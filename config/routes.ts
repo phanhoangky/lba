@@ -88,13 +88,13 @@
                     name: 'basic',
                     icon: 'smile',
                     path: '/profile/basic',
-                    component: './Profile/basic',
+                    component: './profile/basic',
                   },
                   {
                     name: 'wallet',
                     icon: 'smile',
                     path: '/profile/wallet',
-                    component: './Profile/wallet',
+                    component: './profile/wallet',
                   },
                 ]
               },
