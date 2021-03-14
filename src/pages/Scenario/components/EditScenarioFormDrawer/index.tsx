@@ -1,6 +1,6 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
 import { DeleteTwoTone, EyeTwoTone, UploadOutlined } from '@ant-design/icons';
-import { Button, Drawer, Space, Form, Input, Image, Divider, Row, Col, List } from 'antd';
+import { Button, Drawer, Space, Form, Input, Image, Divider, Row, Col, List, Checkbox } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type {
@@ -296,6 +296,35 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     return null;
   };
 
+  setAudioArea = async (id: string, checked: boolean) => {
+    const { scenarioItems } = this.props.scenarios.selectedSenario;
+    await this.setSelectedScenarios({
+      scenarioItems: scenarioItems.map((scenarioItem) => {
+        if (checked) {
+          if (scenarioItem.id === id) {
+            return {
+              ...scenarioItem,
+              audioArea: true,
+            };
+          }
+
+          return {
+            ...scenarioItem,
+            audioArea: false,
+          };
+        }
+
+        if (scenarioItem.id === id) {
+          return {
+            ...scenarioItem,
+            audioArea: false,
+          };
+        }
+        return scenarioItem;
+      }),
+    });
+  };
+
   formRef = React.createRef<FormInstance<any>>();
   render() {
     const { editScenarioDrawer, selectedSenario, playlistsDrawer } = this.props.scenarios;
@@ -380,6 +409,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
         <div
           id="areaWrapper"
           style={{
+            margin: `0 auto`,
             display: 'flex',
             width: '50%',
             boxSizing: 'border-box',
@@ -396,6 +426,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                   flex: `${area.width * 100}%`,
                   position: 'relative',
                   display: 'flex',
+                  flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center',
                   height: `${area.height * 100}%`,
@@ -413,86 +444,105 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                 }}
               >
                 {scenarioItem ? (
-                  <div
-                    onMouseOver={() => {
-                      const item = scenarioItem;
-                      if (item) {
-                        this.setHoverScenarioItem(item, true);
-                      }
-                    }}
-                    onMouseLeave={() => {
-                      const item = scenarioItem;
-                      if (item) {
-                        this.setHoverScenarioItem(item, false);
-                      }
-                    }}
-                    style={{
-                      position: 'absolute',
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    {scenarioItem.playlist.title}
-                    {scenarioItem.isHover ? (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          top: 0,
-                          left: 0,
-                          backgroundColor: `rgba(30, 30, 30, 0.5)`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <Space>
-                          <DeleteTwoTone
-                            style={{
-                              fontSize: '2em',
-                            }}
-                            twoToneColor="#f93e3e"
-                            onClick={() => {
-                              this.removeScenarioItems(scenarioItem);
-                            }}
-                          />
+                  <>
+                    <div
+                      onMouseOver={() => {
+                        const item = scenarioItem;
+                        if (item) {
+                          this.setHoverScenarioItem(item, true);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        const item = scenarioItem;
+                        if (item) {
+                          this.setHoverScenarioItem(item, false);
+                        }
+                      }}
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '80%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {scenarioItem.playlist.title}
+                      {scenarioItem.isHover ? (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            width: '100%',
+                            height: '100%',
+                            top: 0,
+                            left: 0,
+                            backgroundColor: `rgba(30, 30, 30, 0.5)`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Space>
+                            <DeleteTwoTone
+                              style={{
+                                fontSize: '2em',
+                              }}
+                              twoToneColor="#f93e3e"
+                              onClick={() => {
+                                this.removeScenarioItems(scenarioItem);
+                              }}
+                            />
 
-                          <EyeTwoTone
-                            style={{
-                              fontSize: '2em',
-                            }}
-                            onClick={() => {
-                              this.setEditScenariosDrawer({
-                                playlistLoading: true,
-                              })
-                                .then(() => {
-                                  this.callGetItemsByPlaylistId({
-                                    id: scenarioItem.playlist.id,
-                                  }).then(() => {
-                                    this.setSelectedPlaylist(scenarioItem.playlist).then(() => {
-                                      this.setEditScenariosDrawer({
-                                        playlistLoading: false,
+                            <EyeTwoTone
+                              style={{
+                                fontSize: '2em',
+                              }}
+                              onClick={() => {
+                                this.setEditScenariosDrawer({
+                                  playlistLoading: true,
+                                })
+                                  .then(() => {
+                                    this.callGetItemsByPlaylistId({
+                                      id: scenarioItem.playlist.id,
+                                    }).then(() => {
+                                      this.setSelectedPlaylist(scenarioItem.playlist).then(() => {
+                                        this.setEditScenariosDrawer({
+                                          playlistLoading: false,
+                                        });
                                       });
                                     });
+                                  })
+                                  .catch(() => {
+                                    this.setEditScenariosDrawer({
+                                      playlistLoading: false,
+                                    });
                                   });
-                                })
-                                .catch(() => {
-                                  this.setEditScenariosDrawer({
-                                    playlistLoading: false,
-                                  });
-                                });
-                            }}
-                          />
-                        </Space>
-                      </div>
-                    ) : (
-                      ''
-                    )}
-                  </div>
+                              }}
+                            />
+                          </Space>
+                        </div>
+                      ) : (
+                        ''
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '20%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Checkbox
+                        checked={scenarioItem.audioArea}
+                        onChange={(e) => {
+                          this.setAudioArea(scenarioItem.id, e.target.checked);
+                        }}
+                      />
+                    </div>
+                  </>
                 ) : (
                   <UploadOutlined />
                 )}
@@ -588,4 +638,4 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     );
   }
 }
-export default connect((state) => ({ ...state }))(EditScenarioFormDrawer);
+export default connect((state: any) => ({ ...state }))(EditScenarioFormDrawer);

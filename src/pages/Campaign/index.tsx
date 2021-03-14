@@ -358,4 +358,4 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(CampaignScreen);
+export default connect((state: any) => ({ ...state }))(CampaignScreen);

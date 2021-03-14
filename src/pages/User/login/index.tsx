@@ -68,16 +68,17 @@ const Login: React.FC<LoginProps> = (props) => {
         initialValues={{
           autoLogin: true,
         }}
-        submitter={{
-          render: (_, dom) => dom.pop(),
-          submitButtonProps: {
-            loading: submitting,
-            size: 'large',
-            style: {
-              width: '100%',
-            },
-          },
-        }}
+        // submitter={{
+        //   render: (_, dom) => dom.pop(),
+        //   submitButtonProps: {
+        //     loading: submitting,
+        //     size: 'large',
+        //     style: {
+        //       width: '100%',
+        //     },
+        //   },
+        // }}
+        submitter={false}
         onFinish={(values) => {
           handleSubmit(values as LoginParamsType);
           return Promise.resolve();

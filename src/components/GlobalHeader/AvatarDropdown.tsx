@@ -41,12 +41,14 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
 
   render(): React.ReactNode {
     const {
-      currentUser = {
-        avatar: '',
-        name: '',
-      },
+      // currentUser = {
+      //   avatar: '',
+      //   name: '',
+      // },
       menu,
     } = this.props;
+
+    const { currentUser } = this.props.userTest;
     const menuHeaderDropdown = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         {menu && (
@@ -90,6 +92,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
   }
 }
 
-export default connect(({ user }: ConnectState) => ({
+export default connect(({ user, userTest }: ConnectState) => ({
   currentUser: user.currentUser,
+  userTest,
 }))(AvatarDropdown);
