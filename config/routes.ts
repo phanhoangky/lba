@@ -4,17 +4,6 @@
     component: '../layouts/BlankLayout',
     routes: [
       {
-        path: '/user',
-        component: '../layouts/UserLayout',
-        routes: [
-          {
-            name: 'login',
-            path: '/user/login',
-            component: './User/login',
-          },
-        ],
-      },
-      {
         path: '/',
         component: '../layouts/SecurityLayout',
         routes: [
@@ -134,6 +123,17 @@
           },
           {
             component: './404',
+          },
+        ],
+      },
+      {
+        path: '/user',
+        component: '../layouts/UserLayout',
+        routes: [
+          {
+            name: 'login',
+            path: '/user/login',
+            component: './User/login',
           },
         ],
       },
