@@ -81,7 +81,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
     ) : (
       <Button
         onClick={() => {
-          history.replace('/user/login');
+          history.replace('/account');
         }}
       >
         Login

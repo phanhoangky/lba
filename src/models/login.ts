@@ -67,9 +67,9 @@ const Model: LoginModelType = {
       if (localStorage.getItem("JWT")) {
         localStorage.removeItem("JWT");
       }
-      if (window.location.pathname !== '/user/login' && !redirect) {
+      if (window.location.pathname !== '/account/login' && !redirect) {
         history.replace({
-          pathname: '/user/login',
+          pathname: '/account',
           search: stringify({
             redirect: window.location.href,
           }),

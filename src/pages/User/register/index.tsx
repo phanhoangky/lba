@@ -308,7 +308,7 @@ const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) 
           >
             <FormattedMessage id="userandregister.register.register" />
           </Button>
-          <Link className={styles.login} to="/user/login">
+          <Link className={styles.login} to="/account/login">
             <FormattedMessage id="userandregister.register.sign-in" />
           </Link>
         </FormItem>

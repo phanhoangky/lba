@@ -4,13 +4,13 @@
     component: '../layouts/BlankLayout',
     routes: [
       {
-        path: '/user',
+        path: '/account',
         component: '../layouts/UserLayout',
         routes: [
-          { path: '/user', redirect: '/user/login' },
+          { path: '/account', redirect: '/account/login' },
           {
             name: 'login',
-            path: '/user/login',
+            path: '/account/login',
             component: './User/login',
           },
         ],
