@@ -46,6 +46,7 @@ export type ScenarioModelState = {
   addNewScenarioModal: {
     isLoading: boolean;
     visible: boolean;
+    currentStep: number;
   };
 
   createScenarioParam: PostScenarioParam;
@@ -152,6 +153,7 @@ const ScenarioStore: ScenarioStoreModel = {
     addNewScenarioModal: {
       isLoading: false,
       visible: false,
+      currentStep: 0
     },
 
     createScenarioParam: {

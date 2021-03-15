@@ -64,6 +64,9 @@ const Model: LoginModelType = {
     logout() {
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
+      if (localStorage.getItem("JWT")) {
+        localStorage.removeItem("JWT");
+      }
       if (window.location.pathname !== '/user/login' && !redirect) {
         history.replace({
           pathname: '/user/login',
