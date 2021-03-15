@@ -1,5 +1,4 @@
 import * as React from 'react';
-import type { UserTestModelState } from 'umi';
 import { connect } from 'umi';
 import type { MediaSourceModelState } from 'umi';
 import type { Dispatch } from 'umi';
@@ -9,7 +8,6 @@ import { UploadOutlined } from '@ant-design/icons';
 type AddNewModalMediaProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
 };
 
 class AddNewMediaModal extends React.Component<AddNewModalMediaProps> {
@@ -29,7 +27,7 @@ class AddNewMediaModal extends React.Component<AddNewModalMediaProps> {
       .then(() => {
         this.props
           .dispatch({
-            type: 'userTest/readJWT',
+            type: 'user/readJWT',
             payload: '',
           })
           .then(() => {
@@ -176,4 +174,4 @@ class AddNewMediaModal extends React.Component<AddNewModalMediaProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewMediaModal);
+export default connect((state: any) => ({ ...state }))(AddNewMediaModal);

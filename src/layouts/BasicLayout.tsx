@@ -20,7 +20,7 @@ import type { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 // import logo from '../assets/logo.svg';
 import lba from '../assets/lba.png';
-import type { UserTestModelState } from '@/models/testUser';
+import type { CurrentUser } from '@/models/user';
 
 const noMatch = (
   <Result
@@ -41,7 +41,7 @@ export type BasicLayoutProps = {
   };
   settings: Settings;
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  currentUser: CurrentUser;
 } & ProLayoutProps;
 export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
   breadcrumbNameMap: Record<string, MenuDataItem>;
@@ -88,18 +88,17 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     dispatch,
     children,
     settings,
-    userTest,
     location = {
       pathname: '/',
     },
   } = props;
   const menuDataRef = useRef<MenuDataItem[]>([]);
   useEffect(() => {
-    if (dispatch) {
-      dispatch({
-        type: 'user/fetchCurrent',
-      });
-    }
+    // if (dispatch) {
+    //   dispatch({
+    //     type: 'user/fetchCurrent',
+    //   });
+    // }
   }, []);
   /** Init variables */
 
@@ -165,7 +164,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           return null;
         }}
         menuDataRender={menuDataRender}
-        rightContentRender={() => <RightContent userTest={userTest} />}
+        rightContentRender={() => <RightContent currentUser={props.currentUser} />}
         postMenuData={(menuData: any) => {
           menuDataRef.current = menuData || [];
           return menuData || [];
@@ -188,8 +187,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 };
 
-export default connect(({ global, settings, userTest }: ConnectState) => ({
+export default connect(({ global, settings, user }: ConnectState) => ({
   collapsed: global.collapsed,
   settings,
-  userTest,
+  currentUser: user.currentUser,
 }))(BasicLayout);

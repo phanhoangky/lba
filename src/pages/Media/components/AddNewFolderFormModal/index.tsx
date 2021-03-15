@@ -1,13 +1,13 @@
 import { Card, Input, Modal, Skeleton, Form } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
-import type { Dispatch, MediaSourceModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
 export type AddNewFolderFormModalProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModalProps> {
@@ -85,7 +85,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
-    const { listLoading, addNewFolderModal, createFolderParam } = this.props.media;
+    const { listLoading, addNewFolderModal } = this.props.media;
     return (
       <Modal
         title={
@@ -152,4 +152,4 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewFolderFormModal);
+export default connect((state: any) => ({ ...state }))(AddNewFolderFormModal);

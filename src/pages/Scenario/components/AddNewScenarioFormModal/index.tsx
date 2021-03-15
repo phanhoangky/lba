@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Divider, List, Card, Image, Steps } from 'antd';
+import { Modal, Form, Divider, List, Card, Image } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type {
@@ -6,20 +6,17 @@ import type {
   LayoutModelState,
   PlayListModelState,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import styles from '../../index.less';
 import TitleStep from './TitleStep';
 import { Animated } from 'react-animated-css';
-import ChooseLayoutDirectionStep from './ChooseLayoutDirectionStep';
-import ChooseLayoutStep from './ChooseLayoutStep';
-import SetupScenarioItemsStep from './SetupScenarioItemsStep';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };

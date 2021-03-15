@@ -4,13 +4,13 @@ import { Form, Input, Modal, Select, Skeleton, Switch, Upload } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import { Keccak } from 'sha3';
-import type { Dispatch, MediaSourceModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
 export type AddNewFileFormModalProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProps> {
@@ -71,19 +71,19 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
 
   addNewFile = async (values: any) => {
     const { createFileParam } = this.props.media;
-    const { ether } = this.props.userTest.currentUser;
+    const { currentUser } = this.props.user;
     const hash = new Keccak(256);
     const byte = await values.upload.file.originFileObj.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
 
-    await ether?.addDocument(security, createFileParam.isSigned);
+    await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
     const param: CreateFileParam = {
       ...createFileParam,
       ...values,
       securityHash: security,
       public_id: security,
-      accountId: this.props.userTest.currentUser.id,
+      accountId: currentUser?.id,
       fileId: createFileParam.fileId,
       isSigned: createFileParam.isSigned,
     };
@@ -273,4 +273,4 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewFileFormModal);
+export default connect((state: any) => ({ ...state }))(AddNewFileFormModal);

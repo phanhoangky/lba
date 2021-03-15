@@ -1,13 +1,13 @@
 import { Modal, Form, Input } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
-import type { Dispatch, MediaSourceModelState, PlayListModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
 export type AddNewPlaylistFormModalProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   media: MediaSourceModelState;
 };
 
@@ -56,7 +56,7 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
       payload: {
         ...addNewPlaylistParam,
         ...param,
-        accountId: this.props.userTest.currentUser.id,
+        accountId: this.props.user.currentUser?.id,
       },
     });
   };
@@ -130,4 +130,4 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewPlaylistFormModal);
+export default connect((state: any) => ({ ...state }))(AddNewPlaylistFormModal);

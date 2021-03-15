@@ -2,7 +2,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
 import { Button, Input, Select, Space, Table, Tooltip } from 'antd';
-import type { DeviceModelState, Dispatch, UserTestModelState } from 'umi';
+import type { DeviceModelState, Dispatch, UserModelState, UserTestModelState } from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
 import { ControlTwoTone, FilterTwoTone } from '@ant-design/icons';
@@ -11,7 +11,7 @@ import UpdateDeviceFormDrawer from './components/UpdateDeviceFormDrawer';
 
 type DeviceProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   deviceStore: DeviceModelState;
 };
 
@@ -382,6 +382,6 @@ class Device extends React.Component<DeviceProps> {
   }
 }
 
-export default connect((state) => ({
+export default connect((state: any) => ({
   ...state,
 }))(Device);

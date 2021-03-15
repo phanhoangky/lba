@@ -2,7 +2,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Card, Col, Row, Image, Space, Table, Divider } from 'antd';
 import Title from 'antd/lib/typography/Title';
 import * as React from 'react';
-import type { DeviceModelState, Dispatch, ProfileWalletModelState, UserTestModelState } from 'umi';
+import type { DeviceModelState, Dispatch, ProfileWalletModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import logo from '@/assets/wallet.svg';
 import NumberFormat from 'react-number-format';
@@ -11,7 +11,7 @@ import { SendOutlined } from '@ant-design/icons';
 
 type WalletProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   deviceStore: DeviceModelState;
   profileWallet: ProfileWalletModelState;
 };
@@ -33,23 +33,21 @@ class Wallet extends React.Component<WalletProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };
   getBalance = async () => {
-    const { ether } = this.props.userTest.currentUser;
-    console.log('====================================');
-    console.log('Ether >>>', ether, ether?.contract);
-    console.log('====================================');
-    const balance = await ether?.getBalance();
+    const { currentUser } = this.props.user;
+
+    const balance = await currentUser?.ether?.getBalance();
     this.setState({ balance });
   };
 
   getListTransactions = async () => {
     const param = {
-      holder: this.props.userTest.currentUser.ether?.wallet.address,
-      token: this.props.userTest.currentUser.ether?.evn.SUPPORT_ADDRESS,
+      holder: this.props.user.currentUser?.ether?.wallet.address,
+      token: this.props.user.currentUser?.ether?.evn.SUPPORT_ADDRESS,
       limit: 10,
       page: this.state.currentPage,
     };
@@ -60,7 +58,7 @@ class Wallet extends React.Component<WalletProps> {
   };
 
   render() {
-    const { ether } = this.props.userTest.currentUser;
+    const { currentUser } = this.props.user;
     const { listTransactions, totalTransaction, getTransactionsParam } = this.props.profileWallet;
     const { tableLoading, balance } = this.state;
     return (
@@ -70,7 +68,7 @@ class Wallet extends React.Component<WalletProps> {
             <>
               <Space>
                 <Image width={50} src={logo} />
-                <Title level={2}>{ether?.wallet.address}</Title>
+                <Title level={2}>{currentUser?.ether?.wallet.address}</Title>
               </Space>
             </>
           }

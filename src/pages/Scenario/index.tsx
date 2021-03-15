@@ -8,7 +8,7 @@ import type {
   PlayListModelState,
   ScenarioItem,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 // import AddNewScenarioModal from './components/AddNewScenarioModal';
@@ -24,7 +24,7 @@ import { PlusSquareTwoTone } from '@ant-design/icons';
 type ScenarioProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };
@@ -48,7 +48,7 @@ class Scenario extends React.Component<ScenarioProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };

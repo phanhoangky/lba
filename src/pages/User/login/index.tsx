@@ -53,13 +53,11 @@ const Login: React.FC<LoginProps> = (props) => {
   const handleSubmitGoogle = async () => {
     const { dispatch } = props;
     await dispatch({
-      type: 'userTest/setUser',
-      payload: '',
+      type: 'user/googleLogin',
     });
 
     await dispatch({
-      type: 'userTest/getCurrentUser',
-      payload: '',
+      type: 'user/getCurrentUser',
     });
   };
   return (
@@ -80,7 +78,7 @@ const Login: React.FC<LoginProps> = (props) => {
         // }}
         submitter={false}
         onFinish={(values) => {
-          handleSubmit(values as LoginParamsType);
+          // handleSubmit(values as LoginParamsType);
           return Promise.resolve();
         }}
       >

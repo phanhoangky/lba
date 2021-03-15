@@ -7,12 +7,10 @@ import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
 import HeaderDropdown from '../HeaderDropdown';
 import styles from './index.less';
-import type { UserTestModelState } from '@/models/testUser';
 
 export type GlobalHeaderRightProps = {
   currentUser?: CurrentUser;
   menu?: boolean;
-  userTest: UserTestModelState;
 } & Partial<ConnectProps>;
 
 class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
@@ -45,10 +43,10 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
       //   avatar: '',
       //   name: '',
       // },
+      currentUser,
       menu,
     } = this.props;
 
-    const { currentUser } = this.props.userTest;
     const menuHeaderDropdown = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         {menu && (
@@ -90,7 +88,6 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
   }
 }
 
-export default connect(({ user, userTest }: ConnectState) => ({
+export default connect(({ user }: ConnectState) => ({
   currentUser: user.currentUser,
-  userTest,
 }))(AvatarDropdown);

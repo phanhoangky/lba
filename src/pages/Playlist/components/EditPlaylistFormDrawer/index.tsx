@@ -21,7 +21,7 @@ import type {
   MediaSourceModelState,
   PlaylistItem,
   PlayListModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,7 +31,7 @@ import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
 export type EditPlaylistFormDrawerProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   media: MediaSourceModelState;
 };
 
@@ -591,4 +591,4 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   }
 }
 
-export default connect((state) => ({ ...state }))(EditPlaylistFormDrawer);
+export default connect((state: any) => ({ ...state }))(EditPlaylistFormDrawer);

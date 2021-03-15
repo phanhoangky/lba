@@ -23,14 +23,14 @@ import {
 import type { FormInstance } from 'antd/lib/form';
 import moment from 'moment';
 import * as React from 'react';
-import type { DeviceModelState, Dispatch, UserTestModelState } from 'umi';
+import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
 import { connect } from 'umi';
 // import DrawerUpdateMultipleDevice from '../DrawerUpdateMultipleDevice';
 import FilterDate from '../FilterDate';
 
 export type UpdateDeviceFormDrawerProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   deviceStore: DeviceModelState;
 };
 
@@ -516,4 +516,4 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
   }
 }
 
-export default connect((state) => ({ ...state }))(UpdateDeviceFormDrawer);
+export default connect((state: any) => ({ ...state }))(UpdateDeviceFormDrawer);

@@ -3,7 +3,13 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
-import type { Dispatch, MediaSourceModelState, PlayListModelState, UserTestModelState } from 'umi';
+import type {
+  Dispatch,
+  MediaSourceModelState,
+  PlayListModelState,
+  UserModelState,
+  UserTestModelState,
+} from 'umi';
 import { connect } from 'umi';
 // import AddNewPlaylistItemDrawer from './components/AddNewPlaylistItemDrawer';
 // import AddNewPlaylistModal from './components/AddNewPlaylistModal';
@@ -17,7 +23,7 @@ import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 type PlaylistProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   media: MediaSourceModelState;
 };
 
@@ -32,7 +38,7 @@ class Playlist extends React.Component<PlaylistProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };

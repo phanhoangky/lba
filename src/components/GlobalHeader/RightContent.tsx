@@ -9,11 +9,11 @@ import Avatar from './AvatarDropdown';
 // import HeaderSearch from '../HeaderSearch';
 import styles from './index.less';
 // import NoticeIconView from './NoticeIconView';
-import type { UserTestModelState } from '@/models/testUser';
+import type { CurrentUser } from '@/models/user';
 
 export type GlobalHeaderRightProps = {
   theme?: ProSettings['navTheme'] | 'realDark';
-  userTest: UserTestModelState;
+  currentUser?: CurrentUser;
 } & Partial<ConnectProps> &
   Partial<ProSettings>;
 const ENVTagColor = {
@@ -23,7 +23,7 @@ const ENVTagColor = {
 };
 
 const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
-  const { theme, layout, userTest } = props;
+  const { theme, layout } = props;
   let className = styles.right;
 
   if (theme === 'dark' && layout === 'top') {
@@ -71,7 +71,7 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
         </a>
       </Tooltip>
       <NoticeIconView /> */}
-      <Avatar menu={true} userTest={userTest} />
+      <Avatar menu={true} currentUser={props.currentUser} />
       {REACT_APP_ENV && (
         <span>
           <Tag color={ENVTagColor[REACT_APP_ENV]}>{REACT_APP_ENV}</Tag>
@@ -82,7 +82,8 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
   );
 };
 
-export default connect(({ settings }: ConnectState) => ({
+export default connect(({ settings, user }: ConnectState) => ({
+  currentUser: user.currentUser,
   theme: settings.navTheme,
   layout: settings.layout,
 }))(GlobalHeaderRight);

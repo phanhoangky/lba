@@ -4,14 +4,14 @@ import type {
   LayoutModelState,
   PlayListModelState,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 
 export type ChooseLayoutStepProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };

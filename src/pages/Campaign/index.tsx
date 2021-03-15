@@ -63,7 +63,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };

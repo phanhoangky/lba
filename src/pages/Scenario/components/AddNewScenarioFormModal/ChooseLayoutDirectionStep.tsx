@@ -1,18 +1,18 @@
-import { Col, Divider, Row, Switch } from 'antd';
+import { Col, Divider, Row } from 'antd';
 import * as React from 'react';
 import type {
   Dispatch,
   LayoutModelState,
   PlayListModelState,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 
 export type ChooseLayoutDirectionStepProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };

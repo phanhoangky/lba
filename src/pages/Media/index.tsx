@@ -18,7 +18,13 @@ import {
   Alert,
 } from 'antd';
 import * as React from 'react';
-import type { Dispatch, FolderType, MediaSourceModelState, UserTestModelState } from 'umi';
+import type {
+  Dispatch,
+  FolderType,
+  MediaSourceModelState,
+  UserModelState,
+  UserTestModelState,
+} from 'umi';
 import { connect } from 'umi';
 // import VideoThumbnail from 'react-video-thumbnail';
 // import ReactPlayer from 'react-player';
@@ -46,7 +52,7 @@ import EditMediaFormDrawer from './components/EditMediaFormDrawer';
 export type MediaSourceProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 class Media extends React.Component<MediaSourceProps> {
@@ -78,17 +84,17 @@ class Media extends React.Component<MediaSourceProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };
   addBreadscrumbHome = async () => {
-    const { userTest } = this.props;
+    const { user } = this.props;
     await this.props.dispatch({
       type: 'media/setBreadScrumbReducer',
       payload: [
         {
-          id: userTest.currentUser.rootFolderId,
+          id: user.currentUser?.rootFolderId,
           name: 'Home',
           path: '',
           parent_id: '',
@@ -108,12 +114,12 @@ class Media extends React.Component<MediaSourceProps> {
 
   getCurrentUser = async () => {
     const res = await this.props.dispatch({
-      type: 'userTest/getCurrentUser',
+      type: 'user/getCurrentUser',
       payload: '',
     });
 
     await this.setCreateFileParam({
-      accountId: this.props.userTest.currentUser.id,
+      accountId: this.props.user.currentUser?.id,
     });
 
     await this.setGetListFilesParam({
@@ -270,13 +276,15 @@ class Media extends React.Component<MediaSourceProps> {
 
   addNewFile = async () => {
     const { createFileParam } = this.props.media;
-    const { ether } = this.props.userTest.currentUser;
+    const { currentUser } = this.props.user;
     const hash = new Keccak(256);
     const byte = await createFileParam.file.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
-    if (createFileParam.isSigned) {
-      await ether?.addDocument(security, createFileParam.isSigned);
+    if (currentUser) {
+      if (createFileParam.isSigned) {
+        await currentUser.ether?.addDocument(security, createFileParam.isSigned);
+      }
     }
 
     await this.props.dispatch({
@@ -285,7 +293,7 @@ class Media extends React.Component<MediaSourceProps> {
         ...createFileParam,
         securityHash: security,
         public_id: security,
-        accountId: this.props.userTest.currentUser.id,
+        accountId: this.props.user.currentUser?.id,
         fileId: createFileParam.fileId,
         isSigned: createFileParam.isSigned,
       },
@@ -326,11 +334,11 @@ class Media extends React.Component<MediaSourceProps> {
         // });
         this.setListLoading(true)
           .then(() => {
-            const { currentUser } = this.props.userTest;
+            const { currentUser } = this.props.user;
             console.log('====================================');
-            console.log(item, currentUser.ether);
+            console.log(item, currentUser?.ether);
             console.log('====================================');
-            currentUser.ether?.signDocument(item.securityHash);
+            currentUser?.ether?.signDocument(item.securityHash);
             this.updateFile({
               isSigned: 1,
             }).then(() => {
@@ -936,4 +944,4 @@ class Media extends React.Component<MediaSourceProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(Media);
+export default connect((state: any) => ({ ...state }))(Media);

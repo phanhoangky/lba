@@ -10,7 +10,7 @@ import type {
   PlayListModelState,
   ScenarioItem,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import { sortArea } from '@/utils/utils';
@@ -21,7 +21,7 @@ import ReactPlayer from 'react-player';
 export type EditScenarioFormDrawerProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };

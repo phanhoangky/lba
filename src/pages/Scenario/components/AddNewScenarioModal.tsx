@@ -1,12 +1,12 @@
 import { Card, Col, Divider, Input, List, Row } from 'antd';
 import * as React from 'react';
-import type { Dispatch, LayoutModelState, ScenarioModelState, UserTestModelState } from 'umi';
+import type { Dispatch, LayoutModelState, ScenarioModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import styles from '../index.less';
 
 export type AddNewScenarioModalProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   scenarios: ScenarioModelState;
   layouts: LayoutModelState;
 };
@@ -102,4 +102,4 @@ class AddNewScenarioModal extends React.Component<AddNewScenarioModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewScenarioModal);
+export default connect((state: any) => ({ ...state }))(AddNewScenarioModal);
