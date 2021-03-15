@@ -139,7 +139,7 @@ const UserModel: UserModelType = {
         }
       });
 
-      history.replace('/welcome' || '/');
+      history.replace(redirect || '/');
       
     },
 
