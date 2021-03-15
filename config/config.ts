@@ -14,7 +14,7 @@ export default defineConfig({
   history: {
     type: 'browser',
   },
-  publicPath: "/welcome/",
+  publicPath: "/",
   locale: {
     default: 'en-US',
     antd: true,
