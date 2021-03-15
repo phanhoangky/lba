@@ -116,6 +116,9 @@ const UserModel: UserModelType = {
             redirect = redirect.substr(urlParams.origin.length);
             if (redirect.match(/^\/.*#/)) {
               redirect = redirect.substr(redirect.indexOf('#') + 1);
+              console.log('====================================');
+              console.log("redirect.match(/^/.*#/) >>>>", redirect);
+              console.log('====================================');
             }
           } else {
             window.location.href = '/';
@@ -136,7 +139,7 @@ const UserModel: UserModelType = {
         }
       });
 
-      history.replace(redirect || '/');
+      history.replace('/welcome' || '/');
       
     },
 
