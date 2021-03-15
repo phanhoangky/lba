@@ -39,6 +39,7 @@ export type CampaignModelState = {
     visible: boolean;
     isLoading: boolean;
     address: string;
+    currentStep: number;
   };
 
   editCampaignDrawer: {
@@ -127,7 +128,8 @@ const CampaignStore: CampaignModelStore = {
     addNewCampaignModal: {
       visible: false,
       isLoading: false,
-      address: ""
+      address: "",
+      currentStep: 1,
     },
 
     editCampaignDrawer: {

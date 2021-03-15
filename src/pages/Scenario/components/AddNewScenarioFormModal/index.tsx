@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Divider, List, Card, Image } from 'antd';
+import { Modal, Form, Input, Divider, List, Card, Image, Steps } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type {
@@ -10,6 +10,11 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import styles from '../../index.less';
+import TitleStep from './TitleStep';
+import { Animated } from 'react-animated-css';
+import ChooseLayoutDirectionStep from './ChooseLayoutDirectionStep';
+import ChooseLayoutStep from './ChooseLayoutStep';
+import SetupScenarioItemsStep from './SetupScenarioItemsStep';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
@@ -137,65 +142,99 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
             visible: false,
           });
         }}
+        okButtonProps={{
+          disabled: listLayouts.every((layouts) => !layouts.isSelected),
+        }}
         onOk={async () => {
-          this.formRef.current?.validateFields().then((values) => {
-            this.onCreateScenarios(values);
-          });
+          if (addNewScenarioModal.currentStep === 0) {
+            this.formRef.current?.validateFields().then((values) => {
+              this.onCreateScenarios(values);
+              this.setAddNewScenarioModal({
+                currentStep: 1,
+              });
+            });
+          }
         }}
       >
         {/* <AddNewScenarioModal {...this.props} /> */}
-        <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: 'Please input title' }]}
-          >
-            <Input />
-          </Form.Item>
+        {/* <Steps current={addNewScenarioModal.currentStep} onChange={(e) => {}}>
+          <Steps.Step title="Finished" description="This is a description." />
+          <Steps.Step
+            title="In Progress"
+            subTitle="Left 00:00:08"
+            description="This is a description."
+          />
+          <Steps.Step title="Waiting" description="This is a description." />
+        </Steps> */}
+        <Animated
+          animationIn="zoomIn"
+          animationOut="fadeOut"
+          isVisible={addNewScenarioModal.currentStep === 0}
+        >
+          <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
+            <TitleStep {...this.props} />
+          </Form>
+        </Animated>
 
-          <Form.Item label="Description" name="description">
-            <Input.TextArea rows={4} />
-          </Form.Item>
-
-          <Divider></Divider>
-          <List
-            itemLayout="horizontal"
-            dataSource={listLayouts}
-            grid={{
-              gutter: 20,
-              xs: 1,
-              sm: 2,
-              md: 2,
-              lg: 2,
-              xl: 3,
-              xxl: 4,
-            }}
-            split
-            style={{ alignItems: 'center', alignContent: 'center' }}
-            renderItem={(item) => {
-              return (
-                <List.Item>
-                  <Card
-                    style={{ width: '100%', borderRadius: 20, borderColor: 'red', padding: 5 }}
-                    hoverable
-                    title={item.title}
-                    cover={<Image src={item.layoutUrl} height={150} />}
-                    className={item.isSelected ? styles.selectedLayout : ''}
-                    onClick={() => {
-                      this.chooseLayout(item);
-                    }}
-                  >
-                    <Card.Meta description={item.description} />
-                  </Card>
-                </List.Item>
-              );
-            }}
-          ></List>
-        </Form>
+        {/* <Animated
+          animationIn="zoomIn"
+          animationOut="fadeOut"
+          isVisible={addNewScenarioModal.currentStep === 1}
+        >
+          <ChooseLayoutDirectionStep {...this.props} />
+        </Animated>
+        <Animated
+          animationIn="zoomIn"
+          animationOut="fadeOut"
+          isVisible={addNewScenarioModal.currentStep === 2}
+        >
+          <ChooseLayoutStep {...this.props} />
+        </Animated>
+        <Animated
+          animationIn="zoomIn"
+          animationOut="fadeOut"
+          isVisible={addNewScenarioModal.currentStep === 3}
+        >
+          <SetupScenarioItemsStep {...this.props} />
+        </Animated>
+        <Divider></Divider> */}
+        <List
+          itemLayout="horizontal"
+          dataSource={listLayouts}
+          grid={{
+            gutter: 20,
+            xs: 1,
+            sm: 2,
+            md: 2,
+            lg: 2,
+            xl: 3,
+            xxl: 4,
+          }}
+          split
+          style={{ alignItems: 'center', alignContent: 'center' }}
+          renderItem={(item) => {
+            return (
+              <List.Item>
+                <Card
+                  style={{ width: '100%', borderRadius: 20, borderColor: 'red', padding: 5 }}
+                  hoverable
+                  title={item.title}
+                  cover={<Image src={item.layoutUrl} height={150} />}
+                  className={item.isSelected ? styles.selectedLayout : ''}
+                  onClick={() => {
+                    this.chooseLayout(item);
+                  }}
+                >
+                  <Card.Meta description={item.description} />
+                </Card>
+              </List.Item>
+            );
+          }}
+        ></List>
         <Divider></Divider>
       </Modal>
     );
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewScenarioFormModal);
+export default connect((state: any) => ({ ...state }))(AddNewScenarioFormModal);

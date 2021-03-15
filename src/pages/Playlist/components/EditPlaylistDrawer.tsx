@@ -78,6 +78,7 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
         useDragHandle
         disableAutoscroll
         helperClass={styles.drag}
+        className={styles.drag}
         onSortEnd={this.onSortEnd}
         {...props}
       />
@@ -319,4 +320,4 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(EditPlaylistDrawer);
+export default connect((state: any) => ({ ...state }))(EditPlaylistDrawer);

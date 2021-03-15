@@ -106,13 +106,12 @@ const UserModel: UserModelType = {
       const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params as { redirect: string };
-        console.log('====================================');
-        console.log(">>>>>", urlParams, redirect, params);
-        console.log('====================================');
       if (redirect) {
           
         const redirectUrlParams = new URL(redirect);
-        
+        console.log('====================================');
+        console.log(">>>>>", urlParams, redirect, params, redirectUrlParams);
+        console.log('====================================');
           if (redirectUrlParams.origin === urlParams.origin) {
             redirect = redirect.substr(urlParams.origin.length);
             if (redirect.match(/^\/.*#/)) {

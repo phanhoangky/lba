@@ -35,7 +35,7 @@ ApiHelper.interceptors.response.use(
     if (error.response) {
       const { status } = error.response;
       if (status === 401) {
-        history.push("/user");
+        history.push("/user/login");
       } else {
         history.push('/exception/500')
       }

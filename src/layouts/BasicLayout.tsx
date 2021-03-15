@@ -20,7 +20,7 @@ import type { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 // import logo from '../assets/logo.svg';
 import lba from '../assets/lba.png';
-import { UserTestModelState } from '@/models/testUser';
+import type { UserTestModelState } from '@/models/testUser';
 
 const noMatch = (
   <Result
@@ -88,6 +88,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     dispatch,
     children,
     settings,
+    userTest,
     location = {
       pathname: '/',
     },
@@ -164,8 +165,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           return null;
         }}
         menuDataRender={menuDataRender}
-        rightContentRender={() => <RightContent userTest={props.userTest} />}
-        postMenuData={(menuData) => {
+        rightContentRender={() => <RightContent userTest={userTest} />}
+        postMenuData={(menuData: any) => {
           menuDataRef.current = menuData || [];
           return menuData || [];
         }}
@@ -187,7 +188,8 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 };
 
-export default connect(({ global, settings }: ConnectState) => ({
+export default connect(({ global, settings, userTest }: ConnectState) => ({
   collapsed: global.collapsed,
   settings,
+  userTest,
 }))(BasicLayout);

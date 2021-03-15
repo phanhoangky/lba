@@ -279,15 +279,16 @@ class Scenario extends React.Component<ScenarioProps> {
           onRow={(item) => {
             return {
               onClick: async () => {
-                await this.setEditScenariosDrawer({
-                  visible: true,
+                this.setEditScenariosDrawer({
                   isLoading: true,
-                });
-                const clone = cloneDeep(item);
-                this.setSelectedScenarios(clone)
+                })
                   .then(() => {
-                    this.setEditScenariosDrawer({
-                      isLoading: false,
+                    const clone = cloneDeep(item);
+                    this.setSelectedScenarios(clone).then(() => {
+                      this.setEditScenariosDrawer({
+                        visible: true,
+                        isLoading: false,
+                      });
                     });
                   })
                   .catch(() => {
@@ -433,4 +434,4 @@ class Scenario extends React.Component<ScenarioProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(Scenario);
+export default connect((state: any) => ({ ...state }))(Scenario);

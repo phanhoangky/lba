@@ -1,5 +1,5 @@
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Menu, Spin } from 'antd';
+import { Avatar, Button, Menu, Spin } from 'antd';
 import React from 'react';
 import type { ConnectProps } from 'umi';
 import { history, connect } from 'umi';
@@ -41,12 +41,14 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
 
   render(): React.ReactNode {
     const {
-      currentUser = {
-        avatar: '',
-        name: '',
-      },
+      // currentUser = {
+      //   avatar: '',
+      //   name: '',
+      // },
       menu,
     } = this.props;
+
+    const { currentUser } = this.props.userTest;
     const menuHeaderDropdown = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         {menu && (
@@ -77,19 +79,18 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
         </span>
       </HeaderDropdown>
     ) : (
-      <span className={`${styles.action} ${styles.account}`}>
-        <Spin
-          size="small"
-          style={{
-            marginLeft: 8,
-            marginRight: 8,
-          }}
-        />
-      </span>
+      <Button
+        onClick={() => {
+          history.replace('/user/login');
+        }}
+      >
+        Login
+      </Button>
     );
   }
 }
 
-export default connect(({ user }: ConnectState) => ({
+export default connect(({ user, userTest }: ConnectState) => ({
   currentUser: user.currentUser,
+  userTest,
 }))(AvatarDropdown);
