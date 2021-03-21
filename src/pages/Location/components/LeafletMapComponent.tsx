@@ -91,6 +91,7 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
         }
         await this.setCreateNewCampaignParam({
           location: `${data.lat}-${data.lon}`,
+          address: data.display_name,
         });
 
         await this.setAddNewCampaignModal({

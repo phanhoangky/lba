@@ -22,7 +22,7 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
     isReady: false,
   };
 
-  componentDidMount() {
+  componentDidMount = async () => {
     this.setState({
       isReady: true,
     });
@@ -30,14 +30,15 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
     const { dispatch } = this.props;
     // this.readJWT();
     if (dispatch) {
-      dispatch({
-        type: 'user/getCurrentUser',
-      });
-      dispatch({
+      await dispatch({
         type: 'user/readJWT',
       });
+
+      // await dispatch({
+      //   type: 'user/getCurrentUser',
+      // });
     }
-  }
+  };
 
   render() {
     const { isReady } = this.state;

@@ -1,7 +1,6 @@
 import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
-import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 import {
   Col,
   DatePicker,
@@ -9,11 +8,9 @@ import {
   Form,
   Input,
   InputNumber,
-  List,
   Modal,
   Row,
   Select,
-  Skeleton,
   Space,
 } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
@@ -27,9 +24,11 @@ import type {
   Dispatch,
   LocationModelState,
   ScenarioModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '..';
+import SelectScenarioPart from './AddNewCampaignModalComponent/SelectScenarioPart';
 import FilterDate from './FilterDate';
 import TimeFilterComponent from './TimeFilterComponent';
 
@@ -39,6 +38,7 @@ export type AddNewCampaignModalProps = {
   deviceStore: DeviceModelState;
   scenarios: ScenarioModelState;
   location: LocationModelState;
+  user: UserModelState;
 };
 
 class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
@@ -99,10 +99,10 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
     });
   };
 
-  selectScenario = async (id: string) => {
+  selectScenario = async (id?: string) => {
     await this.props.dispatch({
       type: `scenarios/setListScenarioReducer`,
-      payload: this.props.scenarios.listScenario.map((scenario) => {
+      payload: this.props.scenarios.listScenario?.map((scenario) => {
         if (scenario.id === id) {
           return {
             ...scenario,
@@ -174,40 +174,50 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
     });
   };
 
-  okConfirm = async () => {
-    if (this.formRef.current) {
-      this.formRef.current
-        .validateFields()
-        .then((values) => {
-          console.log('====================================');
-          console.log(values);
-          console.log('====================================');
+  callGetFee = async () => {
+    const res = await this.props.dispatch({
+      type: `${CAMPAIGN}/getListFee`,
+    });
 
-          this.setAddNewCampaignModal({
-            isLoading: true,
-          })
-            .then(() => {
-              this.createNewCampaign(values).then(() => {
-                this.callGetListCampaigns().then(() => {
-                  this.setAddNewCampaignModal({
-                    visible: false,
-                    isLoading: false,
-                  });
+    await this.setAddNewCampaignModal({
+      fees: res.result.data,
+    });
+  };
+
+  okConfirm = async () => {
+    // const { addNewCampaignModal } = this.props.campaign;
+    // const { currentUser } = this.props.user;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then(async (values) => {
+        // console.log('====================================');
+        // console.log(values);
+        // console.log('====================================');
+        this.setAddNewCampaignModal({
+          isLoading: true,
+        })
+          .then(() => {
+            // currentUser.ether.createCampaign();
+            this.createNewCampaign(values).then(() => {
+              this.callGetListCampaigns().then(() => {
+                this.setAddNewCampaignModal({
+                  visible: false,
+                  isLoading: false,
                 });
               });
-            })
-            .catch(() => {
-              this.setAddNewCampaignModal({
-                visible: false,
-                isLoading: false,
-              });
             });
-        })
-        .catch((info) => {
-          console.log('====================================');
-          console.log(info);
-          console.log('====================================');
-        });
+          })
+          .catch(() => {
+            this.setAddNewCampaignModal({
+              visible: false,
+              isLoading: false,
+            });
+          });
+      });
+      // .catch((info) => {
+      //   console.log('====================================');
+      //   console.log(info);
+      //   console.log('====================================');
+      // });
     }
   };
 
@@ -245,9 +255,9 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
       // const { data } = await forwardGeocoding(address);
       const lat = Number.parseFloat(coordination.split('-')[0]);
       const lon = Number.parseFloat(coordination.split('-')[1]);
-      console.log('====================================');
-      console.log('Add New Campaign >>>>', coordination, address);
-      console.log('====================================');
+      // console.log('====================================');
+      // console.log('Add New Campaign >>>>', coordination, address);
+      // console.log('====================================');
 
       if (mapComponent.map) {
         mapComponent.map.setView([lat, lon]);
@@ -266,14 +276,6 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
 
       await this.setCreateNewCampaignParam({ location: coordination, address });
     }
-  };
-
-  listAddressGeocoding = async (address: string) => {
-    const { data } = await forwardGeocoding(address);
-    console.log('====================================');
-    console.log(data);
-    console.log('====================================');
-    return data;
   };
 
   resetMap = async () => {
@@ -295,6 +297,28 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
     }
   };
 
+  hanldeOnChangeBudget = async (e: any) => {
+    const { addNewCampaignModal } = this.props.campaign;
+    if (addNewCampaignModal.fees) {
+      const totalFee = e * addNewCampaignModal.fees.Advertiser + e;
+      const remainFee = e - e * addNewCampaignModal.fees.Supplier;
+      const cancelFee = e * addNewCampaignModal.fees.CancelCampagin;
+      const newFes = {
+        newSupplier: remainFee,
+        newAdvertiser: totalFee,
+        newCancelCampagin: cancelFee,
+      };
+      this.setAddNewCampaignModal({
+        fees: {
+          ...addNewCampaignModal.fees,
+          ...newFes,
+        },
+      });
+      // console.log('====================================');
+      // console.log(addNewCampaignModal.fees, newFes);
+      // console.log('====================================');
+    }
+  };
   formRef = React.createRef<FormInstance<any>>();
   datePickerRef = React.createRef<any>();
   render() {
@@ -302,7 +326,7 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
 
     const { listDeviceTypes } = this.props.deviceStore;
 
-    const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
+    // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
 
     const { mapComponent } = this.props.location;
 
@@ -320,7 +344,9 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
           closable={false}
           afterClose={() => {
             this.clearCreateNewCampaignParam().then(() => {
-              this.resetMap();
+              this.selectScenario(undefined).then(() => {
+                this.resetMap();
+              });
             });
           }}
           onOk={() => {
@@ -332,159 +358,26 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
             });
           }}
         >
-          <Skeleton active loading={addNewCampaignModal.isLoading}>
-            {/* <Row>
-              <Col span={10}>Time Filter</Col>
-            </Row>
-            <Row>
-              <Col span={24}>
-                <TimeFilterComponent {...this.props} />
-              </Col>
-            </Row>
-            <Divider></Divider>
-            <Row>
-              <Col span={10}>Date Filter</Col>
-              <Col span={14}></Col>
-            </Row>
-            <Space>
-              <FilterDate {...this.props} />
-            </Space> */}
-            {/* <Row>
-              <Col span={10}>Budget</Col>
-              <Col span={14}>
-                <InputNumber
-                  style={{ width: 200 }}
-                  min={0}
-                  step="0.0001"
-                  value={createCampaignParam.budget}
-                  onChange={(e) => {
-                    this.setCreateNewCampaignParam({
-                      budget: e,
-                    });
-                  }}
-                />
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col span={10}>Description</Col>
-              <Col span={14}>
-                <Input
-                  value={createCampaignParam.description}
-                  onChange={(e) => {
-                    this.setCreateNewCampaignParam({
-                      description: e.target.value,
-                    });
-                  }}
-                />
-              </Col>
-            </Row>
-            <Divider /> */}
-            {/* <Row>
-              <Col span={10}>Max Bid</Col>
-              <Col span={14}>
-                <InputNumber
-                  style={{ width: 200 }}
-                  min={0}
-                  max={createCampaignParam.budget}
-                  step="0.0001"
-                  value={createCampaignParam.maxBid}
-                  onChange={(e) => {
-                    this.setCreateNewCampaignParam({
-                      maxBid: e,
-                    });
-                  }}
-                />
-              </Col>
-            </Row>
-            <Divider /> */}
-            {/* <Row>
-              <Col span={10}>Start-End</Col>
-              <Col span={14}>
-                <DatePicker.RangePicker
-                  ref={this.datePickerRef}
-                  format={'YYYY/MM/DD'}
-                  disabledDate={(current) => {
-                    return current < moment().endOf('day');
-                  }}
-                  value={[
-                    moment(moment(createCampaignParam.startDate).format('YYYY/MM/DD')),
-                    moment(moment(createCampaignParam.endDate).format('YYYY/MM/DD')),
-                  ]}
-                  onChange={(e) => {
-                    if (e) {
-                      if (e[0] && e[1]) {
-                        const startDate = e[0].format('YYYY-MM-DD');
-                        const endDate = e[1].format('YYYY-MM-DD');
-                        this.setCreateNewCampaignParam({
-                          startDate,
-                          endDate,
-                        });
-                        if (this.datePickerRef) {
-                          this.datePickerRef.current.blur();
-                        }
-                      }
-                    }
-                  }}
-                ></DatePicker.RangePicker>
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col span={10}>Type</Col>
-              <Col span={14}>
-                <Select
-                  mode="multiple"
-                  style={{ width: '100%' }}
-                  onChange={(e) => {
-                    this.setCreateNewCampaignParam({
-                      typeIds: e,
-                    });
-                  }}
-                  autoClearSearchValue={false}
-                  defaultValue={listDeviceTypes[0]?.id}
-                  showSearch
-                  value={createCampaignParam.typeIds}
-                >
-                  {listDeviceTypes.map((type) => {
-                    return (
-                      <Select.Option key={type.id} value={type.id}>
-                        {type.typeName}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              </Col>
-            </Row>
-            <Divider />
-            <Row>
-              <Col span={10}>Radius</Col>
-              <Col span={14}>
-                <InputNumber
-                  style={{ width: 200 }}
-                  min={0}
-                  value={createCampaignParam.radius}
-                  onChange={async (e) => {
-                    if (e) {
-                      this.setCreateNewCampaignParam({
-                        radius: e,
-                      }).then(() => {
-                        this.setRadiusOfLocation(Number.parseFloat(e.toString()) * 1000);
-                      });
-                    }
-                  }}
-                />
-              </Col>
-            </Row> */}
-          </Skeleton>
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
             <Form.Item
               name="budget"
               label="Budget"
-              rules={[{ required: true, message: 'Please input the name of collection!' }]}
+              rules={[
+                { required: true, message: 'Please input the name of collection!' },
+                // { min: 100000, message: 'Budeget must larger than 100.000' },
+              ]}
             >
-              <InputNumber style={{ width: 200 }} min={0} step="0.0001" />
+              <InputNumber
+                style={{ width: 200 }}
+                min={100000}
+                onChange={(e) => {
+                  this.hanldeOnChangeBudget(e);
+                }}
+              />
             </Form.Item>
+            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.newSupplier}</Row>
+            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.newAdvertiser}</Row>
+            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.newCancelCampagin}</Row>
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={4} />
             </Form.Item>
@@ -551,7 +444,7 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
                 showSearch
                 // value={createCampaignParam.typeIds}
               >
-                {listDeviceTypes.map((type) => {
+                {listDeviceTypes?.map((type) => {
                   return (
                     <Select.Option key={type.id} value={type.id}>
                       {type.typeName}
@@ -574,7 +467,7 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
                     this.setCreateNewCampaignParam({
                       radius: e,
                     }).then(() => {
-                      this.setRadiusOfLocation(Number.parseFloat(e.toString()) * 1000);
+                      this.setRadiusOfLocation(Number.parseFloat(e) * 1000);
                     });
                   }
                 }}
@@ -584,11 +477,14 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
             <Row style={{ textAlign: 'center' }}>
               <Col span={24}>Choose Scenario</Col>
             </Row>
-            <List
+            {/* <List
               bordered
               dataSource={listScenario}
               pagination={{
-                current: getListScenarioParam.pageNumber + 1,
+                current: getListScenarioParam?.pageNumber ? getListScenarioParam.pageNumber + 1 : 1,
+                pageSize: getListScenarioParam?.pageLimitItem
+                  ? getListScenarioParam?.pageLimitItem
+                  : 10,
                 total: totalItem,
                 onChange: (e) => {
                   this.callGetListScenario({
@@ -610,12 +506,13 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
                   <List.Item.Meta title={item.title} description={item.description} />
                 </List.Item>
               )}
-            ></List>
+            ></List> */}
+            <SelectScenarioPart {...this.props} />
 
             <Row style={{ textAlign: 'center' }}>
               <Col span={24}>Choose Location</Col>
             </Row>
-            <Row style={{ textAlign: 'center' }}>
+            <Row>
               <Col span={10}>Address</Col>
               <Col span={14}>
                 <AutoCompleteComponent
@@ -625,12 +522,12 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
                     label: createCampaignParam.address,
                     value: createCampaignParam.location,
                   }}
-                  onInputChange={(e) => {
-                    // this.setCreateNewCampaignParam({
-                    //   address: e,
-                    // });
-                  }}
-                  handleOnSelect={(value, address) => {
+                  // onInputChange={(e: any) => {
+                  //   // this.setCreateNewCampaignParam({
+                  //   //   address: e,
+                  //   // });
+                  // }}
+                  handleOnSelect={(value: any, address: any) => {
                     this.handleAutoCompleteSearch(value, address);
                   }}
                 />
@@ -648,4 +545,4 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewCampaignModal);
+export default connect((state: any) => ({ ...state }))(AddNewCampaignModal);

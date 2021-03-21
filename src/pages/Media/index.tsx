@@ -18,13 +18,7 @@ import {
   Alert,
 } from 'antd';
 import * as React from 'react';
-import type {
-  Dispatch,
-  FolderType,
-  MediaSourceModelState,
-  UserModelState,
-  UserTestModelState,
-} from 'umi';
+import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 // import VideoThumbnail from 'react-video-thumbnail';
 // import ReactPlayer from 'react-player';
@@ -497,10 +491,7 @@ class Media extends React.Component<MediaSourceProps> {
       listLoading,
       listFolder,
       breadScrumb,
-      // addNewFileModal,
-      // addNewFolderModal,
-      // editFileDrawer,
-      // selectedFile,
+      editFileDrawer,
       searchListMediaParam,
     } = this.props.media;
 
@@ -552,6 +543,7 @@ class Media extends React.Component<MediaSourceProps> {
             <Row>
               <Col span={12}>
                 <Input.Search
+                  enterButton
                   value={searchListMediaParam.title}
                   onChange={async (e) => {
                     this.setSearchListMediaParam({
@@ -785,10 +777,10 @@ class Media extends React.Component<MediaSourceProps> {
                           style={{ width: '100%', height: '100%' }}
                           cover={
                             item.type.name.toLowerCase().includes('image') ? (
-                              <Image src={item.urlPreview} alt="image" height={300} />
+                              <Image src={item.urlPreview} alt="image" height={200} />
                             ) : (
                               <HoverVideoPlayer
-                                style={{ height: 300 }}
+                                style={{ height: 200 }}
                                 videoSrc={item.urlPreview}
                                 restartOnPaused
                               />
@@ -846,97 +838,8 @@ class Media extends React.Component<MediaSourceProps> {
 
           {/** Edit File */}
           {/* ========================================================================================================================== */}
-          {/* <Drawer
-            closable={false}
-            destroyOnClose={true}
-            visible={editFileDrawer.visible}
-            width={700}
-            onClose={async () => {
-              await this.setEditFileDrawer({
-                visible: false,
-              });
-            }}
-            title={
-              <>
-                <div>{selectedFile.title}</div>
-              </>
-            }
-            footer={
-              <>
-                <div style={{ textAlign: 'right' }}>
-                  <Popconfirm
-                    title={`Remove ${selectedFile.title}`}
-                    visible={this.state.removeConfirmVisible}
-                    onConfirm={async () => {
-                      await this.setListLoading(true);
+          {editFileDrawer.visible && <EditMediaFormDrawer {...this.props} />}
 
-                      await this.setEditFileDrawer({
-                        visible: false,
-                      });
-                      this.removeMedia(selectedFile)
-                        .then(() => {
-                          this.callGetListMedia().then(() => {
-                            this.setListLoading(false).then(() => {
-                              this.setState({
-                                removeConfirmVisible: false,
-                              });
-                            });
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false).then(() => {
-                            this.setState({
-                              removeConfirmVisible: false,
-                            });
-                          });
-                        });
-                    }}
-                    okButtonProps={{ loading: this.props.media.listLoading }}
-                    onCancel={() => {
-                      this.setState({
-                        removeConfirmVisible: false,
-                      });
-                    }}
-                  >
-                    <Button
-                      danger
-                      onClick={() => {
-                        this.setState({
-                          removeConfirmVisible: true,
-                        });
-                      }}
-                    >
-                      <DeleteTwoTone twoToneColor={'#f64842'} /> Remove
-                    </Button>
-                  </Popconfirm>
-                  <Button
-                    type="primary"
-                    onClick={async () => {
-                      await this.setEditFileDrawer({
-                        visible: false,
-                      });
-                      this.setListLoading(true)
-                        .then(() => {
-                          this.updateFile().then(() => {
-                            this.callGetListMedia().then(() => {
-                              this.setListLoading(false);
-                            });
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }}
-                  >
-                    <EditOutlined /> Update Media
-                  </Button>
-                </div>
-              </>
-            }
-          >
-            <EditMediaDrawer {...this.props}></EditMediaDrawer>
-          </Drawer> */}
-          <EditMediaFormDrawer {...this.props} />
           {/* ========================================================================================================================== */}
         </PageContainer>
       </>

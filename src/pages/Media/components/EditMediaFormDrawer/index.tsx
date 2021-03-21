@@ -116,17 +116,18 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
                 title={`Remove ${selectedFile.title}`}
                 visible={this.state.removeConfirmVisible}
                 onConfirm={async () => {
-                  await this.setListLoading(true);
-
-                  await this.setEditFileDrawer({
-                    visible: false,
-                  });
-                  this.removeMedia(selectedFile)
+                  this.setListLoading(true)
                     .then(() => {
-                      this.callGetListMedia().then(() => {
-                        this.setListLoading(false).then(() => {
-                          this.setState({
-                            removeConfirmVisible: false,
+                      this.setEditFileDrawer({
+                        visible: false,
+                      }).then(() => {
+                        this.removeMedia(selectedFile).then(() => {
+                          this.callGetListMedia().then(() => {
+                            this.setListLoading(false).then(() => {
+                              this.setState({
+                                removeConfirmVisible: false,
+                              });
+                            });
                           });
                         });
                       });

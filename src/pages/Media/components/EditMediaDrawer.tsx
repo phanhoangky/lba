@@ -94,4 +94,4 @@ class EditMediaDrawer extends React.Component<EditMediaDrawerProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(EditMediaDrawer);
+export default connect((state: any) => ({ ...state }))(EditMediaDrawer);

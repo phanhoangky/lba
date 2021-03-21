@@ -3,13 +3,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
-import type {
-  Dispatch,
-  MediaSourceModelState,
-  PlayListModelState,
-  UserModelState,
-  UserTestModelState,
-} from 'umi';
+import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 // import AddNewPlaylistItemDrawer from './components/AddNewPlaylistItemDrawer';
 // import AddNewPlaylistModal from './components/AddNewPlaylistModal';
@@ -43,13 +37,16 @@ class Playlist extends React.Component<PlaylistProps> {
     });
   };
 
-  callGetListPlaylist = async () => {
+  callGetListPlaylist = async (param?: any) => {
     this.setTableLoading(true);
     const { getPlaylistParam } = this.props.playlists;
     await this.props
       .dispatch({
         type: 'playlists/getListPlaylist',
-        payload: getPlaylistParam,
+        payload: {
+          ...getPlaylistParam,
+          ...param,
+        },
       })
       .then(() => {
         this.setTableLoading(false);
@@ -65,17 +62,6 @@ class Playlist extends React.Component<PlaylistProps> {
       type: 'playlists/setAddNewPlaylistModalReducer',
       payload: {
         ...addNewPlaylistModal,
-        ...modal,
-      },
-    });
-  };
-
-  setAddNewPlaylistParam = async (modal: any) => {
-    const { addNewPlaylistParam } = this.props.playlists;
-    await this.props.dispatch({
-      type: 'playlists/setGetPlaylistParamReducer',
-      payload: {
-        ...addNewPlaylistParam,
         ...modal,
       },
     });
@@ -111,20 +97,13 @@ class Playlist extends React.Component<PlaylistProps> {
     });
   };
 
-  callGetItemsByPlaylistId = async () => {
+  callGetItemsByPlaylistId = async (param?: any) => {
     const { getItemsByPlaylistIdParam } = this.props.playlists;
 
     await this.props.dispatch({
       type: 'playlists/getItemsByPlaylist',
-      payload: getItemsByPlaylistIdParam,
-    });
-  };
-
-  callGetListMediaNotBelongToPlaylist = async (param: any) => {
-    this.props.dispatch({
-      type: 'playlists/getMediaNotBelongToPlaylist',
       payload: {
-        ...this.props.playlists.getListMediaParam,
+        ...getItemsByPlaylistIdParam,
         ...param,
       },
     });
@@ -136,16 +115,6 @@ class Playlist extends React.Component<PlaylistProps> {
       type: 'playlists/setGetItemsByPlaylistIdParamReducer',
       payload: {
         ...getItemsByPlaylistIdParam,
-        ...modal,
-      },
-    });
-  };
-  setGetListMediaParam = async (modal: any) => {
-    const { getListMediaParam } = this.props.playlists;
-    await this.props.dispatch({
-      type: 'playlists/setGetListMediaParamReducer',
-      payload: {
-        ...getListMediaParam,
         ...modal,
       },
     });
@@ -329,15 +298,7 @@ class Playlist extends React.Component<PlaylistProps> {
       totalItem,
       tableLoading,
       editPlaylistDrawer,
-      // totalDuration,
-      // maxDuration,
-      // minDuration,
-      // listMediaNotBelongToPlaylist,
     } = this.props.playlists;
-
-    // const isMediaSelected = listMediaNotBelongToPlaylist.some(
-    //   (media: any) => media.isSelected === true,
-    // );
 
     return (
       <PageContainer>
@@ -348,11 +309,9 @@ class Playlist extends React.Component<PlaylistProps> {
           pagination={{
             current: getPlaylistParam.pageNumber + 1,
             total: totalItem,
-            onChange: async (e) => {
-              this.setGetListPlaylistParam({
+            onChange: (e) => {
+              this.callGetListPlaylist({
                 pageNumber: e - 1,
-              }).then(() => {
-                this.callGetListPlaylist();
               });
             },
           }}
@@ -360,10 +319,6 @@ class Playlist extends React.Component<PlaylistProps> {
             return {
               onClick: async () => {
                 await this.setSelectedPlaylist(record);
-
-                // await this.setGetListMediaParam({
-                //   id: record.id,
-                // });
 
                 await this.setGetItemsByPlaylistIdParam({
                   id: record.id,
@@ -409,173 +364,12 @@ class Playlist extends React.Component<PlaylistProps> {
           <Column key="description" title="Description" dataIndex="description"></Column>
         </Table>
 
-        {/* <Modal
-          title="Add New Playlist"
-          visible={addNewPlaylistModal.visible}
-          destroyOnClose={true}
-          confirmLoading={addNewPlaylistModal.isLoading}
-          onCancel={async () => {
-            await this.setAddNewPlaylistModal({
-              visible: false,
-            });
-          }}
-          afterClose={() => {
-            this.props.dispatch({
-              type: 'playlists/clearAddNewPlaylistParamReducer',
-            });
-          }}
-          onOk={async () => {
-            await this.setAddNewPlaylistModal({
-              isLoading: true,
-            });
-            await this.props
-              .dispatch({
-                type: 'playlists/addNewPlaylist',
-                payload: {
-                  ...addNewPlaylistParam,
-                },
-              })
-              .then(() => {
-                this.setAddNewPlaylistModal({
-                  visible: false,
-                });
-                this.setAddNewPlaylistModal({
-                  isLoading: false,
-                });
-              })
-              .catch(() => {
-                this.setAddNewPlaylistModal({
-                  isLoading: false,
-                });
-              });
-            await this.callGetListPlaylist();
-          }}
-        >
-          <AddNewPlaylistModal {...this.props} />
-        </Modal> */}
         {addNewPlaylistModal.visible && <AddNewPlaylistFormModal {...this.props} />}
 
-        {/* <Drawer
-          getContainer={false}
-          closable={false}
-          destroyOnClose={true}
-          visible={editPlaylistDrawer.visible}
-          afterVisibleChange={(e) => {
-            this.setSelectedPlaylistItems([]);
-            if (!e) {
-              this.clearSelectedPlaylist();
-            }
-          }}
-          width={'80%'}
-          onClose={async () => {
-            await this.setEditPlaylistDrawer({
-              visible: false,
-            });
-          }}
-          footer={
-            <>
-              <div style={{ textAlign: 'right' }}>
-                <Space>
-                  <Button
-                    onClick={async () => {
-                      await this.setEditPlaylistDrawer({
-                        visible: false,
-                      });
-                    }}
-                    icon={<CloseSquareTwoTone />}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    danger
-                    onClick={async () => {
-                      this.setEditPlaylistDrawer({
-                        visible: true,
-                      });
-                      this.removePlaylist()
-                        .then(() => {
-                          this.setEditPlaylistDrawer({
-                            visible: false,
-                          });
-                        })
-                        .catch(() => {
-                          this.setEditPlaylistDrawer({
-                            visible: false,
-                          });
-                        });
-                    }}
-                    icon={<DeleteTwoTone twoToneColor="#f93e3e" />}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    onClick={async () => {
-                      this.setEditPlaylistDrawer({
-                        visible: true,
-                      });
-                      this.updatePlaylist()
-                        .then(() => {
-                          this.setEditPlaylistDrawer({
-                            visible: false,
-                          });
-                        })
-                        .catch(() => {
-                          this.setEditPlaylistDrawer({
-                            visible: false,
-                          });
-                        });
-                    }}
-                    icon={<SettingTwoTone />}
-                  >
-                    Save Change
-                  </Button>
-                </Space>
-              </div>
-            </>
-          }
-        >
-          <EditPlaylistDrawer {...this.props}></EditPlaylistDrawer>
-
-          <Drawer
-            title="Media"
-            width="80%"
-            destroyOnClose={true}
-            afterVisibleChange={() => {
-              this.clearSearchListMediaParam();
-            }}
-            closable={false}
-            footer={
-              <>
-                <Button
-                  onClick={this.addNewPlaylistItem}
-                  disabled={maxDuration - totalDuration < minDuration || !isMediaSelected}
-                >
-                  <PlusCircleTwoTone />
-                  Add New PlaylistItem
-                </Button>
-              </>
-            }
-            onClose={async () => {
-              this.calculateTotalDuration().then(() => {
-                this.clearDuration().then(() => {
-                  this.clearSelectedMedia().then(() => {
-                    this.setAddNewPlaylistItemsDrawer({
-                      visible: false,
-                    });
-                  });
-                });
-              });
-            }}
-            visible={this.props.playlists.addNewPlaylistItemsDrawer.visible}
-          >
-            <AddNewPlaylistItemDrawer {...this.props} />
-          </Drawer>
-        </Drawer> */}
         {editPlaylistDrawer.visible && <EditPlaylistFormDrawer {...this.props} />}
-        {/* <EditPlaylistFormDrawer {...this.props} /> */}
       </PageContainer>
     );
   }
 }
 
-export default connect((state) => ({ ...state }))(Playlist);
+export default connect((state: any) => ({ ...state }))(Playlist);

@@ -3,6 +3,7 @@ import { createCampaign, deleteCampaign, getListCampaigns } from "@/services/Cam
 import type { CreateCampaignParam } from '@/services/CampaignService/CampaignService';
 import moment from "moment";
 import type { Effect, Reducer } from "umi";
+import { GetFees } from "@/services/FeeService";
 
 export type Campaign = {
   id: string;
@@ -31,7 +32,7 @@ export type CampaignModelState = {
   totalCampaigns: number; 
   selectedCampaign: Campaign;
   
-  getListCampaignParam: BaseGetRequest;
+  getListCampaignParam: BaseGetRequest & {mail: string};
 
   createCampaignParam: CreateCampaignParam;
 
@@ -40,6 +41,8 @@ export type CampaignModelState = {
     isLoading: boolean;
     address: string;
     currentStep: number;
+    fees?: any;
+    
   };
 
   editCampaignDrawer: {
@@ -57,6 +60,7 @@ export type CampaignModelStore = {
     getListCampaigns: Effect;
     createCampaign: Effect;
     deleteCampaign: Effect;
+    getListFee: Effect;
   };
 
   reducers: {
@@ -122,7 +126,8 @@ const CampaignStore: CampaignModelStore = {
       isSort: false,
       orderBy: "",
       pageLimitItem: 5,
-      pageNumber: 0
+      pageNumber: 0,
+      mail: ""
     },
 
     addNewCampaignModal: {
@@ -171,6 +176,12 @@ const CampaignStore: CampaignModelStore = {
 
     *deleteCampaign({ payload }, { call }) {
       yield call(deleteCampaign, payload);
+    },
+
+    *getListFee({ payload }, { call, put }) {
+      const res = yield call(GetFees, payload);
+      
+      return res;
     }
   },
 

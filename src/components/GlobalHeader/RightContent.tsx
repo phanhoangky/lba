@@ -1,4 +1,4 @@
-import { Tag } from 'antd';
+import { Button, Tag } from 'antd';
 import type { Settings as ProSettings } from '@ant-design/pro-layout';
 // import { QuestionCircleOutlined } from '@ant-design/icons';
 import React from 'react';
@@ -10,6 +10,7 @@ import Avatar from './AvatarDropdown';
 import styles from './index.less';
 // import NoticeIconView from './NoticeIconView';
 import type { CurrentUser } from '@/models/user';
+import { WalletTwoTone } from '@ant-design/icons';
 
 export type GlobalHeaderRightProps = {
   theme?: ProSettings['navTheme'] | 'realDark';
@@ -71,6 +72,12 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
         </a>
       </Tooltip>
       <NoticeIconView /> */}
+
+      <Button className={styles.action} icon={<WalletTwoTone />}>
+        {props.currentUser &&
+          props.currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+        VND
+      </Button>
       <Avatar menu={true} currentUser={props.currentUser} />
       {REACT_APP_ENV && (
         <span>

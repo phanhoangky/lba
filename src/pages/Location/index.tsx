@@ -49,8 +49,10 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                 pageLimitItem: 10,
                 pageNumber: 0,
                 seachValue: '',
+              }).then(() => {
+                this.setLocationsTableLoading(false);
               });
-              this.setLocationsTableLoading(false);
+              this.readJWT();
             });
         });
       })
@@ -59,6 +61,11 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       });
   };
 
+  readJWT = async () => {
+    await this.props.dispatch({
+      type: 'user/readJWT',
+    });
+  };
   callGetListLocations = async (param?: any) => {
     await this.props.dispatch({
       type: `${LOCATION_DISPATCHER}/getListLocation`,
@@ -356,4 +363,4 @@ class LocationScreen extends React.Component<LocationScreenProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(LocationScreen);
+export default connect((state: any) => ({ ...state }))(LocationScreen);

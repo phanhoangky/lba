@@ -23,7 +23,7 @@ export type Scenario = {
   playlists: Playlist[];
   scenarioItems: ScenarioItem[];
   layout: Layout;
-  isSelected: boolean;
+  isSelected?: boolean;
 };
 
 export type ScenarioItem = {
@@ -31,45 +31,46 @@ export type ScenarioItem = {
   displayOrder?: number
   audioArea?: boolean;
   isActive?: boolean;
-  playlist: Playlist;
-  area: Area;
-  scenario: Scenario;
+  playlist?: Playlist;
+  area?: Area;
+  scenario?: Scenario;
   isHover?: boolean;
+  isSelected?: boolean;
 }
 
 export type ScenarioModelState = {
-  listScenario: Scenario[];
-  selectedSenario: Scenario;
-  getListScenarioParam: GetListScenariosParam;
-  tableLoading: boolean;
-  totalItem: number;
-  addNewScenarioModal: {
+  listScenario?: Scenario[];
+  selectedSenario?: Scenario;
+  getListScenarioParam?: GetListScenariosParam;
+  tableLoading?: boolean;
+  totalItem?: number;
+  addNewScenarioModal?: {
     isLoading: boolean;
     visible: boolean;
     currentStep: number;
   };
 
-  createScenarioParam: PostScenarioParam;
+  createScenarioParam?: PostScenarioParam;
 
-  editScenarioDrawer: {
+  editScenarioDrawer?: {
     visible: boolean;
     isLoading: boolean;
     playlistLoading: boolean;
   };
 
-  selectedArea: Area;
+  selectedArea?: Area;
 
-  playlistsDrawer: {
+  playlistsDrawer?: {
     visible: boolean;
     isLoading: boolean;
     totalItem: number;
     listPlaylists: Playlist[]
   },
 
-  getListPlaylistParam: GetListPlaylistParam;
+  getListPlaylistParam?: GetListPlaylistParam;
 
-  selectedPlaylist: Playlist;
-  selectedPlaylistItems: PlaylistItem[];
+  selectedPlaylist?: Playlist;
+  selectedPlaylistItems?: PlaylistItem[];
 };
 
 export type ScenarioStoreModel = {

@@ -60,7 +60,9 @@ class AutoCompleteComponent extends React.Component<AutoCompleteComponentProps> 
           }
         }}
         onInputChange={(e) => {
-          this.props.onInputChange(e);
+          if (this.props.onInputChange) {
+            this.props.onInputChange(e);
+          }
         }}
       />
     );

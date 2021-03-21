@@ -3,12 +3,12 @@ import {
   CloseSquareTwoTone,
   DeleteTwoTone,
   MenuOutlined,
+  MinusSquareTwoTone,
   PlaySquareTwoTone,
-  PlusCircleTwoTone,
   PlusSquareTwoTone,
   SettingTwoTone,
 } from '@ant-design/icons';
-import { Button, Drawer, Space, Form, Input, Table, Row, Col, Image } from 'antd';
+import { Button, Drawer, Space, Form, Input, Table, Row, Col, Image, Slider } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
@@ -26,7 +26,7 @@ import type {
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import styles from '../../index.less';
-import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
+// import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
 
 export type EditPlaylistFormDrawerProps = {
   dispatch: Dispatch;
@@ -42,7 +42,7 @@ const SortableItemComponent = SortableElement((props: any) => <tr {...props} />)
 const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
 
 export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDrawerProps> {
-  componentDidMount() {
+  componentDidMount = async () => {
     const { selectedPlaylist } = this.props.playlists;
     if (this.formRef.current) {
       this.formRef.current.setFieldsValue({
@@ -50,7 +50,35 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         description: selectedPlaylist.description,
       });
     }
-  }
+    this.setEditPlaylistDrawer({
+      isLoading: true,
+    })
+      .then(() => {
+        this.getMediaNotBelongToPlaylist({ isPaging: false }).then(() => {
+          this.calculateTotalDuration().then(() => {
+            this.setEditPlaylistDrawer({
+              isLoading: false,
+            });
+          });
+        });
+      })
+      .catch(() => {
+        this.setEditPlaylistDrawer({
+          isLoading: false,
+        });
+      });
+  };
+
+  getMediaNotBelongToPlaylist = async (param?: any) => {
+    const { getListMediaParam } = this.props.playlists;
+    this.props.dispatch({
+      type: 'playlists/getMediaNotBelongToPlaylist',
+      payload: {
+        ...getListMediaParam,
+        ...param,
+      },
+    });
+  };
 
   callGetListPlaylist = async () => {
     this.setTableLoading(true);
@@ -134,48 +162,44 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
-  addNewItemToSelectedItems = async () => {
+  addNewItemToSelectedItems = async (media?: any) => {
     const {
       selectedPlaylistItems,
-      selectedMedia,
       selectedPlaylist,
-      currentNewItemDuration,
+      // currentNewItemDuration,
     } = this.props.playlists;
 
     const newList = cloneDeep(selectedPlaylistItems);
 
     newList.push({
       id: uuidv4(),
-      createTime: '',
-      modifyBy: '',
       index: selectedPlaylistItems.length,
       displayOrder: selectedPlaylistItems.length,
-      duration: currentNewItemDuration,
+      duration: 10,
       isActive: true,
       key: `${uuidv4()}`,
-      mediaSrcId: selectedMedia.id,
-      modifyTime: '',
+      mediaSrcId: media.id,
       playlistId: selectedPlaylist.id,
-      createBy: '',
-      title: selectedMedia.title ? selectedMedia.title : '',
-      typeName: selectedMedia.type.name,
-      url: selectedMedia.urlPreview,
+      title: media.title,
+      typeName: media.type.name,
+      url: media.urlPreview,
     });
-    await this.props.dispatch({
-      type: 'playlists/setSelectedPlaylistItemsReducer',
-      payload: newList,
-    });
+    await this.setSelectedPlaylistItems(newList);
+    // await this.props.dispatch({
+    //   type: 'playlists/setSelectedPlaylistItemsReducer',
+    //   payload: newList,
+    // });
   };
 
-  addNewPlaylistItem = async () => {
-    await this.addNewItemToSelectedItems()
+  addNewPlaylistItem = async (media?: any) => {
+    await this.addNewItemToSelectedItems(media)
       .then(() => {
-        this.removeMediaFromListMedia().then(() => {
+        this.removeMediaFromListMedia(media).then(() => {
           this.calculateTotalDuration().then(() => {
             this.clearDuration().then(() => {
-              this.setAddNewPlaylistItemsDrawer({
-                visible: false,
-              });
+              // this.setAddNewPlaylistItemsDrawer({
+              //   visible: false,
+              // });
             });
           });
         });
@@ -201,6 +225,9 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     selectedPlaylistItems.forEach((item) => {
       total += item.duration;
     });
+    console.log('====================================');
+    console.log('Total >>>>', total);
+    console.log('====================================');
     await this.setTotalDuration(total);
   };
 
@@ -211,15 +238,17 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
-  removeMediaFromListMedia = async () => {
-    const { listMediaNotBelongToPlaylist, selectedMedia } = this.props.playlists;
-    const newList = listMediaNotBelongToPlaylist.filter(
-      (media: any) => media.id !== selectedMedia.id,
-    );
+  setListMediaNotBelongToPlaylist = async (param?: any) => {
     await this.props.dispatch({
       type: 'playlists/setListMediaNotBelongToPlaylistReducer',
-      payload: newList,
+      payload: param,
     });
+  };
+
+  removeMediaFromListMedia = async (param?: any) => {
+    const { listMediaNotBelongToPlaylist } = this.props.playlists;
+    const newList = listMediaNotBelongToPlaylist.filter((media: any) => media.id !== param.id);
+    await this.setListMediaNotBelongToPlaylist(newList);
   };
 
   setAddNewPlaylistItemsDrawer = async (modal: any) => {
@@ -314,9 +343,9 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
 
   removeItem = async (record: any) => {
     const { selectedPlaylistItems } = this.props.playlists;
-    await this.props.dispatch({
-      type: 'playlists/setSelectedPlaylistItemsReducer',
-      payload: selectedPlaylistItems
+
+    this.setSelectedPlaylistItems(
+      selectedPlaylistItems
         .filter((item) => item.id !== record.id)
         .map((item, index) => {
           return {
@@ -325,7 +354,16 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
             index,
           };
         }),
-    });
+    );
+  };
+
+  addMediaToListMedia = async (media: any) => {
+    const { listMediaNotBelongToPlaylist } = this.props.playlists;
+
+    const newList = cloneDeep(listMediaNotBelongToPlaylist);
+    newList.push({ ...media });
+
+    this.setListMediaNotBelongToPlaylist(newList);
   };
 
   getSelectedPlaylistItem = () => {
@@ -339,20 +377,30 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   };
 
   renderPreviewMedia = () => {
-    const selectedPlaylistItem = this.getSelectedPlaylistItem();
-    if (selectedPlaylistItem) {
-      if (selectedPlaylistItem.typeName === 'Image') {
+    const { editPlaylistDrawer } = this.props.playlists;
+    if (
+      editPlaylistDrawer &&
+      editPlaylistDrawer.playingUrl &&
+      editPlaylistDrawer.playlingMediaType
+    ) {
+      if (editPlaylistDrawer.playlingMediaType.toLowerCase().includes('image')) {
         return (
           <>
-            <Image src={selectedPlaylistItem.url} loading="lazy" width="100%" />
+            <Image src={editPlaylistDrawer.playingUrl} loading="lazy" width="100%" height="100%" />
           </>
         );
       }
 
-      if (selectedPlaylistItem.typeName === 'Video') {
+      if (editPlaylistDrawer.playlingMediaType.toLowerCase().includes('video')) {
         return (
           <>
-            <ReactPlayer url={selectedPlaylistItem.url} controls={true} width={'100%'} />
+            <ReactPlayer
+              url={editPlaylistDrawer.playingUrl}
+              playing
+              controls={true}
+              width={'100%'}
+              height="100%"
+            />
           </>
         );
       }
@@ -360,16 +408,26 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     return null;
   };
 
+  setSelectedPlaylistItemsDuration = async (record?: any, duration?: number) => {
+    const { selectedPlaylistItems } = this.props.playlists;
+    if (record && duration) {
+      const clone = cloneDeep(selectedPlaylistItems);
+      const newItems = clone.map((item) => {
+        if (record.id === item.id) {
+          return {
+            ...item,
+            duration,
+          };
+        }
+        return item;
+      });
+      this.setSelectedPlaylistItems(newItems);
+    }
+  };
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
     const {
-      // listPlaylist,
-      // addNewPlaylistModal,
-      // getPlaylistParam,
-      // totalItem,
-      // tableLoading,
-      // addNewPlaylistParam,
       editPlaylistDrawer,
       totalDuration,
       maxDuration,
@@ -378,9 +436,14 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       selectedPlaylistItems,
     } = this.props.playlists;
 
-    const isMediaSelected = listMediaNotBelongToPlaylist.some(
-      (media: any) => media.isSelected === true,
+    const listMedia = listMediaNotBelongToPlaylist.filter((media) =>
+      selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
     );
+
+    const availableDuration = maxDuration - totalDuration;
+    console.log('====================================');
+    console.log('Duration >>>', availableDuration, totalDuration);
+    console.log('====================================');
     return (
       <Drawer
         getContainer={false}
@@ -393,6 +456,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
             this.clearSelectedPlaylist();
           }
         }}
+        title="Edit Playlist"
         width={'80%'}
         onClose={async () => {
           await this.setEditPlaylistDrawer({
@@ -481,111 +545,145 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={4} />
           </Form.Item>
-          <Table
-            bordered
-            rowKey="index"
-            key={uuidv4()}
-            components={{
-              body: {
-                wrapper: this.DraggableContainer,
-                row: this.DraggableBodyRow,
-              },
-            }}
-            dataSource={selectedPlaylistItems}
-            title={() => {
+
+          <Row>
+            <Col span={12}>{this.renderPreviewMedia()}</Col>
+            <Col span={12}>
+              {/* PlaylistItems Table */}
+              <Table
+                bordered
+                rowKey="index"
+                loading={editPlaylistDrawer.isLoading}
+                key={uuidv4()}
+                components={{
+                  body: {
+                    wrapper: this.DraggableContainer,
+                    row: this.DraggableBodyRow,
+                  },
+                }}
+                dataSource={selectedPlaylistItems}
+                pagination={false}
+              >
+                <Column
+                  key="drag"
+                  dataIndex="sort"
+                  className={styles.dragVisible}
+                  render={() => <DragHandle />}
+                ></Column>
+                <Column key="index" title="No" dataIndex="index"></Column>
+                <Column
+                  key="title"
+                  title="Title"
+                  dataIndex="title"
+                  className="drag-visible"
+                ></Column>
+
+                <Column
+                  key="description"
+                  title="Duration"
+                  render={(record) => {
+                    return (
+                      <>
+                        <Slider
+                          min={minDuration}
+                          max={maxDuration}
+                          disabled={availableDuration < minDuration}
+                          value={record.duration}
+                          onChange={(e: any) => {
+                            if (totalDuration + e < maxDuration) {
+                              console.log('====================================');
+                              console.log(e, record.duration);
+                              console.log('====================================');
+                              this.setSelectedPlaylistItemsDuration(record, e);
+                              this.calculateTotalDuration();
+                            }
+                          }}
+                        ></Slider>
+                      </>
+                    );
+                  }}
+                ></Column>
+
+                <Column
+                  key="action"
+                  title="Action"
+                  render={(record: any) => {
+                    return (
+                      <>
+                        <Space>
+                          <Button
+                            onClick={() => {
+                              // this.selectPlaylistItem(record);
+                              this.setEditPlaylistDrawer({
+                                playingUrl: record.url,
+                                playlingMediaType: record.mediaSrc.type.name,
+                              });
+                            }}
+                          >
+                            <PlaySquareTwoTone size={20} />
+                          </Button>
+                          <Button
+                            danger
+                            onClick={async () => {
+                              this.removeItem(record).then(() => {
+                                this.calculateTotalDuration().then(() => {
+                                  this.clearDuration();
+                                });
+                              });
+                            }}
+                          >
+                            <MinusSquareTwoTone size={20} twoToneColor="#f93e3e" />
+                          </Button>
+                        </Space>
+                      </>
+                    );
+                  }}
+                ></Column>
+              </Table>
+            </Col>
+          </Row>
+        </Form>
+        <Table
+          dataSource={listMedia}
+          pagination={false}
+          loading={editPlaylistDrawer.isLoading}
+          scroll={{
+            x: 400,
+            y: 300,
+          }}
+        >
+          <Column key="Title" dataIndex="title" title="Title"></Column>
+          <Column key="Title"></Column>
+          <Column
+            key="action"
+            title="Action"
+            render={(record) => {
               return (
-                <>
+                <Space>
                   <Button
-                    onClick={async () => {
-                      await this.setAddNewPlaylistItemsDrawer({
-                        visible: true,
+                    disabled={availableDuration < minDuration}
+                    onClick={() => {
+                      this.addNewPlaylistItem(record);
+                    }}
+                  >
+                    <PlusSquareTwoTone />
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      this.setEditPlaylistDrawer({
+                        playingUrl: record.urlPreview,
+                        playlingMediaType: record.type.name,
                       });
                     }}
                   >
-                    <PlusSquareTwoTone /> Add New Playlist Items
+                    <PlaySquareTwoTone />
                   </Button>
-                </>
+                </Space>
               );
             }}
-          >
-            <Column
-              key="drag"
-              dataIndex="sort"
-              className={styles.dragVisible}
-              render={() => <DragHandle />}
-            ></Column>
-            <Column key="index" title="No" dataIndex="index"></Column>
-            <Column key="title" title="Title" dataIndex="title" className="drag-visible"></Column>
-            <Column key="description" title="Duration" dataIndex="duration"></Column>
-            <Column
-              key="action"
-              title="Action"
-              render={(record: any) => {
-                return (
-                  <>
-                    <Space>
-                      <PlaySquareTwoTone
-                        size={20}
-                        onClick={() => {
-                          this.selectPlaylistItem(record);
-                        }}
-                      />
-                      <DeleteTwoTone
-                        size={20}
-                        twoToneColor="#f93e3e"
-                        onClick={async () => {
-                          this.removeItem(record).then(() => {
-                            this.calculateTotalDuration().then(() => {
-                              this.clearDuration();
-                            });
-                          });
-                        }}
-                      />
-                    </Space>
-                  </>
-                );
-              }}
-            ></Column>
-          </Table>
-          <Row>
-            <Col span={24}>{this.renderPreviewMedia()}</Col>
-          </Row>
-        </Form>
+          ></Column>
+        </Table>
         {/* Add New Playlist Item */}
-        <Drawer
-          title="Media"
-          width="80%"
-          visible={this.props.playlists.addNewPlaylistItemsDrawer.visible}
-          destroyOnClose={true}
-          afterVisibleChange={() => {
-            this.clearSearchListMediaParam();
-          }}
-          closable={false}
-          footer={
-            <>
-              <Button
-                onClick={this.addNewPlaylistItem}
-                disabled={maxDuration - totalDuration < minDuration || !isMediaSelected}
-              >
-                <PlusCircleTwoTone />
-                Add New PlaylistItem
-              </Button>
-            </>
-          }
-          onClose={async () => {
-            this.calculateTotalDuration().then(() => {
-              this.clearDuration().then(() => {
-                this.clearSelectedMedia().then(() => {
-                  this.setAddNewPlaylistItemsDrawer({
-                    visible: false,
-                  });
-                });
-              });
-            });
-          }}
-        >
-          <AddNewPlaylistItemDrawer {...this.props} />
-        </Drawer>
       </Drawer>
     );
   }

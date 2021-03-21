@@ -2,7 +2,7 @@ import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
 import { Button, Input, Select, Space, Table, Tooltip } from 'antd';
-import type { DeviceModelState, Dispatch, UserModelState, UserTestModelState } from 'umi';
+import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
 import { ControlTwoTone, FilterTwoTone } from '@ant-design/icons';
@@ -42,11 +42,9 @@ class Device extends React.Component<DeviceProps> {
         type: 'deviceStore/getDevices',
       })
       .then(() => {
+        this.readJWT();
         this.setState({
           tableLoading: false,
-        });
-        this.props.dispatch({
-          type: 'deviceStore/getDeviceType',
         });
       })
       .catch(() => {
@@ -55,6 +53,12 @@ class Device extends React.Component<DeviceProps> {
         });
       });
   }
+
+  readJWT = async () => {
+    await this.props.dispatch({
+      type: 'user/readJWT',
+    });
+  };
 
   setEditModalVisible = (isOpen: boolean) => {
     this.props.dispatch({
@@ -89,7 +93,7 @@ class Device extends React.Component<DeviceProps> {
       type: 'deviceStore/updateListDevice',
       payload: {
         updateDevicesState: this.props.deviceStore.updateDevicesState,
-        listId: this.props.deviceStore.selectedDevices.map((device) => {
+        listId: this.props.deviceStore.selectedDevices?.map((device) => {
           return device.id;
         }),
       },
@@ -110,7 +114,12 @@ class Device extends React.Component<DeviceProps> {
   };
 
   render() {
-    const { selectedDevices, listDevices, getDevicesParam } = this.props.deviceStore;
+    const {
+      selectedDevices,
+      listDevices,
+      getDevicesParam,
+      editMultipleDevicesDrawerVisible,
+    } = this.props.deviceStore;
 
     const { selectedRowKeys } = this.state;
     // console.log(selectedDevices);
@@ -183,14 +192,15 @@ class Device extends React.Component<DeviceProps> {
                     </Select>
                     <FilterTwoTone style={{ fontSize: `2em` }} />
                     <Button
-                      disabled={!(selectedDevices.length > 0)}
+                      disabled={selectedDevices && !(selectedDevices?.length > 0)}
                       onClick={async () => {
                         this.setMultipleUpdateMode(true);
 
-                        await this.props.dispatch({
-                          type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                          payload: true,
-                        });
+                        // await this.props.dispatch({
+                        //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+                        //   payload: true,
+                        // });
+                        this.setEditModalVisible(true);
                       }}
                     >
                       Edit Multiple Devices
@@ -217,8 +227,7 @@ class Device extends React.Component<DeviceProps> {
             pagination={{
               total: this.props.deviceStore.totalItem,
               pageSize: 10,
-              current: this.state.currentPage,
-              showSizeChanger: false,
+              current: getDevicesParam?.pageNumber ? getDevicesParam?.pageNumber + 1 : 1,
               onChange: async (current) => {
                 this.setState({
                   tableLoading: true,
@@ -228,7 +237,7 @@ class Device extends React.Component<DeviceProps> {
                     type: 'deviceStore/getDevices',
                     payload: {
                       ...getDevicesParam,
-                      pageNumber: current,
+                      pageNumber: current - 1,
                     },
                   })
                   .then(() => {
@@ -375,8 +384,8 @@ class Device extends React.Component<DeviceProps> {
           <DrawerUpdateMultipleDevice {...this.props}></DrawerUpdateMultipleDevice>
         </Drawer> */}
 
-        {/* {editMultipleDevicesDrawerVisible && <UpdateDeviceFormDrawer {...this.props} />} */}
-        <UpdateDeviceFormDrawer {...this.props} />
+        {editMultipleDevicesDrawerVisible && <UpdateDeviceFormDrawer {...this.props} />}
+        {/* <UpdateDeviceFormDrawer {...this.props} /> */}
       </>
     );
   }

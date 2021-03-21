@@ -1,5 +1,5 @@
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Button, Menu, Spin } from 'antd';
+import { Avatar, Button, Menu } from 'antd';
 import React from 'react';
 import type { ConnectProps } from 'umi';
 import { history, connect } from 'umi';
@@ -34,6 +34,16 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
       return;
     }
 
+    if (key === 'wallet') {
+      history.push(`/profile/wallet`);
+      return;
+    }
+
+    if (key === 'profile') {
+      history.push(`/profile/infor`);
+      return;
+    }
+
     history.push(`/account/${key}`);
   };
 
@@ -50,7 +60,7 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
     const menuHeaderDropdown = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         {menu && (
-          <Menu.Item key="basic">
+          <Menu.Item key="profile">
             <UserOutlined />
             Profile
           </Menu.Item>

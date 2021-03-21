@@ -83,13 +83,13 @@
                 routes: [
                    {
                     path: '/',
-                    redirect: '/profile/basic',
+                    redirect: '/profile/infor',
                   },
                   {
-                    name: 'basic',
+                    name: 'information',
                     icon: 'smile',
-                    path: '/profile/basic',
-                    component: './profile/basic',
+                    path: '/profile/infor',
+                    component: './profile/information',
                   },
                   {
                     name: 'wallet',

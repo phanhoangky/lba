@@ -1,13 +1,11 @@
 import {
   DeleteDevice,
-  GetDeviceParams,
   GetDevices,
   GetListTypes,
   UpdateDevice,
-  UpdateDeviceParams,
   UpdateListDevices,
-  UpdateListDevicesParam,
 } from '@/services/DevicePageService';
+import type {GetDeviceParams, UpdateDeviceParams, UpdateListDevicesParam} from '@/services/DevicePageService';
 import moment from 'moment';
 import type { Effect, Reducer } from 'umi';
 
@@ -35,18 +33,18 @@ export type DeviceType = {
 };
 
 export type DeviceModelState = {
-  selectedDevice: DeviceType;
-  listDevices: any[];
-  listDeviceTypes: any[];
-  editDeviceVisible: boolean;
-  selectedDevices: any[];
-  editMultipleDevicesDrawerVisible: boolean;
+  selectedDevice?: DeviceType;
+  listDevices?: any[];
+  listDeviceTypes?: any[];
+  editDeviceVisible?: boolean;
+  selectedDevices?: any[];
+  editMultipleDevicesDrawerVisible?: boolean;
 
   // Update Drawer Model State
-  isUpdateMultiple: boolean;
-  updateDevicesState: UpdateListDevicesParam;
-  getDevicesParam: GetDeviceParams;
-  totalItem: number;
+  isUpdateMultiple?: boolean;
+  updateDevicesState?: UpdateListDevicesParam;
+  getDevicesParam?: GetDeviceParams;
+  totalItem?: number;
 };
 
 export type DeviceModelType = {
@@ -121,7 +119,7 @@ const DeviceModel: DeviceModelType = {
       isSort: false,
       orderBy: '',
       pageLimitItem: 10,
-      pageNumber: 1,
+      pageNumber: 0,
       name: '',
       typeId: null,
     },
@@ -190,7 +188,7 @@ const DeviceModel: DeviceModelType = {
         isSort: false,
         orderBy: '',
         pageLimitItem: 10,
-        pageNumber: 1,
+        pageNumber: 0,
         name: '',
         typeId: null,
       };
@@ -369,7 +367,7 @@ const DeviceModel: DeviceModelType = {
         ...state,
         listDeviceTypes: payload,
         updateDevicesState: {
-          ...state.updateDevicesState,
+          ...state?.updateDevicesState,
           currentType: payload[0].typeName,
         },
       };
@@ -384,6 +382,7 @@ const DeviceModel: DeviceModelType = {
           endDate: moment(Date.now()).format('YYYY-MM-DD'),
           idList: [],
           minBid: 0,
+          isPublished: false,
           startDate: moment(Date.now()).format('YYYY-MM-DD'),
           timeFilter: [
             '0',
@@ -442,6 +441,8 @@ const DeviceModel: DeviceModelType = {
           pageLimitItem: 10,
           pageNumber: 1,
           searchValue: '',
+          name: "",
+          typeId: ""
         },
       };
     },

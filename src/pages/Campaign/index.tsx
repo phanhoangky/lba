@@ -18,6 +18,7 @@ import type {
   Dispatch,
   LocationModelState,
   ScenarioModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../Location';
@@ -30,6 +31,7 @@ export type CampaignScreenProps = {
   deviceStore: DeviceModelState;
   scenarios: ScenarioModelState;
   location: LocationModelState;
+  user: UserModelState;
 };
 
 export const CAMPAIGN = 'campaign';
@@ -42,13 +44,15 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           this.callGetListDeviceTypes().then(() => {
             this.callGetListScenario().then(() => {
               this.setListScenarios(
-                this.props.scenarios.listScenario.filter(
+                this.props.scenarios.listScenario?.filter(
                   (scenario) => scenario.scenarioItems.length > 0,
                 ),
               ).then(() => {
                 this.callGetListLocations().then(() => {
                   this.readJWT().then(() => {
-                    this.setCampaignTableLoading(false);
+                    this.callGetFee().then(() => {
+                      this.setCampaignTableLoading(false);
+                    });
                   });
                 });
               });
@@ -61,10 +65,23 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       });
   };
 
+  callGetFee = async () => {
+    const res = await this.props.dispatch({
+      type: `${CAMPAIGN}/getListFee`,
+      payload: {},
+    });
+
+    console.log('====================================');
+    console.log(res);
+    console.log('====================================');
+    await this.setAddNewCampaignModal({
+      fees: res.result,
+    });
+  };
+
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
 
@@ -124,7 +141,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   setListScenarioWithAtLeastOneItems = async () => {
     const { listScenario } = this.props.scenarios;
 
-    const newList = listScenario.filter((s) => s.scenarioItems.length > 0);
+    const newList = listScenario?.filter((s) => s.scenarioItems.length > 0);
     console.log('====================================');
     console.log('Filter Scenarios', listScenario, newList);
     console.log('====================================');

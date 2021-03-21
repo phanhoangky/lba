@@ -9,13 +9,14 @@ export type PlaylistItem = {
   key: string;
   id: string;
   mediaSrcId: string;
+  mediaSrc?: any;
   playlistId: string;
   displayOrder: number,
   duration: number,
-  modifyBy: string;
-  createBy: string;
-  createTime: string;
-  modifyTime: string,
+  modifyBy?: string;
+  createBy?: string;
+  createTime?: string;
+  modifyTime?: string,
   isActive: true,
   url: string;
   title: string,
@@ -56,6 +57,8 @@ export type PlayListModelState = {
     isLoading: boolean,
     currentPage: number,
     totalItem: number,
+    playingUrl?: string;
+    playlingMediaType?: string;
   }
   minDuration: number,
   maxDuration: number,
@@ -75,7 +78,8 @@ export type PlayListModelState = {
 
   selectedMedia: FileType,
 
-  newPlaylistItemParam: AddNewPlaylistItemParam
+  newPlaylistItemParam: AddNewPlaylistItemParam,
+
 }
 
 export type PlaylistModel = {
@@ -231,7 +235,7 @@ const PlaylistStore: PlaylistModel = {
       id: "",
     },
 
-    totalDuration: 10*60,
+    totalDuration: 0,
     minDuration: 10,
     maxDuration: 60 * 4,
     currentNewItemDuration: 10
