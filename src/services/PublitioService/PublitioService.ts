@@ -35,6 +35,7 @@ export type CreateFileParam = {
   tags: string;
   fileId: string;
   isSigned: number;
+  mediaSrcId: string;
 }
 
 export type UpdateFileParam = {

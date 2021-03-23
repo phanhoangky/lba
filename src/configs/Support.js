@@ -30,7 +30,7 @@ export default class EtherService {
       console.log('====================================');
       balance = await this.contract.balanceOf(this.wallet.address);
     }
-    return balance.toString();
+    return ethers.BigNumber.from(balance);
   }
 
   async createAccount() {
@@ -79,7 +79,7 @@ export default class EtherService {
 
     };
     const callPromise = await this.contract.addDocument(`0x${hash_id}`, overrides);
-    const receipt = await this.provider.getTransactionReceipt(callPromise.hash);
+    const receipt = await callPromise.wait();
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
@@ -96,7 +96,7 @@ export default class EtherService {
     };
 
     const signDocumentFunction = await this.contract.signDocument(`0x${hash_id}`, overrides);
-    const receipt = await this.provider.getTransactionReceipt(signDocumentFunction.hash);
+    const receipt = await signDocumentFunction.wait();
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
@@ -114,7 +114,7 @@ export default class EtherService {
     const total = ethers.BigNumber.from(ethers.utils.parseEther(numberOfToken)).add(ethers.BigNumber.from(ethers.utils.parseEther(numberOfToken)));
     if (balance.ite(total)) {
       const callPromise = await this.contract.transfer(receiverAddress, numberOfToken);
-      const receipt = await this.provider.getTransactionReceipt(callPromise.hash);
+      const receipt = await callPromise.wait();
       if (receipt.status !== 1) {
         return "Fail On Server Blockchain";
       }
@@ -126,7 +126,7 @@ export default class EtherService {
 
 
   async createCampaign(campaignId, totalWithFee, totalBudget, remainBudget, feeCancel) {
-    if (totalBudget < 1000000) return "Not Enough Total Budget";
+    if (totalBudget < 100000) return "Not Enough Total Budget";
     if (totalWithFee < totalBudget) return "Wrong Total With Fee";
     if (remainBudget <= 100000) return "Not Enough Remain Budget";
     let minFeeCancel = feeCancel;
@@ -138,9 +138,9 @@ export default class EtherService {
     const feeCancelBN = ethers.BigNumber.from(minFeeCancel.toString());
 
     const balance = await this.getBalance();
-    if (totalWithFeeBN < balance) {
+    if (totalWithFeeBN.lt(balance)) {
       const approveToTransferMoney = await this.contract.approve(this.evn.SUPPORT_ADDRESS, totalWithFeeBN);
-      let receipt = await this.provider.getTransactionReceipt(approveToTransferMoney.hash);
+      let receipt = await approveToTransferMoney.wait();
       if (receipt.status === 1) {
         const overrides = {
           gasLimit: ethers.BigNumber.from("2000000"),
@@ -148,12 +148,14 @@ export default class EtherService {
         };
 
         const createCampaign = await this.contract.createCampaign(campaignId, totalWithFeeBN, totalBudgetBN, remainBudgetBN, feeCancelBN, overrides);
-        receipt = await this.provider.getTransactionReceipt(createCampaign.hash);
+        receipt = await createCampaign.wait();
         if (receipt.status !== 1) {
           return "Fail On Server Blockchain Create Campaign";
         }
-      } else {
-        return "Fail On Server Blockchain Approve Money";
+        console.log('====================================');
+        console.log("Create Campaign  >>>", createCampaign.hash);
+        console.log('====================================');
+        return createCampaign.hash;
       }
     } else {
       return "Not Enough Money";
@@ -167,12 +169,22 @@ export default class EtherService {
   }
 
   async cancelCampaign(id) {
+    console.log("Cancel Campaign >>>", id);
     const cancelCampaign = await this.contract.cancelCampaign(id);
-    const receipt = await this.provider.getTransactionReceipt(cancelCampaign.hash);
+    console.log("Cancel Campaign >>>", cancelCampaign);
+    const receipt = await cancelCampaign.wait();
+    console.log("Cancel Campaign Receipi>>>", receipt);
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain Create Campaign";
     }
-    return "Success";
+    const { feeCancel } = await this.getCampaignById(id);
+    console.log("Cancel Campaign feeCancel>>>", feeCancel.toString());
+
+    const result = {
+      hash: cancelCampaign.hash, feeCancel: feeCancel.toString()
+    }
+    console.log("Cancel Campaign result>>>", result);
+    return result;
   }
 
 }

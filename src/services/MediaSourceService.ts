@@ -22,6 +22,7 @@ export type AddNewMediaParam = {
   securityHash?: string;
   fileId: string;
   isSigned: number;
+  mediaSrcId: string;
 }
 
 export type EditMediaParam = {

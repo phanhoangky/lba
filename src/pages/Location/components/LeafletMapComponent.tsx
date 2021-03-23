@@ -50,7 +50,7 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
         });
       }
       if (mapComponent.circle) {
-        mapComponent.circle.setLatLng([e.latlng.lat, e.latlng.lng]);
+        mapComponent.circle.setLatLng([e.latlng.lat, e.latlng.lng]).redraw();
       }
       const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
 
@@ -74,7 +74,7 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
         const { createCampaignParam } = this.props.campaign;
         if (createCampaignParam.radius > 0) {
           if (mapComponent.map) {
-            if (!mapComponent.circle) {
+            if (!mapComponent.circle && createCampaignParam.radius !== 0) {
               const circle = L.circle(e.latlng, {
                 radius: createCampaignParam.radius * 1000,
               });
@@ -84,8 +84,9 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
               });
             } else {
               mapComponent.circle
-                .setLatLng([data.lat, data.lon])
-                .setRadius(createCampaignParam.radius * 1000);
+                ?.setLatLng([data.lat, data.lon])
+                .setRadius(createCampaignParam.radius * 1000)
+                .redraw();
             }
           }
         }
@@ -94,9 +95,9 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
           address: data.display_name,
         });
 
-        await this.setAddNewCampaignModal({
-          address: data.display_name,
-        });
+        // await this.setAddNewCampaignModal({
+        //   address: data.display_name,
+        // });
       }
     });
     this.setMapComponent({
@@ -158,4 +159,4 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(LeafletMapComponent);
+export default connect((state: any) => ({ ...state }))(LeafletMapComponent);

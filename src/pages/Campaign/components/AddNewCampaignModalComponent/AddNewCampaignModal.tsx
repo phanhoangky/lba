@@ -1,18 +1,7 @@
 import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
-import {
-  Col,
-  DatePicker,
-  Divider,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Row,
-  Select,
-  Space,
-} from 'antd';
+import { Col, DatePicker, Divider, Form, Input, InputNumber, Row, Select, Space } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import L from 'leaflet';
 import moment from 'moment';
@@ -27,10 +16,11 @@ import type {
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-import { CAMPAIGN } from '..';
-import SelectScenarioPart from './AddNewCampaignModalComponent/SelectScenarioPart';
-import FilterDate from './FilterDate';
-import TimeFilterComponent from './TimeFilterComponent';
+import { CAMPAIGN } from '../..';
+import SelectScenarioPart from './SelectScenarioPart';
+import FilterDate from '../FilterDate';
+import TimeFilterComponent from '../TimeFilterComponent';
+import { v4 as uuidv4 } from 'uuid';
 
 export type AddNewCampaignModalProps = {
   dispatch: Dispatch;
@@ -41,7 +31,7 @@ export type AddNewCampaignModalProps = {
   user: UserModelState;
 };
 
-class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
+export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
   /**
    *
    */
@@ -185,39 +175,51 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
   };
 
   okConfirm = async () => {
-    // const { addNewCampaignModal } = this.props.campaign;
-    // const { currentUser } = this.props.user;
+    const { addNewCampaignModal } = this.props.campaign;
+    const { currentUser } = this.props.user;
     if (this.formRef.current) {
-      this.formRef.current.validateFields().then(async (values) => {
-        // console.log('====================================');
-        // console.log(values);
-        // console.log('====================================');
-        this.setAddNewCampaignModal({
-          isLoading: true,
-        })
-          .then(() => {
-            // currentUser.ether.createCampaign();
-            this.createNewCampaign(values).then(() => {
-              this.callGetListCampaigns().then(() => {
-                this.setAddNewCampaignModal({
-                  visible: false,
-                  isLoading: false,
+      this.formRef.current
+        .validateFields()
+        .then(async (values) => {
+          this.setAddNewCampaignModal({
+            isLoading: true,
+          })
+            .then(async () => {
+              const campaignId = uuidv4();
+              if (currentUser) {
+                const hash = await currentUser.ether?.createCampaign(
+                  campaignId,
+                  addNewCampaignModal.fees.totalFee,
+                  values.budget,
+                  addNewCampaignModal.fees.remainFee,
+                  addNewCampaignModal.fees.cancelFee,
+                );
+                await this.createNewCampaign({
+                  campaignId,
+                  hash,
+                  ...values,
+                }).then(() => {
+                  this.callGetListCampaigns().then(() => {
+                    this.setAddNewCampaignModal({
+                      visible: false,
+                      isLoading: false,
+                    });
+                  });
                 });
+              }
+            })
+            .catch(() => {
+              this.setAddNewCampaignModal({
+                visible: false,
+                isLoading: false,
               });
             });
-          })
-          .catch(() => {
-            this.setAddNewCampaignModal({
-              visible: false,
-              isLoading: false,
-            });
-          });
-      });
-      // .catch((info) => {
-      //   console.log('====================================');
-      //   console.log(info);
-      //   console.log('====================================');
-      // });
+        })
+        .catch((info) => {
+          console.log('====================================');
+          console.log('Info >>>', info);
+          console.log('====================================');
+        });
     }
   };
 
@@ -237,7 +239,7 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
     if (mapComponent.map) {
       if (mapComponent.circle) {
         // mapComponent.circle.remove();
-        mapComponent.circle.setRadius(radius);
+        mapComponent.circle.setRadius(radius).redraw();
       } else if (mapComponent.marker) {
         const { marker } = mapComponent;
         const circle = L.circle(marker.getLatLng(), { radius }).addTo(mapComponent.map);
@@ -250,14 +252,10 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
 
   handleAutoCompleteSearch = async (coordination: string, address: string) => {
     if (address !== '') {
-      // const { createCampaignParam } = this.props.campaign;
+      const { createCampaignParam } = this.props.campaign;
       const { mapComponent } = this.props.location;
-      // const { data } = await forwardGeocoding(address);
       const lat = Number.parseFloat(coordination.split('-')[0]);
       const lon = Number.parseFloat(coordination.split('-')[1]);
-      // console.log('====================================');
-      // console.log('Add New Campaign >>>>', coordination, address);
-      // console.log('====================================');
 
       if (mapComponent.map) {
         mapComponent.map.setView([lat, lon]);
@@ -270,6 +268,20 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
           L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
           await this.setMapComponent({
             marker,
+          });
+        }
+
+        if (mapComponent.circle) {
+          mapComponent.circle.setLatLng([lat, lon]).redraw();
+
+          if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
+            mapComponent.circle.setRadius(createCampaignParam.radius * 1000);
+          }
+        } else if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
+          const circle = L.circle([lat, lon]).setRadius(createCampaignParam.radius);
+          circle.addTo(mapComponent.map);
+          await this.setMapComponent({
+            circle,
           });
         }
       }
@@ -304,9 +316,9 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
       const remainFee = e - e * addNewCampaignModal.fees.Supplier;
       const cancelFee = e * addNewCampaignModal.fees.CancelCampagin;
       const newFes = {
-        newSupplier: remainFee,
-        newAdvertiser: totalFee,
-        newCancelCampagin: cancelFee,
+        remainFee,
+        totalFee,
+        cancelFee,
       };
       this.setAddNewCampaignModal({
         fees: {
@@ -318,6 +330,14 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
       // console.log(addNewCampaignModal.fees, newFes);
       // console.log('====================================');
     }
+  };
+
+  handleAfterClose = async () => {
+    this.clearCreateNewCampaignParam().then(() => {
+      this.selectScenario(undefined).then(() => {
+        this.resetMap();
+      });
+    });
   };
   formRef = React.createRef<FormInstance<any>>();
   datePickerRef = React.createRef<any>();
@@ -335,12 +355,13 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
     console.log('====================================');
     return (
       <>
-        <Modal
+        {/* <Modal
           width="80%"
           title="Add New Campaign"
           visible={addNewCampaignModal.visible}
           centered
           destroyOnClose={true}
+          confirmLoading={addNewCampaignModal.isLoading}
           closable={false}
           afterClose={() => {
             this.clearCreateNewCampaignParam().then(() => {
@@ -357,7 +378,8 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
               visible: false,
             });
           }}
-        >
+        > */}
+        {addNewCampaignModal.visible && (
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
             <Form.Item
               name="budget"
@@ -375,9 +397,9 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
                 }}
               />
             </Form.Item>
-            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.newSupplier}</Row>
-            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.newAdvertiser}</Row>
-            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.newCancelCampagin}</Row>
+            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
+            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee}</Row>
+            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row>
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={4} />
             </Form.Item>
@@ -477,36 +499,7 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
             <Row style={{ textAlign: 'center' }}>
               <Col span={24}>Choose Scenario</Col>
             </Row>
-            {/* <List
-              bordered
-              dataSource={listScenario}
-              pagination={{
-                current: getListScenarioParam?.pageNumber ? getListScenarioParam.pageNumber + 1 : 1,
-                pageSize: getListScenarioParam?.pageLimitItem
-                  ? getListScenarioParam?.pageLimitItem
-                  : 10,
-                total: totalItem,
-                onChange: (e) => {
-                  this.callGetListScenario({
-                    pageNumber: e - 1,
-                  });
-                },
-              }}
-              renderItem={(item) => (
-                <List.Item
-                  style={item.isSelected ? { backgroundColor: '#b3def5', transition: 'ease' } : {}}
-                  onClick={async () => {
-                    this.setCreateNewCampaignParam({
-                      scenarioId: item.id,
-                    }).then(() => {
-                      this.selectScenario(item.id);
-                    });
-                  }}
-                >
-                  <List.Item.Meta title={item.title} description={item.description} />
-                </List.Item>
-              )}
-            ></List> */}
+
             <SelectScenarioPart {...this.props} />
 
             <Row style={{ textAlign: 'center' }}>
@@ -517,6 +510,7 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
               <Col span={14}>
                 <AutoCompleteComponent
                   {...this.props}
+                  di
                   inputValue={createCampaignParam.address}
                   value={{
                     label: createCampaignParam.address,
@@ -539,7 +533,8 @@ class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
               </Col>
             </Row>
           </Form>
-        </Modal>
+        )}
+        {/* </Modal> */}
       </>
     );
   }

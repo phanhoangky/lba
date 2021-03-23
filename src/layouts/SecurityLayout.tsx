@@ -5,7 +5,7 @@ import { Redirect, connect } from 'umi';
 import { stringify } from 'querystring';
 // import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
-import { ConnectState } from '@/models/connect';
+import type { ConnectState } from '@/models/connect';
 
 type SecurityLayoutProps = {
   dispatch: Dispatch;
@@ -27,17 +27,17 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
       isReady: true,
     });
 
-    const { dispatch } = this.props;
-    // this.readJWT();
-    if (dispatch) {
-      await dispatch({
-        type: 'user/readJWT',
-      });
+    this.setState({});
+    await this.readJWT();
 
-      // await dispatch({
-      //   type: 'user/getCurrentUser',
-      // });
-    }
+    // await dispatch({
+    //   type: 'user/getCurrentUser',
+    // });
+  };
+  readJWT = async () => {
+    await this.props.dispatch({
+      type: 'user/readJWT',
+    });
   };
 
   render() {
@@ -50,6 +50,10 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
     });
     console.log('====================================');
     console.log('Security Layout >>>>', currentUser);
+    console.log('Is Ready >>>>', isReady);
+    console.log('Is Login >>>>', isLogin);
+    console.log('Loading >>>>', loading);
+    console.log('path >>>>', window.location.pathname);
     console.log('====================================');
     if ((!isLogin && loading) || !isReady) {
       return <PageLoading />;
@@ -63,5 +67,5 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
 
 export default connect(({ user, loading }: ConnectState) => ({
   currentUser: user.currentUser,
-  loading: loading.models.global,
+  loading: loading.global,
 }))(SecurityLayout);

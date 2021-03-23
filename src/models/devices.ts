@@ -193,7 +193,10 @@ const DeviceModel: DeviceModelType = {
         typeId: null,
       };
       if (payload) {
-        param = payload;
+        param = {
+          ...param,
+          ...payload
+        };
       }
 
       yield put({
@@ -216,7 +219,6 @@ const DeviceModel: DeviceModelType = {
           createTime: moment(d.createTime).format('YYYY-MM-DD'),
         };
       });
-      console.log(res);
       yield put({
         type: 'setDevices',
         payload: res,

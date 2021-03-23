@@ -46,10 +46,9 @@ class ProfileInformation extends React.Component<ProfileInformationProps> {
           <Descriptions.Item label="Telephone">1810000000</Descriptions.Item>
           <Descriptions.Item label="Email">{currentUser && currentUser.email}</Descriptions.Item>
           <Descriptions.Item label="Your Balance">
-            {currentUser && currentUser.balance}
+            {currentUser && currentUser.balance?.toString()}
           </Descriptions.Item>
         </Descriptions>
-        ,
       </PageContainer>
     );
   }

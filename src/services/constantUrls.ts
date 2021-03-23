@@ -15,6 +15,7 @@ export enum CONSTANTS_LBA {
   LOCATION_URL = `locations`,
   MOMO_PAYMENT_URL = 'momopayment',
   FEE_URL = "fee",
+  TRANSACTION_URL = "transactions",
 }
 
 export enum CONSTANTS_TOMO {

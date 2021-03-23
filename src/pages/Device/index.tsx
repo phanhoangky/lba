@@ -37,10 +37,7 @@ class Device extends React.Component<DeviceProps> {
     this.setState({
       tableLoading: true,
     });
-    this.props
-      .dispatch({
-        type: 'deviceStore/getDevices',
-      })
+    this.callGetListDevices()
       .then(() => {
         this.readJWT();
         this.setState({
@@ -53,6 +50,16 @@ class Device extends React.Component<DeviceProps> {
         });
       });
   }
+
+  callGetListDevices = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/getDevices',
+      payload: {
+        ...this.props.deviceStore.getDevicesParam,
+        ...param,
+      },
+    });
+  };
 
   readJWT = async () => {
     await this.props.dispatch({
@@ -75,17 +82,21 @@ class Device extends React.Component<DeviceProps> {
   };
 
   onUpdateDevice = async () => {
-    await this.props.dispatch({
-      type: 'deviceStore/updateDevice',
-      payload: this.props.deviceStore.selectedDevice,
-    });
+    this.props
+      .dispatch({
+        type: 'deviceStore/updateDevice',
+        payload: this.props.deviceStore.selectedDevice,
+      })
+      .then(() => {
+        this.callGetListDevices();
+      });
 
-    await this.props.dispatch({
-      type: 'deviceStore/getDevices',
-      payload: {
-        ...this.props.deviceStore.getDevicesParam,
-      },
-    });
+    // await this.props.dispatch({
+    //   type: 'deviceStore/getDevices',
+    //   payload: {
+    //     ...this.props.deviceStore.getDevicesParam,
+    //   },
+    // });
   };
 
   onUpdateMultipleDevices = async () => {
@@ -105,12 +116,14 @@ class Device extends React.Component<DeviceProps> {
     this.setState({
       selectedRowKeys: [],
     });
-    await this.props.dispatch({
-      type: 'deviceStore/getDevices',
-      payload: {
-        ...this.props.deviceStore.getDevicesParam,
-      },
-    });
+
+    await this.callGetListDevices();
+    // await this.props.dispatch({
+    //   type: 'deviceStore/getDevices',
+    //   payload: {
+    //     ...this.props.deviceStore.getDevicesParam,
+    //   },
+    // });
   };
 
   render() {
@@ -153,38 +166,57 @@ class Device extends React.Component<DeviceProps> {
                     <Input.Search
                       placeholder="Input search text"
                       onSearch={(value) => {
-                        this.props.dispatch({
-                          type: 'deviceStore/getDevices',
-                          payload: {
-                            ...getDevicesParam,
-                            name: value.trim(),
-                          },
+                        this.callGetListDevices({
+                          name: value.trim(),
                         });
+                        // this.props.dispatch({
+                        //   type: 'deviceStore/getDevices',
+                        //   payload: {
+                        //     ...getDevicesParam,
+
+                        //   },
+                        // });
                       }}
                       enterButton
                     />
                     <ControlTwoTone style={{ fontSize: `2em` }} />
                     <Select
                       style={{ width: 120 }}
-                      defaultValue="CreateTime"
+                      // defaultValue="CreateTime"
                       onChange={async (value) => {
-                        await this.props.dispatch({
-                          type: 'deviceStore/getDevices',
-                          payload:
-                            value === 'CreateTime'
-                              ? {
-                                  ...getDevicesParam,
-                                  isSort: true,
-                                  isDescending: true,
-                                  orderBy: value,
-                                }
-                              : {
-                                  ...getDevicesParam,
-                                  isSort: true,
-                                  isDescending: false,
-                                  orderBy: value,
-                                },
+                        this.setState({
+                          tableLoading: true,
                         });
+                        this.callGetListDevices({
+                          orderBy: value,
+                        })
+                          .then(() => {
+                            this.setState({
+                              tableLoading: false,
+                            });
+                          })
+                          .catch(() => {
+                            this.setState({
+                              tableLoading: false,
+                            });
+                          });
+                        // await this.props.dispatch({
+                        //   type: 'deviceStore/getDevices',
+                        //   payload:
+                        //     value === 'CreateTime'
+                        //       ? {
+                        //           ...getDevicesParam,
+                        //           isSort: true,
+                        //           isDescending: true,
+                        //           orderBy: value,
+                        //         }
+                        //       : {
+                        //           ...getDevicesParam,
+                        //           isSort: true,
+                        //           isDescending: false,
+                        //           orderBy: value,
+                        //         },
+                        // });
                       }}
                     >
                       <Select.Option value="CreateTime">Newest</Select.Option>
@@ -232,14 +264,9 @@ class Device extends React.Component<DeviceProps> {
                 this.setState({
                   tableLoading: true,
                 });
-                this.props
-                  .dispatch({
-                    type: 'deviceStore/getDevices',
-                    payload: {
-                      ...getDevicesParam,
-                      pageNumber: current - 1,
-                    },
-                  })
+                this.callGetListDevices({
+                  pageNumber: current - 1,
+                })
                   .then(() => {
                     this.setState({
                       tableLoading: false,
@@ -250,7 +277,19 @@ class Device extends React.Component<DeviceProps> {
                       tableLoading: false,
                     });
                   });
-                this.setState({ currentPage: current });
+                // this.props
+                //   .dispatch({
+                //     type: 'deviceStore/getDevices',
+                //     payload: {
+                //       ...getDevicesParam,
+                //       pageNumber: current - 1,
+                //     },
+                //   })
+                //   .then(() => {
+
+                //   })
+
+                // this.setState({ currentPage: current });
               },
             }}
           >

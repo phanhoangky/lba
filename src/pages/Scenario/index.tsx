@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Table } from 'antd';
+import { Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -19,7 +19,7 @@ import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioSer
 import { cloneDeep } from 'lodash';
 import AddNewScenarioFormModal from './components/AddNewScenarioFormModal';
 import EditScenarioFormDrawer from './components/EditScenarioFormDrawer';
-import { PlusSquareTwoTone } from '@ant-design/icons';
+import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
 
 type ScenarioProps = {
   dispatch: Dispatch;
@@ -265,16 +265,7 @@ class Scenario extends React.Component<ScenarioProps> {
           title={() => {
             return (
               <>
-                <Button
-                  onClick={() => {
-                    this.setAddNewScenarioModal({
-                      visible: true,
-                    });
-                  }}
-                  icon={<PlusSquareTwoTone />}
-                >
-                  Add New Scenario
-                </Button>
+                <ScenarioTableHeaderComponent {...this.props} />
               </>
             );
           }}

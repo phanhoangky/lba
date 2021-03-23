@@ -129,8 +129,8 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
 
     return (
       <Modal
-        visible={addNewScenarioModal.visible}
-        confirmLoading={addNewScenarioModal.isLoading}
+        visible={addNewScenarioModal?.visible}
+        confirmLoading={addNewScenarioModal?.isLoading}
         closable={false}
         width={'70%'}
         destroyOnClose={true}
@@ -143,7 +143,7 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           disabled: listLayouts.every((layouts) => !layouts.isSelected),
         }}
         onOk={async () => {
-          if (addNewScenarioModal.currentStep === 0) {
+          if (addNewScenarioModal?.currentStep === 0) {
             this.formRef.current?.validateFields().then((values) => {
               this.onCreateScenarios(values);
               this.setAddNewScenarioModal({
@@ -166,7 +166,7 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
         <Animated
           animationIn="zoomIn"
           animationOut="fadeOut"
-          isVisible={addNewScenarioModal.currentStep === 0}
+          isVisible={addNewScenarioModal?.currentStep === 0}
         >
           <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
             <TitleStep {...this.props} />

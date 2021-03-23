@@ -614,9 +614,12 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                           <Button
                             onClick={() => {
                               // this.selectPlaylistItem(record);
+                              console.log('====================================');
+                              console.log(record);
+                              console.log('====================================');
                               this.setEditPlaylistDrawer({
                                 playingUrl: record.url,
-                                playlingMediaType: record.mediaSrc.type.name,
+                                playlingMediaType: record.typeName,
                               });
                             }}
                           >
@@ -672,7 +675,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                     onClick={() => {
                       this.setEditPlaylistDrawer({
                         playingUrl: record.urlPreview,
-                        playlingMediaType: record.type.name,
+                        playlingMediaType: record.type.name ? record.type.name : record.typeName,
                       });
                     }}
                   >

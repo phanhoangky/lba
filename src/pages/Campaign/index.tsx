@@ -1,14 +1,19 @@
+import type {
+  DeleteCampaignParam,
+  UpdateCampaignParam,
+} from '@/services/CampaignService/CampaignService';
+import { CAMPAIGN_STATUS } from '@/services/CampaignService/CampaignService';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import {
   CaretRightOutlined,
   DeleteTwoTone,
   ExclamationCircleOutlined,
   EyeTwoTone,
-  PlusSquareTwoTone,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Modal, Space, Table } from 'antd';
+import { Button, Modal, Space, Switch, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
+import { isObject } from 'lodash';
 import moment from 'moment';
 import * as React from 'react';
 import type {
@@ -22,7 +27,8 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../Location';
-import AddNewCampaignModal from './components/AddNewCampaignModal';
+import { AddNewCampaignModal } from './components/AddNewCampaignModalComponent/AddNewCampaignModal';
+import { CampaignTableHeaderComponent } from './components/CampaignTableHeaderComponent';
 import ViewCampaignDetailDrawer from './components/ViewCampaignDetailDrawer';
 
 export type CampaignScreenProps = {
@@ -39,25 +45,16 @@ export const CAMPAIGN = 'campaign';
 export class CampaignScreen extends React.Component<CampaignScreenProps> {
   componentDidMount = () => {
     this.setCampaignTableLoading(true)
-      .then(() => {
-        this.callGetListCampaigns().then(() => {
-          this.callGetListDeviceTypes().then(() => {
-            this.callGetListScenario().then(() => {
-              this.setListScenarios(
-                this.props.scenarios.listScenario?.filter(
-                  (scenario) => scenario.scenarioItems.length > 0,
-                ),
-              ).then(() => {
-                this.callGetListLocations().then(() => {
-                  this.readJWT().then(() => {
-                    this.callGetFee().then(() => {
-                      this.setCampaignTableLoading(false);
-                    });
-                  });
-                });
-              });
-            });
-          });
+      .then(async () => {
+        Promise.all([
+          this.callGetListCampaigns(),
+          this.callGetListDeviceTypes(),
+          this.callGetListScenario(),
+          this.callGetListLocations(),
+          this.readJWT(),
+          this.callGetFee(),
+        ]).then(() => {
+          this.setCampaignTableLoading(false);
         });
       })
       .catch(() => {
@@ -65,15 +62,18 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       });
   };
 
+  setListScenarios = async (list: any) => {
+    await this.props.dispatch({
+      type: `scenarios/setListScenarioReducer`,
+      payload: list,
+    });
+  };
+
   callGetFee = async () => {
     const res = await this.props.dispatch({
       type: `${CAMPAIGN}/getListFee`,
       payload: {},
     });
-
-    console.log('====================================');
-    console.log(res);
-    console.log('====================================');
     await this.setAddNewCampaignModal({
       fees: res.result,
     });
@@ -111,16 +111,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     });
   };
 
-  setGetListCampaignParam = async (param: any) => {
-    await this.props.dispatch({
-      type: `${CAMPAIGN}/setGetListCampaignParamReducer`,
-      payload: {
-        ...this.props.campaign.getListCampaignParam,
-        ...param,
-      },
-    });
-  };
-
   setCampaignTableLoading = async (loading: boolean) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setCampaignTableLoadingReducer`,
@@ -138,30 +128,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     });
   };
 
-  setListScenarioWithAtLeastOneItems = async () => {
-    const { listScenario } = this.props.scenarios;
-
-    const newList = listScenario?.filter((s) => s.scenarioItems.length > 0);
-    console.log('====================================');
-    console.log('Filter Scenarios', listScenario, newList);
-    console.log('====================================');
-    await this.setListScenarios(newList);
-  };
-
-  setListScenarios = async (list: any) => {
-    await this.props.dispatch({
-      type: `scenarios/setListScenarioReducer`,
-      payload: list,
-    });
-  };
-
-  setTableLoading = async (loading: boolean) => {
-    await this.props.dispatch({
-      type: `${CAMPAIGN}/setCampaignTableLoadingReducer`,
-      payload: loading,
-    });
-  };
-
   setAddNewCampaignModal = async (modal: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setAddNewCampaignModalReducer`,
@@ -172,11 +138,14 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     });
   };
 
-  deleteCampaign = async (id: string) => {
+  deleteCampaign = async (param: DeleteCampaignParam) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/deleteCampaign`,
-      payload: id,
+      payload: param,
     });
+    console.log('====================================');
+    console.log(param);
+    console.log('====================================');
   };
 
   deleteCampaignConfirm = async (item: Campaign) => {
@@ -187,12 +156,30 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       centered: true,
       onOk: () => {
         this.setCampaignTableLoading(true)
-          .then(() => {
-            this.deleteCampaign(item.id).then(() => {
-              this.callGetListCampaigns().then(() => {
-                this.setCampaignTableLoading(false);
-              });
-            });
+          .then(async () => {
+            const { currentUser } = this.props.user;
+
+            if (currentUser) {
+              const result = await currentUser.ether?.cancelCampaign(item.id);
+              console.log('====================================');
+              console.log(result);
+              if (isObject(result)) {
+                const deleteParam: DeleteCampaignParam = {
+                  id: item.id,
+                  hash: result.hash,
+                  value: result.feeCancel,
+                };
+                console.log('====================================');
+                console.log(result);
+                console.log(deleteParam);
+                console.log('====================================');
+                this.deleteCampaign(deleteParam).then(() => {
+                  this.callGetListCampaigns().then(() => {
+                    this.setCampaignTableLoading(false);
+                  });
+                });
+              }
+            }
           })
           .catch(() => {
             this.setCampaignTableLoading(false);
@@ -263,12 +250,39 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       },
     });
   };
+
+  updateCampaign = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/updateCampaign`,
+      payload: param,
+    });
+  };
+
+  handleChangeStatusCampaign = async (item: any, status: number) => {
+    this.setCampaignTableLoading(true)
+      .then(() => {
+        const updateParam: UpdateCampaignParam = {
+          id: item.id,
+          status,
+        };
+        this.updateCampaign(updateParam).then(() => {
+          this.callGetListCampaigns();
+          this.setCampaignTableLoading(false);
+        });
+      })
+      .catch(() => {
+        this.setCampaignTableLoading(false);
+      });
+  };
+
+  addNewModalRef = React.createRef<AddNewCampaignModal>();
   render() {
     const {
       listCampaign,
       campaignsTableLoading,
       getListCampaignParam,
       totalCampaigns,
+      addNewCampaignModal,
     } = this.props.campaign;
     return (
       <>
@@ -298,22 +312,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                   });
               },
             }}
-            title={() => (
-              <>
-                <Button
-                  onClick={async () => {
-                    this.setListScenarioWithAtLeastOneItems().then(() => {
-                      this.setAddNewCampaignModal({
-                        visible: true,
-                      });
-                    });
-                  }}
-                  icon={<PlusSquareTwoTone />}
-                >
-                  Add New Campaign
-                </Button>
-              </>
-            )}
+            title={() => <CampaignTableHeaderComponent {...this.props} />}
           >
             <Column key="description" dataIndex="description" title="Description"></Column>
             <Column
@@ -331,7 +330,25 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               }}
             ></Column>
             <Column key="budget" dataIndex="budget" title="Budget"></Column>
-            <Column key="maxBid" dataIndex="maxBid" title="MaxBid"></Column>
+            <Column
+              key="status"
+              title="Status"
+              render={(record) => {
+                return (
+                  <>
+                    <Switch
+                      checked={record.status === 0}
+                      onChange={(e) => {
+                        this.handleChangeStatusCampaign(
+                          record,
+                          e ? CAMPAIGN_STATUS.CREATE : CAMPAIGN_STATUS.PAUSE,
+                        );
+                      }}
+                    ></Switch>
+                  </>
+                );
+              }}
+            ></Column>
             <Column
               key="action"
               title="Action"
@@ -367,7 +384,31 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               }}
             ></Column>
           </Table>
-          <AddNewCampaignModal {...this.props} />
+          <Modal
+            width="80%"
+            title="Add New Campaign"
+            visible={addNewCampaignModal.visible}
+            centered
+            destroyOnClose={true}
+            confirmLoading={addNewCampaignModal.isLoading}
+            closable={false}
+            afterClose={() => {
+              this.addNewModalRef.current?.handleAfterClose();
+            }}
+            onOk={() => {
+              // this.okConfirm();
+              this.addNewModalRef.current?.okConfirm();
+            }}
+            onCancel={() => {
+              this.setAddNewCampaignModal({
+                visible: false,
+              });
+            }}
+          >
+            {addNewCampaignModal.visible && (
+              <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
+            )}
+          </Modal>
           <ViewCampaignDetailDrawer {...this.props} />
         </PageContainer>
       </>

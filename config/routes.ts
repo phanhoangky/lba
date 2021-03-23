@@ -34,12 +34,12 @@
                 icon: 'smile',
                 component: './Welcome',
               },
-              {
-                name: 'list.brand-list',
-                icon: 'TagsFilled',
-                path: '/brand',
-                component: './Brand',
-              },
+              // {
+              //   name: 'list.brand-list',
+              //   icon: 'TagsFilled',
+              //   path: '/brand',
+              //   component: './Brand',
+              // },
               {
                 name: 'list.location-list',
                 icon: 'RadarChartOutlined',
@@ -80,24 +80,25 @@
                 path: "/profile",
                 name: "profile",
                 icon: "profile",
-                routes: [
-                   {
-                    path: '/',
-                    redirect: '/profile/infor',
-                  },
-                  {
-                    name: 'information',
-                    icon: 'smile',
-                    path: '/profile/infor',
-                    component: './profile/information',
-                  },
-                  {
-                    name: 'wallet',
-                    icon: 'smile',
-                    path: '/profile/wallet',
-                    component: './profile/wallet',
-                  },
-                ]
+                component: './profile/wallet'
+                // routes: [
+                //    {
+                //     path: '/',
+                //     redirect: '/profile/infor',
+                //   },
+                //   {
+                //     name: 'information',
+                //     icon: 'smile',
+                //     path: '/profile/infor',
+                //     component: './profile/information',
+                //   },
+                //   {
+                //     name: 'wallet',
+                //     icon: 'smile',
+                //     path: '/profile/wallet',
+                //     component: './profile/wallet',
+                //   },
+                // ]
               },
               {
                 component: './404',

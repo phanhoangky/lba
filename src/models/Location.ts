@@ -35,30 +35,30 @@ export type Location = {
 
 
 export type LocationModelState = {
-  listLocations: Location[];
-  totalItem: number;
-  locationTableLoading: boolean;
+  listLocations?: Location[];
+  totalItem?: number;
+  locationTableLoading?: boolean;
 
-  selectedLocation: Location;
+  selectedLocation?: Location;
 
-  getListLocationParam: GetLocationParam;
+  getListLocationParam?: GetLocationParam;
 
-  createLocationParam: CreateLocationParam;
+  createLocationParam?: CreateLocationParam;
 
-  addNewLocationModal: {
+  addNewLocationModal?: {
     visible: boolean;
     isLoading: boolean;
     addressSearchBoxLoading: boolean;
   };
 
-  editLocationModal: {
+  editLocationModal?: {
     visible: boolean;
     isLoading: boolean;
   },
 
-  addressSuggestList: any[];
+  addressSuggestList?: any[];
 
-  mapComponent: {
+  mapComponent?: {
     map?: L.Map;
     marker?: L.Marker;
     circle?: L.Circle;

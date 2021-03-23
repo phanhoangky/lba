@@ -1,14 +1,8 @@
 import { CONSTANTS_LBA } from '../constantUrls';
 import ApiHelper from "@/apis/LBA_API"
+import type { BaseGetRequest } from '../BaseRequest';
 
-export type GetListPlaylistParam = {
-  isSort: boolean;
-  isDescending: boolean;
-  isPaging: boolean,
-  pageNumber: number;
-  pageLimitItem: number;
-  orderBy: string;
-}
+export type GetListPlaylistParam = BaseGetRequest
 
 export type AddNewPlaylistParam = {
   title: string,

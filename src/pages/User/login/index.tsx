@@ -1,19 +1,14 @@
-import {
-  AlipayCircleOutlined,
-  LockOutlined,
-  TaobaoCircleOutlined,
-  UserOutlined,
-  WeiboCircleOutlined,
-} from '@ant-design/icons';
-import { Alert, Button, Space, Tabs } from 'antd';
-import React, { useState } from 'react';
-import ProForm, { ProFormCheckbox, ProFormText } from '@ant-design/pro-form';
-import { useIntl, connect, FormattedMessage } from 'umi';
+import { GoogleCircleFilled } from '@ant-design/icons';
+import { Button, Space, Image, Divider } from 'antd';
+import React from 'react';
+import ProForm from '@ant-design/pro-form';
+import { connect } from 'umi';
 // import { getFakeCaptcha } from '@/services/login';
 import type { Dispatch } from 'umi';
 import type { StateType } from '@/models/login';
 // import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';
+import lba from '@/assets/lba.png';
 
 import styles from './index.less';
 
@@ -88,6 +83,16 @@ const Login: React.FC<LoginProps> = (props) => {
         // }}
         submitter={false}
       >
+        <div
+          style={{
+            width: '80%',
+            height: 'auto',
+            margin: '0 auto',
+          }}
+        >
+          <Image src={lba} preview={false} width={'100%'} />
+        </div>
+        <Divider></Divider>
         <Button
           style={{
             width: '100%',
@@ -101,31 +106,21 @@ const Login: React.FC<LoginProps> = (props) => {
             handleSubmitGoogle();
           }}
         >
-          Login with Google
+          <Space wrap direction="horizontal">
+            <GoogleCircleFilled
+              style={{
+                fontSize: '1.2em',
+              }}
+            />
+            Login with Google
+          </Space>
         </Button>
         <div
           style={{
             marginBottom: 24,
           }}
-        >
-          <ProFormCheckbox noStyle name="autoLogin">
-            <FormattedMessage id="pages.login.rememberMe" defaultMessage="自动登录" />
-          </ProFormCheckbox>
-          <a
-            style={{
-              float: 'right',
-            }}
-          >
-            <FormattedMessage id="pages.login.forgotPassword" defaultMessage="忘记密码" />
-          </a>
-        </div>
+        ></div>
       </ProForm>
-      <Space className={styles.other}>
-        <FormattedMessage id="pages.login.loginWith" defaultMessage="其他登录方式" />
-        <AlipayCircleOutlined className={styles.icon} />
-        <TaobaoCircleOutlined className={styles.icon} />
-        <WeiboCircleOutlined className={styles.icon} />
-      </Space>
     </div>
   );
 };

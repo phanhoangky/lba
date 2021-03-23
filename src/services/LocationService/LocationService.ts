@@ -2,7 +2,9 @@ import ApiHelper from "@/apis/LBA_API";
 import type { BaseGetRequest } from "../BaseRequest";
 import { CONSTANTS_LBA } from "../constantUrls";
 
-export type GetLocationParam = BaseGetRequest;
+export type GetLocationParam = BaseGetRequest & {
+  id?: string;
+};
 
 export type CreateLocationParam = {
   name: string;

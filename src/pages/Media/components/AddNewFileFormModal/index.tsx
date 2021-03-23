@@ -4,6 +4,7 @@ import { Form, Input, Modal, Select, Skeleton, Switch, Upload } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import { Keccak } from 'sha3';
+import { v4 as uuidv4 } from 'uuid';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
@@ -51,14 +52,12 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
           this.setAddNewFileModal({
             isLoading: true,
           }).then(() => {
+            // const { currentUser } = this.props.user;
             this.addNewFile(values).then(() => {
               this.setAddNewFileModal({
                 isLoading: false,
               });
             });
-            // this.setAddNewFileModal({
-            //   isLoading: false,
-            // });
           });
         })
         .catch(() => {
@@ -77,7 +76,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
 
-    await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
+    // const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
     const param: CreateFileParam = {
       ...createFileParam,
       ...values,
@@ -86,6 +85,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
       accountId: currentUser?.id,
       fileId: createFileParam.fileId,
       isSigned: createFileParam.isSigned,
+      mediaSrcId: uuidv4(),
     };
     await this.props.dispatch({
       type: 'media/createFile',
@@ -165,7 +165,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         }}
       >
         {/* <AddNewModal {...this.props}></AddNewModal> */}
-        <Form ref={this.formRef} name="add_new_file_form">
+        <Form ref={this.formRef} name="add_new_file_form" layout="vertical">
           <Form.Item
             name="upload"
             label="Upload"

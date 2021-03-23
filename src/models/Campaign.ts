@@ -1,5 +1,5 @@
 import type { BaseGetRequest } from "@/services/BaseRequest";
-import { createCampaign, deleteCampaign, getListCampaigns } from "@/services/CampaignService/CampaignService";
+import { createCampaign, deleteCampaign, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
 import type { CreateCampaignParam } from '@/services/CampaignService/CampaignService';
 import moment from "moment";
 import type { Effect, Reducer } from "umi";
@@ -61,6 +61,7 @@ export type CampaignModelStore = {
     createCampaign: Effect;
     deleteCampaign: Effect;
     getListFee: Effect;
+    updateCampaign: Effect;
   };
 
   reducers: {
@@ -178,10 +179,14 @@ const CampaignStore: CampaignModelStore = {
       yield call(deleteCampaign, payload);
     },
 
-    *getListFee({ payload }, { call, put }) {
+    *getListFee({ payload }, { call }) {
       const res = yield call(GetFees, payload);
       
       return res;
+    },
+
+    *updateCampaign({ payload }, { call }) {
+      yield call(updateCampaign, payload);
     }
   },
 

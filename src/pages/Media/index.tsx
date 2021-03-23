@@ -35,6 +35,7 @@ import {
   FolderOpenTwoTone,
   FormOutlined,
   HomeTwoTone,
+  PlusSquareTwoTone,
   SettingTwoTone,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
@@ -70,6 +71,16 @@ class Media extends React.Component<MediaSourceProps> {
             });
           });
         });
+        // Promise.all([
+        //   this.getCurrentUser(),
+        //   this.readJWT(),
+        //   this.callGetListFolders(),
+        //   this.callGetListMedia(),
+        //   this.callGetListMediaType(),
+        //   this.addBreadscrumbHome(),
+        // ]).then(() => {
+        //   this.setListLoading(false);
+        // });
       })
       .catch(() => {
         this.setListLoading(false);
@@ -586,6 +597,7 @@ class Media extends React.Component<MediaSourceProps> {
                         });
                       }}
                     >
+                      <PlusSquareTwoTone />
                       Add New Folder
                     </Button>
                     <Button
@@ -595,6 +607,7 @@ class Media extends React.Component<MediaSourceProps> {
                         });
                       }}
                     >
+                      <PlusSquareTwoTone />
                       Add New File
                     </Button>
                     <Select
@@ -628,7 +641,7 @@ class Media extends React.Component<MediaSourceProps> {
                         Approved
                       </Select.Option>
                     </Select>
-                    <Select
+                    {/* <Select
                       defaultValue={'Current Files'}
                       value={
                         getListFileParam.filter_privacy === 'public'
@@ -648,7 +661,7 @@ class Media extends React.Component<MediaSourceProps> {
                       <Select.Option key={'Private'} value={'private'}>
                         Deleted Files
                       </Select.Option>
-                    </Select>
+                    </Select> */}
                   </Space>
                 </div>
               </Col>
@@ -728,9 +741,6 @@ class Media extends React.Component<MediaSourceProps> {
               total: totalItem,
               pageSize: getListFileParam.limit,
               onChange: async (e) => {
-                console.log('====================================');
-                console.log();
-                console.log('====================================');
                 if (searchListMediaParam.title === '') {
                   if (getListFileParam.limit) {
                     await this.setListLoading(true);

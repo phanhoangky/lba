@@ -75,6 +75,16 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
     });
   };
 
+  callGetListDevices = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/getDevices',
+      payload: {
+        ...this.props.deviceStore.getDevicesParam,
+        ...param,
+      },
+    });
+  };
+
   onUpdateDevice = async (values: any) => {
     console.log('====================================');
     console.log(values);
@@ -88,13 +98,13 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
         endDate: values.startEnd[1],
       },
     });
-
-    await this.props.dispatch({
-      type: 'deviceStore/getDevices',
-      payload: {
-        ...this.props.deviceStore.getDevicesParam,
-      },
-    });
+    this.callGetListDevices();
+    // await this.props.dispatch({
+    //   type: 'deviceStore/getDevices',
+    //   payload: {
+    //     ...this.props.deviceStore.getDevicesParam,
+    //   },
+    // });
   };
 
   handleRemoveDateFilter = (index: any) => {
@@ -215,14 +225,19 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
                       payload: selectedDevice?.id,
                     });
 
-                    await this.props.dispatch({
-                      type: 'deviceStore/getDevices',
-                      payload: getDevicesParam,
-                    });
-                    await this.props.dispatch({
-                      type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                      payload: false,
-                    });
+                    this.callGetListDevices()
+                      .then(() => {
+                        this.props.dispatch({
+                          type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+                          payload: false,
+                        });
+                      })
+                      .catch(() => {
+                        this.props.dispatch({
+                          type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+                          payload: false,
+                        });
+                      });
                   }}
                 >
                   Delete Device

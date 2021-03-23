@@ -24,7 +24,7 @@ export type AddNewLocationModalProps = {
   campaign: CampaignModelState;
 };
 
-class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
+export class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
   formRef = React.createRef<FormInstance<any>>();
 
   setAddNewLocationModal = async (modal: any) => {
@@ -232,7 +232,7 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
                   // });
                 }}
               >
-                {listDeviceTypes.map((type: any) => {
+                {listDeviceTypes?.map((type: any) => {
                   return (
                     <Select.Option key={type.id} value={type.id}>
                       {type.typeName}
@@ -280,12 +280,12 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
                   label: createLocationParam.address,
                   value: `${createLocationParam.longitude}-${createLocationParam.latitude}`,
                 }}
-                onInputChange={(e) => {
+                onInputChange={(e: any) => {
                   this.setCreateLocationParam({
                     address: e,
                   });
                 }}
-                handleOnSelect={(e, address) => {
+                handleOnSelect={(e: any, address: any) => {
                   this.handleAutoCompleteSearch(e, address);
                 }}
               />
@@ -302,4 +302,4 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewLocationModal);
+export default connect((state: any) => ({ ...state }))(AddNewLocationModal);

@@ -3,13 +3,13 @@ import { history } from "umi";
 
 
 const ApiHelper = axios.create({
-  baseURL: "https://location-base-advertising.herokuapp.com/api/v1/",
-  // baseURL: "https://localhost:44333/api/v1",
+  // baseURL: "https://location-base-advertising.herokuapp.com/api/v1/",
+  baseURL: "https://localhost:44333/api/v1",
   headers: {
     "Accept": "application/json",
     'Access-Control-Allow-Origin':  '*',
-    // 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-    // 'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
   },
   withCredentials: true,
 })

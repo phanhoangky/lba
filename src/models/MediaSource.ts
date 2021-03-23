@@ -155,6 +155,7 @@ const MediaSourceStore: MediaSourceModel = {
       tags: "",
       fileId: "",
       isSigned: 0,
+      mediaSrcId: ""
     },
 
     createFolderParam: {
@@ -332,7 +333,8 @@ const MediaSourceStore: MediaSourceModel = {
         description: payload.description,
         typeId: payload.typeId,
         securityHash: payload.securityHash,
-        isSigned: payload.isSigned
+        isSigned: payload.isSigned,
+        mediaSrcId: payload.mediaSrcId,
       }
       
       yield call(AddNewMediaSource, newParam);

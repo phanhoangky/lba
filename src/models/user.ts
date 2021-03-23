@@ -73,26 +73,50 @@ const UserModel: UserModelType = {
     *readJWT(_, { put }) {
       const token = yield localStorage.getItem("JWT");
       // const res = yield call(CreateFolder, { name: token.user_id });
-      
+
       if (token) {
         const decode = yield jwt_decode(token);
-        const ether = yield EtherService.build();
-        console.log("Token >>>>", token, decode);
-        yield ether.readKeyStoreJson(decode.WalletKeyStore, decode.user_id)
-        yield ether.initContracts();
-        const balance = yield ether.getBalance();
-        yield put({
-          type: "saveCurrentUser",
-          payload: {
-            id: decode.Id,
-            name: decode.name,
-            avatar: decode.picture,
-            email: decode.email,
-            userid: decode.user_id,
-            balance,
-            ether
-          }
-        })
+          console.log('====================================');
+          console.log(decode);
+          console.log('====================================');
+        if (decode.claims) {
+          
+          const ether = yield EtherService.build();
+          console.log("Token >>>>", token, decode);
+          yield ether.readKeyStoreJson(decode.claims.WalletKeyStore, decode.claims.user_id)
+          yield ether.initContracts();
+          const balance = yield ether.getBalance();
+          yield put({
+            type: "saveCurrentUser",
+            payload: {
+              id: decode.claims.Id,
+              name: decode.claims.name,
+              avatar: decode.claims.picture,
+              email: decode.claims.email,
+              userid: decode.claims.user_id,
+              balance,
+              ether
+            }
+          })
+        } else {
+          const ether = yield EtherService.build();
+          console.log("Token >>>>", token, decode);
+          yield ether.readKeyStoreJson(decode.WalletKeyStore, decode.user_id)
+          yield ether.initContracts();
+          const balance = yield ether.getBalance();
+          yield put({
+            type: "saveCurrentUser",
+            payload: {
+              id: decode.Id,
+              name: decode.name,
+              avatar: decode.picture,
+              email: decode.email,
+              userid: decode.user_id,
+              balance,
+              ether
+            }
+          })
+        }
       }
     },
 
@@ -141,6 +165,7 @@ const UserModel: UserModelType = {
           walletKeyStore,
           walletAddress: ether.wallet.address,
           rootFolderId: res.id,
+          newUser: firebaseResponse.additionalUserInfo.isNewUser
         }
         // console.log(param);
         
