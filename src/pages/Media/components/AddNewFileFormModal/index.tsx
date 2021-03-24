@@ -76,7 +76,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
     console.log('====================================');
-    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether);
+    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether); 
     console.log('====================================');
     const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
     if (signature && !signature.toLowerCase().includes('fail')) {

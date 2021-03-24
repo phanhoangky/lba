@@ -338,7 +338,7 @@ const MediaSourceStore: MediaSourceModel = {
         mediaSrcId: payload.mediaSrcId,
       }
       
-      yield call(addDocument, newParam);
+      yield call(AddNewMediaSource, newParam);
     },
 
     *createFolder({ payload }, { call, put }) {
