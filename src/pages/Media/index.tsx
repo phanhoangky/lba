@@ -18,7 +18,7 @@ import {
   Alert,
 } from 'antd';
 import * as React from 'react';
-import type { Dispatch, FolderType, MediaSourceModelState, UserTestModelState } from 'umi';
+import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 // import VideoThumbnail from 'react-video-thumbnail';
 // import ReactPlayer from 'react-player';
@@ -35,6 +35,7 @@ import {
   FolderOpenTwoTone,
   FormOutlined,
   HomeTwoTone,
+  PlusSquareTwoTone,
   SettingTwoTone,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
@@ -46,7 +47,7 @@ import EditMediaFormDrawer from './components/EditMediaFormDrawer';
 export type MediaSourceProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 class Media extends React.Component<MediaSourceProps> {
@@ -70,6 +71,16 @@ class Media extends React.Component<MediaSourceProps> {
             });
           });
         });
+        // Promise.all([
+        //   this.getCurrentUser(),
+        //   this.readJWT(),
+        //   this.callGetListFolders(),
+        //   this.callGetListMedia(),
+        //   this.callGetListMediaType(),
+        //   this.addBreadscrumbHome(),
+        // ]).then(() => {
+        //   this.setListLoading(false);
+        // });
       })
       .catch(() => {
         this.setListLoading(false);
@@ -78,17 +89,17 @@ class Media extends React.Component<MediaSourceProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };
   addBreadscrumbHome = async () => {
-    const { userTest } = this.props;
+    const { user } = this.props;
     await this.props.dispatch({
       type: 'media/setBreadScrumbReducer',
       payload: [
         {
-          id: userTest.currentUser.rootFolderId,
+          id: user.currentUser?.rootFolderId,
           name: 'Home',
           path: '',
           parent_id: '',
@@ -108,12 +119,12 @@ class Media extends React.Component<MediaSourceProps> {
 
   getCurrentUser = async () => {
     const res = await this.props.dispatch({
-      type: 'userTest/getCurrentUser',
+      type: 'user/getCurrentUser',
       payload: '',
     });
 
     await this.setCreateFileParam({
-      accountId: this.props.userTest.currentUser.id,
+      accountId: this.props.user.currentUser?.id,
     });
 
     await this.setGetListFilesParam({
@@ -185,11 +196,12 @@ class Media extends React.Component<MediaSourceProps> {
       },
     });
   };
-  async callGetListMediaType() {
+
+  callGetListMediaType = async () => {
     await this.props.dispatch({
       type: 'media/getListMediaType',
     });
-  }
+  };
 
   setListMediaLoading = async (isLoading: boolean) => {
     await this.props.dispatch({
@@ -270,13 +282,15 @@ class Media extends React.Component<MediaSourceProps> {
 
   addNewFile = async () => {
     const { createFileParam } = this.props.media;
-    const { ether } = this.props.userTest.currentUser;
+    const { currentUser } = this.props.user;
     const hash = new Keccak(256);
     const byte = await createFileParam.file.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
-    if (createFileParam.isSigned) {
-      await ether?.addDocument(security, createFileParam.isSigned);
+    if (currentUser) {
+      if (createFileParam.isSigned) {
+        await currentUser.ether?.addDocument(security, createFileParam.isSigned);
+      }
     }
 
     await this.props.dispatch({
@@ -285,7 +299,7 @@ class Media extends React.Component<MediaSourceProps> {
         ...createFileParam,
         securityHash: security,
         public_id: security,
-        accountId: this.props.userTest.currentUser.id,
+        accountId: this.props.user.currentUser?.id,
         fileId: createFileParam.fileId,
         isSigned: createFileParam.isSigned,
       },
@@ -325,14 +339,16 @@ class Media extends React.Component<MediaSourceProps> {
         //   isSigned: 1,
         // });
         this.setListLoading(true)
-          .then(() => {
-            const { currentUser } = this.props.userTest;
+          .then(async () => {
+            const { currentUser } = this.props.user;
+
+            const signature = await currentUser?.ether?.signDocument(item.securityHash);
             console.log('====================================');
-            console.log(item, currentUser.ether);
+            console.log(item, currentUser?.ether, signature);
             console.log('====================================');
-            currentUser.ether?.signDocument(item.securityHash);
             this.updateFile({
               isSigned: 1,
+              hash: signature,
             }).then(() => {
               this.callGetListMedia().then(() => {
                 this.setListLoading(false);
@@ -347,23 +363,23 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  showConfirmCreateNewFile = async () => {
-    this.setAddNewFileModal({
-      isLoading: true,
-    })
-      .then(() => {
-        this.addNewFile().then(() => {
-          this.setAddNewFileModal({
-            isLoading: false,
-          });
-        });
-      })
-      .catch(() => {
-        this.setAddNewFileModal({
-          isLoading: false,
-        });
-      });
-  };
+  // showConfirmCreateNewFile = async () => {
+  //   this.setAddNewFileModal({
+  //     isLoading: true,
+  //   })
+  //     .then(() => {
+  //       this.addNewFile().then(() => {
+  //         this.setAddNewFileModal({
+  //           isLoading: false,
+  //         });
+  //       });
+  //     })
+  //     .catch(() => {
+  //       this.setAddNewFileModal({
+  //         isLoading: false,
+  //       });
+  //     });
+  // };
 
   createFolder = async () => {
     const { breadScrumb, createFolderParam } = this.props.media;
@@ -489,10 +505,7 @@ class Media extends React.Component<MediaSourceProps> {
       listLoading,
       listFolder,
       breadScrumb,
-      // addNewFileModal,
-      // addNewFolderModal,
-      // editFileDrawer,
-      // selectedFile,
+      editFileDrawer,
       searchListMediaParam,
     } = this.props.media;
 
@@ -543,38 +556,75 @@ class Media extends React.Component<MediaSourceProps> {
           <Skeleton active loading={listLoading}>
             <Row>
               <Col span={12}>
-                <Input.Search
-                  value={searchListMediaParam.title}
-                  onChange={async (e) => {
-                    this.setSearchListMediaParam({
-                      title: e.target.value,
-                    });
-                  }}
-                  onSearch={async (e) => {
-                    await this.setListLoading(true);
-                    if (e !== '') {
-                      this.callSearchListMedia({
-                        title: e,
-                      })
+                <Space>
+                  <Input.Search
+                    style={{
+                      width: '100%',
+                    }}
+                    enterButton
+                    value={searchListMediaParam.title}
+                    onChange={async (e) => {
+                      this.setSearchListMediaParam({
+                        title: e.target.value,
+                      });
+                    }}
+                    onSearch={async (e) => {
+                      await this.setListLoading(true);
+                      if (e !== '') {
+                        this.callSearchListMedia({
+                          title: e,
+                        })
+                          .then(() => {
+                            this.setListLoading(false);
+                          })
+                          .catch(() => {
+                            this.setListLoading(false);
+                          });
+                      } else {
+                        this.callGetListMedia({
+                          folder: breadScrumb[breadScrumb.length - 1].id,
+                        })
+                          .then(() => {
+                            this.setListLoading(false);
+                          })
+                          .catch(() => {
+                            this.setListLoading(false);
+                          });
+                      }
+                    }}
+                  />
+                  <Select
+                    style={{ width: '100px' }}
+                    defaultValue={-1}
+                    value={searchListMediaParam.isSigned}
+                    onChange={(e) => {
+                      this.setListLoading(true)
                         .then(() => {
-                          this.setListLoading(false);
+                          this.callSearchListMedia({
+                            isSigned: e === -1 ? undefined : e,
+                          }).then(() => {
+                            this.setListLoading(false);
+                          });
                         })
                         .catch(() => {
                           this.setListLoading(false);
                         });
-                    } else {
-                      this.callGetListMedia({
-                        folder: breadScrumb[breadScrumb.length - 1].id,
-                      })
-                        .then(() => {
-                          this.setListLoading(false);
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <Select.Option key={'all'} value={-1}>
+                      All
+                    </Select.Option>
+                    <Select.Option key={'Not Sign'} value={0}>
+                      Not Sign
+                    </Select.Option>
+                    <Select.Option key={'Waiting'} value={1}>
+                      Waiting
+                    </Select.Option>
+                    <Select.Option key={'Approved'} value={2}>
+                      Approved
+                    </Select.Option>
+                  </Select>
+                </Space>
               </Col>
               <Col span={12}>
                 <div style={{ textAlign: 'right' }}>
@@ -586,6 +636,7 @@ class Media extends React.Component<MediaSourceProps> {
                         });
                       }}
                     >
+                      <PlusSquareTwoTone />
                       Add New Folder
                     </Button>
                     <Button
@@ -595,40 +646,11 @@ class Media extends React.Component<MediaSourceProps> {
                         });
                       }}
                     >
+                      <PlusSquareTwoTone />
                       Add New File
                     </Button>
-                    <Select
-                      style={{ width: '100px' }}
-                      defaultValue={-1}
-                      value={searchListMediaParam.isSigned}
-                      onChange={(e) => {
-                        this.setListLoading(true)
-                          .then(() => {
-                            this.callSearchListMedia({
-                              isSigned: e === -1 ? undefined : e,
-                            }).then(() => {
-                              this.setListLoading(false);
-                            });
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      }}
-                    >
-                      <Select.Option key={'all'} value={-1}>
-                        All
-                      </Select.Option>
-                      <Select.Option key={'Not Sign'} value={0}>
-                        Not Sign
-                      </Select.Option>
-                      <Select.Option key={'Waiting'} value={1}>
-                        Waiting
-                      </Select.Option>
-                      <Select.Option key={'Approved'} value={2}>
-                        Approved
-                      </Select.Option>
-                    </Select>
-                    <Select
+
+                    {/* <Select
                       defaultValue={'Current Files'}
                       value={
                         getListFileParam.filter_privacy === 'public'
@@ -648,7 +670,7 @@ class Media extends React.Component<MediaSourceProps> {
                       <Select.Option key={'Private'} value={'private'}>
                         Deleted Files
                       </Select.Option>
-                    </Select>
+                    </Select> */}
                   </Space>
                 </div>
               </Col>
@@ -728,9 +750,6 @@ class Media extends React.Component<MediaSourceProps> {
               total: totalItem,
               pageSize: getListFileParam.limit,
               onChange: async (e) => {
-                console.log('====================================');
-                console.log();
-                console.log('====================================');
                 if (searchListMediaParam.title === '') {
                   if (getListFileParam.limit) {
                     await this.setListLoading(true);
@@ -777,10 +796,10 @@ class Media extends React.Component<MediaSourceProps> {
                           style={{ width: '100%', height: '100%' }}
                           cover={
                             item.type.name.toLowerCase().includes('image') ? (
-                              <Image src={item.urlPreview} alt="image" height={300} />
+                              <Image src={item.urlPreview} alt="image" height={200} />
                             ) : (
                               <HoverVideoPlayer
-                                style={{ height: 300 }}
+                                style={{ height: 200 }}
                                 videoSrc={item.urlPreview}
                                 restartOnPaused
                               />
@@ -838,97 +857,8 @@ class Media extends React.Component<MediaSourceProps> {
 
           {/** Edit File */}
           {/* ========================================================================================================================== */}
-          {/* <Drawer
-            closable={false}
-            destroyOnClose={true}
-            visible={editFileDrawer.visible}
-            width={700}
-            onClose={async () => {
-              await this.setEditFileDrawer({
-                visible: false,
-              });
-            }}
-            title={
-              <>
-                <div>{selectedFile.title}</div>
-              </>
-            }
-            footer={
-              <>
-                <div style={{ textAlign: 'right' }}>
-                  <Popconfirm
-                    title={`Remove ${selectedFile.title}`}
-                    visible={this.state.removeConfirmVisible}
-                    onConfirm={async () => {
-                      await this.setListLoading(true);
+          {editFileDrawer.visible && <EditMediaFormDrawer {...this.props} />}
 
-                      await this.setEditFileDrawer({
-                        visible: false,
-                      });
-                      this.removeMedia(selectedFile)
-                        .then(() => {
-                          this.callGetListMedia().then(() => {
-                            this.setListLoading(false).then(() => {
-                              this.setState({
-                                removeConfirmVisible: false,
-                              });
-                            });
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false).then(() => {
-                            this.setState({
-                              removeConfirmVisible: false,
-                            });
-                          });
-                        });
-                    }}
-                    okButtonProps={{ loading: this.props.media.listLoading }}
-                    onCancel={() => {
-                      this.setState({
-                        removeConfirmVisible: false,
-                      });
-                    }}
-                  >
-                    <Button
-                      danger
-                      onClick={() => {
-                        this.setState({
-                          removeConfirmVisible: true,
-                        });
-                      }}
-                    >
-                      <DeleteTwoTone twoToneColor={'#f64842'} /> Remove
-                    </Button>
-                  </Popconfirm>
-                  <Button
-                    type="primary"
-                    onClick={async () => {
-                      await this.setEditFileDrawer({
-                        visible: false,
-                      });
-                      this.setListLoading(true)
-                        .then(() => {
-                          this.updateFile().then(() => {
-                            this.callGetListMedia().then(() => {
-                              this.setListLoading(false);
-                            });
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }}
-                  >
-                    <EditOutlined /> Update Media
-                  </Button>
-                </div>
-              </>
-            }
-          >
-            <EditMediaDrawer {...this.props}></EditMediaDrawer>
-          </Drawer> */}
-          <EditMediaFormDrawer {...this.props} />
           {/* ========================================================================================================================== */}
         </PageContainer>
       </>
@@ -936,4 +866,4 @@ class Media extends React.Component<MediaSourceProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(Media);
+export default connect((state: any) => ({ ...state }))(Media);

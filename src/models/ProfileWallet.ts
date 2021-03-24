@@ -3,6 +3,7 @@ import type { GetListTransactionParam } from '@/services/TOMOService';
 import { diffTwoDate } from "@/utils/utils";
 import moment from "moment";
 import type { Effect, Reducer } from "umi";
+import type { GetLinkTransferParam } from "@/services/MomopaymentService";
 
 export type TransactionType = {
   address: string;
@@ -21,10 +22,25 @@ export type TransactionType = {
 }
 
 export type ProfileWalletModelState = {
-  listTransactions: TransactionType[],
-  getTransactionsParam: GetListTransactionParam;
-  balance: number;
-  totalTransaction: number;
+  listTransactions?: TransactionType[],
+  getTransactionsParam?: GetListTransactionParam;
+  balance?: number;
+  totalTransaction?: number;
+  transTableLoading?: boolean;
+  QRModal?: {
+    visible: boolean;
+    isLoading: boolean; //
+    dataQRCode?: string;
+  },
+
+  depositModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
+  linkTransferParam?: GetLinkTransferParam;
+
+  refreshBalanceLoading?: boolean,
 }
 
 
@@ -42,7 +58,12 @@ export type WalletStoreType = {
     setListTransactionsReducer: Reducer<ProfileWalletModelState>,
     setCallTransactionsParamReducer: Reducer<ProfileWalletModelState>,
     setBalance: Reducer<ProfileWalletModelState>,
-    setTotalTransaction: Reducer<ProfileWalletModelState>
+    setTotalTransaction: Reducer<ProfileWalletModelState>;
+    setTransTableLoadingReducer: Reducer<ProfileWalletModelState>;
+    setQRModalReducer: Reducer<ProfileWalletModelState>;
+    setDepositModalReducer: Reducer<ProfileWalletModelState>;
+    setRefreshBalanceLoadingReducer: Reducer<ProfileWalletModelState>;
+
   }
 
 }
@@ -61,7 +82,19 @@ const WalletModel: WalletStoreType = {
     balance: 0,
 
     totalTransaction: 0,
-    
+    transTableLoading: false,
+
+    QRModal: {
+      visible: false,
+      isLoading: false,
+    },
+
+    depositModal: {
+      isLoading: false,
+      visible: false,
+    },
+
+    refreshBalanceLoading: false,
   },
 
   effects: {
@@ -124,6 +157,34 @@ const WalletModel: WalletStoreType = {
       return {
         ...state,
         totalTransaction: payload
+      }
+    },
+
+    setTransTableLoadingReducer(state, { payload }) {
+      return {
+        ...state,
+        transTableLoading: payload
+      }
+    },
+
+    setQRModalReducer(state, { payload }) {
+      return {
+        ...state,
+        QRModal: payload
+      }
+    },
+
+    setDepositModalReducer(state, { payload }) {
+      return {
+        ...state,
+        depositModal: payload
+      }
+    },
+
+    setRefreshBalanceLoadingReducer(state, { payload }) {
+      return {
+        ...state,
+        refreshBalanceLoading: payload
       }
     }
   }

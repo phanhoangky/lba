@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Divider, List, Card, Image, Steps } from 'antd';
+import { Modal, Form, Divider, List, Card, Image } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type {
@@ -6,20 +6,17 @@ import type {
   LayoutModelState,
   PlayListModelState,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import styles from '../../index.less';
 import TitleStep from './TitleStep';
 import { Animated } from 'react-animated-css';
-import ChooseLayoutDirectionStep from './ChooseLayoutDirectionStep';
-import ChooseLayoutStep from './ChooseLayoutStep';
-import SetupScenarioItemsStep from './SetupScenarioItemsStep';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };
@@ -132,8 +129,8 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
 
     return (
       <Modal
-        visible={addNewScenarioModal.visible}
-        confirmLoading={addNewScenarioModal.isLoading}
+        visible={addNewScenarioModal?.visible}
+        confirmLoading={addNewScenarioModal?.isLoading}
         closable={false}
         width={'70%'}
         destroyOnClose={true}
@@ -146,7 +143,7 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           disabled: listLayouts.every((layouts) => !layouts.isSelected),
         }}
         onOk={async () => {
-          if (addNewScenarioModal.currentStep === 0) {
+          if (addNewScenarioModal?.currentStep === 0) {
             this.formRef.current?.validateFields().then((values) => {
               this.onCreateScenarios(values);
               this.setAddNewScenarioModal({
@@ -169,7 +166,7 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
         <Animated
           animationIn="zoomIn"
           animationOut="fadeOut"
-          isVisible={addNewScenarioModal.currentStep === 0}
+          isVisible={addNewScenarioModal?.currentStep === 0}
         >
           <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
             <TitleStep {...this.props} />

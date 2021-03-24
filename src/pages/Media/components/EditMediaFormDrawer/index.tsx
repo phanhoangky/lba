@@ -4,13 +4,13 @@ import { Button, Drawer, Popconfirm, Form, Input, Row, Col, Image } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import ReactPlayer from 'react-player';
-import type { Dispatch, MediaSourceModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
 export type EditMediaFormDrawerProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
@@ -116,17 +116,18 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
                 title={`Remove ${selectedFile.title}`}
                 visible={this.state.removeConfirmVisible}
                 onConfirm={async () => {
-                  await this.setListLoading(true);
-
-                  await this.setEditFileDrawer({
-                    visible: false,
-                  });
-                  this.removeMedia(selectedFile)
+                  this.setListLoading(true)
                     .then(() => {
-                      this.callGetListMedia().then(() => {
-                        this.setListLoading(false).then(() => {
-                          this.setState({
-                            removeConfirmVisible: false,
+                      this.setEditFileDrawer({
+                        visible: false,
+                      }).then(() => {
+                        this.removeMedia(selectedFile).then(() => {
+                          this.callGetListMedia().then(() => {
+                            this.setListLoading(false).then(() => {
+                              this.setState({
+                                removeConfirmVisible: false,
+                              });
+                            });
                           });
                         });
                       });
@@ -221,4 +222,4 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(EditMediaFormDrawer);
+export default connect((state: any) => ({ ...state }))(EditMediaFormDrawer);

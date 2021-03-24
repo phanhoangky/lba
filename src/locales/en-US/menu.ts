@@ -38,6 +38,7 @@ export default {
   'menu.list.search-list.applications': 'Search List(applications)',
   'menu.profile': 'Profile',
   'menu.profile.basic': 'Basic Profile',
+  'menu.profile.information': "Information",
   'menu.profile.wallet': 'Wallet',
   'menu.profile.advanced': 'Advanced Profile',
   'menu.result': 'Result',

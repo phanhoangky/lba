@@ -56,7 +56,7 @@ export const diffTwoDate = (from: any, to: any) => {
 
 
 export const sortArea = (areas: Area[]) => {
-  const newAreas = areas.sort((a: Area, b: Area) => {
+    const newAreas = areas.sort((a: Area, b: Area) => {
     if (a.y < b.y) {
       return -1;
     }

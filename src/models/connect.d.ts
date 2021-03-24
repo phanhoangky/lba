@@ -2,6 +2,7 @@ import type { MenuDataItem, Settings as ProSettings } from '@ant-design/pro-layo
 import { GlobalModelState } from './global';
 import { UserModelState } from './user';
 import type { StateType } from './login';
+import type { MomoModelState } from './momopayment';
 import type { UserTestModelState } from './testUser';
 
 export { GlobalModelState, UserModelState };
@@ -25,6 +26,7 @@ export type ConnectState = {
   user: UserModelState;
   login: StateType;
   userTest: UserTestModelState;
+  momo: MomoModelState;
 };
 
 export type Route = {

@@ -24,7 +24,7 @@ export type AddNewLocationModalProps = {
   campaign: CampaignModelState;
 };
 
-class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
+export class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
   formRef = React.createRef<FormInstance<any>>();
 
   setAddNewLocationModal = async (modal: any) => {
@@ -123,18 +123,20 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
       console.log('====================================');
       console.log(coordination);
       console.log('====================================');
-      if (mapComponent.map) {
-        mapComponent.map.setView([lat, lon]);
+      if (mapComponent) {
+        if (mapComponent.map) {
+          mapComponent.map.setView([lat, lon]);
 
-        if (mapComponent.marker) {
-          mapComponent.marker.setLatLng([lat, lon]);
-          L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
-        } else {
-          const marker = L.marker([lat, lon]).addTo(mapComponent.map);
-          L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
-          await this.setMapComponent({
-            marker,
-          });
+          if (mapComponent.marker) {
+            mapComponent.marker.setLatLng([lat, lon]);
+            L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
+          } else {
+            const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+            L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
+            await this.setMapComponent({
+              marker,
+            });
+          }
         }
       }
 
@@ -169,17 +171,22 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
       <>
         <Modal
           title="Add New Location"
-          visible={addNewLocationModal.visible}
+          visible={addNewLocationModal?.visible}
           centered
-          confirmLoading={addNewLocationModal.isLoading}
-          width={'80%'}
+          confirmLoading={addNewLocationModal?.isLoading}
+          width={'50%'}
           afterClose={() => {
-            if (mapComponent.map) {
-              if (mapComponent.marker) {
-                mapComponent.marker.removeFrom(mapComponent.map);
+            if (mapComponent) {
+              if (mapComponent.map) {
                 this.setMapComponent({
-                  marker: undefined,
+                  map: undefined,
                 });
+                if (mapComponent.marker) {
+                  mapComponent.marker.removeFrom(mapComponent.map);
+                  this.setMapComponent({
+                    marker: undefined,
+                  });
+                }
               }
             }
             this.clearCreateLocationParam();
@@ -232,7 +239,7 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
                   // });
                 }}
               >
-                {listDeviceTypes.map((type: any) => {
+                {listDeviceTypes?.map((type: any) => {
                   return (
                     <Select.Option key={type.id} value={type.id}>
                       {type.typeName}
@@ -241,7 +248,7 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
                 })}
               </Select>
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
               name="brandId"
               label="Brand"
               rules={[{ required: true, message: 'Please input address' }]}
@@ -262,7 +269,7 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
                   );
                 })}
               </Select>
-            </Form.Item>
+            </Form.Item> */}
 
             {/* <Form.Item
               name="address"
@@ -275,17 +282,17 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
             <Col flex="6">
               <AutoCompleteComponent
                 {...this.props}
-                inputValue={createLocationParam.address}
+                inputValue={createLocationParam?.address}
                 value={{
-                  label: createLocationParam.address,
-                  value: `${createLocationParam.longitude}-${createLocationParam.latitude}`,
+                  label: createLocationParam?.address,
+                  value: `${createLocationParam?.longitude}-${createLocationParam?.latitude}`,
                 }}
-                onInputChange={(e) => {
+                onInputChange={(e: any) => {
                   this.setCreateLocationParam({
                     address: e,
                   });
                 }}
-                handleOnSelect={(e, address) => {
+                onChange={(e: any, address: any) => {
                   this.handleAutoCompleteSearch(e, address);
                 }}
               />
@@ -302,4 +309,4 @@ class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewLocationModal);
+export default connect((state: any) => ({ ...state }))(AddNewLocationModal);

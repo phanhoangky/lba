@@ -8,11 +8,10 @@ import type {
   BasicLayoutProps as ProLayoutProps,
   Settings,
 } from '@ant-design/pro-layout';
-import ProLayout, { DefaultFooter, SettingDrawer } from '@ant-design/pro-layout';
+import ProLayout, { SettingDrawer } from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef } from 'react';
-import type { Dispatch } from 'umi';
+import type { Dispatch, MomoModelState } from 'umi';
 import { Link, useIntl, connect, history } from 'umi';
-import { GithubOutlined } from '@ant-design/icons';
 import { Result, Button } from 'antd';
 import Authorized from '@/utils/Authorized';
 import RightContent from '@/components/GlobalHeader/RightContent';
@@ -20,7 +19,7 @@ import type { ConnectState } from '@/models/connect';
 import { getMatchMenu } from '@umijs/route-utils';
 // import logo from '../assets/logo.svg';
 import lba from '../assets/lba.png';
-import type { UserTestModelState } from '@/models/testUser';
+import type { CurrentUser } from '@/models/user';
 
 const noMatch = (
   <Result
@@ -29,7 +28,7 @@ const noMatch = (
     subTitle="Sorry, you are not authorized to access this page."
     extra={
       <Button type="primary">
-        <Link to="/user/login">Go Login</Link>
+        <Link to="/acount/login">Go Login</Link>
       </Button>
     }
   />
@@ -41,7 +40,8 @@ export type BasicLayoutProps = {
   };
   settings: Settings;
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  currentUser: CurrentUser;
+  momo: MomoModelState;
 } & ProLayoutProps;
 export type BasicLayoutContext = { [K in 'location']: BasicLayoutProps[K] } & {
   breadcrumbNameMap: Record<string, MenuDataItem>;
@@ -57,49 +57,48 @@ const menuDataRender = (menuList: MenuDataItem[]): MenuDataItem[] =>
     return Authorized.check(item.authority, localItem, null) as MenuDataItem;
   });
 
-const defaultFooterDom = (
-  <DefaultFooter
-    copyright={`${new Date().getFullYear()} 蚂蚁集团体验技术部出品`}
-    links={[
-      {
-        key: 'Ant Design Pro',
-        title: 'Ant Design Pro',
-        href: 'https://pro.ant.design',
-        blankTarget: true,
-      },
-      {
-        key: 'github',
-        title: <GithubOutlined />,
-        href: 'https://github.com/ant-design/ant-design-pro',
-        blankTarget: true,
-      },
-      {
-        key: 'Ant Design',
-        title: 'Ant Design',
-        href: 'https://ant.design',
-        blankTarget: true,
-      },
-    ]}
-  />
-);
+// const defaultFooterDom = (
+//   <DefaultFooter
+//     copyright={`${new Date().getFullYear()} 蚂蚁集团体验技术部出品`}
+//     links={[
+//       {
+//         key: 'Ant Design Pro',
+//         title: 'Ant Design Pro',
+//         href: 'https://pro.ant.design',
+//         blankTarget: true,
+//       },
+//       {
+//         key: 'github',
+//         title: <GithubOutlined />,
+//         href: 'https://github.com/ant-design/ant-design-pro',
+//         blankTarget: true,
+//       },
+//       {
+//         key: 'Ant Design',
+//         title: 'Ant Design',
+//         href: 'https://ant.design',
+//         blankTarget: true,
+//       },
+//     ]}
+//   />
+// );
 
 const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   const {
     dispatch,
     children,
     settings,
-    userTest,
     location = {
       pathname: '/',
     },
   } = props;
   const menuDataRef = useRef<MenuDataItem[]>([]);
   useEffect(() => {
-    if (dispatch) {
-      dispatch({
-        type: 'user/fetchCurrent',
-      });
-    }
+    // if (dispatch) {
+    //   dispatch({
+    //     type: 'user/fetchCurrent',
+    //   });
+    // }
   }, []);
   /** Init variables */
 
@@ -126,6 +125,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         logo={lba}
         formatMessage={formatMessage}
         {...props}
+        menu={{
+          type: 'group',
+        }}
         {...settings}
         onCollapse={handleMenuCollapse}
         onMenuHeaderClick={() => history.push('/')}
@@ -137,35 +139,37 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           ) {
             return defaultDom;
           }
-
           return <Link to={menuItemProps.path}>{defaultDom}</Link>;
         }}
-        breadcrumbRender={(routers = []) => [
-          {
-            path: '/',
-            breadcrumbName: formatMessage({
-              id: 'menu.home',
-            }),
-          },
-          ...routers,
-        ]}
-        itemRender={(route, params, routes, paths) => {
-          const first = routes.indexOf(route) === 0;
-          return first ? (
-            <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
-          ) : (
-            <span>{route.breadcrumbName}</span>
-          );
-        }}
-        footerRender={() => {
-          if (settings.footerRender || settings.footerRender === undefined) {
-            return defaultFooterDom;
-          }
+        // breadcrumbRender={(routers = []) => [
+        //   {
+        //     path: '/',
+        //     breadcrumbName: formatMessage({
+        //       id: 'menu.home',
+        //     }),
+        //   },
+        //   ...routers,
+        // ]}
+        // itemRender={(route, params, routes, paths) => {
+        //   const first = routes.indexOf(route) === 0;
+        //   return first ? (
+        //     <Link to={paths.join('/')}>{route.breadcrumbName}</Link>
+        //   ) : (
+        //     <span>{route.breadcrumbName}</span>
+        //   );
+        // }}
 
-          return null;
-        }}
+        // footerRender={() => {
+        //   if (settings.footerRender || settings.footerRender === undefined) {
+        //     return defaultFooterDom;
+        //   }
+
+        //   return null;
+        // }}
         menuDataRender={menuDataRender}
-        rightContentRender={() => <RightContent userTest={userTest} />}
+        rightContentRender={() => (
+          <RightContent currentUser={props.currentUser} momo={props.momo} />
+        )}
         postMenuData={(menuData: any) => {
           menuDataRef.current = menuData || [];
           return menuData || [];
@@ -188,8 +192,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
   );
 };
 
-export default connect(({ global, settings, userTest }: ConnectState) => ({
+export default connect(({ global, settings, user, momo }: ConnectState) => ({
   collapsed: global.collapsed,
   settings,
-  userTest,
+  currentUser: user.currentUser,
+  momo,
 }))(BasicLayout);

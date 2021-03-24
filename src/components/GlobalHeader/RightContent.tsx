@@ -1,19 +1,21 @@
-import { Tag } from 'antd';
+import { Button, Tag } from 'antd';
 import type { Settings as ProSettings } from '@ant-design/pro-layout';
 // import { QuestionCircleOutlined } from '@ant-design/icons';
 import React from 'react';
-import type { ConnectProps } from 'umi';
-import { connect, SelectLang } from 'umi';
+import { ConnectProps, history, MomoModelState } from 'umi';
+import { connect } from 'umi';
 import type { ConnectState } from '@/models/connect';
 import Avatar from './AvatarDropdown';
 // import HeaderSearch from '../HeaderSearch';
 import styles from './index.less';
 // import NoticeIconView from './NoticeIconView';
-import type { UserTestModelState } from '@/models/testUser';
+import type { CurrentUser } from '@/models/user';
+import { WalletTwoTone } from '@ant-design/icons';
 
 export type GlobalHeaderRightProps = {
   theme?: ProSettings['navTheme'] | 'realDark';
-  userTest: UserTestModelState;
+  currentUser?: CurrentUser;
+  momo?: MomoModelState;
 } & Partial<ConnectProps> &
   Partial<ProSettings>;
 const ENVTagColor = {
@@ -23,66 +25,80 @@ const ENVTagColor = {
 };
 
 const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
-  const { theme, layout, userTest } = props;
+  const { theme, layout } = props;
   let className = styles.right;
 
   if (theme === 'dark' && layout === 'top') {
     className = `${styles.right}  ${styles.dark}`;
   }
 
+  const setMomoAmount = async (e) => {
+    if (props.dispatch) {
+      await props.dispatch({
+        type: 'momo/setAmountReducer',
+        payload: e,
+      });
+    }
+  };
+
+  const getLinkTransfer = async () => {
+    if (props.dispatch) {
+      await props.dispatch({
+        type: 'momo/getLinkTransfer',
+        payload: {
+          amount: props.momo?.amount?.toString(),
+          orderInfo: '',
+        },
+      });
+    }
+  };
+  console.log('====================================');
+  console.log(props.momo);
+  console.log('====================================');
   return (
     <div className={className}>
-      {/* <HeaderSearch
-        className={`${styles.action} ${styles.search}`}
-        placeholder="站内搜索"
-        defaultValue="umi ui"
-        options={[
-          {
-            label: <a href="https://umijs.org/zh/guide/umi-ui.html">umi ui</a>,
-            value: 'umi ui',
-          },
-          {
-            label: <a href="next.ant.design">Ant Design</a>,
-            value: 'Ant Design',
-          },
-          {
-            label: <a href="https://protable.ant.design/">Pro Table</a>,
-            value: 'Pro Table',
-          },
-          {
-            label: <a href="https://prolayout.ant.design/">Pro Layout</a>,
-            value: 'Pro Layout',
-          },
-        ]} // onSearch={value => {
-        //   //console.log('input', value);
-        // }}
-      />
-      <Tooltip title="使用文档">
-        <a
-          style={{
-            color: 'inherit',
-          }}
-          target="_blank"
-          href="https://pro.ant.design/docs/getting-started"
-          rel="noopener noreferrer"
-          className={styles.action}
-        >
-          <QuestionCircleOutlined />
-        </a>
-      </Tooltip>
-      <NoticeIconView /> */}
-      <Avatar menu={true} userTest={userTest} />
+      <Button
+        className={styles.action}
+        icon={<WalletTwoTone />}
+        onClick={() => {
+          history.push('/profile');
+        }}
+      >
+        {props.currentUser &&
+          props.currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+        VND
+      </Button>
+      {/* <InputNumber
+        className={styles.action}
+        value={props.momo?.amount}
+        onChange={(e) => {
+          setMomoAmount(e);
+        }}
+      ></InputNumber> */}
+      {/* <Button
+        className={styles.action}
+        icon={<WalletTwoTone />}
+        onClick={async () => {
+          const res = await getLinkTransfer();
+          console.log('====================================');
+          console.log(res);
+          console.log('====================================');
+        }}
+      >
+        Deposit Money
+      </Button> */}
+      <Avatar menu={true} currentUser={props.currentUser} />
       {REACT_APP_ENV && (
         <span>
           <Tag color={ENVTagColor[REACT_APP_ENV]}>{REACT_APP_ENV}</Tag>
         </span>
       )}
-      <SelectLang className={styles.action} />
     </div>
   );
 };
 
-export default connect(({ settings }: ConnectState) => ({
+export default connect(({ settings, user }: ConnectState) => ({
+  currentUser: user.currentUser,
   theme: settings.navTheme,
   layout: settings.layout,
 }))(GlobalHeaderRight);

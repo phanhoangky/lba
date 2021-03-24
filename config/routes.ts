@@ -4,12 +4,13 @@
     component: '../layouts/BlankLayout',
     routes: [
       {
-        path: '/user',
+        path: '/account',
         component: '../layouts/UserLayout',
         routes: [
+          { path: '/account', redirect: '/account/login' },
           {
             name: 'login',
-            path: '/user/login',
+            path: '/account/login',
             component: './User/login',
           },
         ],
@@ -33,12 +34,12 @@
                 icon: 'smile',
                 component: './Welcome',
               },
-              {
-                name: 'list.brand-list',
-                icon: 'TagsFilled',
-                path: '/brand',
-                component: './Brand',
-              },
+              // {
+              //   name: 'list.brand-list',
+              //   icon: 'TagsFilled',
+              //   path: '/brand',
+              //   component: './Brand',
+              // },
               {
                 name: 'list.location-list',
                 icon: 'RadarChartOutlined',
@@ -54,7 +55,7 @@
               {
                 name: 'list.device-list',
                 icon: 'FundProjectionScreen',
-                path: '/devies',
+                path: '/devices',
                 component: './Device',
               },
               {
@@ -79,24 +80,25 @@
                 path: "/profile",
                 name: "profile",
                 icon: "profile",
-                routes: [
-                   {
-                    path: '/',
-                    redirect: '/profile/basic',
-                  },
-                  {
-                    name: 'basic',
-                    icon: 'smile',
-                    path: '/profile/basic',
-                    component: './profile/basic',
-                  },
-                  {
-                    name: 'wallet',
-                    icon: 'smile',
-                    path: '/profile/wallet',
-                    component: './profile/wallet',
-                  },
-                ]
+                component: './profile/wallet'
+                // routes: [
+                //    {
+                //     path: '/',
+                //     redirect: '/profile/infor',
+                //   },
+                //   {
+                //     name: 'information',
+                //     icon: 'smile',
+                //     path: '/profile/infor',
+                //     component: './profile/information',
+                //   },
+                //   {
+                //     name: 'wallet',
+                //     icon: 'smile',
+                //     path: '/profile/wallet',
+                //     component: './profile/wallet',
+                //   },
+                // ]
               },
               {
                 component: './404',

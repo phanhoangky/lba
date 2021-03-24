@@ -9,6 +9,8 @@ export type Area = {
   width: number;
   x: number;
   y: number;
+  urlPreview?: string;
+  typeMediaName?: string;
 }
 
 export type Layout = {

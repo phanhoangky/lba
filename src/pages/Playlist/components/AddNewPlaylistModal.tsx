@@ -1,13 +1,13 @@
 import { Col, Divider, Input, Row } from 'antd';
 import * as React from 'react';
-import type { Dispatch, MediaSourceModelState, PlayListModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import jwt_decode from 'jwt-decode';
 
 type AddNewPlaylistModalProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   media: MediaSourceModelState;
 };
 
@@ -73,4 +73,4 @@ class AddNewPlaylistModal extends React.Component<AddNewPlaylistModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewPlaylistModal);
+export default connect((state: any) => ({ ...state }))(AddNewPlaylistModal);

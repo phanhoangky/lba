@@ -12,7 +12,7 @@ import type {
   MediaSourceModelState,
   PlaylistItem,
   PlayListModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 import arrayMove from 'array-move';
@@ -24,7 +24,7 @@ type EditPlaylistDrawerProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 const DragHandle = SortableHandle(() => (

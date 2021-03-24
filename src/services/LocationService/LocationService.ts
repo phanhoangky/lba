@@ -2,7 +2,9 @@ import ApiHelper from "@/apis/LBA_API";
 import type { BaseGetRequest } from "../BaseRequest";
 import { CONSTANTS_LBA } from "../constantUrls";
 
-export type GetLocationParam = BaseGetRequest;
+export type GetLocationParam = BaseGetRequest & {
+  id?: string;
+};
 
 export type CreateLocationParam = {
   name: string;
@@ -28,7 +30,7 @@ export type UpdateLocationParam = {
 }
 
 export async function GetLocations(param: GetLocationParam) {
-  const response = await ApiHelper.get(`${CONSTANTS_LBA.LOCATION_URL}/${CONSTANTS_LBA.LOCATION_URL}`, { params: { ...param } });
+  const response = await ApiHelper.get(`${CONSTANTS_LBA.LOCATION_URL}`, { params: { ...param } });
   return response;
 }
 

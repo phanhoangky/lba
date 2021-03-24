@@ -1,7 +1,7 @@
 import { Skeleton, Image, Slider, Divider, Row, Col, List } from 'antd';
 // import Column from 'antd/lib/table/Column';
 import React, { Component } from 'react';
-import type { Dispatch, MediaSourceModelState, PlayListModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import HoverVideoPlayer from 'react-hover-video-player';
 import styles from '../index.less';
@@ -10,7 +10,7 @@ import Input from 'antd/es/input';
 type AddNewPlaylistItemProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   media: MediaSourceModelState;
 };
 
@@ -20,7 +20,7 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
   };
 
   componentDidMount() {
-    Promise.all([this.getMediaNotBelongToPlaylist({ isSigned: -1 })]);
+    Promise.all([this.getMediaNotBelongToPlaylist({ isSigned: 2, isApproved: true })]);
   }
 
   getMediaNotBelongToPlaylist = async (param: any) => {
@@ -295,4 +295,4 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewPlaylistItemModal);
+export default connect((state: any) => ({ ...state }))(AddNewPlaylistItemModal);

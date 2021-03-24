@@ -247,4 +247,4 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
   }
 }
 
-export default connect((state) => ({ ...state }))(ViewCampaignDetailDrawer);
+export default connect((state: any) => ({ ...state }))(ViewCampaignDetailDrawer);

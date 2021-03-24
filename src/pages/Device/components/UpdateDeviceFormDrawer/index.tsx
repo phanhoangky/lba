@@ -23,14 +23,14 @@ import {
 import type { FormInstance } from 'antd/lib/form';
 import moment from 'moment';
 import * as React from 'react';
-import type { DeviceModelState, Dispatch, UserTestModelState } from 'umi';
+import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
 import { connect } from 'umi';
 // import DrawerUpdateMultipleDevice from '../DrawerUpdateMultipleDevice';
 import FilterDate from '../FilterDate';
 
 export type UpdateDeviceFormDrawerProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   deviceStore: DeviceModelState;
 };
 
@@ -40,12 +40,12 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
     if (!isUpdateMultiple) {
       if (this.formRef.current) {
         this.formRef.current.setFieldsValue({
-          description: selectedDevice.description,
+          description: selectedDevice?.description,
           startEnd: [
-            moment(moment(selectedDevice.startDate).format('YYYY/MM/DD')),
-            moment(moment(selectedDevice.endDate).format('YYYY/MM/DD')),
+            moment(moment(selectedDevice?.startDate).format('YYYY/MM/DD')),
+            moment(moment(selectedDevice?.endDate).format('YYYY/MM/DD')),
           ],
-          typeId: selectedDevice.type?.id,
+          typeId: selectedDevice?.type?.id,
         });
       }
     }
@@ -68,9 +68,19 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
           startDate: values.startEnd[0],
           endDate: values.startEnd[1],
         },
-        listId: this.props.deviceStore.selectedDevices.map((device) => {
+        listId: this.props.deviceStore.selectedDevices?.map((device) => {
           return device.id;
         }),
+      },
+    });
+  };
+
+  callGetListDevices = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/getDevices',
+      payload: {
+        ...this.props.deviceStore.getDevicesParam,
+        ...param,
       },
     });
   };
@@ -88,20 +98,20 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
         endDate: values.startEnd[1],
       },
     });
-
-    await this.props.dispatch({
-      type: 'deviceStore/getDevices',
-      payload: {
-        ...this.props.deviceStore.getDevicesParam,
-      },
-    });
+    this.callGetListDevices();
+    // await this.props.dispatch({
+    //   type: 'deviceStore/getDevices',
+    //   payload: {
+    //     ...this.props.deviceStore.getDevicesParam,
+    //   },
+    // });
   };
 
   handleRemoveDateFilter = (index: any) => {
     const { isUpdateMultiple, updateDevicesState, selectedDevice } = this.props.deviceStore;
     const listTimeFilter = isUpdateMultiple
-      ? updateDevicesState.timeFilter
-      : selectedDevice.timeFilter;
+      ? updateDevicesState?.timeFilter
+      : selectedDevice?.timeFilter;
 
     if (isUpdateMultiple) {
       this.props.dispatch({
@@ -145,8 +155,10 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
       listDeviceTypes,
     } = this.props.deviceStore;
 
-    const timeFilter = isUpdateMultiple ? updateDevicesState.timeFilter : selectedDevice.timeFilter;
-    const displayTimeFilter = timeFilter.map((time, index) => {
+    const timeFilter = isUpdateMultiple
+      ? updateDevicesState?.timeFilter
+      : selectedDevice?.timeFilter;
+    const displayTimeFilter = timeFilter?.map((time, index) => {
       return (
         time === '1' && (
           <Input
@@ -174,7 +186,7 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
     });
     return (
       <Drawer
-        title={isUpdateMultiple ? 'Update Multiple Devices' : selectedDevice.name}
+        title={isUpdateMultiple ? 'Update Multiple Devices' : selectedDevice?.name}
         key="updateMultipleDevies"
         visible={this.props.deviceStore.editMultipleDevicesDrawerVisible}
         width={700}
@@ -210,17 +222,22 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
                   onClick={async () => {
                     await this.props.dispatch({
                       type: 'deviceStore/deleteDevice',
-                      payload: selectedDevice.id,
+                      payload: selectedDevice?.id,
                     });
 
-                    await this.props.dispatch({
-                      type: 'deviceStore/getDevices',
-                      payload: getDevicesParam,
-                    });
-                    await this.props.dispatch({
-                      type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                      payload: false,
-                    });
+                    this.callGetListDevices()
+                      .then(() => {
+                        this.props.dispatch({
+                          type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+                          payload: false,
+                        });
+                      })
+                      .catch(() => {
+                        this.props.dispatch({
+                          type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+                          payload: false,
+                        });
+                      });
                   }}
                 >
                   Delete Device
@@ -310,7 +327,7 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
                               type: 'deviceStore/setUpdateDevicesState',
                               payload: {
                                 ...updateDevicesState,
-                                timeFilter: timeFilter.map((time, index) => {
+                                timeFilter: timeFilter?.map((time, index) => {
                                   if (index >= startDate && index < endDate) {
                                     return '1';
                                   }
@@ -445,7 +462,7 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
                   <Switch
                     checkedChildren={<CheckOutlined />}
                     unCheckedChildren={<CloseOutlined />}
-                    checked={selectedDevice.isPublished}
+                    checked={selectedDevice?.isPublished}
                     onChange={(value) => {
                       this.props.dispatch({
                         type: 'deviceStore/setCurrentDevice',
@@ -501,7 +518,7 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
               //   isUpdateMultiple ? updateDevicesState.currentType : selectedDevice.type.typeName
               // }
             >
-              {listDeviceTypes.map((type) => {
+              {listDeviceTypes?.map((type) => {
                 return (
                   <Select.Option key={`${type.id}`} value={type.id}>
                     {type.typeName}
@@ -516,4 +533,4 @@ class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDrawerProps
   }
 }
 
-export default connect((state) => ({ ...state }))(UpdateDeviceFormDrawer);
+export default connect((state: any) => ({ ...state }))(UpdateDeviceFormDrawer);

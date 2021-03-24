@@ -4,13 +4,14 @@ import { Form, Input, Modal, Select, Skeleton, Switch, Upload } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import { Keccak } from 'sha3';
-import type { Dispatch, MediaSourceModelState, UserTestModelState } from 'umi';
+import { v4 as uuidv4 } from 'uuid';
+import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
 export type AddNewFileFormModalProps = {
   dispatch: Dispatch;
   media: MediaSourceModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
 };
 
 export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProps> {
@@ -51,14 +52,12 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
           this.setAddNewFileModal({
             isLoading: true,
           }).then(() => {
+            // const { currentUser } = this.props.user;
             this.addNewFile(values).then(() => {
               this.setAddNewFileModal({
                 isLoading: false,
               });
             });
-            // this.setAddNewFileModal({
-            //   isLoading: false,
-            // });
           });
         })
         .catch(() => {
@@ -71,42 +70,54 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
 
   addNewFile = async (values: any) => {
     const { createFileParam } = this.props.media;
-    const { ether } = this.props.userTest.currentUser;
+    const { currentUser } = this.props.user;
     const hash = new Keccak(256);
     const byte = await values.upload.file.originFileObj.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
+    console.log('====================================');
+    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether);
+    console.log('====================================');
+    const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
+    if (signature && !signature.toLowerCase().includes('fail')) {
+      console.log('====================================');
+      console.log('Param  222>>>', security, signature);
+      console.log('====================================');
+      const param: CreateFileParam = {
+        ...createFileParam,
+        ...values,
+        securityHash: security,
+        public_id: security,
+        accountId: currentUser?.id,
+        hash: createFileParam.isSigned === 1 ? signature : undefined,
+        fileId: createFileParam.fileId,
+        isSigned: createFileParam.isSigned,
+        mediaSrcId: uuidv4(),
+      };
+      console.log('====================================');
+      console.log('Param >>>', signature, param);
+      console.log('====================================');
+      await this.props.dispatch({
+        type: 'media/createFile',
+        payload: {
+          ...param,
+        },
+      });
 
-    await ether?.addDocument(security, createFileParam.isSigned);
-    const param: CreateFileParam = {
-      ...createFileParam,
-      ...values,
-      securityHash: security,
-      public_id: security,
-      accountId: this.props.userTest.currentUser.id,
-      fileId: createFileParam.fileId,
-      isSigned: createFileParam.isSigned,
-    };
-    await this.props.dispatch({
-      type: 'media/createFile',
-      payload: {
-        ...param,
-      },
-    });
-
-    this.setListLoading(true)
-      .then(() => {
-        this.callGetListMedia().then(() => {
-          this.clearCreateFileParam().then(() => {
-            this.clearFilelist().then(() => {
-              this.setListLoading(false);
+      this.setListLoading(true)
+        .then(() => {
+          this.callGetListMedia().then(() => {
+            this.clearCreateFileParam().then(() => {
+              this.clearFilelist().then(() => {
+                this.setListLoading(false);
+              });
             });
           });
+        })
+        .catch(() => {
+          this.setListLoading(false);
         });
-      })
-      .catch(() => {
-        this.setListLoading(false);
-      });
+    }
   };
 
   clearCreateFileParam = async () => {
@@ -165,7 +176,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         }}
       >
         {/* <AddNewModal {...this.props}></AddNewModal> */}
-        <Form ref={this.formRef} name="add_new_file_form">
+        <Form ref={this.formRef} name="add_new_file_form" layout="vertical">
           <Form.Item
             name="upload"
             label="Upload"
@@ -273,4 +284,4 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewFileFormModal);
+export default connect((state: any) => ({ ...state }))(AddNewFileFormModal);

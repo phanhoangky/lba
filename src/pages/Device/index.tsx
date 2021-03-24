@@ -1,17 +1,19 @@
 import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
-import { Button, Input, Select, Space, Table, Tooltip } from 'antd';
-import type { DeviceModelState, Dispatch, UserTestModelState } from 'umi';
+import { Button, Modal, Space, Table } from 'antd';
+import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
-import { ControlTwoTone, FilterTwoTone } from '@ant-design/icons';
 // import DrawerUpdateMultipleDevice from './components/DrawerUpdateMultipleDevice';
 import UpdateDeviceFormDrawer from './components/UpdateDeviceFormDrawer';
+import { DevicesTableHeaderComponent } from './components/DevicesTableHeaderComponent';
+import { EyeTwoTone } from '@ant-design/icons';
+import { ViewScreenShotModal } from './components/ViewScreenShotModal';
 
 type DeviceProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   deviceStore: DeviceModelState;
 };
 
@@ -33,28 +35,46 @@ class Device extends React.Component<DeviceProps> {
     tableLoading: false,
   };
 
-  async componentDidMount() {
-    this.setState({
-      tableLoading: true,
-    });
-    this.props
-      .dispatch({
-        type: 'deviceStore/getDevices',
-      })
+  componentDidMount = async () => {
+    this.setDevicesTableLoading(true)
       .then(() => {
-        this.setState({
-          tableLoading: false,
-        });
-        this.props.dispatch({
-          type: 'deviceStore/getDeviceType',
+        this.callGetListDevices().then(() => {
+          this.setGetDevicesParam({
+            locationId: undefined,
+          });
+          this.setDevicesTableLoading(false);
         });
       })
       .catch(() => {
-        this.setState({
-          tableLoading: false,
-        });
+        this.setDevicesTableLoading(false);
       });
-  }
+  };
+
+  callGetListDevices = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/getDevices',
+      payload: {
+        ...this.props.deviceStore.getDevicesParam,
+        ...param,
+      },
+    });
+  };
+
+  setGetDevicesParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/setGetDevicesParamReducer',
+      payload: {
+        ...this.props.deviceStore.getDevicesParam,
+        ...param,
+      },
+    });
+  };
+
+  readJWT = async () => {
+    await this.props.dispatch({
+      type: 'user/readJWT',
+    });
+  };
 
   setEditModalVisible = (isOpen: boolean) => {
     this.props.dispatch({
@@ -71,17 +91,21 @@ class Device extends React.Component<DeviceProps> {
   };
 
   onUpdateDevice = async () => {
-    await this.props.dispatch({
-      type: 'deviceStore/updateDevice',
-      payload: this.props.deviceStore.selectedDevice,
-    });
+    this.props
+      .dispatch({
+        type: 'deviceStore/updateDevice',
+        payload: this.props.deviceStore.selectedDevice,
+      })
+      .then(() => {
+        this.callGetListDevices();
+      });
 
-    await this.props.dispatch({
-      type: 'deviceStore/getDevices',
-      payload: {
-        ...this.props.deviceStore.getDevicesParam,
-      },
-    });
+    // await this.props.dispatch({
+    //   type: 'deviceStore/getDevices',
+    //   payload: {
+    //     ...this.props.deviceStore.getDevicesParam,
+    //   },
+    // });
   };
 
   onUpdateMultipleDevices = async () => {
@@ -89,7 +113,7 @@ class Device extends React.Component<DeviceProps> {
       type: 'deviceStore/updateListDevice',
       payload: {
         updateDevicesState: this.props.deviceStore.updateDevicesState,
-        listId: this.props.deviceStore.selectedDevices.map((device) => {
+        listId: this.props.deviceStore.selectedDevices?.map((device) => {
           return device.id;
         }),
       },
@@ -101,16 +125,47 @@ class Device extends React.Component<DeviceProps> {
     this.setState({
       selectedRowKeys: [],
     });
+
+    await this.callGetListDevices();
+    // await this.props.dispatch({
+    //   type: 'deviceStore/getDevices',
+    //   payload: {
+    //     ...this.props.deviceStore.getDevicesParam,
+    //   },
+    // });
+  };
+
+  setDevicesTableLoading = async (isLoading: boolean) => {
     await this.props.dispatch({
-      type: 'deviceStore/getDevices',
-      payload: {
-        ...this.props.deviceStore.getDevicesParam,
-      },
+      type: 'deviceStore/setDevicesTableLoadingReducer',
+      payload: isLoading,
     });
   };
 
+  fetchDevicesScreenShot = async (macAddress: string) => {
+    await this.props.dispatch({
+      type: 'deviceStore/fetchDevicesScreenShot',
+      payload: macAddress,
+    });
+  };
+
+  setViewScreenshotModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/setViewScreenshotModalReducer',
+      payload: {
+        ...this.props.deviceStore.viewScreenshotModal,
+        ...param,
+      },
+    });
+  };
   render() {
-    const { selectedDevices, listDevices, getDevicesParam } = this.props.deviceStore;
+    const {
+      selectedDevices,
+      listDevices,
+      getDevicesParam,
+      editMultipleDevicesDrawerVisible,
+      viewScreenshotModal,
+    } = this.props.deviceStore;
 
     const { selectedRowKeys } = this.state;
     // console.log(selectedDevices);
@@ -131,84 +186,25 @@ class Device extends React.Component<DeviceProps> {
     return (
       <>
         <PageContainer>
-          <div>Device List</div>
           <Table
             dataSource={listDevices}
             style={{}}
-            scroll={{ y: 'max-content' }}
+            scroll={{ y: 400, x: 500 }}
             loading={this.state.tableLoading}
             title={() => {
               return (
                 <>
-                  <Space>
-                    <Input.Search
-                      placeholder="Input search text"
-                      onSearch={(value) => {
-                        this.props.dispatch({
-                          type: 'deviceStore/getDevices',
-                          payload: {
-                            ...getDevicesParam,
-                            name: value.trim(),
-                          },
-                        });
-                      }}
-                      enterButton
-                    />
-                    <ControlTwoTone style={{ fontSize: `2em` }} />
-                    <Select
-                      style={{ width: 120 }}
-                      defaultValue="CreateTime"
-                      onChange={async (value) => {
-                        await this.props.dispatch({
-                          type: 'deviceStore/getDevices',
-                          payload:
-                            value === 'CreateTime'
-                              ? {
-                                  ...getDevicesParam,
-                                  isSort: true,
-                                  isDescending: true,
-                                  orderBy: value,
-                                }
-                              : {
-                                  ...getDevicesParam,
-                                  isSort: true,
-                                  isDescending: false,
-                                  orderBy: value,
-                                },
-                        });
-                      }}
-                    >
-                      <Select.Option value="CreateTime">Newest</Select.Option>
-                      <Select.Option value="Name">Name</Select.Option>
-                    </Select>
-                    <FilterTwoTone style={{ fontSize: `2em` }} />
-                    <Button
-                      disabled={!(selectedDevices.length > 0)}
-                      onClick={async () => {
-                        this.setMultipleUpdateMode(true);
-
-                        await this.props.dispatch({
-                          type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                          payload: true,
-                        });
-                      }}
-                    >
-                      Edit Multiple Devices
-                    </Button>
-                  </Space>
+                  <DevicesTableHeaderComponent {...this.props} />
                 </>
               );
             }}
             onRow={(record) => {
               return {
                 onClick: async () => {
-                  this.setMultipleUpdateMode(false);
-
                   await this.props.dispatch({
                     type: 'deviceStore/setCurrentDevice',
                     payload: record,
                   });
-                  this.setEditModalVisible(true);
                 },
               };
             }}
@@ -217,38 +213,40 @@ class Device extends React.Component<DeviceProps> {
             pagination={{
               total: this.props.deviceStore.totalItem,
               pageSize: 10,
-              current: this.state.currentPage,
-              showSizeChanger: false,
+              current: getDevicesParam?.pageNumber ? getDevicesParam?.pageNumber + 1 : 1,
               onChange: async (current) => {
-                this.setState({
-                  tableLoading: true,
-                });
-                this.props
-                  .dispatch({
-                    type: 'deviceStore/getDevices',
-                    payload: {
-                      ...getDevicesParam,
-                      pageNumber: current,
-                    },
-                  })
+                this.setDevicesTableLoading(true)
                   .then(() => {
-                    this.setState({
-                      tableLoading: false,
+                    this.callGetListDevices({
+                      pageNumber: current - 1,
+                    }).then(() => {
+                      this.setDevicesTableLoading(false);
                     });
                   })
                   .catch(() => {
-                    this.setState({
-                      tableLoading: false,
-                    });
+                    this.setDevicesTableLoading(false);
                   });
-                this.setState({ currentPage: current });
+
+                // this.props
+                //   .dispatch({
+                //     type: 'deviceStore/getDevices',
+                //     payload: {
+                //       ...getDevicesParam,
+                //       pageNumber: current - 1,
+                //     },
+                //   })
+                //   .then(() => {
+
+                //   })
+
+                // this.setState({ currentPage: current });
               },
             }}
           >
             <Column key="Name" title="Name" dataIndex="name" width="100"></Column>
             <Column key="resolution" title="Resolution" dataIndex="resolution" width="100"></Column>
             <Column key="macAddress" title="MacAddress" dataIndex="macaddress" width="100"></Column>
-            <Column
+            {/* <Column
               key="description"
               title="Description"
               dataIndex="description"
@@ -263,13 +261,61 @@ class Device extends React.Component<DeviceProps> {
                   </>
                 );
               }}
-            ></Column>
+            ></Column> */}
             {/* <Column key="type" title="Type" dataIndex="typeName" width="100"></Column> */}
+
             <Column
-              key="createTime"
-              title="Create Time"
-              dataIndex="createTime"
+              key="location"
+              title="Location"
+              dataIndex={['location', 'name']}
               width="100"
+            ></Column>
+            <Column
+              key="action"
+              title="Action"
+              render={(record) => {
+                return (
+                  <Space>
+                    <Button
+                      onClick={async () => {
+                        this.setMultipleUpdateMode(false);
+
+                        await this.props.dispatch({
+                          type: 'deviceStore/setCurrentDevice',
+                          payload: record,
+                        });
+                        this.setEditModalVisible(true);
+                      }}
+                    >
+                      <EyeTwoTone />
+                    </Button>
+                  </Space>
+                );
+              }}
+              width="100"
+            ></Column>
+            <Column
+              key="screenShot"
+              title="ScreenShot"
+              render={(record) => {
+                return (
+                  <Space>
+                    <Button
+                      onClick={async () => {
+                        await this.props.dispatch({
+                          type: 'deviceStore/setCurrentDevice',
+                          payload: record,
+                        });
+                        await this.setViewScreenshotModal({
+                          visible: true,
+                        });
+                      }}
+                    >
+                      Sreenshot
+                    </Button>
+                  </Space>
+                );
+              }}
             ></Column>
           </Table>
         </PageContainer>
@@ -375,13 +421,35 @@ class Device extends React.Component<DeviceProps> {
           <DrawerUpdateMultipleDevice {...this.props}></DrawerUpdateMultipleDevice>
         </Drawer> */}
 
-        {/* {editMultipleDevicesDrawerVisible && <UpdateDeviceFormDrawer {...this.props} />} */}
-        <UpdateDeviceFormDrawer {...this.props} />
+        {editMultipleDevicesDrawerVisible && <UpdateDeviceFormDrawer {...this.props} />}
+        {/* <UpdateDeviceFormDrawer {...this.props} /> */}
+
+        {/** Screenshot Modal */}
+        <Modal
+          title="Screenshot"
+          destroyOnClose={true}
+          closable={false}
+          okText={false}
+          centered
+          forceRender
+          cancelText={false}
+          onCancel={() => {
+            this.setViewScreenshotModal({
+              visible: false,
+            });
+          }}
+          width={'50%'}
+          visible={viewScreenshotModal?.visible}
+        >
+          {viewScreenshotModal?.visible && <ViewScreenShotModal {...this.props} />}
+        </Modal>
+
+        {/** End Screenshot Modal */}
       </>
     );
   }
 }
 
-export default connect((state) => ({
+export default connect((state: any) => ({
   ...state,
 }))(Device);

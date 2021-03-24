@@ -67,4 +67,4 @@ class FilterDateComponent extends React.Component<FilterDateComponentProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(FilterDateComponent);
+export default connect((state: any) => ({ ...state }))(FilterDateComponent);

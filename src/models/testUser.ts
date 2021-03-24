@@ -107,7 +107,6 @@ const UserModel: UserModelType = {
         const params = getPageQuery();
         let { redirect } = params as { redirect: string };
       if (redirect) {
-          
         const redirectUrlParams = new URL(redirect);
         console.log('====================================');
         console.log(">>>>>", urlParams, redirect, params, redirectUrlParams);

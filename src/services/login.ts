@@ -1,5 +1,4 @@
 import  ApiHelper  from '@/apis/LBA_API';
-import request from '@/utils/request';
 import firebase from "./FirebaseService/firebase";
 
 export type LoginParamsType = {
@@ -16,23 +15,23 @@ export type LoginWithGoogleType = {
 }
 
 export type AuthenticationRequest = {
-  firebaseToken: string,
-  walletKeyStore: string,
-  walletAddress: string,
-  uid: string,
-  rootFolderId: string,
+  firebaseToken?: string,
+  walletKeyStore?: string,
+  walletAddress?: string,
+  uid?: string,
+  rootFolderId?: string,
 }
 
-export async function fakeAccountLogin(params: LoginParamsType) {
-  return request('/api/login/account', {
-    method: 'POST',
-    data: params,
-  });
-}
+// export async function fakeAccountLogin(params: LoginParamsType) {
+//   return request('/api/login/account', {
+//     method: 'POST',
+//     data: params,
+//   });
+// }
 
-export async function getFakeCaptcha(mobile: string) {
-  return request(`/api/login/captcha?mobile=${mobile}`);
-}
+// export async function getFakeCaptcha(mobile: string) {
+//   return request(`/api/login/captcha?mobile=${mobile}`);
+// }
 
 export async function GoogleLogin() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -43,9 +42,6 @@ export async function GoogleLogin() {
 }
 
 export async function PostAuthentication(params: AuthenticationRequest) {
-  console.log(params);
-  
   const res = await  ApiHelper.post("accounts/authenticate", { ...params });
-  console.log(">>>>", res);
   return res
 }

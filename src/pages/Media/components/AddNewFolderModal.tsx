@@ -1,11 +1,11 @@
 import { Card, Input } from 'antd';
 import React, { Component } from 'react';
-import type { Dispatch, MediaSourceModelState, UserTestModelState } from 'umi';
+import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 
 export type AddNewFolderModalProps = {
   dispatch: Dispatch;
-  userTest: UserTestModelState;
+  user: UserModelState;
   media: MediaSourceModelState;
 };
 
@@ -39,4 +39,4 @@ class AddNewFolderModal extends Component<AddNewFolderModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(AddNewFolderModal);
+export default connect((state: any) => ({ ...state }))(AddNewFolderModal);

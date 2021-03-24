@@ -1,15 +1,8 @@
 // import { Location } from '@/models/Location';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
-import {
-  CheckCircleTwoTone,
-  ClockCircleTwoTone,
-  DeleteTwoTone,
-  EditTwoTone,
-  ExclamationCircleOutlined,
-  PlusSquareTwoTone,
-} from '@ant-design/icons';
+import { DeleteTwoTone, EditTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Alert, Button, Modal, Space, Table } from 'antd';
+import { Button, Col, Modal, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -19,15 +12,17 @@ import type {
   Dispatch,
   LocationModelState,
 } from 'umi';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import AddNewLocationModal from './components/AddNewLocationModal';
 import EditLocationModal from './components/EditLocationModal';
+import { LocationTableHeaderComponent } from './components/LocationTableHeaderComponent';
+import type { Location } from '@/models/Location';
+import { ViewLocationDetailComponent } from './components/ViewLocationDetailComponent';
 
 export type LocationScreenProps = {
   dispatch: Dispatch;
   location: LocationModelState;
   deviceStore: DeviceModelState;
-  brand: BrandModelState;
   campaign: CampaignModelState;
 };
 export const LOCATION_DISPATCHER = 'location';
@@ -41,22 +36,20 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               type: 'deviceStore/getDeviceType',
             })
             .then(() => {
-              this.callGetListBrands({
-                isDescending: false,
-                isPaging: false,
-                isSort: false,
-                orderBy: '',
-                pageLimitItem: 10,
-                pageNumber: 0,
-                seachValue: '',
-              });
               this.setLocationsTableLoading(false);
+              this.readJWT();
             });
         });
       })
       .catch(() => {
         this.setLocationsTableLoading(false);
       });
+  };
+
+  readJWT = async () => {
+    await this.props.dispatch({
+      type: 'user/readJWT',
+    });
   };
 
   callGetListLocations = async (param?: any) => {
@@ -69,15 +62,15 @@ class LocationScreen extends React.Component<LocationScreenProps> {
     });
   };
 
-  callGetListBrands = async (param?: any) => {
-    await this.props.dispatch({
-      type: 'brand/getListBrands',
-      payload: {
-        ...this.props.brand.getListBrandParam,
-        ...param,
-      },
-    });
-  };
+  // callGetListBrands = async (param?: any) => {
+  //   await this.props.dispatch({
+  //     type: 'brand/getListBrands',
+  //     payload: {
+  //       ...this.props.brand.getListBrandParam,
+  //       ...param,
+  //     },
+  //   });
+  // };
 
   setLocationsTableLoading = async (loading: boolean) => {
     await this.props.dispatch({
@@ -109,12 +102,14 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       this.setSelectedLocation({
         address: data.display_name,
       }).then(() => {
-        if (mapComponent.map) {
-          if (mapComponent.marker) {
-            mapComponent.marker.remove();
-            this.setMapComponent({
-              marker: undefined,
-            });
+        if (mapComponent) {
+          if (mapComponent.map) {
+            if (mapComponent.marker) {
+              mapComponent.marker.remove();
+              this.setMapComponent({
+                marker: undefined,
+              });
+            }
           }
         }
       });
@@ -185,175 +180,153 @@ class LocationScreen extends React.Component<LocationScreenProps> {
     });
   };
 
+  setGetDevicesParam = async (param: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/setGetDevicesParamReducer',
+      payload: {
+        ...this.props.deviceStore.getDevicesParam,
+        ...param,
+      },
+    });
+  };
+
+  redirectToListDevicesByLocation = async (record: Location) => {
+    this.setGetDevicesParam({
+      locationId: record.id,
+    }).then(() => {
+      history.push('/devices');
+    });
+  };
+
   render() {
     const {
       getListLocationParam,
       listLocations,
       totalItem,
       locationTableLoading,
-      mapComponent,
       addNewLocationModal,
       editLocationModal,
     } = this.props.location;
-
     return (
-      <>
-        <PageContainer>
-          <Table
-            loading={locationTableLoading}
-            dataSource={listLocations}
-            scroll={{
-              x: 400,
-              y: 1000,
-            }}
-            pagination={{
-              current: getListLocationParam.pageNumber + 1,
-              total: totalItem,
-              onChange: async (e) => {
-                this.setLocationsTableLoading(true)
-                  .then(() => {
-                    this.callGetListLocations({
-                      pageNumber: e - 1,
-                    }).then(() => {
-                      this.setLocationsTableLoading(false);
-                    });
-                  })
-                  .catch(() => {
-                    this.setLocationsTableLoading(false);
-                  });
-              },
-            }}
-            title={() => (
-              <>
-                <Button
-                  onClick={async () => {
-                    this.clearCreateLocationParam().then(() => {
-                      if (mapComponent.map) {
-                        if (mapComponent.marker) {
-                          mapComponent.marker.removeFrom(mapComponent.map);
-                          this.setMapComponent({
-                            marker: undefined,
-                          });
-                        }
-                      }
-                      this.setAddNewLocationModal({
+      <PageContainer>
+        <Row gutter={20}>
+          <Col span={12}>
+            <div
+              style={{
+                overflow: 'hidden',
+              }}
+            >
+              <Table
+                loading={locationTableLoading}
+                dataSource={listLocations}
+                scroll={{
+                  x: 400,
+                  y: 530,
+                }}
+                style={{
+                  overflowY: 'scroll',
+                }}
+                pagination={{
+                  current: getListLocationParam?.pageNumber
+                    ? getListLocationParam?.pageNumber + 1
+                    : 1,
+                  total: totalItem,
+                  pageSize: getListLocationParam?.pageLimitItem
+                    ? getListLocationParam?.pageLimitItem
+                    : 10,
+                  onChange: async (e) => {
+                    this.setLocationsTableLoading(true)
+                      .then(() => {
+                        this.callGetListLocations({
+                          pageNumber: e - 1,
+                        }).then(() => {
+                          this.setLocationsTableLoading(false);
+                        });
+                      })
+                      .catch(() => {
+                        this.setLocationsTableLoading(false);
+                      });
+                  },
+                }}
+                title={() => (
+                  <>
+                    <LocationTableHeaderComponent {...this.props} />
+                  </>
+                )}
+                onRow={(record) => {
+                  return {
+                    onDoubleClick: () => {
+                      this.redirectToListDevicesByLocation(record);
+                    },
+
+                    onClick: async () => {
+                      const { data } = await this.reverseGeocoding(
+                        record.latitude,
+                        record.longitude,
+                      );
+                      await this.setSelectedLocation({
+                        ...record,
+                        address: data.display_name,
+                      });
+                      await this.setEditLocationModal({
                         visible: true,
                       });
-                    });
-                    // this.setAddNewLocationModal({
-                    //   visible: true,
-                    // });
-                  }}
-                  icon={<PlusSquareTwoTone />}
-                >
-                  Add New Location
-                </Button>
-              </>
-            )}
-          >
-            <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
-            <Column key="name" dataIndex="name" title="Name"></Column>
-            <Column key="description" dataIndex="description" title="Description"></Column>
-            <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
-            <Column key="brandName" dataIndex="brandName" title="Brand Name"></Column>
-            {/* <Column
-              width="auto"
-              key="coordination"
-              render={(text, record: Location) => {
-                return (
-                  <>
-                    {record.longitude}-{record.latitude}
-                  </>
-                );
-              }}
-            ></Column> */}
-            <Column
-              key="isApprove"
-              render={(text, record: any) => {
-                return (
-                  <Alert
-                    style={{ textAlign: 'center' }}
-                    message={
+                    },
+                  };
+                }}
+              >
+                <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
+                <Column key="name" dataIndex="name" title="Name"></Column>
+                <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
+                {/* <Column
+                  key="action"
+                  width={150}
+                  title="Action"
+                  render={(text, record: any) => {
+                    return (
                       <>
-                        <Space align="center" style={{ textAlign: 'center' }}>
-                          {record.isApprove ? <CheckCircleTwoTone /> : <ClockCircleTwoTone />}
+                        <Space>
+                          <Button
+                            onClick={async () => {
+                              this.setSelectedLocation(record).then(() => {
+                                this.setLocationAddressInMap(record).then(() => {
+                                  this.setEditLocationModal({
+                                    visible: true,
+                                  });
+                                });
+                              });
+                            }}
+                          >
+                            <EditTwoTone />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              this.deleteConfirm(record);
+                            }}
+                          >
+                            <DeleteTwoTone twoToneColor="#f93e3e" />
+                          </Button>
                         </Space>
                       </>
-                    }
-                    type={record.isApprove ? 'success' : 'warning'}
-                  />
-                );
-                // if (record.isApprove) {
-                //   return (
-                //     <Alert
-                //       message={
-                //         <>
-                //           <Space align="center" style={{ textAlign: 'center' }}>
-                //             <CheckCircleTwoTone />
-                //             Approved
-                //           </Space>
-                //         </>
-                //       }
-                //       type="warning"
-                //     />
-                //   );
-                // }
-                // return (
-                //   <Alert
-                //     message={
-                //       <>
-                //         <Space align="center" style={{ textAlign: 'center' }}>
-                //           <ClockCircleTwoTone />
-                //           Waiting Approve
-                //         </Space>
-                //       </>
-                //     }
-                //     type="warning"
-                //   />
-                // );
-              }}
-            ></Column>
-            <Column
-              key="action"
-              width={200}
-              fixed="right"
-              title="Action"
-              render={(text, record: any) => {
-                return (
-                  <>
-                    <Space>
-                      <Button
-                        onClick={async () => {
-                          this.setSelectedLocation(record).then(() => {
-                            this.setLocationAddressInMap(record).then(() => {
-                              this.setEditLocationModal({
-                                visible: true,
-                              });
-                            });
-                          });
-                        }}
-                      >
-                        <EditTwoTone />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          this.deleteConfirm(record);
-                        }}
-                      >
-                        <DeleteTwoTone twoToneColor="#f93e3e" />
-                      </Button>
-                    </Space>
-                  </>
-                );
-              }}
-            ></Column>
-          </Table>
-          {addNewLocationModal.visible && <AddNewLocationModal {...this.props} />}
-          {editLocationModal.visible && <EditLocationModal {...this.props} />}
-        </PageContainer>
-      </>
+                    );
+                  }}
+                ></Column> */}
+              </Table>
+            </div>
+          </Col>
+          <Col span={12}>
+            {editLocationModal?.visible && (
+              <Typography.Title level={4}>Edit Location Detail</Typography.Title>
+            )}
+            {editLocationModal?.visible && <ViewLocationDetailComponent {...this.props} />}
+          </Col>
+        </Row>
+
+        {addNewLocationModal?.visible && <AddNewLocationModal {...this.props} />}
+        {/* {editLocationModal?.visible && <EditLocationModal {...this.props} />} */}
+      </PageContainer>
     );
   }
 }
 
-export default connect((state) => ({ ...state }))(LocationScreen);
+export default connect((state: any) => ({ ...state }))(LocationScreen);

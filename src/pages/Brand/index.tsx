@@ -28,6 +28,7 @@ class BrandScreen extends React.Component<BrandProps> {
       .then(() => {
         this.setBrandsTableLoading(true).then(() => {
           this.callGetListBrands().then(() => {
+            this.readJWT();
             this.setBrandsTableLoading(false);
           });
         });
@@ -35,6 +36,12 @@ class BrandScreen extends React.Component<BrandProps> {
       .catch(() => {
         this.setBrandsTableLoading(false);
       });
+  };
+
+  readJWT = async () => {
+    await this.props.dispatch({
+      type: 'user/readJWT',
+    });
   };
 
   clearGetListBrandsParam = async () => {

@@ -1,15 +1,14 @@
 import {
   DeleteDevice,
-  GetDeviceParams,
   GetDevices,
   GetListTypes,
   UpdateDevice,
-  UpdateDeviceParams,
   UpdateListDevices,
-  UpdateListDevicesParam,
 } from '@/services/DevicePageService';
+import type {GetDeviceParams, UpdateDeviceParams, UpdateListDevicesParam} from '@/services/DevicePageService';
 import moment from 'moment';
 import type { Effect, Reducer } from 'umi';
+import { fetchScreenShot } from '@/services/FirebaseService';
 
 export type DeviceType = {
   key: string;
@@ -32,21 +31,30 @@ export type DeviceType = {
     id: string;
     typeName: string;
   };
+  location?: any;
 };
 
 export type DeviceModelState = {
-  selectedDevice: DeviceType;
-  listDevices: any[];
-  listDeviceTypes: any[];
-  editDeviceVisible: boolean;
-  selectedDevices: any[];
-  editMultipleDevicesDrawerVisible: boolean;
+  selectedDevice?: DeviceType;
+  listDevices?: any[];
+  listDeviceTypes?: any[];
+  editDeviceVisible?: boolean;
+  selectedDevices?: any[];
+  editMultipleDevicesDrawerVisible?: boolean;
 
   // Update Drawer Model State
-  isUpdateMultiple: boolean;
-  updateDevicesState: UpdateListDevicesParam;
-  getDevicesParam: GetDeviceParams;
-  totalItem: number;
+  isUpdateMultiple?: boolean;
+  updateDevicesState?: UpdateListDevicesParam;
+  getDevicesParam?: GetDeviceParams;
+  totalItem?: number;
+  devicesTableLoading?: boolean;
+
+  listDevicesScreenShot?: any;
+
+  viewScreenshotModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  }
 };
 
 export type DeviceModelType = {
@@ -66,6 +74,8 @@ export type DeviceModelType = {
     getDeviceType: Effect;
     updateListDevice: Effect;
     setGetDevicesParam: Effect;
+
+    fetchDevicesScreenShot: Effect;
   };
 
   // 4. Reducers
@@ -82,6 +92,9 @@ export type DeviceModelType = {
     setGetDevicesParamReducer: Reducer<DeviceModelState>;
     clearGetDevicesParam: Reducer<DeviceModelState>;
     setTotalItemReducer: Reducer<DeviceModelState>;
+    setDevicesTableLoadingReducer: Reducer<DeviceModelState>;
+    setViewScreenshotModalReducer: Reducer<DeviceModelState>;
+    setListDevicesScreenShotReducer: Reducer<DeviceModelState>;
   };
 };
 
@@ -121,7 +134,7 @@ const DeviceModel: DeviceModelType = {
       isSort: false,
       orderBy: '',
       pageLimitItem: 10,
-      pageNumber: 1,
+      pageNumber: 0,
       name: '',
       typeId: null,
     },
@@ -172,6 +185,12 @@ const DeviceModel: DeviceModelType = {
 
     totalItem: 0,
     //----------------
+
+    devicesTableLoading: false,
+    viewScreenshotModal: {
+      isLoading: false,
+      visible: false
+    }
   },
 
   //
@@ -190,12 +209,15 @@ const DeviceModel: DeviceModelType = {
         isSort: false,
         orderBy: '',
         pageLimitItem: 10,
-        pageNumber: 1,
+        pageNumber: 0,
         name: '',
         typeId: null,
       };
       if (payload) {
-        param = payload;
+        param = {
+          ...param,
+          ...payload
+        };
       }
 
       yield put({
@@ -218,7 +240,6 @@ const DeviceModel: DeviceModelType = {
           createTime: moment(d.createTime).format('YYYY-MM-DD'),
         };
       });
-      console.log(res);
       yield put({
         type: 'setDevices',
         payload: res,
@@ -309,6 +330,17 @@ const DeviceModel: DeviceModelType = {
         }),
       });
     },
+
+    *fetchDevicesScreenShot({ payload }, { call, put }) {
+      const data = yield call(fetchScreenShot, payload);
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
+      yield put({
+        type: "setListDevicesScreenShotReducer",
+        payload: data
+      })
+    }
   },
 
   //
@@ -369,11 +401,12 @@ const DeviceModel: DeviceModelType = {
         ...state,
         listDeviceTypes: payload,
         updateDevicesState: {
-          ...state.updateDevicesState,
+          ...state?.updateDevicesState,
           currentType: payload[0].typeName,
         },
       };
     },
+
     clearUpdateDevicesDrawer(state) {
       return {
         ...state,
@@ -384,6 +417,7 @@ const DeviceModel: DeviceModelType = {
           endDate: moment(Date.now()).format('YYYY-MM-DD'),
           idList: [],
           minBid: 0,
+          isPublished: false,
           startDate: moment(Date.now()).format('YYYY-MM-DD'),
           timeFilter: [
             '0',
@@ -442,6 +476,8 @@ const DeviceModel: DeviceModelType = {
           pageLimitItem: 10,
           pageNumber: 1,
           searchValue: '',
+          name: "",
+          typeId: ""
         },
       };
     },
@@ -452,6 +488,27 @@ const DeviceModel: DeviceModelType = {
         totalItem: payload,
       };
     },
+
+    setDevicesTableLoadingReducer(state, { payload }) {
+      return {
+        ...state,
+        devicesTableLoading: payload
+      }
+    },
+
+    setViewScreenshotModalReducer(state, { payload }) {
+      return {
+        ...state,
+        viewScreenshotModal: payload
+      }
+    },
+
+    setListDevicesScreenShotReducer(state, { payload }) {
+      return {
+        ...state,
+        listDevicesScreenShot: payload
+      }
+    }
   },
 };
 

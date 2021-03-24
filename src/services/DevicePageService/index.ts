@@ -9,7 +9,8 @@ export type GetDeviceParams = {
   pageLimitItem: number,
   orderBy: string,
   name: string,
-  typeId: string | null
+  typeId: string | null,
+  locationId?: string;
 }
 
 export type CreateDeviceParams = {

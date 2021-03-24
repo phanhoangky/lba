@@ -14,6 +14,8 @@ export enum CONSTANTS_LBA {
   BRAND_URL = `brands`,
   LOCATION_URL = `locations`,
   MOMO_PAYMENT_URL = 'momopayment',
+  FEE_URL = "fee",
+  TRANSACTION_URL = "transactions",
 }
 
 export enum CONSTANTS_TOMO {
@@ -39,3 +41,12 @@ export enum CONSTANTS_LOCATIONIQ {
   AUTOCOMPLETE = "autocomplete.php",
   GEOCODING = "search.php"
 }
+
+// export enum TYPE_TRANSACTIONS {
+//   TRANSFER_MONEY = 0,
+//   CREATE_CAMPAIGN = 1, //
+//   DELETE_CAMPAIGN = 2, //
+//   SIGN_MEDIA = 3,
+// }
+
+export const TYPE_TRANSACTIONS: string[] = ["Transfer", "Create Campaign", "Delete Campaign", "Sign Media"]

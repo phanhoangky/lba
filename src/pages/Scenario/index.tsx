@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Table } from 'antd';
+import { Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -8,7 +8,7 @@ import type {
   PlayListModelState,
   ScenarioItem,
   ScenarioModelState,
-  UserTestModelState,
+  UserModelState,
 } from 'umi';
 import { connect } from 'umi';
 // import AddNewScenarioModal from './components/AddNewScenarioModal';
@@ -19,12 +19,12 @@ import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioSer
 import { cloneDeep } from 'lodash';
 import AddNewScenarioFormModal from './components/AddNewScenarioFormModal';
 import EditScenarioFormDrawer from './components/EditScenarioFormDrawer';
-import { PlusSquareTwoTone } from '@ant-design/icons';
+import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
 
 type ScenarioProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  userTest: UserTestModelState;
+  user: UserModelState;
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };
@@ -48,7 +48,7 @@ class Scenario extends React.Component<ScenarioProps> {
 
   readJWT = async () => {
     await this.props.dispatch({
-      type: 'userTest/readJWT',
+      type: 'user/readJWT',
       payload: '',
     });
   };
@@ -109,7 +109,7 @@ class Scenario extends React.Component<ScenarioProps> {
     });
   };
 
-  setSelectedScenarios = async (item: any) => {
+  setSelectedScenario = async (item: any) => {
     await this.props.dispatch({
       type: 'scenarios/setSelectedScenarioReducer',
       payload: {
@@ -142,40 +142,42 @@ class Scenario extends React.Component<ScenarioProps> {
   choosePlaylist = () => {
     const { selectedSenario, selectedArea, playlistsDrawer } = this.props.scenarios;
 
-    const selectedPlaylist = playlistsDrawer.listPlaylists.filter((item) => item.isSelected)[0];
+    const selectedPlaylist = playlistsDrawer?.listPlaylists.filter((item) => item.isSelected)[0];
 
-    const selectedScenarioItem = selectedSenario.scenarioItems.filter(
-      (item) => item.area.id === selectedArea.id,
+    const selectedScenarioItem = selectedSenario?.scenarioItems.filter(
+      (item) => item?.area?.id === selectedArea?.id,
     );
-    if (selectedScenarioItem.length > 0) {
-      this.setSelectedScenarios({
-        scenarioItems: selectedSenario.scenarioItems.map((item) => {
-          if (selectedScenarioItem[0].id === item.id) {
-            return {
-              ...item,
-              playlist: selectedPlaylist,
-              scenario: selectedSenario,
-            };
-          }
+    if (selectedScenarioItem && selectedScenarioItem.length) {
+      if (selectedScenarioItem.length > 0) {
+        this.setSelectedScenario({
+          scenarioItems: selectedSenario?.scenarioItems.map((item) => {
+            if (selectedScenarioItem[0].id === item.id) {
+              return {
+                ...item,
+                playlist: selectedPlaylist,
+                scenario: selectedSenario,
+              };
+            }
 
-          return item;
-        }),
-      });
-    } else {
-      const newScenarioItem: ScenarioItem = {
-        area: selectedArea,
-        audioArea: false,
-        displayOrder: 1,
-        id: uuidv4(),
-        isActive: true,
-        playlist: selectedPlaylist,
-        scenario: selectedSenario,
-      };
+            return item;
+          }),
+        });
+      } else {
+        const newScenarioItem: ScenarioItem = {
+          area: selectedArea,
+          audioArea: false,
+          displayOrder: 1,
+          id: uuidv4(),
+          isActive: true,
+          playlist: selectedPlaylist,
+          scenario: selectedSenario,
+        };
 
-      selectedSenario.scenarioItems.push(newScenarioItem);
-      this.setSelectedScenarios({
-        scenarioItems: selectedSenario.scenarioItems,
-      });
+        selectedSenario?.scenarioItems.push(newScenarioItem);
+        this.setSelectedScenario({
+          scenarioItems: selectedSenario?.scenarioItems,
+        });
+      }
     }
     this.setPlaylistDrawer({
       visible: false,
@@ -235,6 +237,22 @@ class Scenario extends React.Component<ScenarioProps> {
     await this.setSelectedPlaylistItems([]);
   };
 
+  clearAreas = async () => {
+    const { selectedSenario } = this.props.scenarios;
+    const newAreas = selectedSenario?.layout.areas.map((area) => {
+      return {
+        ...area,
+        typeMediaName: undefined,
+        urlPreview: undefined,
+      };
+    });
+    await this.setSelectedScenario({
+      layout: {
+        ...selectedSenario?.layout,
+        areas: newAreas,
+      },
+    });
+  };
   render() {
     const {
       getListScenarioParam,
@@ -250,7 +268,7 @@ class Scenario extends React.Component<ScenarioProps> {
           dataSource={listScenario}
           loading={tableLoading}
           pagination={{
-            current: getListScenarioParam.pageNumber + 1,
+            current: getListScenarioParam?.pageNumber ? getListScenarioParam?.pageNumber + 1 : 1,
             total: totalItem,
             onChange: async (e) => {
               this.setGetListScenarioParam({
@@ -263,16 +281,7 @@ class Scenario extends React.Component<ScenarioProps> {
           title={() => {
             return (
               <>
-                <Button
-                  onClick={() => {
-                    this.setAddNewScenarioModal({
-                      visible: true,
-                    });
-                  }}
-                  icon={<PlusSquareTwoTone />}
-                >
-                  Add New Scenario
-                </Button>
+                <ScenarioTableHeaderComponent {...this.props} />
               </>
             );
           }}
@@ -284,10 +293,13 @@ class Scenario extends React.Component<ScenarioProps> {
                 })
                   .then(() => {
                     const clone = cloneDeep(item);
-                    this.setSelectedScenarios(clone).then(() => {
-                      this.setEditScenariosDrawer({
-                        visible: true,
-                        isLoading: false,
+                    this.setSelectedScenario(clone).then(() => {
+                      this.clearSelectedPlaylistItems().then(() => {
+                        this.clearAreas();
+                        this.setEditScenariosDrawer({
+                          visible: true,
+                          isLoading: false,
+                        });
                       });
                     });
                   })
@@ -305,130 +317,12 @@ class Scenario extends React.Component<ScenarioProps> {
         </Table>
 
         {/* Add New Scenario Modal */}
-        {/* <Modal
-          visible={addNewScenarioModal.visible}
-          confirmLoading={addNewScenarioModal.isLoading}
-          closable={false}
-          destroyOnClose={true}
-          onCancel={() => {
-            this.setAddNewScenarioModal({
-              visible: false,
-            });
-          }}
-          onOk={async () => {
-            await this.setTableLoading(true);
-            await this.setAddNewScenarioModal({
-              isLoading: true,
-            });
-            this.createNewScenario()
-              .then(() => {
-                this.callGetListScenario().then(() => {
-                  this.setAddNewScenarioModal({
-                    visible: false,
-                    isLoading: false,
-                  }).then(() => {
-                    this.setTableLoading(false);
-                  });
-                });
-              })
-              .catch(() => {
-                this.setTableLoading(false);
-              });
-          }}
-        >
-          <AddNewScenarioModal {...this.props} />
-        </Modal> */}
+
         <AddNewScenarioFormModal {...this.props} />
 
         {/* Edit Scenario Drawer */}
-        {/* <Drawer
-          visible={editScenarioDrawer.visible}
-          destroyOnClose={true}
-          getContainer={false}
-          afterVisibleChange={() => {
-            this.clearSelectedPlaylistItems();
-          }}
-          closable={false}
-          footer={
-            <>
-              <div style={{ textAlign: 'right' }}>
-                <Space>
-                  <Button
-                    danger
-                    onClick={() => {
-                      this.removeScenario(selectedSenario.id);
-                    }}
-                  >
-                    Remove
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const updateParam: UpdateScenarioParam = {
-                        description: selectedSenario.description,
-                        id: selectedSenario.id,
-                        layoutId: selectedSenario.layoutId,
-                        scenarioItems: selectedSenario.scenarioItems.map((item) => {
-                          return {
-                            id: item.id,
-                            areaId: item.area.id,
-                            audioArea: item.audioArea,
-                            displayOrder: item.displayOrder,
-                            isActive: item.isActive,
-                            playlistId: item.playlist.id,
-                            scenarioId: selectedSenario.id,
-                          };
-                        }),
-                        title: selectedSenario.title,
-                      };
 
-                      this.updateScenario(updateParam);
-                    }}
-                  >
-                    Save Change
-                  </Button>
-                </Space>
-              </div>
-            </>
-          }
-          onClose={() => {
-            this.setEditScenariosDrawer({
-              visible: false,
-            });
-          }}
-          width={'80%'}
-        >
-          <Skeleton active loading={editScenarioDrawer.isLoading}>
-            <EditScenarioDrawer {...this.props} />
-
-            <Drawer
-              title="Playlist"
-              width={`80%`}
-              closable={false}
-              destroyOnClose={true}
-              afterVisibleChange={() => {
-                this.clearSelectedPlaylistItems();
-              }}
-              onClose={() => {
-                this.setPlaylistDrawer({
-                  visible: false,
-                });
-              }}
-              visible={playlistsDrawer.visible}
-              footer={
-                <>
-                  <div style={{ textAlign: 'right' }}>
-                    <Button type="primary" onClick={async () => this.choosePlaylist()}>
-                      Choose Playlist
-                    </Button>
-                  </div>
-                </>
-              }
-            >
-              <SelectPlaylistDrawer {...this.props} />
-            </Drawer>
-          </Skeleton>
-        </Drawer> */}
-        {editScenarioDrawer.visible && <EditScenarioFormDrawer {...this.props} />}
+        {editScenarioDrawer?.visible && <EditScenarioFormDrawer {...this.props} />}
       </PageContainer>
     );
   }

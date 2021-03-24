@@ -30,7 +30,7 @@ export default class EtherService {
       console.log('====================================');
       balance = await this.contract.balanceOf(this.wallet.address);
     }
-    return balance.toString();
+    return ethers.BigNumber.from(balance);
   }
 
   async createAccount() {
@@ -73,20 +73,25 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id, isSign) {
+    console.log('====================================');
+    console.log("callPromise>>>>>", hash_id, isSign);
+    console.log('====================================');
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
 
     };
     const callPromise = await this.contract.addDocument(`0x${hash_id}`, overrides);
-    const receipt = await this.provider.getTransactionReceipt(callPromise.hash);
-    if (receipt.status !== 1) {
-      return "Fail On Server Blockchain";
-    }
+    const receipt = await callPromise.wait();
+
+    // if (receipt.status !== 1) {
+    //   return "Fail On Server Blockchain";
+    // }
     if (isSign === 1) {
-      await this.signDocument(hash_id);
+      //await this.signDocument(hash_id);
+      //return receipt.transactionHash;
     }
-    return "Success";
+    return "Fail On Server Blockchain";
   }
 
   async signDocument(hash_id) {
@@ -96,11 +101,16 @@ export default class EtherService {
     };
 
     const signDocumentFunction = await this.contract.signDocument(`0x${hash_id}`, overrides);
-    const receipt = await this.provider.getTransactionReceipt(signDocumentFunction.hash);
+    const receipt = await signDocumentFunction.wait();
+    console.log('====================================');
+    // console.log("signDocument>>>>>>", signDocumentFunction, receipt);
+    console.log('====================================');
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
-    return signDocumentFunction;
+    return "signDocumentFunction.transactionHash";
+    //  return signDocumentFunction.transactionHash;
+
   }
 
   async getSignatureDocument(id) {
@@ -114,7 +124,7 @@ export default class EtherService {
     const total = ethers.BigNumber.from(ethers.utils.parseEther(numberOfToken)).add(ethers.BigNumber.from(ethers.utils.parseEther(numberOfToken)));
     if (balance.ite(total)) {
       const callPromise = await this.contract.transfer(receiverAddress, numberOfToken);
-      const receipt = await this.provider.getTransactionReceipt(callPromise.hash);
+      const receipt = await callPromise.wait();
       if (receipt.status !== 1) {
         return "Fail On Server Blockchain";
       }
@@ -125,24 +135,37 @@ export default class EtherService {
   }
 
 
-  async createCampaign(campaignId, campaignTotal, feeAdvetiser, feeSupplier) {
-    const campaignTotals = ethers.BigNumber.from(campaignTotal.toString());
+  async createCampaign(campaignId, totalWithFee, totalBudget, remainBudget, feeCancel) {
+    if (totalBudget < 100000) return "Not Enough Total Budget";
+    if (totalWithFee < totalBudget) return "Wrong Total With Fee";
+    if (remainBudget <= 100000) return "Not Enough Remain Budget";
+    let minFeeCancel = feeCancel;
+    if (feeCancel <= 100000) minFeeCancel = 100000;
+
+    const totalWithFeeBN = ethers.BigNumber.from(totalWithFee.toString());
+    const totalBudgetBN = ethers.BigNumber.from(totalBudget.toString());
+    const remainBudgetBN = ethers.BigNumber.from(remainBudget.toString());
+    const feeCancelBN = ethers.BigNumber.from(minFeeCancel.toString());
+
     const balance = await this.getBalance();
-    if (campaignTotals < balance) {
-      const approveToTransferMoney = await this.contract.approve(this.evn.SUPPORT_ADDRESS, campaignTotals);
-      let receipt = await this.provider.getTransactionReceipt(approveToTransferMoney.hash);
+    if (totalWithFeeBN.lt(balance)) {
+      const approveToTransferMoney = await this.contract.approve(this.evn.SUPPORT_ADDRESS, totalWithFeeBN);
+      let receipt = await approveToTransferMoney.wait();
       if (receipt.status === 1) {
         const overrides = {
           gasLimit: ethers.BigNumber.from("2000000"),
           gasPrice: ethers.BigNumber.from("10000000000000"),
         };
-        const createCampaign = await this.contract.createCampaign(campaignId, campaignTotals, feeAdvetiser, feeSupplier, overrides);
-        receipt = await this.provider.getTransactionReceipt(createCampaign.hash);
+
+        const createCampaign = await this.contract.createCampaign(campaignId, totalWithFeeBN, totalBudgetBN, remainBudgetBN, feeCancelBN, overrides);
+        receipt = await createCampaign.wait();
         if (receipt.status !== 1) {
           return "Fail On Server Blockchain Create Campaign";
         }
-      } else {
-        return "Fail On Server Blockchain Approve Money";
+        console.log('====================================');
+        console.log("Create Campaign  >>>", createCampaign.hash);
+        console.log('====================================');
+        return createCampaign.hash;
       }
     } else {
       return "Not Enough Money";
@@ -156,12 +179,22 @@ export default class EtherService {
   }
 
   async cancelCampaign(id) {
+    console.log("Cancel Campaign >>>", id);
     const cancelCampaign = await this.contract.cancelCampaign(id);
-    const receipt = await this.provider.getTransactionReceipt(cancelCampaign.hash);
+    console.log("Cancel Campaign >>>", cancelCampaign);
+    const receipt = await cancelCampaign.wait();
+    console.log("Cancel Campaign Receipi>>>", receipt);
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain Create Campaign";
     }
-    return "Success";
+    const { feeCancel } = await this.getCampaignById(id);
+    console.log("Cancel Campaign feeCancel>>>", feeCancel.toString());
+
+    const result = {
+      hash: cancelCampaign.hash, feeCancel: feeCancel.toString()
+    }
+    console.log("Cancel Campaign result>>>", result);
+    return result;
   }
 
 }
