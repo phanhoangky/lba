@@ -20,14 +20,8 @@ export type Location = {
     id: string;
     typeName: string;
   },
-  brand: {
-    id: string;
-    name: string;
-  }
   typeId: string;
   typeName: string;
-  brandId: string;
-  brandName: string;
   address: string;
   isSelected: boolean;
 };
@@ -108,33 +102,25 @@ const LocationStore: LocationStoreModel = {
     listLocations: [],
     locationTableLoading: false,
     totalItem: 0,
-    selectedLocation: {
-      key: "",
-      id: "",
-      description: "",
-      isActive: true,
-      isApprove: false,
-      latitude: "",
-      longitude: "",
-      matchingCode: "",
-      name: "",
-      type: {
-        id: "",
-        typeName: ""
-      },
-      typeName: "",
-      typeId: "",
-
-      brand: {
-        id: "",
-        name: ""
-      },
-
-      brandId: "",
-      brandName: "",
-      address: "",
-      isSelected: false
-    },
+    // selectedLocation: {
+    //   key: "",
+    //   id: "",
+    //   description: "",
+    //   isActive: true,
+    //   isApprove: false,
+    //   latitude: "",
+    //   longitude: "",
+    //   matchingCode: "",
+    //   name: "",
+    //   type: {
+    //     id: "",
+    //     typeName: ""
+    //   },
+    //   typeName: "",
+    //   typeId: "",
+    //   address: "",
+    //   isSelected: false
+    // },
     
     createLocationParam: {
       brandId: "",
@@ -150,7 +136,6 @@ const LocationStore: LocationStoreModel = {
       isDescending: false,
       isPaging: true,
       isSort: false,
-      orderBy: "",
       pageLimitItem: 10,
       pageNumber: 0
     },
@@ -187,8 +172,6 @@ const LocationStore: LocationStoreModel = {
             ...item,
             typeId: item.type.id,
             typeName: item.type.typeName,
-            brandId: item.brand.id,
-            brandName: item.brand.name,
             isSelected: false
           }
         })

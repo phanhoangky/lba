@@ -79,7 +79,6 @@ const TransactionStore: TransactionStoreModel = {
           const diff = diffTwoDate(now, date);
           return {
             ...data,
-            key: data.id,
             time: moment(data.time).format("YYYY-MM-DD"),
             age: diff
           }

@@ -73,6 +73,9 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id, isSign) {
+    console.log('====================================');
+    console.log("callPromise>>>>>", hash_id, isSign);
+    console.log('====================================');
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
@@ -80,13 +83,15 @@ export default class EtherService {
     };
     const callPromise = await this.contract.addDocument(`0x${hash_id}`, overrides);
     const receipt = await callPromise.wait();
-    if (receipt.status !== 1) {
-      return "Fail On Server Blockchain";
-    }
+
+    // if (receipt.status !== 1) {
+    //   return "Fail On Server Blockchain";
+    // }
     if (isSign === 1) {
-      await this.signDocument(hash_id);
+      //await this.signDocument(hash_id);
+      //return receipt.transactionHash;
     }
-    return "Success";
+    return "Fail On Server Blockchain";
   }
 
   async signDocument(hash_id) {
@@ -97,10 +102,15 @@ export default class EtherService {
 
     const signDocumentFunction = await this.contract.signDocument(`0x${hash_id}`, overrides);
     const receipt = await signDocumentFunction.wait();
+    console.log('====================================');
+    // console.log("signDocument>>>>>>", signDocumentFunction, receipt);
+    console.log('====================================');
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
-    return signDocumentFunction;
+    return "signDocumentFunction.transactionHash";
+    //  return signDocumentFunction.transactionHash;
+
   }
 
   async getSignatureDocument(id) {

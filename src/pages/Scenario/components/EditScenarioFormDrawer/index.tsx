@@ -176,8 +176,11 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     const selectedScenarioItem = selectedSenario?.scenarioItems.filter(
       (item) => item?.area?.id === selectedArea?.id,
     );
-    if (selectedScenarioItem && selectedScenarioItem.length) {
-      if (selectedScenarioItem?.length > 0) {
+    console.log('====================================');
+    console.log(selectedScenarioItem, selectedPlaylist);
+    console.log('====================================');
+    if (selectedScenarioItem) {
+      if (selectedScenarioItem.length > 0) {
         this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems.map((item) => {
             if (selectedScenarioItem[0].id === item.id) {
@@ -195,7 +198,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
         const newScenarioItem: ScenarioItem = {
           area: selectedArea,
           audioArea: false,
-          displayOrder: 1,
+          displayOrder: 0,
           id: uuidv4(),
           isActive: true,
           playlist: selectedPlaylist,
@@ -203,6 +206,9 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
         };
 
         selectedSenario?.scenarioItems.push(newScenarioItem);
+        console.log('====================================');
+        console.log(selectedSenario);
+        console.log('====================================');
         this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems,
         });
@@ -536,7 +542,12 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                               {area &&
                                 area.typeMediaName &&
                                 area.typeMediaName.toLowerCase().includes('image') && (
-                                  <Image src={area.urlPreview} width={'100%'} height={'100%'} />
+                                  <Image
+                                    src={area.urlPreview}
+                                    width={'100%'}
+                                    height={'100%'}
+                                    preview={false}
+                                  />
                                 )}
                               {area &&
                                 area.typeMediaName &&
@@ -549,7 +560,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                                   ></video>
                                 )}
                             </div>
-                            {!area.urlPreview && (
+                            {/* {!area.urlPreview && (
                               <ReactPlayer
                                 url={scenarioItem.playlist?.playlistItems.map((item) => {
                                   return item.mediaSrc.urlPreview;
@@ -559,7 +570,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                                 controls={true}
                                 width={'100%'}
                               />
-                            )}
+                            )} */}
                           </div>
                           <div
                             style={{
@@ -603,6 +614,9 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                       onRow={(record) => {
                         return {
                           onClick: () => {
+                            console.log('====================================');
+                            console.log(record);
+                            console.log('====================================');
                             this.setUrlAreasOfScenario(
                               selectedArea,
                               record.mediaSrc.urlPreview,
@@ -647,7 +661,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
           footer={
             <>
               <div style={{ textAlign: 'right' }}>
-                <Button type="primary" onClick={async () => this.choosePlaylist()}>
+                <Button type="primary" onClick={() => this.choosePlaylist()}>
                   Choose Playlist
                 </Button>
               </div>

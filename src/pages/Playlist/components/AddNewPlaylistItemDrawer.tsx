@@ -20,7 +20,7 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
   };
 
   componentDidMount() {
-    Promise.all([this.getMediaNotBelongToPlaylist({ isSigned: 2 })]);
+    Promise.all([this.getMediaNotBelongToPlaylist({ isSigned: 2, isApproved: true })]);
   }
 
   getMediaNotBelongToPlaylist = async (param: any) => {

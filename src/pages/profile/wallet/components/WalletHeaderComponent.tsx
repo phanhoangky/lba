@@ -179,7 +179,12 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                       </Row>
                       <Row wrap>
                         <Col span={24}>
-                          {currentUser && currentUser.balance && currentUser.balance.toString()} VND
+                          {currentUser &&
+                            currentUser.balance &&
+                            currentUser.balance
+                              .toString()
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
+                          VND
                         </Col>
                       </Row>
                       <Row>

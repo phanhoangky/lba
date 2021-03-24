@@ -118,7 +118,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   selectLocation = async (id: string) => {
     const { listLocations } = this.props.location;
 
-    const newList = listLocations.map((item) => {
+    const newList = listLocations?.map((item) => {
       if (item.id === id) {
         return {
           ...item,
@@ -236,16 +236,18 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   setRadiusOfLocation = (radius: number) => {
     const { mapComponent } = this.props.location;
 
-    if (mapComponent.map) {
-      if (mapComponent.circle) {
-        // mapComponent.circle.remove();
-        mapComponent.circle.setRadius(radius).redraw();
-      } else if (mapComponent.marker) {
-        const { marker } = mapComponent;
-        const circle = L.circle(marker.getLatLng(), { radius }).addTo(mapComponent.map);
-        this.setMapComponent({
-          circle,
-        });
+    if (mapComponent) {
+      if (mapComponent.map) {
+        if (mapComponent.circle) {
+          // mapComponent.circle.remove();
+          mapComponent.circle.setRadius(radius).redraw();
+        } else if (mapComponent.marker) {
+          const { marker } = mapComponent;
+          const circle = L.circle(marker.getLatLng(), { radius }).addTo(mapComponent.map);
+          this.setMapComponent({
+            circle,
+          });
+        }
       }
     }
   };
@@ -257,32 +259,34 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
       const lat = Number.parseFloat(coordination.split('-')[0]);
       const lon = Number.parseFloat(coordination.split('-')[1]);
 
-      if (mapComponent.map) {
-        mapComponent.map.setView([lat, lon]);
+      if (mapComponent) {
+        if (mapComponent.map) {
+          mapComponent.map.setView([lat, lon]);
 
-        if (mapComponent.marker) {
-          mapComponent.marker.setLatLng([lat, lon]);
-          L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
-        } else {
-          const marker = L.marker([lat, lon]).addTo(mapComponent.map);
-          L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
-          await this.setMapComponent({
-            marker,
-          });
-        }
-
-        if (mapComponent.circle) {
-          mapComponent.circle.setLatLng([lat, lon]).redraw();
-
-          if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
-            mapComponent.circle.setRadius(createCampaignParam.radius * 1000);
+          if (mapComponent.marker) {
+            mapComponent.marker.setLatLng([lat, lon]);
+            L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
+          } else {
+            const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+            L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
+            await this.setMapComponent({
+              marker,
+            });
           }
-        } else if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
-          const circle = L.circle([lat, lon]).setRadius(createCampaignParam.radius);
-          circle.addTo(mapComponent.map);
-          await this.setMapComponent({
-            circle,
-          });
+
+          if (mapComponent.circle) {
+            mapComponent.circle.setLatLng([lat, lon]).redraw();
+
+            if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
+              mapComponent.circle.setRadius(createCampaignParam.radius * 1000);
+            }
+          } else if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
+            const circle = L.circle([lat, lon]).setRadius(createCampaignParam.radius);
+            circle.addTo(mapComponent.map);
+            await this.setMapComponent({
+              circle,
+            });
+          }
         }
       }
 
@@ -292,19 +296,24 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
 
   resetMap = async () => {
     const { mapComponent } = this.props.location;
-    if (mapComponent.map) {
-      if (mapComponent.marker) {
-        mapComponent.marker.remove();
+    if (mapComponent) {
+      if (mapComponent.map) {
         this.setMapComponent({
-          marker: undefined,
+          map: undefined,
         });
-      }
+        if (mapComponent.marker) {
+          mapComponent.marker.remove();
+          this.setMapComponent({
+            marker: undefined,
+          });
+        }
 
-      if (mapComponent.circle) {
-        mapComponent.circle.remove();
-        this.setMapComponent({
-          circle: undefined,
-        });
+        if (mapComponent.circle) {
+          mapComponent.circle.remove();
+          this.setMapComponent({
+            circle: undefined,
+          });
+        }
       }
     }
   };
@@ -521,7 +530,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   //   //   address: e,
                   //   // });
                   // }}
-                  handleOnSelect={(value: any, address: any) => {
+                  onChange={(value: any, address: any) => {
                     this.handleAutoCompleteSearch(value, address);
                   }}
                 />

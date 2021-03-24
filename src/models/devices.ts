@@ -8,6 +8,7 @@ import {
 import type {GetDeviceParams, UpdateDeviceParams, UpdateListDevicesParam} from '@/services/DevicePageService';
 import moment from 'moment';
 import type { Effect, Reducer } from 'umi';
+import { fetchScreenShot } from '@/services/FirebaseService';
 
 export type DeviceType = {
   key: string;
@@ -30,6 +31,7 @@ export type DeviceType = {
     id: string;
     typeName: string;
   };
+  location?: any;
 };
 
 export type DeviceModelState = {
@@ -45,6 +47,14 @@ export type DeviceModelState = {
   updateDevicesState?: UpdateListDevicesParam;
   getDevicesParam?: GetDeviceParams;
   totalItem?: number;
+  devicesTableLoading?: boolean;
+
+  listDevicesScreenShot?: any;
+
+  viewScreenshotModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  }
 };
 
 export type DeviceModelType = {
@@ -64,6 +74,8 @@ export type DeviceModelType = {
     getDeviceType: Effect;
     updateListDevice: Effect;
     setGetDevicesParam: Effect;
+
+    fetchDevicesScreenShot: Effect;
   };
 
   // 4. Reducers
@@ -80,6 +92,9 @@ export type DeviceModelType = {
     setGetDevicesParamReducer: Reducer<DeviceModelState>;
     clearGetDevicesParam: Reducer<DeviceModelState>;
     setTotalItemReducer: Reducer<DeviceModelState>;
+    setDevicesTableLoadingReducer: Reducer<DeviceModelState>;
+    setViewScreenshotModalReducer: Reducer<DeviceModelState>;
+    setListDevicesScreenShotReducer: Reducer<DeviceModelState>;
   };
 };
 
@@ -170,6 +185,12 @@ const DeviceModel: DeviceModelType = {
 
     totalItem: 0,
     //----------------
+
+    devicesTableLoading: false,
+    viewScreenshotModal: {
+      isLoading: false,
+      visible: false
+    }
   },
 
   //
@@ -309,6 +330,17 @@ const DeviceModel: DeviceModelType = {
         }),
       });
     },
+
+    *fetchDevicesScreenShot({ payload }, { call, put }) {
+      const data = yield call(fetchScreenShot, payload);
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
+      yield put({
+        type: "setListDevicesScreenShotReducer",
+        payload: data
+      })
+    }
   },
 
   //
@@ -374,6 +406,7 @@ const DeviceModel: DeviceModelType = {
         },
       };
     },
+
     clearUpdateDevicesDrawer(state) {
       return {
         ...state,
@@ -455,6 +488,27 @@ const DeviceModel: DeviceModelType = {
         totalItem: payload,
       };
     },
+
+    setDevicesTableLoadingReducer(state, { payload }) {
+      return {
+        ...state,
+        devicesTableLoading: payload
+      }
+    },
+
+    setViewScreenshotModalReducer(state, { payload }) {
+      return {
+        ...state,
+        viewScreenshotModal: payload
+      }
+    },
+
+    setListDevicesScreenShotReducer(state, { payload }) {
+      return {
+        ...state,
+        listDevicesScreenShot: payload
+      }
+    }
   },
 };
 

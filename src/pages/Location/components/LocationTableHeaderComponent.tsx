@@ -3,7 +3,7 @@ import {
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
+import { Button, Col, Dropdown, Input, Menu, Row, Select, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, LocationModelState } from 'umi';
 import { connect } from 'umi';
@@ -62,54 +62,72 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
     const { mapComponent, getListLocationParam } = this.props.location;
     return (
       <Space>
-        <Input.Search
-          width={'40%'}
-          value={getListLocationParam.searchValue}
-          enterButton
-          onSearch={(e) => {
-            this.setLocationsTableLoading(true)
-              .then(() => {
-                this.callGetListLocations({
-                  searchValue: e,
-                  pageNumber: 0,
-                }).then(() => {
-                  this.setLocationsTableLoading(false);
-                });
-              })
-              .catch(() => {
-                this.setLocationsTableLoading(false);
-              });
-          }}
-        />
-        <Button
-          onClick={async () => {
-            this.clearCreateLocationParam().then(() => {
-              if (mapComponent.map) {
-                if (mapComponent.marker) {
-                  mapComponent.marker.removeFrom(mapComponent.map);
-                  this.setMapComponent({
-                    marker: undefined,
-                  });
-                }
-              }
-              this.setAddNewLocationModal({
-                visible: true,
-              });
-            });
-          }}
-          icon={<PlusSquareTwoTone />}
-        >
-          Add New Location
-        </Button>
-
-        <Dropdown
-          overlay={
-            <Menu
-              onClick={(e) => {
+        <Row>
+          <Col span={12}>
+            <Input.Search
+              width={'40%'}
+              // value={getListLocationParam?.searchValue}
+              enterButton
+              onSearch={(e) => {
                 this.setLocationsTableLoading(true)
                   .then(() => {
                     this.callGetListLocations({
-                      isDescending: e.key === 'desc',
+                      searchValue: e,
+                      pageNumber: 0,
+                    }).then(() => {
+                      this.setLocationsTableLoading(false);
+                    });
+                  })
+                  .catch(() => {
+                    this.setLocationsTableLoading(false);
+                  });
+              }}
+            />
+
+            <Dropdown
+              overlay={
+                <Menu
+                  onClick={(e) => {
+                    this.setLocationsTableLoading(true)
+                      .then(() => {
+                        this.callGetListLocations({
+                          isDescending: e.key === 'desc',
+                          isSort: true,
+                        }).then(() => {
+                          this.setLocationsTableLoading(false);
+                        });
+                      })
+                      .catch(() => {
+                        this.setLocationsTableLoading(false);
+                      });
+                  }}
+                >
+                  <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
+                    Ascending
+                  </Menu.Item>
+                  <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
+                    Descending
+                  </Menu.Item>
+                </Menu>
+              }
+            >
+              <Button>
+                {getListLocationParam?.isDescending && <SortDescendingOutlined />}
+                {!getListLocationParam?.isDescending && <SortAscendingOutlined />}
+              </Button>
+            </Dropdown>
+            <Select
+              style={{
+                width: '100px',
+              }}
+              defaultValue=""
+              value={getListLocationParam?.orderBy}
+              onChange={(e) => {
+                this.setLocationsTableLoading(true)
+                  .then(() => {
+                    this.callGetListLocations({
+                      orderBy: e !== '' ? e : undefined,
+                      isSort: e !== '',
                     }).then(() => {
                       this.setLocationsTableLoading(false);
                     });
@@ -119,40 +137,41 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
                   });
               }}
             >
-              <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
-                Ascending
-              </Menu.Item>
-              <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
-                Descending
-              </Menu.Item>
-            </Menu>
-          }
-        >
-          <Button>
-            {getListLocationParam.isDescending && <SortDescendingOutlined />}
-            {!getListLocationParam.isDescending && <SortAscendingOutlined />}
-          </Button>
-        </Dropdown>
-        <Select
-          defaultValue=""
-          value={getListLocationParam.orderBy}
-          onChange={(e) => {
-            this.setLocationsTableLoading(true)
-              .then(() => {
-                this.callGetListLocations({
-                  orderBy: e,
-                }).then(() => {
-                  this.setLocationsTableLoading(false);
-                });
-              })
-              .catch(() => {
-                this.setLocationsTableLoading(false);
-              });
-          }}
-        >
-          <Select.Option value="">Default</Select.Option>
-          <Select.Option value="createDate">Create Date</Select.Option>
-        </Select>
+              <Select.Option value="CreateTime">Create Time</Select.Option>
+              <Select.Option value="Name">Name</Select.Option>
+            </Select>
+          </Col>
+          <Col span={12}>
+            <div
+              style={{
+                textAlign: 'right',
+              }}
+            >
+              <Button
+                onClick={async () => {
+                  this.clearCreateLocationParam().then(() => {
+                    if (mapComponent) {
+                      if (mapComponent.map) {
+                        if (mapComponent.marker) {
+                          mapComponent.marker.removeFrom(mapComponent.map);
+                          this.setMapComponent({
+                            marker: undefined,
+                          });
+                        }
+                      }
+                    }
+                    this.setAddNewLocationModal({
+                      visible: true,
+                    });
+                  });
+                }}
+                icon={<PlusSquareTwoTone />}
+              >
+                Add New Location
+              </Button>
+            </div>
+          </Col>
+        </Row>
       </Space>
     );
   }

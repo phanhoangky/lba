@@ -34,13 +34,8 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
       return;
     }
 
-    if (key === 'wallet') {
-      history.push(`/profile/wallet`);
-      return;
-    }
-
     if (key === 'profile') {
-      history.push(`/profile/infor`);
+      history.push(`/profile`);
       return;
     }
 
@@ -63,12 +58,6 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
           <Menu.Item key="profile">
             <UserOutlined />
             Profile
-          </Menu.Item>
-        )}
-        {menu && (
-          <Menu.Item key="wallet">
-            <SettingOutlined />
-            Wallet
           </Menu.Item>
         )}
         {menu && <Menu.Divider />}

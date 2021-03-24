@@ -30,7 +30,7 @@ export type UpdateLocationParam = {
 }
 
 export async function GetLocations(param: GetLocationParam) {
-  const response = await ApiHelper.get(`${CONSTANTS_LBA.LOCATION_URL}/${CONSTANTS_LBA.LOCATION_URL}`, { params: { ...param } });
+  const response = await ApiHelper.get(`${CONSTANTS_LBA.LOCATION_URL}`, { params: { ...param } });
   return response;
 }
 

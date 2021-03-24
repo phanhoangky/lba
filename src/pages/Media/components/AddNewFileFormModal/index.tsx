@@ -75,38 +75,49 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     const byte = await values.upload.file.originFileObj.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
+    console.log('====================================');
+    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether);
+    console.log('====================================');
+    const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
+    if (signature && !signature.toLowerCase().includes('fail')) {
+      console.log('====================================');
+      console.log('Param  222>>>', security, signature);
+      console.log('====================================');
+      const param: CreateFileParam = {
+        ...createFileParam,
+        ...values,
+        securityHash: security,
+        public_id: security,
+        accountId: currentUser?.id,
+        hash: createFileParam.isSigned === 1 ? signature : undefined,
+        fileId: createFileParam.fileId,
+        isSigned: createFileParam.isSigned,
+        mediaSrcId: uuidv4(),
+      };
+      console.log('====================================');
+      console.log('Param >>>', signature, param);
+      console.log('====================================');
+      await this.props.dispatch({
+        type: 'media/createFile',
+        payload: {
+          ...param,
+        },
+      });
 
-    // const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
-    const param: CreateFileParam = {
-      ...createFileParam,
-      ...values,
-      securityHash: security,
-      public_id: security,
-      accountId: currentUser?.id,
-      fileId: createFileParam.fileId,
-      isSigned: createFileParam.isSigned,
-      mediaSrcId: uuidv4(),
-    };
-    await this.props.dispatch({
-      type: 'media/createFile',
-      payload: {
-        ...param,
-      },
-    });
-
-    this.setListLoading(true)
-      .then(() => {
-        this.callGetListMedia().then(() => {
-          this.clearCreateFileParam().then(() => {
-            this.clearFilelist().then(() => {
-              this.setListLoading(false);
+      this.setListLoading(true)
+        .then(() => {
+          this.callGetListMedia().then(() => {
+            this.clearCreateFileParam().then(() => {
+              this.clearFilelist().then(() => {
+                this.setListLoading(false);
+              });
             });
           });
+        })
+        .catch(() => {
+          this.setListLoading(false);
         });
-      })
-      .catch(() => {
-        this.setListLoading(false);
-      });
+    }
   };
 
   clearCreateFileParam = async () => {

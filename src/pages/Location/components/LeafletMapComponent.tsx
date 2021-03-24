@@ -13,7 +13,7 @@ export type LeafletMapComponentProps = {
   campaign: CampaignModelState;
 };
 
-class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
+export class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
   componentDidMount() {
     const { addNewLocationModal, editLocationModal } = this.props.location;
     const { addNewCampaignModal } = this.props.campaign;
@@ -34,67 +34,67 @@ class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
       console.log(e.latlng);
       console.log('====================================');
       mymap.setView([e.latlng.lat, e.latlng.lng]);
+      if (mapComponent) {
+        if (mapComponent.marker !== undefined) {
+          mapComponent.marker.remove();
+          const marker = L.marker(e.latlng);
+          marker.addTo(mymap);
+          this.setMapComponent({
+            marker,
+          });
+        } else {
+          const marker = L.marker(e.latlng);
+          marker.addTo(mymap);
+          this.setMapComponent({
+            marker,
+          });
+        }
+        if (mapComponent.circle) {
+          mapComponent.circle.setLatLng([e.latlng.lat, e.latlng.lng]).redraw();
+        }
+        const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
 
-      if (mapComponent.marker !== undefined) {
-        mapComponent.marker.remove();
-        const marker = L.marker(e.latlng);
-        marker.addTo(mymap);
-        this.setMapComponent({
-          marker,
-        });
-      } else {
-        const marker = L.marker(e.latlng);
-        marker.addTo(mymap);
-        this.setMapComponent({
-          marker,
-        });
-      }
-      if (mapComponent.circle) {
-        mapComponent.circle.setLatLng([e.latlng.lat, e.latlng.lng]).redraw();
-      }
-      const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
+        if (addNewLocationModal?.visible) {
+          await this.setCreateLocationParam({
+            address: data.display_name,
+            longitude: data.lon,
+            latitude: data.lat,
+          });
+        }
 
-      if (addNewLocationModal.visible) {
-        await this.setCreateLocationParam({
-          address: data.display_name,
-          longitude: data.lon,
-          latitude: data.lat,
-        });
-      }
+        if (editLocationModal?.visible) {
+          await this.setSelectedLocation({
+            address: data.display_name,
+            longitude: data.lon,
+            latitude: data.lat,
+          });
+        }
 
-      if (editLocationModal.visible) {
-        await this.setSelectedLocation({
-          address: data.display_name,
-          longitude: data.lon,
-          latitude: data.lat,
-        });
-      }
-
-      if (addNewCampaignModal.visible) {
-        const { createCampaignParam } = this.props.campaign;
-        if (createCampaignParam.radius > 0) {
-          if (mapComponent.map) {
-            if (!mapComponent.circle && createCampaignParam.radius !== 0) {
-              const circle = L.circle(e.latlng, {
-                radius: createCampaignParam.radius * 1000,
-              });
-              circle.addTo(mapComponent.map);
-              await this.setMapComponent({
-                circle,
-              });
-            } else {
-              mapComponent.circle
-                ?.setLatLng([data.lat, data.lon])
-                .setRadius(createCampaignParam.radius * 1000)
-                .redraw();
+        if (addNewCampaignModal.visible) {
+          const { createCampaignParam } = this.props.campaign;
+          if (createCampaignParam.radius > 0) {
+            if (mapComponent.map) {
+              if (!mapComponent.circle && createCampaignParam.radius !== 0) {
+                const circle = L.circle(e.latlng, {
+                  radius: createCampaignParam.radius * 1000,
+                });
+                circle.addTo(mapComponent.map);
+                await this.setMapComponent({
+                  circle,
+                });
+              } else {
+                mapComponent.circle
+                  ?.setLatLng([data.lat, data.lon])
+                  .setRadius(createCampaignParam.radius * 1000)
+                  .redraw();
+              }
             }
           }
+          await this.setCreateNewCampaignParam({
+            location: `${data.lat}-${data.lon}`,
+            address: data.display_name,
+          });
         }
-        await this.setCreateNewCampaignParam({
-          location: `${data.lat}-${data.lon}`,
-          address: data.display_name,
-        });
-
         // await this.setAddNewCampaignModal({
         //   address: data.display_name,
         // });

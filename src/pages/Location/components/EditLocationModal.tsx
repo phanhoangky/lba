@@ -31,32 +31,36 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
 
     if (this.formRef.current) {
       const { selectedLocation } = this.props.location;
-      this.formRef.current.setFieldsValue({
-        name: selectedLocation.name,
-        description: selectedLocation.description,
-        typeId: selectedLocation.typeId,
-        brandId: selectedLocation.brandId,
-      });
+      if (selectedLocation) {
+        this.formRef.current.setFieldsValue({
+          name: selectedLocation.name,
+          description: selectedLocation.description,
+          typeId: selectedLocation.typeId,
+          address: selectedLocation.address,
+        });
+      }
     }
   };
 
   initialMap = () => {
     const { mapComponent, selectedLocation } = this.props.location;
-    if (mapComponent.map) {
-      const lat = Number.parseFloat(selectedLocation.latitude);
-      const lng = Number.parseFloat(selectedLocation.longitude);
-      mapComponent.map.setView([lat, lng]);
-      if (!mapComponent.marker) {
-        if (selectedLocation.longitude !== '' && selectedLocation.latitude !== '') {
-          const marker = L.marker([lat, lng]);
-          marker.addTo(mapComponent.map);
+    if (mapComponent) {
+      if (mapComponent.map && selectedLocation) {
+        const lat = Number.parseFloat(selectedLocation.latitude);
+        const lng = Number.parseFloat(selectedLocation.longitude);
+        mapComponent.map.setView([lat, lng]);
+        if (!mapComponent.marker) {
+          if (selectedLocation.longitude !== '' && selectedLocation?.latitude !== '') {
+            const marker = L.marker([lat, lng]);
+            marker.addTo(mapComponent.map);
 
-          this.setMapComponent({
-            marker,
-          });
+            this.setMapComponent({
+              marker,
+            });
+          }
+        } else {
+          mapComponent.marker.setLatLng([lat, lng]);
         }
-      } else {
-        mapComponent.marker.setLatLng([lat, lng]);
       }
     }
   };
@@ -71,10 +75,10 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
     });
   };
 
-  reverseGeocoding = async (lat: string, lng: string) => {
-    const res = await reverseGeocoding(Number.parseFloat(lat), Number.parseFloat(lng));
-    return res;
-  };
+  // reverseGeocoding = async (lat: string, lng: string) => {
+  //   const res = await reverseGeocoding(Number.parseFloat(lat), Number.parseFloat(lng));
+  //   return res;
+  // };
 
   setSelectedLocation = async (item: any) => {
     await this.props.dispatch({
@@ -85,6 +89,7 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
       },
     });
   };
+
   callGetListLocations = async (param?: any) => {
     await this.props.dispatch({
       type: `${LOCATION_DISPATCHER}/getListLocation`,
@@ -94,31 +99,33 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
       },
     });
   };
+
   updateLocation = async (values: any) => {
     const { selectedLocation } = this.props.location;
     console.log('====================================');
     console.log('Update Location', selectedLocation);
     console.log('====================================');
 
-    const updateParam: UpdateLocationParam = {
-      id: selectedLocation.id,
-      brandId: selectedLocation.brandId,
-      description: selectedLocation.description,
-      isActive: selectedLocation.isActive,
-      isApprove: selectedLocation.isApprove,
-      latitude: selectedLocation.latitude,
-      longitude: selectedLocation.longitude,
-      name: selectedLocation.name,
-      typeId: selectedLocation.typeId,
-      ...values,
-    };
-    console.log('====================================');
-    console.log(selectedLocation, values);
-    console.log('====================================');
-    await this.props.dispatch({
-      type: `${LOCATION_DISPATCHER}/updateLocation`,
-      payload: updateParam,
-    });
+    if (selectedLocation) {
+      const updateParam: UpdateLocationParam = {
+        id: selectedLocation.id,
+        description: selectedLocation.description,
+        isActive: selectedLocation.isActive,
+        isApprove: selectedLocation.isApprove,
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+        name: selectedLocation.name,
+        typeId: selectedLocation.typeId,
+        ...values,
+      };
+      console.log('====================================');
+      console.log(selectedLocation, values);
+      console.log('====================================');
+      await this.props.dispatch({
+        type: `${LOCATION_DISPATCHER}/updateLocation`,
+        payload: updateParam,
+      });
+    }
   };
 
   updateConfirm = async (values: any) => {
@@ -162,17 +169,19 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
       console.log('====================================');
       console.log(coordination, lat.toString(), lon.toString());
       console.log('====================================');
-      if (mapComponent.map) {
-        mapComponent.map.setView([lat, lon]);
+      if (mapComponent) {
+        if (mapComponent.map) {
+          mapComponent.map.setView([lat, lon]);
 
-        if (mapComponent.marker) {
-          mapComponent.marker.setLatLng([lat, lon]);
-        } else {
-          const marker = L.marker([lat, lon]).addTo(mapComponent.map);
-          // marker.setPopupContent('Marker');
-          this.setMapComponent({
-            marker,
-          });
+          if (mapComponent.marker) {
+            mapComponent.marker.setLatLng([lat, lon]);
+          } else {
+            const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+            // marker.setPopupContent('Marker');
+            this.setMapComponent({
+              marker,
+            });
+          }
         }
       }
 
@@ -200,8 +209,6 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
 
     const { listDeviceTypes } = this.props.deviceStore;
 
-    const { listBrand } = this.props.brand;
-
     console.log('====================================');
     console.log('Selected Location>>>>', selectedLocation);
     console.log('====================================');
@@ -211,15 +218,17 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
           title="Update Location"
           destroyOnClose={true}
           width={'80%'}
-          visible={editLocationModal.visible}
-          confirmLoading={editLocationModal.isLoading}
+          visible={editLocationModal?.visible}
+          confirmLoading={editLocationModal?.isLoading}
           afterClose={() => {
-            if (mapComponent.map) {
-              if (mapComponent.marker) {
-                mapComponent.marker.removeFrom(mapComponent.map);
-                this.setMapComponent({
-                  marker: undefined,
-                });
+            if (mapComponent) {
+              if (mapComponent.map) {
+                if (mapComponent.marker) {
+                  mapComponent.marker.removeFrom(mapComponent.map);
+                  this.setMapComponent({
+                    marker: undefined,
+                  });
+                }
               }
             }
             this.clearSelectedLocation();
@@ -238,125 +247,6 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
             });
           }}
         >
-          {/* <Skeleton active loading={editLocationModal.isLoading}>
-            <Row>
-              <Col span={10}>Name</Col>
-              <Col span={14}>
-                <Input
-                  value={selectedLocation.name}
-                  onChange={(e) => {
-                    this.setSelectedLocation({
-                      name: e.target.value,
-                    });
-                  }}
-                />
-              </Col>
-            </Row>
-          </Skeleton>
-          <Divider></Divider>
-          <Skeleton active loading={editLocationModal.isLoading}>
-            <Row>
-              <Col span={10}>Description</Col>
-              <Col span={14}>
-                <Input
-                  value={selectedLocation.description}
-                  onChange={(e) => {
-                    this.setSelectedLocation({
-                      description: e.target.value,
-                    });
-                  }}
-                />
-              </Col>
-            </Row>
-          </Skeleton>
-          <Divider></Divider>
-          <Skeleton active loading={editLocationModal.isLoading}>
-            <Row>
-              <Col span={10}>Address</Col>
-              <Col span={14}>
-                <AutoCompleteComponent
-                  {...this.props}
-                  inputValue={selectedLocation.address}
-                  onInputChange={(e) => {
-                    this.setSelectedLocation({
-                      address: e,
-                    });
-                  }}
-                  handleOnSelect={async (e, address) => {
-                    await this.handleAutoCompleteSearch(e);
-
-                    const coordination = e.split('-');
-                    const lat = coordination[0];
-                    const lon = coordination[1];
-                    await this.setSelectedLocation({
-                      longitude: lon,
-                      latitude: lat,
-                      address,
-                    });
-                  }}
-                />
-              </Col>
-            </Row>
-          </Skeleton>
-          <Divider></Divider>
-          <Skeleton active loading={editLocationModal.isLoading}>
-            <Row>
-              <Col span={24}>
-                <LeafletMapComponent {...this.props} />
-              </Col>
-            </Row>
-            <Divider></Divider>
-            <Row>
-              <Col span={10}>Type</Col>
-              <Col span={14}>
-                <Select
-                  style={{ width: '100%' }}
-                  defaultValue={selectedLocation.typeId}
-                  onChange={(e) => {
-                    console.log('====================================');
-                    console.log(e);
-                    console.log('====================================');
-                    this.setSelectedLocation({
-                      typeId: e,
-                    });
-                  }}
-                >
-                  {listDeviceTypes.map((type: any) => {
-                    return (
-                      <Select.Option key={type.id} value={type.id}>
-                        {type.typeName}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              </Col>
-            </Row>
-          </Skeleton>
-          <Divider></Divider>
-          <Skeleton active loading={editLocationModal.isLoading}>
-            <Row>
-              <Col span={10}>Brand</Col>
-              <Col span={14}>
-                <Select
-                  defaultValue={selectedLocation.brandId}
-                  style={{ width: '100%' }}
-                  onChange={(e) => {
-                    this.setSelectedLocation({
-                      brandId: e,
-                    });
-                  }}
-                >
-                  {listBrand.map((brand) => {
-                    return (
-                      <Select.Option key={brand.id} value={brand.id}>
-                        {brand.name}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              </Col>
-            </Row>
-          </Skeleton> */}
           <Form ref={this.formRef} layout="vertical" name="edit_location_modal_form">
             <Form.Item
               name="name"
@@ -368,12 +258,6 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={4} autoSize />
             </Form.Item>
-
-            {/* <Form.Item
-              name="address"
-              label="Address"
-              rules={[{ required: true, message: 'Please input address' }]}
-            ></Form.Item> */}
 
             <Form.Item
               name="typeId"
@@ -391,7 +275,7 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
                   // });
                 }}
               >
-                {listDeviceTypes.map((type: any) => {
+                {listDeviceTypes?.map((type: any) => {
                   return (
                     <Select.Option key={type.id} value={type.id}>
                       {type.typeName}
@@ -400,51 +284,70 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
                 })}
               </Select>
             </Form.Item>
+
             <Form.Item
-              name="brandId"
-              label="Brand"
-              rules={[{ required: true, message: 'Please select brand' }]}
+              name="address"
+              label="Address"
+              rules={[
+                {
+                  validator: (_: any, value: any) => {
+                    if (value && value !== '') {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error('Please enter address'));
+                  },
+                },
+
+                { required: true, message: 'Please enter address' },
+              ]}
             >
-              <Select
-                style={{ width: '100%' }}
-                onChange={() => {
-                  // this.setCreateLocationParam({
-                  //   brandId: e,
-                  // });
+              <AutoCompleteComponent
+                {...this.props}
+                inputValue={selectedLocation?.address}
+                value={{
+                  label: selectedLocation?.address,
+                  value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
                 }}
-              >
-                {listBrand.map((brand) => {
-                  return (
-                    <Select.Option key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
+                // onInputChange={(e: any) => {
+                //   this.setSelectedLocation({
+                //     address: e,
+                //   });
+                // }}
+                onChange={async (e: any, address: any) => {
+                  await this.handleAutoCompleteSearch(e);
+                  const coordination = e.split('-');
+                  const lat = coordination[0];
+                  const lon = coordination[1];
+                  this.setSelectedLocation({
+                    longitude: lon,
+                    latitude: lat,
+                    address,
+                  });
+                }}
+              />
             </Form.Item>
           </Form>
-          <Row>
+          {/* <Row>
             <Col span={10}>Address</Col>
             <Col span={14}>
               <AutoCompleteComponent
                 {...this.props}
-                inputValue={selectedLocation.address}
+                // inputValue={selectedLocation?.address}
                 value={{
-                  label: selectedLocation.address,
-                  value: `${selectedLocation.latitude}-${selectedLocation.longitude}`,
+                  label: selectedLocation?.address,
+                  value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
                 }}
-                onInputChange={(e) => {
-                  this.setSelectedLocation({
-                    address: e,
-                  });
-                }}
-                handleOnSelect={async (e, address) => {
+                // onInputChange={(e: any) => {
+                //   this.setSelectedLocation({
+                //     address: e,
+                //   });
+                // }}
+                onChange={async (e: any, address: any) => {
                   await this.handleAutoCompleteSearch(e);
-
                   const coordination = e.split('-');
                   const lat = coordination[0];
                   const lon = coordination[1];
-                  await this.setSelectedLocation({
+                  this.setSelectedLocation({
                     longitude: lon,
                     latitude: lat,
                     address,
@@ -452,7 +355,7 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
                 }}
               />
             </Col>
-          </Row>
+          </Row> */}
           <Row>
             <Col span={24}>
               <LeafletMapComponent {...this.props} />
@@ -464,4 +367,4 @@ class EditLocationModal extends React.Component<EditLocationModalProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(EditLocationModal);
+export default connect((state: any) => ({ ...state }))(EditLocationModal);

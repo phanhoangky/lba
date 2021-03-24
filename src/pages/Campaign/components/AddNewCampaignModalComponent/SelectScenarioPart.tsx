@@ -73,7 +73,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
     return (
       <>
         <Row>
-          <Col span={12}>
+          <Col span={24}>
             <List
               bordered
               loading={tableLoading}
@@ -112,7 +112,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
               )}
             ></List>
           </Col>
-          <Col span={12}>
+          {/* <Col span={12}>
             <div
               id="areaWrapper"
               style={{
@@ -148,7 +148,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
                   );
                 })}
             </div>
-          </Col>
+          </Col> */}
         </Row>
       </>
     );

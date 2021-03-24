@@ -109,7 +109,7 @@ class Scenario extends React.Component<ScenarioProps> {
     });
   };
 
-  setSelectedScenarios = async (item: any) => {
+  setSelectedScenario = async (item: any) => {
     await this.props.dispatch({
       type: 'scenarios/setSelectedScenarioReducer',
       payload: {
@@ -149,7 +149,7 @@ class Scenario extends React.Component<ScenarioProps> {
     );
     if (selectedScenarioItem && selectedScenarioItem.length) {
       if (selectedScenarioItem.length > 0) {
-        this.setSelectedScenarios({
+        this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems.map((item) => {
             if (selectedScenarioItem[0].id === item.id) {
               return {
@@ -174,7 +174,7 @@ class Scenario extends React.Component<ScenarioProps> {
         };
 
         selectedSenario?.scenarioItems.push(newScenarioItem);
-        this.setSelectedScenarios({
+        this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems,
         });
       }
@@ -237,6 +237,22 @@ class Scenario extends React.Component<ScenarioProps> {
     await this.setSelectedPlaylistItems([]);
   };
 
+  clearAreas = async () => {
+    const { selectedSenario } = this.props.scenarios;
+    const newAreas = selectedSenario?.layout.areas.map((area) => {
+      return {
+        ...area,
+        typeMediaName: undefined,
+        urlPreview: undefined,
+      };
+    });
+    await this.setSelectedScenario({
+      layout: {
+        ...selectedSenario?.layout,
+        areas: newAreas,
+      },
+    });
+  };
   render() {
     const {
       getListScenarioParam,
@@ -277,10 +293,13 @@ class Scenario extends React.Component<ScenarioProps> {
                 })
                   .then(() => {
                     const clone = cloneDeep(item);
-                    this.setSelectedScenarios(clone).then(() => {
-                      this.setEditScenariosDrawer({
-                        visible: true,
-                        isLoading: false,
+                    this.setSelectedScenario(clone).then(() => {
+                      this.clearSelectedPlaylistItems().then(() => {
+                        this.clearAreas();
+                        this.setEditScenariosDrawer({
+                          visible: true,
+                          isLoading: false,
+                        });
                       });
                     });
                   })

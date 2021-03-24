@@ -1,9 +1,9 @@
-import { Button, Input, InputNumber, Tag } from 'antd';
+import { Button, Tag } from 'antd';
 import type { Settings as ProSettings } from '@ant-design/pro-layout';
 // import { QuestionCircleOutlined } from '@ant-design/icons';
 import React from 'react';
-import type { ConnectProps, MomoModelState } from 'umi';
-import { connect, SelectLang } from 'umi';
+import { ConnectProps, history, MomoModelState } from 'umi';
+import { connect } from 'umi';
 import type { ConnectState } from '@/models/connect';
 import Avatar from './AvatarDropdown';
 // import HeaderSearch from '../HeaderSearch';
@@ -57,7 +57,13 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
   console.log('====================================');
   return (
     <div className={className}>
-      <Button className={styles.action} icon={<WalletTwoTone />}>
+      <Button
+        className={styles.action}
+        icon={<WalletTwoTone />}
+        onClick={() => {
+          history.push('/profile');
+        }}
+      >
         {props.currentUser &&
           props.currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
         VND

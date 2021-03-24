@@ -171,7 +171,7 @@ class Playlist extends React.Component<PlaylistProps> {
           dataSource={listPlaylist}
           loading={tableLoading}
           pagination={{
-            current: getPlaylistParam.pageNumber + 1,
+            current: getPlaylistParam?.pageNumber ? getPlaylistParam.pageNumber + 1 : 1,
             total: totalItem,
             onChange: (e) => {
               this.callGetListPlaylist({

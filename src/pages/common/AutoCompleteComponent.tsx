@@ -11,7 +11,7 @@ export type AutoCompleteComponentProps = {
   inputValue?: string;
   value?: { label: any; value: any };
   onInputChange: (value: string) => void | Promise<void>;
-  handleOnSelect: (value: string, address: string) => void | Promise<void>;
+  onChange: (value: string, address: string) => void | Promise<void>;
 };
 
 class AutoCompleteComponent extends React.Component<AutoCompleteComponentProps> {
@@ -56,7 +56,7 @@ class AutoCompleteComponent extends React.Component<AutoCompleteComponentProps> 
         onChange={(e) => {
           if (e) {
             // this.props.onInputChange(e.label);
-            this.props.handleOnSelect(e.value, e.label);
+            this.props.onChange(e.value, e.label);
           }
         }}
         onInputChange={(e) => {

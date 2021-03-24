@@ -43,7 +43,11 @@ const SortableContainerComponent = SortableContainer((props: any) => <tbody {...
 
 export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDrawerProps> {
   componentDidMount = async () => {
-    const { selectedPlaylist } = this.props.playlists;
+    const {
+      selectedPlaylist,
+      listMediaNotBelongToPlaylist,
+      selectedPlaylistItems,
+    } = this.props.playlists;
     if (this.formRef.current) {
       this.formRef.current.setFieldsValue({
         title: selectedPlaylist.title,
@@ -56,6 +60,11 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       .then(() => {
         this.getMediaNotBelongToPlaylist({ isPaging: false }).then(() => {
           this.calculateTotalDuration().then(() => {
+            // this.setListMediaNotBelongToPlaylist(
+            //   listMediaNotBelongToPlaylist.filter((media) =>
+            //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
+            //   ),
+            // )
             this.setEditPlaylistDrawer({
               isLoading: false,
             });
@@ -69,15 +78,23 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       });
   };
 
+  componentDidUpdate() {}
+
   getMediaNotBelongToPlaylist = async (param?: any) => {
     const { getListMediaParam } = this.props.playlists;
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'playlists/getMediaNotBelongToPlaylist',
       payload: {
         ...getListMediaParam,
         ...param,
       },
     });
+
+    // await this.setListMediaNotBelongToPlaylist(
+    //   listMediaNotBelongToPlaylist.filter((media) =>
+    //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
+    //   ),
+    // );
   };
 
   callGetListPlaylist = async () => {
@@ -179,6 +196,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       isActive: true,
       key: `${uuidv4()}`,
       mediaSrcId: media.id,
+      mediaSrc: media,
       playlistId: selectedPlaylist.id,
       title: media.title,
       typeName: media.type.name,
@@ -269,17 +287,15 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       type: 'playlists/clearSelectedMediaReducer',
     });
 
-    await this.props.dispatch({
-      type: 'playlists/setListMediaNotBelongToPlaylistReducer',
-      payload: listMediaNotBelongToPlaylist.map((media: any) => {
+    await this.setListMediaNotBelongToPlaylist(
+      listMediaNotBelongToPlaylist.map((media: any) => {
         return {
           ...media,
           isSelected: false,
         };
       }),
-    });
+    );
   };
-
   onSortEnd = ({ oldIndex, newIndex }: any) => {
     const { selectedPlaylistItems } = this.props.playlists;
     if (oldIndex !== newIndex) {
@@ -355,25 +371,26 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
           };
         }),
     );
+    const medias = selectedPlaylistItems.filter((item) => item.id === record.id)[0];
+    console.log('====================================');
+    console.log('removeItem >>>', medias);
+    console.log('====================================');
+    this.addMediaToListMedia(medias.mediaSrc);
   };
 
   addMediaToListMedia = async (media: any) => {
     const { listMediaNotBelongToPlaylist } = this.props.playlists;
-
+    console.log('====================================');
+    console.log('addMediaToListMedia >>>', listMediaNotBelongToPlaylist);
+    console.log('====================================');
     const newList = cloneDeep(listMediaNotBelongToPlaylist);
-    newList.push({ ...media });
-
-    this.setListMediaNotBelongToPlaylist(newList);
-  };
-
-  getSelectedPlaylistItem = () => {
-    const { selectedPlaylistItems } = this.props.playlists;
-    if (selectedPlaylistItems.some((item) => item.isSelected)) {
-      const selected = selectedPlaylistItems.filter((playlist) => playlist.isSelected)[0];
-      return selected;
+    console.log('====================================');
+    console.log('addMediaToListMedia >>>', newList, listMediaNotBelongToPlaylist);
+    console.log('====================================');
+    if (newList.every((s) => s.id !== media.id)) {
+      newList.push({ ...media });
+      this.setListMediaNotBelongToPlaylist(newList);
     }
-
-    return null;
   };
 
   renderPreviewMedia = () => {
@@ -424,6 +441,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       this.setSelectedPlaylistItems(newItems);
     }
   };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -443,6 +461,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     const availableDuration = maxDuration - totalDuration;
     console.log('====================================');
     console.log('Duration >>>', availableDuration, totalDuration);
+    console.log('List Media >>>', listMedia, listMediaNotBelongToPlaylist);
     console.log('====================================');
     return (
       <Drawer
@@ -579,7 +598,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 ></Column>
 
                 <Column
-                  key="description"
+                  key="Duration"
                   title="Duration"
                   render={(record) => {
                     return (

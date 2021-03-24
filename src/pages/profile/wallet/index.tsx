@@ -13,6 +13,8 @@ import type {
 import { connect } from 'umi';
 import { WalletHeaderComponent } from './components/WalletHeaderComponent';
 import styles from './index.less';
+import { v4 as uuidv4 } from 'uuid';
+import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
 
 type WalletProps = {
   dispatch: Dispatch;
@@ -89,44 +91,8 @@ class WalletScreen extends React.Component<WalletProps> {
     return (
       <PageContainer>
         <WalletHeaderComponent {...this.props} />
-        <Divider orientation="left">Send Transaction</Divider>
+        <Divider orientation="right">View Transaction</Divider>
         <Row gutter={20}>
-          <Col span={16}>
-            <Table
-              dataSource={listTransactions}
-              loading={transTableLoading}
-              scroll={{
-                x: 500,
-                y: 400,
-              }}
-              pagination={{
-                current: getListTransactionsParam?.pageNumber
-                  ? getListTransactionsParam?.pageNumber + 1
-                  : 1,
-                pageSize: getListTransactionsParam?.pageLimitItem
-                  ? getListTransactionsParam?.pageLimitItem
-                  : 10,
-                total: totalItem,
-                onChange: (e) => {
-                  this.setTransTableLoading(true)
-                    .then(() => {
-                      this.getListTransactions({
-                        pageNumber: e - 1,
-                      }).then(() => {
-                        this.setTransTableLoading(false);
-                      });
-                    })
-                    .catch(() => {
-                      this.setTransTableLoading(false);
-                    });
-                },
-              }}
-            >
-              <Column key="email" title="Email" dataIndex={['senderNavigation', 'email']}></Column>
-              <Column key="time" title="Time" dataIndex="time"></Column>
-              <Column key="age" title="Age" dataIndex="age"></Column>
-            </Table>
-          </Col>
           <Col span={8}>
             <div
               style={{
@@ -156,10 +122,76 @@ class WalletScreen extends React.Component<WalletProps> {
                   {currentUser && currentUser.email}
                 </Descriptions.Item>
                 <Descriptions.Item label="Your Balance">
-                  {currentUser && currentUser.balance?.toString()}
+                  {currentUser &&
+                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
+                  VND
                 </Descriptions.Item>
               </Descriptions>
             </Space>
+          </Col>
+          <Col span={16}>
+            <Table
+              dataSource={listTransactions?.map((item) => {
+                return {
+                  ...item,
+                  key: uuidv4(),
+                };
+              })}
+              loading={transTableLoading}
+              scroll={{
+                x: 500,
+                y: 400,
+              }}
+              pagination={{
+                current: getListTransactionsParam?.pageNumber
+                  ? getListTransactionsParam?.pageNumber + 1
+                  : 1,
+                pageSize: getListTransactionsParam?.pageLimitItem
+                  ? getListTransactionsParam?.pageLimitItem
+                  : 10,
+                total: totalItem,
+                onChange: (e) => {
+                  this.setTransTableLoading(true)
+                    .then(() => {
+                      this.getListTransactions({
+                        pageNumber: e - 1,
+                      }).then(() => {
+                        this.setTransTableLoading(false);
+                      });
+                    })
+                    .catch(() => {
+                      this.setTransTableLoading(false);
+                    });
+                },
+              }}
+            >
+              <Column
+                key="sender"
+                title="Sender"
+                dataIndex={['senderNavigation', 'email']}
+              ></Column>
+              <Column
+                key="receiver"
+                title="Receiver"
+                dataIndex={['receiverNavigation', 'email']}
+              ></Column>
+              <Column
+                key="type"
+                title="Type"
+                render={(record) => {
+                  return TYPE_TRANSACTIONS[record.type];
+                }}
+              ></Column>
+              <Column
+                key="value"
+                title="Value"
+                render={(record) => {
+                  return <>{record.value} VND</>;
+                }}
+              ></Column>
+              {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
+              <Column key="age" title="Age" dataIndex="age"></Column>
+            </Table>
           </Col>
         </Row>
       </PageContainer>

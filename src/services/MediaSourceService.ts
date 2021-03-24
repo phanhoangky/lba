@@ -11,6 +11,7 @@ export type GetMediaSourcesParam = {
   orderBy: string;
   title: string; //
   isSigned?: number;
+  isApproved?: boolean;
 }
 
 export type AddNewMediaParam = {
@@ -23,6 +24,7 @@ export type AddNewMediaParam = {
   fileId: string;
   isSigned: number;
   mediaSrcId: string;
+  hash: string;
 }
 
 export type EditMediaParam = {
@@ -31,6 +33,7 @@ export type EditMediaParam = {
   typeId: string;
   description: string;
   isSigned: number;
+  hash?: string;
 }
 
 export async function GetListMediaSource(param: GetMediaSourcesParam) {

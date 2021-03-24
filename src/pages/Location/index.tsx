@@ -2,28 +2,27 @@
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import { DeleteTwoTone, EditTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Modal, Space, Table } from 'antd';
+import { Button, Col, Modal, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
-import {
+import type {
   BrandModelState,
   CampaignModelState,
   DeviceModelState,
   Dispatch,
-  history,
   LocationModelState,
 } from 'umi';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import AddNewLocationModal from './components/AddNewLocationModal';
 import EditLocationModal from './components/EditLocationModal';
 import { LocationTableHeaderComponent } from './components/LocationTableHeaderComponent';
 import type { Location } from '@/models/Location';
+import { ViewLocationDetailComponent } from './components/ViewLocationDetailComponent';
 
 export type LocationScreenProps = {
   dispatch: Dispatch;
   location: LocationModelState;
   deviceStore: DeviceModelState;
-  brand: BrandModelState;
   campaign: CampaignModelState;
 };
 export const LOCATION_DISPATCHER = 'location';
@@ -37,17 +36,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               type: 'deviceStore/getDeviceType',
             })
             .then(() => {
-              this.callGetListBrands({
-                isDescending: false,
-                isPaging: false,
-                isSort: false,
-                orderBy: '',
-                pageLimitItem: 10,
-                pageNumber: 0,
-                seachValue: '',
-              }).then(() => {
-                this.setLocationsTableLoading(false);
-              });
+              this.setLocationsTableLoading(false);
               this.readJWT();
             });
         });
@@ -73,15 +62,15 @@ class LocationScreen extends React.Component<LocationScreenProps> {
     });
   };
 
-  callGetListBrands = async (param?: any) => {
-    await this.props.dispatch({
-      type: 'brand/getListBrands',
-      payload: {
-        ...this.props.brand.getListBrandParam,
-        ...param,
-      },
-    });
-  };
+  // callGetListBrands = async (param?: any) => {
+  //   await this.props.dispatch({
+  //     type: 'brand/getListBrands',
+  //     payload: {
+  //       ...this.props.brand.getListBrandParam,
+  //       ...param,
+  //     },
+  //   });
+  // };
 
   setLocationsTableLoading = async (loading: boolean) => {
     await this.props.dispatch({
@@ -205,7 +194,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
     this.setGetDevicesParam({
       locationId: record.id,
     }).then(() => {
-      history.push('/devies');
+      history.push('/devices');
     });
   };
 
@@ -215,122 +204,127 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       listLocations,
       totalItem,
       locationTableLoading,
-      mapComponent,
       addNewLocationModal,
       editLocationModal,
     } = this.props.location;
     return (
-      <>
-        <PageContainer>
-          <div
-            style={{
-              boxSizing: 'border-box',
-              width: '80%',
-              height: 'auto',
-              margin: '0 auto',
-            }}
-          >
-            <Table
-              loading={locationTableLoading}
-              dataSource={listLocations}
-              scroll={{
-                x: 400,
-                y: 1000,
-              }}
-              pagination={{
-                current: getListLocationParam?.pageNumber
-                  ? getListLocationParam?.pageNumber + 1
-                  : 1,
-                total: totalItem,
-                pageSize: getListLocationParam?.pageLimitItem
-                  ? getListLocationParam?.pageLimitItem
-                  : 10,
-                onChange: async (e) => {
-                  this.setLocationsTableLoading(true)
-                    .then(() => {
-                      this.callGetListLocations({
-                        pageNumber: e - 1,
-                      }).then(() => {
-                        this.setLocationsTableLoading(false);
-                      });
-                    })
-                    .catch(() => {
-                      this.setLocationsTableLoading(false);
-                    });
-                },
-              }}
-              title={() => (
-                <>
-                  <LocationTableHeaderComponent {...this.props} />
-                </>
-              )}
-              onRow={(record) => {
-                return {
-                  onDoubleClick: () => {},
-                };
+      <PageContainer>
+        <Row gutter={20}>
+          <Col span={12}>
+            <div
+              style={{
+                overflow: 'hidden',
               }}
             >
-              <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
-              <Column key="name" dataIndex="name" title="Name"></Column>
-              <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
+              <Table
+                loading={locationTableLoading}
+                dataSource={listLocations}
+                scroll={{
+                  x: 400,
+                  y: 530,
+                }}
+                style={{
+                  overflowY: 'scroll',
+                }}
+                pagination={{
+                  current: getListLocationParam?.pageNumber
+                    ? getListLocationParam?.pageNumber + 1
+                    : 1,
+                  total: totalItem,
+                  pageSize: getListLocationParam?.pageLimitItem
+                    ? getListLocationParam?.pageLimitItem
+                    : 10,
+                  onChange: async (e) => {
+                    this.setLocationsTableLoading(true)
+                      .then(() => {
+                        this.callGetListLocations({
+                          pageNumber: e - 1,
+                        }).then(() => {
+                          this.setLocationsTableLoading(false);
+                        });
+                      })
+                      .catch(() => {
+                        this.setLocationsTableLoading(false);
+                      });
+                  },
+                }}
+                title={() => (
+                  <>
+                    <LocationTableHeaderComponent {...this.props} />
+                  </>
+                )}
+                onRow={(record) => {
+                  return {
+                    onDoubleClick: () => {
+                      this.redirectToListDevicesByLocation(record);
+                    },
 
-              {/* <Column
-              key="isApprove"
-              render={(text, record: any) => {
-                return (
-                  <Alert
-                    style={{ textAlign: 'center' }}
-                    message={
+                    onClick: async () => {
+                      const { data } = await this.reverseGeocoding(
+                        record.latitude,
+                        record.longitude,
+                      );
+                      await this.setSelectedLocation({
+                        ...record,
+                        address: data.display_name,
+                      });
+                      await this.setEditLocationModal({
+                        visible: true,
+                      });
+                    },
+                  };
+                }}
+              >
+                <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
+                <Column key="name" dataIndex="name" title="Name"></Column>
+                <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
+                {/* <Column
+                  key="action"
+                  width={150}
+                  title="Action"
+                  render={(text, record: any) => {
+                    return (
                       <>
-                        <Space align="center" style={{ textAlign: 'center' }}>
-                          {record.isApprove ? <CheckCircleTwoTone /> : <ClockCircleTwoTone />}
-                        </Space>
-                      </>
-                    }
-                    type={record.isApprove ? 'success' : 'warning'}
-                  />
-                );
-              }}
-            ></Column> */}
-              <Column
-                key="action"
-                width={150}
-                title="Action"
-                render={(text, record: any) => {
-                  return (
-                    <>
-                      <Space>
-                        <Button
-                          onClick={async () => {
-                            this.setSelectedLocation(record).then(() => {
-                              this.setLocationAddressInMap(record).then(() => {
-                                this.setEditLocationModal({
-                                  visible: true,
+                        <Space>
+                          <Button
+                            onClick={async () => {
+                              this.setSelectedLocation(record).then(() => {
+                                this.setLocationAddressInMap(record).then(() => {
+                                  this.setEditLocationModal({
+                                    visible: true,
+                                  });
                                 });
                               });
-                            });
-                          }}
-                        >
-                          <EditTwoTone />
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            this.deleteConfirm(record);
-                          }}
-                        >
-                          <DeleteTwoTone twoToneColor="#f93e3e" />
-                        </Button>
-                      </Space>
-                    </>
-                  );
-                }}
-              ></Column>
-            </Table>
-          </div>
-          {addNewLocationModal?.visible && <AddNewLocationModal {...this.props} />}
-          {editLocationModal?.visible && <EditLocationModal {...this.props} />}
-        </PageContainer>
-      </>
+                            }}
+                          >
+                            <EditTwoTone />
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              this.deleteConfirm(record);
+                            }}
+                          >
+                            <DeleteTwoTone twoToneColor="#f93e3e" />
+                          </Button>
+                        </Space>
+                      </>
+                    );
+                  }}
+                ></Column> */}
+              </Table>
+            </div>
+          </Col>
+          <Col span={12}>
+            {editLocationModal?.visible && (
+              <Typography.Title level={4}>Edit Location Detail</Typography.Title>
+            )}
+            {editLocationModal?.visible && <ViewLocationDetailComponent {...this.props} />}
+          </Col>
+        </Row>
+
+        {addNewLocationModal?.visible && <AddNewLocationModal {...this.props} />}
+        {/* {editLocationModal?.visible && <EditLocationModal {...this.props} />} */}
+      </PageContainer>
     );
   }
 }

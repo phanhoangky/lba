@@ -55,7 +55,7 @@
               {
                 name: 'list.device-list',
                 icon: 'FundProjectionScreen',
-                path: '/devies',
+                path: '/devices',
                 component: './Device',
               },
               {

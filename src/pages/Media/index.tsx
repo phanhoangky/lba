@@ -196,11 +196,12 @@ class Media extends React.Component<MediaSourceProps> {
       },
     });
   };
-  async callGetListMediaType() {
+
+  callGetListMediaType = async () => {
     await this.props.dispatch({
       type: 'media/getListMediaType',
     });
-  }
+  };
 
   setListMediaLoading = async (isLoading: boolean) => {
     await this.props.dispatch({
@@ -338,14 +339,16 @@ class Media extends React.Component<MediaSourceProps> {
         //   isSigned: 1,
         // });
         this.setListLoading(true)
-          .then(() => {
+          .then(async () => {
             const { currentUser } = this.props.user;
+
+            const signature = await currentUser?.ether?.signDocument(item.securityHash);
             console.log('====================================');
-            console.log(item, currentUser?.ether);
+            console.log(item, currentUser?.ether, signature);
             console.log('====================================');
-            currentUser?.ether?.signDocument(item.securityHash);
             this.updateFile({
               isSigned: 1,
+              hash: signature,
             }).then(() => {
               this.callGetListMedia().then(() => {
                 this.setListLoading(false);
@@ -360,23 +363,23 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  showConfirmCreateNewFile = async () => {
-    this.setAddNewFileModal({
-      isLoading: true,
-    })
-      .then(() => {
-        this.addNewFile().then(() => {
-          this.setAddNewFileModal({
-            isLoading: false,
-          });
-        });
-      })
-      .catch(() => {
-        this.setAddNewFileModal({
-          isLoading: false,
-        });
-      });
-  };
+  // showConfirmCreateNewFile = async () => {
+  //   this.setAddNewFileModal({
+  //     isLoading: true,
+  //   })
+  //     .then(() => {
+  //       this.addNewFile().then(() => {
+  //         this.setAddNewFileModal({
+  //           isLoading: false,
+  //         });
+  //       });
+  //     })
+  //     .catch(() => {
+  //       this.setAddNewFileModal({
+  //         isLoading: false,
+  //       });
+  //     });
+  // };
 
   createFolder = async () => {
     const { breadScrumb, createFolderParam } = this.props.media;
@@ -553,39 +556,75 @@ class Media extends React.Component<MediaSourceProps> {
           <Skeleton active loading={listLoading}>
             <Row>
               <Col span={12}>
-                <Input.Search
-                  enterButton
-                  value={searchListMediaParam.title}
-                  onChange={async (e) => {
-                    this.setSearchListMediaParam({
-                      title: e.target.value,
-                    });
-                  }}
-                  onSearch={async (e) => {
-                    await this.setListLoading(true);
-                    if (e !== '') {
-                      this.callSearchListMedia({
-                        title: e,
-                      })
+                <Space>
+                  <Input.Search
+                    style={{
+                      width: '100%',
+                    }}
+                    enterButton
+                    value={searchListMediaParam.title}
+                    onChange={async (e) => {
+                      this.setSearchListMediaParam({
+                        title: e.target.value,
+                      });
+                    }}
+                    onSearch={async (e) => {
+                      await this.setListLoading(true);
+                      if (e !== '') {
+                        this.callSearchListMedia({
+                          title: e,
+                        })
+                          .then(() => {
+                            this.setListLoading(false);
+                          })
+                          .catch(() => {
+                            this.setListLoading(false);
+                          });
+                      } else {
+                        this.callGetListMedia({
+                          folder: breadScrumb[breadScrumb.length - 1].id,
+                        })
+                          .then(() => {
+                            this.setListLoading(false);
+                          })
+                          .catch(() => {
+                            this.setListLoading(false);
+                          });
+                      }
+                    }}
+                  />
+                  <Select
+                    style={{ width: '100px' }}
+                    defaultValue={-1}
+                    value={searchListMediaParam.isSigned}
+                    onChange={(e) => {
+                      this.setListLoading(true)
                         .then(() => {
-                          this.setListLoading(false);
+                          this.callSearchListMedia({
+                            isSigned: e === -1 ? undefined : e,
+                          }).then(() => {
+                            this.setListLoading(false);
+                          });
                         })
                         .catch(() => {
                           this.setListLoading(false);
                         });
-                    } else {
-                      this.callGetListMedia({
-                        folder: breadScrumb[breadScrumb.length - 1].id,
-                      })
-                        .then(() => {
-                          this.setListLoading(false);
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <Select.Option key={'all'} value={-1}>
+                      All
+                    </Select.Option>
+                    <Select.Option key={'Not Sign'} value={0}>
+                      Not Sign
+                    </Select.Option>
+                    <Select.Option key={'Waiting'} value={1}>
+                      Waiting
+                    </Select.Option>
+                    <Select.Option key={'Approved'} value={2}>
+                      Approved
+                    </Select.Option>
+                  </Select>
+                </Space>
               </Col>
               <Col span={12}>
                 <div style={{ textAlign: 'right' }}>
@@ -610,37 +649,7 @@ class Media extends React.Component<MediaSourceProps> {
                       <PlusSquareTwoTone />
                       Add New File
                     </Button>
-                    <Select
-                      style={{ width: '100px' }}
-                      defaultValue={-1}
-                      value={searchListMediaParam.isSigned}
-                      onChange={(e) => {
-                        this.setListLoading(true)
-                          .then(() => {
-                            this.callSearchListMedia({
-                              isSigned: e === -1 ? undefined : e,
-                            }).then(() => {
-                              this.setListLoading(false);
-                            });
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      }}
-                    >
-                      <Select.Option key={'all'} value={-1}>
-                        All
-                      </Select.Option>
-                      <Select.Option key={'Not Sign'} value={0}>
-                        Not Sign
-                      </Select.Option>
-                      <Select.Option key={'Waiting'} value={1}>
-                        Waiting
-                      </Select.Option>
-                      <Select.Option key={'Approved'} value={2}>
-                        Approved
-                      </Select.Option>
-                    </Select>
+
                     {/* <Select
                       defaultValue={'Current Files'}
                       value={

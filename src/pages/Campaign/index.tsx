@@ -385,7 +385,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             ></Column>
           </Table>
           <Modal
-            width="80%"
+            width="50%"
             title="Add New Campaign"
             visible={addNewCampaignModal.visible}
             centered
