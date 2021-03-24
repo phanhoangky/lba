@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Table } from 'antd';
+import { Col, Row, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -18,8 +18,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
 import { cloneDeep } from 'lodash';
 import AddNewScenarioFormModal from './components/AddNewScenarioFormModal';
-import EditScenarioFormDrawer from './components/EditScenarioFormDrawer';
+// import EditScenarioFormDrawer from './components/EditScenarioFormDrawer';
 import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
+import { EditScenarioComponent } from './components/EditScenarioComponent';
 
 type ScenarioProps = {
   dispatch: Dispatch;
@@ -264,57 +265,65 @@ class Scenario extends React.Component<ScenarioProps> {
 
     return (
       <PageContainer>
-        <Table
-          dataSource={listScenario}
-          loading={tableLoading}
-          pagination={{
-            current: getListScenarioParam?.pageNumber ? getListScenarioParam?.pageNumber + 1 : 1,
-            total: totalItem,
-            onChange: async (e) => {
-              this.setGetListScenarioParam({
-                pageNumber: e - 1,
-              }).then(() => {
-                this.callGetListScenario();
-              });
-            },
-          }}
-          title={() => {
-            return (
-              <>
-                <ScenarioTableHeaderComponent {...this.props} />
-              </>
-            );
-          }}
-          onRow={(item) => {
-            return {
-              onClick: async () => {
-                this.setEditScenariosDrawer({
-                  isLoading: true,
-                })
-                  .then(() => {
-                    const clone = cloneDeep(item);
-                    this.setSelectedScenario(clone).then(() => {
-                      this.clearSelectedPlaylistItems().then(() => {
-                        this.clearAreas();
+        <Row gutter={20}>
+          <Col span={10}>
+            <Table
+              dataSource={listScenario}
+              loading={tableLoading}
+              pagination={{
+                current: getListScenarioParam?.pageNumber
+                  ? getListScenarioParam?.pageNumber + 1
+                  : 1,
+                total: totalItem,
+                onChange: async (e) => {
+                  this.setGetListScenarioParam({
+                    pageNumber: e - 1,
+                  }).then(() => {
+                    this.callGetListScenario();
+                  });
+                },
+              }}
+              title={() => {
+                return (
+                  <>
+                    <ScenarioTableHeaderComponent {...this.props} />
+                  </>
+                );
+              }}
+              onRow={(item) => {
+                return {
+                  onClick: async () => {
+                    this.setEditScenariosDrawer({
+                      isLoading: true,
+                    })
+                      .then(() => {
+                        const clone = cloneDeep(item);
+                        this.setSelectedScenario(clone).then(() => {
+                          this.clearSelectedPlaylistItems().then(() => {
+                            this.clearAreas();
+                            this.setEditScenariosDrawer({
+                              visible: true,
+                              isLoading: false,
+                            });
+                          });
+                        });
+                      })
+                      .catch(() => {
                         this.setEditScenariosDrawer({
-                          visible: true,
                           isLoading: false,
                         });
                       });
-                    });
-                  })
-                  .catch(() => {
-                    this.setEditScenariosDrawer({
-                      isLoading: false,
-                    });
-                  });
-              },
-            };
-          }}
-        >
-          <Column dataIndex="title" title="Title" key="title"></Column>
-          <Column dataIndex="description" title="Description" key="description"></Column>
-        </Table>
+                  },
+                };
+              }}
+            >
+              <Column dataIndex="title" title="Title" key="title"></Column>
+            </Table>
+          </Col>
+          <Col span={14}>
+            {editScenarioDrawer?.visible && <EditScenarioComponent {...this.props} />}
+          </Col>
+        </Row>
 
         {/* Add New Scenario Modal */}
 
@@ -322,7 +331,7 @@ class Scenario extends React.Component<ScenarioProps> {
 
         {/* Edit Scenario Drawer */}
 
-        {editScenarioDrawer?.visible && <EditScenarioFormDrawer {...this.props} />}
+        {/* {editScenarioDrawer?.visible && <EditScenarioFormDrawer {...this.props} />} */}
       </PageContainer>
     );
   }

@@ -84,12 +84,12 @@ export default class EtherService {
     const callPromise = await this.contract.addDocument(`0x${hash_id}`, overrides);
     const receipt = await callPromise.wait();
 
-    // if (receipt.status !== 1) {
-    //   return "Fail On Server Blockchain";
-    // }
+    if (receipt.status !== 1) {
+      return "Fail On Server Blockchain";
+    }
     if (isSign === 1) {
-      //await this.signDocument(hash_id);
-      //return receipt.transactionHash;
+      await this.signDocument(hash_id);
+      return receipt.transactionHash;
     }
     return "Fail On Server Blockchain";
   }

@@ -20,6 +20,7 @@ import { getMatchMenu } from '@umijs/route-utils';
 // import logo from '../assets/logo.svg';
 import lba from '../assets/lba.png';
 import type { CurrentUser } from '@/models/user';
+import styles from './BasicLayout.less';
 
 const noMatch = (
   <Result
@@ -124,7 +125,9 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
       <ProLayout
         logo={lba}
         formatMessage={formatMessage}
+        siderWidth={270}
         {...props}
+        className={styles.customSider}
         menu={{
           type: 'group',
         }}

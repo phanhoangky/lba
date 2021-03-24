@@ -1,5 +1,5 @@
 import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
-import { Button, Col, Divider, Form, Input, Row, Select } from 'antd';
+import { Button, Col, Divider, Form, Input, Modal, Row, Select, Skeleton, Space } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -7,8 +7,8 @@ import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState
 import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
-import { UpdateLocationParam } from '@/services/LocationService/LocationService';
-import { EditTwoTone } from '@ant-design/icons';
+import type { UpdateLocationParam } from '@/services/LocationService/LocationService';
+import { DeleteTwoTone, EditTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export type ViewLocationDetailComponentProps = {
   dispatch: Dispatch;
@@ -196,9 +196,53 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
       });
   };
 
+  deleteLocation = async (id: string) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/deleteLocation`,
+      payload: id,
+    });
+  };
+
+  setLocationsTableLoading = async (loading: boolean) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setLocationTableLoadingReducer`,
+      payload: loading,
+    });
+  };
+
+  deleteConfirm = (location: any) => {
+    Modal.confirm({
+      title: `Are you sure want to delete ${location.name}?`,
+      icon: <ExclamationCircleOutlined />,
+      closable: false,
+      onOk: async () => {
+        this.setLocationsTableLoading(true)
+          .then(() => {
+            this.setEditLocationModal({
+              isLoading: true,
+            });
+            this.deleteLocation(location.id).then(() => {
+              this.callGetListLocations().then(() => {
+                this.setLocationsTableLoading(false);
+                this.setEditLocationModal({
+                  isLoading: false,
+                });
+              });
+            });
+          })
+          .catch(() => {
+            this.setLocationsTableLoading(false);
+            this.setEditLocationModal({
+              isLoading: false,
+            });
+          });
+      },
+    });
+  };
+
   formRef = React.createRef<FormInstance<any>>();
   render() {
-    const { selectedLocation } = this.props.location;
+    const { selectedLocation, editLocationModal } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
     return (
       <>
@@ -211,97 +255,117 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 boxSizing: 'border-box',
               }}
             >
-              <Form.Item label="Name" name="name">
-                <Input placeholder="input placeholder" />
-              </Form.Item>
-              <Form.Item label="Type" name="typeId" style={{ width: '50%' }}>
-                <Select
-                  style={{ width: '100%' }}
-                  onChange={() => {
-                    // console.log('====================================');
-                    // console.log(e);
-                    // console.log('====================================');
-                    // this.setCreateLocationParam({
-                    //   typeId: e,
-                    // });
-                  }}
-                >
-                  {listDeviceTypes?.map((type: any) => {
-                    return (
-                      <Select.Option key={type.id} value={type.id}>
-                        {type.typeName}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
-              </Form.Item>
+              <Skeleton active loading={editLocationModal?.isLoading}>
+                <Form.Item label="Name" name="name">
+                  <Input placeholder="input placeholder" />
+                </Form.Item>
+              </Skeleton>
+
+              <Skeleton active loading={editLocationModal?.isLoading}>
+                <Form.Item label="Type" name="typeId" style={{ width: '50%' }}>
+                  <Select
+                    style={{ width: '100%' }}
+                    onChange={() => {
+                      // console.log('====================================');
+                      // console.log(e);
+                      // console.log('====================================');
+                      // this.setCreateLocationParam({
+                      //   typeId: e,
+                      // });
+                    }}
+                  >
+                    {listDeviceTypes?.map((type: any) => {
+                      return (
+                        <Select.Option key={type.id} value={type.id}>
+                          {type.typeName}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+              </Skeleton>
+
               <Divider></Divider>
-              <Form.Item
-                name="description"
-                label="Description"
-                style={{
-                  width: '100%',
-                }}
-              >
-                <Input.TextArea
-                  rows={4}
+              <Skeleton active loading={editLocationModal?.isLoading}>
+                <Form.Item
+                  name="description"
+                  label="Description"
                   style={{
                     width: '100%',
                   }}
-                  placeholder="input placeholder"
-                />
-              </Form.Item>
-              <Divider></Divider>
-              <Form.Item
-                label="Address"
-                name="address"
-                style={{
-                  width: '100%',
-                }}
-              >
-                <AutoCompleteComponent
-                  {...this.props}
-                  inputValue={selectedLocation?.address}
-                  value={{
-                    label: selectedLocation?.address,
-                    value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
+                >
+                  <Input.TextArea
+                    rows={4}
+                    style={{
+                      width: '100%',
+                    }}
+                    placeholder="input placeholder"
+                  />
+                </Form.Item>
+              </Skeleton>
+              <Skeleton active loading={editLocationModal?.isLoading}>
+                <Form.Item
+                  label="Address"
+                  name="address"
+                  style={{
+                    width: '100%',
                   }}
-                  // onInputChange={(e: any) => {
-                  //   this.setSelectedLocation({
-                  //     address: e,
-                  //   });
-                  // }}
-                  onChange={async (e: any, address: any) => {
-                    await this.handleAutoCompleteSearch(e);
-                    const coordination = e.split('-');
-                    const lat = coordination[0];
-                    const lon = coordination[1];
-                    this.setSelectedLocation({
-                      longitude: lon,
-                      latitude: lat,
-                      address,
-                    });
-                  }}
-                />
-              </Form.Item>
+                >
+                  <AutoCompleteComponent
+                    {...this.props}
+                    inputValue={selectedLocation?.address}
+                    value={{
+                      label: selectedLocation?.address,
+                      value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
+                    }}
+                    // onInputChange={(e: any) => {
+                    //   this.setSelectedLocation({
+                    //     address: e,
+                    //   });
+                    // }}
+                    onChange={async (e: any, address: any) => {
+                      await this.handleAutoCompleteSearch(e);
+                      const coordination = e.split('-');
+                      const lat = coordination[0];
+                      const lon = coordination[1];
+                      this.setSelectedLocation({
+                        longitude: lon,
+                        latitude: lat,
+                        address,
+                      });
+                    }}
+                  />
+                </Form.Item>
+              </Skeleton>
               <Divider></Divider>
             </Form>
             <LeafletMapComponent {...this.props} />
             <Divider></Divider>
             <Row>
               <Col>
-                <Button
-                  onClick={() => {
-                    if (this.formRef.current) {
-                      this.formRef.current.validateFields().then((values) => {
-                        this.updateConfirm(values);
-                      });
-                    }
-                  }}
-                >
-                  <EditTwoTone />
-                  Update
-                </Button>
+                <Space>
+                  <Button
+                    onClick={() => {
+                      if (this.formRef.current) {
+                        this.formRef.current.validateFields().then((values) => {
+                          this.updateConfirm(values);
+                        });
+                      }
+                    }}
+                  >
+                    <EditTwoTone />
+                    Update
+                  </Button>
+                  <Button
+                    danger
+                    onClick={() => {
+                      this.deleteConfirm(selectedLocation);
+                    }}
+                  >
+                    <DeleteTwoTone twoToneColor="#f93e3e" />
+                    Remove
+                  </Button>
+                </Space>
               </Col>
             </Row>
           </>

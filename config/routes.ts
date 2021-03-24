@@ -46,12 +46,7 @@
                 path: '/location',
                 component: './Location',
               },
-              {
-                name: 'list.campaign-list',
-                icon: 'GlobalOutlined',
-                path: '/campaign',
-                component: './Campaign',
-              },
+              
               {
                 name: 'list.device-list',
                 icon: 'FundProjectionScreen',
@@ -75,6 +70,12 @@
                 icon: 'ContainerOutlined',
                 path: '/scenario',
                 component: './Scenario',
+              },
+              {
+                name: 'list.campaign-list',
+                icon: 'GlobalOutlined',
+                path: '/campaign',
+                component: './Campaign',
               },
               {
                 path: "/profile",
