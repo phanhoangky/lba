@@ -51,7 +51,9 @@ export default class EtherService {
 
   // Sign in wallet
   async readKeyStoreJson(json, password) {
+    console.log("readKeyStoreJson>>>>>>", json, password);
     this.wallet = await ethers.Wallet.fromEncryptedJson(json, password);
+    console.log("readKeyStoreJson1>>>>>>", this.wallet)
     this.wallet = this.wallet.connect(this.provider);
   }
 
@@ -73,13 +75,19 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id, isSign) {
-    const listSignature = await this.getSignatureDocument(hash_id);
+    const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
+    console.log("listSignature>>>>>>>", listSignature);
     if (listSignature !== null) {
-      return "Fail - File is already on server";
+      let isSigned = false;
+      listSignature.forEach(e => {
+        if (e === this.wallet.address) {
+          isSigned = true;
+        }
+      });
+      if (isSigned) return "Fail - File is already signed";
+
+      return "Fail - CSCD is on the way";
     }
-    console.log('====================================');
-    console.log("callPromise>>>>>", hash_id, isSign);
-    console.log('====================================');
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
@@ -87,15 +95,13 @@ export default class EtherService {
     };
     const callPromise = await this.contract.addDocument(`0x${hash_id}`, overrides);
     const receipt = await callPromise.wait();
-
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
     if (isSign === 1) {
       await this.signDocument(hash_id);
-      return receipt.transactionHash;
     }
-    return "Fail On Server Blockchain";
+    return receipt.transactionHash;
   }
 
   async signDocument(hash_id) {
@@ -106,15 +112,10 @@ export default class EtherService {
 
     const signDocumentFunction = await this.contract.signDocument(`0x${hash_id}`, overrides);
     const receipt = await signDocumentFunction.wait();
-    console.log('====================================');
-    // console.log("signDocument>>>>>>", signDocumentFunction, receipt);
-    console.log('====================================');
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
-    return "signDocumentFunction.transactionHash";
-    //  return signDocumentFunction.transactionHash;
-
+    return signDocumentFunction.transactionHash;
   }
 
   async getSignatureDocument(id) {
