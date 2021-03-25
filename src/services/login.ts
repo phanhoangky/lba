@@ -20,6 +20,7 @@ export type AuthenticationRequest = {
   walletAddress?: string,
   uid?: string,
   rootFolderId?: string,
+  newUser?: string;
 }
 
 // export async function fakeAccountLogin(params: LoginParamsType) {
@@ -44,4 +45,16 @@ export async function GoogleLogin() {
 export async function PostAuthentication(params: AuthenticationRequest) {
   const res = await  ApiHelper.post("accounts/authenticate", { ...params });
   return res
+}
+
+export async function EmailLogin() {
+  const provider = new firebase.auth.EmailAuthProvider();
+  const res = await firebase
+    .auth()
+    .signInWithPopup(provider);
+  return res;
+}
+
+export async function SignOut() {
+  await firebase.auth().signOut();
 }

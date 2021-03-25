@@ -6,7 +6,7 @@ import EtherService from '@/configs/Support';
 import { getPageQuery } from '@/utils/utils';
 import firebase from 'firebase';
 import { CreateFolder } from '@/services/PublitioService/PublitioService';
-import {  GoogleLogin, PostAuthentication } from '@/services/login';
+import {  EmailLogin, GoogleLogin, PostAuthentication } from '@/services/login';
 import type { AuthenticationRequest } from '@/services/login';
 
 export type CurrentUser = {
@@ -42,6 +42,8 @@ export type UserModelType = {
     getCurrentUser: Effect;
     googleLogin: Effect;
     setToken: Effect;
+
+    emailLogin: Effect;
   };
   reducers: {
     saveCurrentUser: Reducer<UserModelState>;
@@ -211,6 +213,11 @@ const UserModel: UserModelType = {
           ether
         }
       });
+    },
+
+    *emailLogin(_, { call, put }) {
+      const firebaseResponse = yield call(EmailLogin);
+      console.log(firebaseResponse);
     }
   },
 

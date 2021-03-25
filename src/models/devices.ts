@@ -32,6 +32,7 @@ export type DeviceType = {
     typeName: string;
   };
   location?: any;
+  defaultScenarioId?: string;
 };
 
 export type DeviceModelState = {
@@ -41,7 +42,10 @@ export type DeviceModelState = {
   editDeviceVisible?: boolean;
   selectedDevices?: any[];
   editMultipleDevicesDrawerVisible?: boolean;
-
+  editMultipleDevicesDrawer?: {
+    visible: boolean;
+    isLoading: boolean;
+  }
   // Update Drawer Model State
   isUpdateMultiple?: boolean;
   updateDevicesState?: UpdateListDevicesParam;
@@ -95,6 +99,7 @@ export type DeviceModelType = {
     setDevicesTableLoadingReducer: Reducer<DeviceModelState>;
     setViewScreenshotModalReducer: Reducer<DeviceModelState>;
     setListDevicesScreenShotReducer: Reducer<DeviceModelState>;
+    setEditMultipleDevicesDrawerReducer: Reducer<DeviceModelState>;
   };
 };
 
@@ -256,7 +261,7 @@ const DeviceModel: DeviceModelType = {
         startDate: payload.startDate,
         timeFilter: payload.timeFilter.toString().replaceAll(',', ''),
         name: payload.name,
-        typeId: payload.type.id,
+        defaultScenarioId: payload.scenarioId
       };
       yield call(UpdateDevice, param, payload.id);
     },
@@ -270,7 +275,6 @@ const DeviceModel: DeviceModelType = {
         endDate: payload.updateDevicesState.endDate,
         idList: payload.listId,
         minBid: payload.updateDevicesState.minBid,
-        typeId: payload.updateDevicesState.typeId,
         isPublished: payload.isPublish
       };
       yield call(UpdateListDevices, param);
@@ -507,6 +511,13 @@ const DeviceModel: DeviceModelType = {
       return {
         ...state,
         listDevicesScreenShot: payload
+      }
+    },
+
+    setEditMultipleDevicesDrawerReducer(state, { payload }) {
+      return {
+        ...state,
+        editMultipleDevicesDrawer: payload
       }
     }
   },

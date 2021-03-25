@@ -3,6 +3,7 @@ import * as React from 'react';
 import ReactPlayer from 'react-player';
 import type { Dispatch, PlayListModelState, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
+import styles from '../index.less';
 
 export type SelectPlaylistDrawerProps = {
   dispatch: Dispatch;
@@ -200,7 +201,7 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                             });
                           });
                       }}
-                      style={item.isSelected ? { backgroundColor: '#424ef5' } : {}}
+                      style={item.isSelected ? styles.selectedPlaylist : {}}
                     >
                       <List.Item.Meta title={item.title}></List.Item.Meta>
                     </List.Item>

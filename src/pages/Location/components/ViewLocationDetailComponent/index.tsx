@@ -19,6 +19,7 @@ export type ViewLocationDetailComponentProps = {
 
 export class ViewLocationDetailComponent extends React.Component<ViewLocationDetailComponentProps> {
   componentDidMount = () => {
+    this.initialMap();
     if (this.formRef.current) {
       const { selectedLocation } = this.props.location;
       if (selectedLocation) {
@@ -32,20 +33,21 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     }
   };
 
-  componentDidUpdate() {
-    this.initialMap();
-    if (this.formRef.current) {
-      const { selectedLocation } = this.props.location;
-      if (selectedLocation) {
-        this.formRef.current.setFieldsValue({
-          name: selectedLocation.name,
-          description: selectedLocation.description,
-          typeId: selectedLocation.typeId,
-          address: selectedLocation.address,
-        });
-      }
-    }
-  }
+  // componentDidUpdate() {
+  //   this.initialMap();
+  //   if (this.formRef.current) {
+  //     const { selectedLocation } = this.props.location;
+  //     if (selectedLocation) {
+  //       this.formRef.current.setFieldsValue({
+  //         name: selectedLocation.name,
+  //         description: selectedLocation.description,
+  //         typeId: selectedLocation.typeId,
+  //         address: selectedLocation.address,
+  //       });
+  //     }
+  //   }
+  // }
+
   initialMap = () => {
     const { mapComponent, selectedLocation } = this.props.location;
     if (mapComponent) {
@@ -175,6 +177,9 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
   };
 
   updateConfirm = async (values: any) => {
+    console.log('====================================');
+    console.log(values);
+    console.log('====================================');
     this.setEditLocationModal({
       isLoading: true,
     })
@@ -303,6 +308,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   />
                 </Form.Item>
               </Skeleton>
+              <Divider></Divider>
               <Skeleton active loading={editLocationModal?.isLoading}>
                 <Form.Item
                   label="Address"

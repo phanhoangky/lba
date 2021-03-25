@@ -34,12 +34,9 @@ class Scenario extends React.Component<ScenarioProps> {
   componentDidMount = async () => {
     this.setTableLoading(true)
       .then(() => {
-        this.readJWT().then(() => {
-          this.callGetListScenario().then(() => {
-            this.callGetListLayout().then(() => {
-              this.setTableLoading(false);
-            });
-          });
+        Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(async () => {
+          this.readJWT();
+          this.setTableLoading(false);
         });
       })
       .catch(() => {
@@ -254,14 +251,10 @@ class Scenario extends React.Component<ScenarioProps> {
       },
     });
   };
+
+  editScenarioComponentRef = React.createRef<EditScenarioComponent>();
   render() {
-    const {
-      getListScenarioParam,
-      totalItem,
-      listScenario,
-      editScenarioDrawer,
-      tableLoading,
-    } = this.props.scenarios;
+    const { getListScenarioParam, totalItem, listScenario, tableLoading } = this.props.scenarios;
 
     return (
       <PageContainer>
@@ -298,14 +291,14 @@ class Scenario extends React.Component<ScenarioProps> {
                     })
                       .then(() => {
                         const clone = cloneDeep(item);
-                        this.setSelectedScenario(clone).then(() => {
-                          this.clearSelectedPlaylistItems().then(() => {
-                            this.clearAreas();
-                            this.setEditScenariosDrawer({
-                              visible: true,
-                              isLoading: false,
-                            });
+                        this.setSelectedScenario(clone).then(async () => {
+                          this.clearAreas();
+                          this.setEditScenariosDrawer({
+                            visible: true,
+                            isLoading: false,
                           });
+                          this.editScenarioComponentRef.current?.componentDidMount();
+                          this.clearSelectedPlaylistItems();
                         });
                       })
                       .catch(() => {
@@ -318,10 +311,11 @@ class Scenario extends React.Component<ScenarioProps> {
               }}
             >
               <Column dataIndex="title" title="Title" key="title"></Column>
+              <Column dataIndex="createTime" title="Create Time" key="createTime"></Column>
             </Table>
           </Col>
           <Col span={14}>
-            {editScenarioDrawer?.visible && <EditScenarioComponent {...this.props} />}
+            <EditScenarioComponent ref={this.editScenarioComponentRef} {...this.props} />
           </Col>
         </Row>
 

@@ -45,8 +45,8 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   componentDidMount = async () => {
     const {
       selectedPlaylist,
-      listMediaNotBelongToPlaylist,
-      selectedPlaylistItems,
+      // listMediaNotBelongToPlaylist,
+      // selectedPlaylistItems,
     } = this.props.playlists;
     if (this.formRef.current) {
       this.formRef.current.setFieldsValue({
@@ -58,7 +58,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       isLoading: true,
     })
       .then(() => {
-        this.getMediaNotBelongToPlaylist({ isPaging: false }).then(() => {
+        this.getMediaNotBelongToPlaylist({ isPaging: false, isSigned: 2 }).then(() => {
           this.calculateTotalDuration().then(() => {
             // this.setListMediaNotBelongToPlaylist(
             //   listMediaNotBelongToPlaylist.filter((media) =>
@@ -98,8 +98,8 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   };
 
   callGetListPlaylist = async () => {
-    this.setTableLoading(true);
     const { getPlaylistParam } = this.props.playlists;
+    this.setTableLoading(true);
     await this.props
       .dispatch({
         type: 'playlists/getListPlaylist',
@@ -296,6 +296,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       }),
     );
   };
+
   onSortEnd = ({ oldIndex, newIndex }: any) => {
     const { selectedPlaylistItems } = this.props.playlists;
     if (oldIndex !== newIndex) {
@@ -355,27 +356,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       });
       await this.setSelectedPlaylistItems(newList);
     }
-  };
-
-  removeItem = async (record: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
-
-    this.setSelectedPlaylistItems(
-      selectedPlaylistItems
-        .filter((item) => item.id !== record.id)
-        .map((item, index) => {
-          return {
-            ...item,
-            displayOrder: index,
-            index,
-          };
-        }),
-    );
-    const medias = selectedPlaylistItems.filter((item) => item.id === record.id)[0];
-    console.log('====================================');
-    console.log('removeItem >>>', medias);
-    console.log('====================================');
-    this.addMediaToListMedia(medias.mediaSrc);
   };
 
   addMediaToListMedia = async (media: any) => {
@@ -442,6 +422,27 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     }
   };
 
+  removeItem = async (record: any) => {
+    const { selectedPlaylistItems } = this.props.playlists;
+
+    this.setSelectedPlaylistItems(
+      selectedPlaylistItems
+        .filter((item) => item.id !== record.id)
+        .map((item, index) => {
+          return {
+            ...item,
+            displayOrder: index,
+            index,
+          };
+        }),
+    );
+    const medias = selectedPlaylistItems.filter((item) => item.id === record.id)[0];
+    console.log('====================================');
+    console.log('removeItem >>>', medias);
+    console.log('====================================');
+    this.addMediaToListMedia(medias.mediaSrc);
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -476,7 +477,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
           }
         }}
         title="Edit Playlist"
-        width={'80%'}
+        width={'50%'}
         onClose={async () => {
           await this.setEditPlaylistDrawer({
             visible: false,

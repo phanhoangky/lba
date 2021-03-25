@@ -24,18 +24,17 @@ export type CreateDeviceParams = {
 export type UpdateDeviceParams = {
   description: string,
   name: string,
-  typeId: string,
   dateFilter: string,
   endDate: string,
   minBid: 0,
   isPublished: boolean,
   startDate: string,
-  timeFilter: string
+  timeFilter: string,
+  defaultScenarioId?: string;
 }
 
 export type UpdateListDevicesParam = {
   idList: string[],
-  typeId: string,
   endDate: string,
   startDate: string,
   isPublished: boolean,
@@ -43,6 +42,7 @@ export type UpdateListDevicesParam = {
   dateFilter: string[],
   minBid: 0,
   currentType: string;
+  defaultScenarioId?: string;
 }
 
 export async function GetDevices(param: GetDeviceParams) {

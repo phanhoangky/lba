@@ -1,4 +1,4 @@
-import { GoogleCircleFilled } from '@ant-design/icons';
+import { GoogleCircleFilled, MailTwoTone } from '@ant-design/icons';
 import { Button, Space, Image, Divider } from 'antd';
 import React from 'react';
 import ProForm from '@ant-design/pro-form';
@@ -51,6 +51,13 @@ const Login: React.FC<LoginProps> = (props) => {
       type: 'user/googleLogin',
     });
   };
+
+  const emailLogin = async () => {
+    const { dispatch } = props;
+    await dispatch({
+      type: 'user/emailLogin',
+    });
+  };
   const setToken = async () => {
     await props.dispatch({
       type: `user/setToken`,
@@ -64,6 +71,12 @@ const Login: React.FC<LoginProps> = (props) => {
     // await dispatch({
     //   type: 'user/getCurrentUser',
     // });
+  };
+
+  const handleEmailSubmit = async () => {
+    emailLogin().then(() => {
+      setToken();
+    });
   };
   return (
     <div className={styles.main}>
@@ -113,6 +126,29 @@ const Login: React.FC<LoginProps> = (props) => {
               }}
             />
             Login with Google
+          </Space>
+        </Button>
+        <Divider />
+        <Button
+          style={{
+            width: '100%',
+            marginBottom: 24,
+            height: 'auto',
+            padding: '1em',
+          }}
+          type="primary"
+          block
+          onClick={() => {
+            handleEmailSubmit();
+          }}
+        >
+          <Space wrap direction="horizontal">
+            <MailTwoTone
+              style={{
+                fontSize: '1.2em',
+              }}
+            />
+            Login with Email
           </Space>
         </Button>
         <div

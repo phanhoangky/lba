@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Table } from 'antd';
+import { Col, Row, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
 import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
@@ -10,6 +10,7 @@ import { connect } from 'umi';
 import { EditPlaylistFormDrawer } from './components/EditPlaylistFormDrawer';
 import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 import { PlaylistTableHeaderComponent } from './components/PlaylistTableHeaderComponent';
+import { ViewEditPlaylistComponent } from './components/ViewEditPlaylistComponent';
 
 type PlaylistProps = {
   dispatch: Dispatch;
@@ -24,7 +25,8 @@ class Playlist extends React.Component<PlaylistProps> {
   componentDidMount = async () => {
     this.setTableLoading(true)
       .then(() => {
-        Promise.all([this.readJWT(), this.callGetListPlaylist()]).then(() => {
+        Promise.all([this.callGetListPlaylist()]).then(() => {
+          this.readJWT();
           this.setTableLoading(false);
         });
       })
@@ -54,16 +56,16 @@ class Playlist extends React.Component<PlaylistProps> {
     });
   };
 
-  setAddNewPlaylistModal = async (modal: any) => {
-    const { addNewPlaylistModal } = this.props.playlists;
-    await this.props.dispatch({
-      type: 'playlists/setAddNewPlaylistModalReducer',
-      payload: {
-        ...addNewPlaylistModal,
-        ...modal,
-      },
-    });
-  };
+  // setAddNewPlaylistModal = async (modal: any) => {
+  //   const { addNewPlaylistModal } = this.props.playlists;
+  //   await this.props.dispatch({
+  //     type: 'playlists/setAddNewPlaylistModalReducer',
+  //     payload: {
+  //       ...addNewPlaylistModal,
+  //       ...modal,
+  //     },
+  //   });
+  // };
 
   setSelectedPlaylist = async (modal: any) => {
     const { selectedPlaylist } = this.props.playlists;
@@ -154,6 +156,7 @@ class Playlist extends React.Component<PlaylistProps> {
     });
   };
 
+  editPlaylistComponentRef = React.createRef<ViewEditPlaylistComponent>();
   render() {
     const {
       listPlaylist,
@@ -166,59 +169,73 @@ class Playlist extends React.Component<PlaylistProps> {
 
     return (
       <PageContainer>
-        <Table
-          bordered
-          dataSource={listPlaylist}
-          loading={tableLoading}
-          pagination={{
-            current: getPlaylistParam?.pageNumber ? getPlaylistParam.pageNumber + 1 : 1,
-            total: totalItem,
-            onChange: (e) => {
-              this.callGetListPlaylist({
-                pageNumber: e - 1,
-              });
-            },
-          }}
-          onRow={(record) => {
-            return {
-              onClick: async () => {
-                await this.setSelectedPlaylist(record);
-
-                await this.setGetItemsByPlaylistIdParam({
-                  id: record.id,
-                });
-
-                await this.setEditPlaylistDrawer({
-                  visible: true,
-                  isLoading: true,
-                });
-                this.callGetItemsByPlaylistId()
-                  .then(() => {
-                    this.calculateTotalDuration().then(() => {
-                      this.setEditPlaylistDrawer({
-                        isLoading: false,
+        <Row gutter={20}>
+          <Col span={10}>
+            <Table
+              bordered
+              dataSource={listPlaylist}
+              loading={tableLoading}
+              pagination={{
+                current: getPlaylistParam?.pageNumber ? getPlaylistParam.pageNumber + 1 : 1,
+                total: totalItem,
+                pageSize: getPlaylistParam?.pageLimitItem ? getPlaylistParam?.pageLimitItem : 10,
+                onChange: (e) => {
+                  this.callGetListPlaylist({
+                    pageNumber: e - 1,
+                  });
+                },
+              }}
+              onRow={(record) => {
+                return {
+                  onClick: async () => {
+                    await this.setEditPlaylistDrawer({
+                      visible: true,
+                      isLoading: true,
+                    }).then(() => {
+                      this.setSelectedPlaylist(record);
+                      this.setGetItemsByPlaylistIdParam({
+                        id: record.id,
+                      });
+                      this.calculateTotalDuration().then(() => {
+                        this.editPlaylistComponentRef.current?.componentDidMount();
+                        this.setEditPlaylistDrawer({
+                          isLoading: false,
+                        });
                       });
                     });
-                  })
-                  .catch(() => {
-                    this.setEditPlaylistDrawer({
-                      isLoading: false,
-                    });
-                  });
-              },
-            };
-          }}
-          title={() => {
-            return <PlaylistTableHeaderComponent {...this.props} />;
-          }}
-        >
-          <Column key="title" title="Title" dataIndex="title"></Column>
-          <Column key="description" title="Description" dataIndex="description"></Column>
-        </Table>
+                    this.callGetItemsByPlaylistId()
+                      .then(() => {
+                        this.calculateTotalDuration().then(() => {
+                          this.editPlaylistComponentRef.current?.componentDidMount();
+                          this.setEditPlaylistDrawer({
+                            isLoading: false,
+                          });
+                        });
+                      })
+                      .catch(() => {
+                        this.setEditPlaylistDrawer({
+                          isLoading: false,
+                        });
+                      });
+                  },
+                };
+              }}
+              title={() => {
+                return <PlaylistTableHeaderComponent {...this.props} />;
+              }}
+            >
+              <Column key="title" title="Title" dataIndex="title"></Column>
+              <Column key="createTime" title="Create Time" dataIndex="createTime"></Column>
+            </Table>
+          </Col>
+          <Col span={14}>
+            <ViewEditPlaylistComponent ref={this.editPlaylistComponentRef} {...this.props} />
+          </Col>
+        </Row>
 
         {addNewPlaylistModal.visible && <AddNewPlaylistFormModal {...this.props} />}
 
-        {editPlaylistDrawer.visible && <EditPlaylistFormDrawer {...this.props} />}
+        {/* {editPlaylistDrawer.visible && <EditPlaylistFormDrawer {...this.props} />} */}
       </PageContainer>
     );
   }

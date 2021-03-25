@@ -218,6 +218,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       payload: list,
     });
   };
+  viewLocationRef = React.createRef<ViewLocationDetailComponent>();
   render() {
     const {
       getListLocationParam,
@@ -280,6 +281,8 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       ...clone,
                       address: data.display_name,
                     });
+                    this.viewLocationRef.current?.initialMap();
+                    this.viewLocationRef.current?.componentDidMount();
                     await this.setEditLocationModal({
                       visible: true,
                     });
@@ -327,7 +330,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           </Col>
           <Col span={12}>
             <Typography.Title level={4}>Edit Location Detail</Typography.Title>
-            <ViewLocationDetailComponent {...this.props} />
+            <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
           </Col>
         </Row>
 

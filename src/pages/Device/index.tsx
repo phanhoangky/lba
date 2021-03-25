@@ -2,11 +2,11 @@ import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
 import { Button, Modal, Space, Table } from 'antd';
-import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
+import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
 // import DrawerUpdateMultipleDevice from './components/DrawerUpdateMultipleDevice';
-import UpdateDeviceFormDrawer from './components/UpdateDeviceFormDrawer';
+import { UpdateDeviceFormDrawer } from './components/UpdateDeviceFormDrawer';
 import { DevicesTableHeaderComponent } from './components/DevicesTableHeaderComponent';
 import { EyeTwoTone } from '@ant-design/icons';
 import { ViewScreenShotModal } from './components/ViewScreenShotModal';
@@ -15,6 +15,7 @@ type DeviceProps = {
   dispatch: Dispatch;
   user: UserModelState;
   deviceStore: DeviceModelState;
+  scenarios: ScenarioModelState;
 };
 
 class Device extends React.Component<DeviceProps> {
@@ -38,7 +39,10 @@ class Device extends React.Component<DeviceProps> {
   componentDidMount = async () => {
     this.setDevicesTableLoading(true)
       .then(() => {
-        this.callGetListDevices().then(() => {
+        Promise.all([
+          this.callGetListScenarios({ isPaging: false }),
+          this.callGetListDevices(),
+        ]).then(() => {
           this.setGetDevicesParam({
             locationId: undefined,
           });
@@ -55,6 +59,16 @@ class Device extends React.Component<DeviceProps> {
       type: 'deviceStore/getDevices',
       payload: {
         ...this.props.deviceStore.getDevicesParam,
+        ...param,
+      },
+    });
+  };
+
+  callGetListScenarios = async (param?: any) => {
+    await this.props.dispatch({
+      type: `scenarios/getListScenarios`,
+      payload: {
+        ...this.props.scenarios.getListScenarioParam,
         ...param,
       },
     });
@@ -158,13 +172,27 @@ class Device extends React.Component<DeviceProps> {
       },
     });
   };
+
+  setEditMultipleDevicesDrawer = async (param?: any) => {
+    this.props.dispatch({
+      type: 'deviceStore/setEditMultipleDevicesDrawerReducer',
+      payload: {
+        ...this.props.deviceStore.editMultipleDevicesDrawer,
+        ...param,
+      },
+    });
+  };
+
+  updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
+
   render() {
     const {
-      selectedDevices,
       listDevices,
       getDevicesParam,
-      editMultipleDevicesDrawerVisible,
+      // editMultipleDevicesDrawerVisible,
       viewScreenshotModal,
+      editMultipleDevicesDrawer,
+      devicesTableLoading,
     } = this.props.deviceStore;
 
     const { selectedRowKeys } = this.state;
@@ -190,7 +218,7 @@ class Device extends React.Component<DeviceProps> {
             dataSource={listDevices}
             style={{}}
             scroll={{ y: 400, x: 500 }}
-            loading={this.state.tableLoading}
+            loading={devicesTableLoading}
             title={() => {
               return (
                 <>
@@ -284,7 +312,12 @@ class Device extends React.Component<DeviceProps> {
                           type: 'deviceStore/setCurrentDevice',
                           payload: record,
                         });
-                        this.setEditModalVisible(true);
+                        await this.updateDeviceFormRef.current?.componentDidMount();
+                        await this.setEditMultipleDevicesDrawer({
+                          visible: true,
+                        });
+
+                        // this.setEditModalVisible(true);
                       }}
                     >
                       <EyeTwoTone />
@@ -421,7 +454,9 @@ class Device extends React.Component<DeviceProps> {
           <DrawerUpdateMultipleDevice {...this.props}></DrawerUpdateMultipleDevice>
         </Drawer> */}
 
-        {editMultipleDevicesDrawerVisible && <UpdateDeviceFormDrawer {...this.props} />}
+        {editMultipleDevicesDrawer?.visible && (
+          <UpdateDeviceFormDrawer ref={this.updateDeviceFormRef} {...this.props} />
+        )}
         {/* <UpdateDeviceFormDrawer {...this.props} /> */}
 
         {/** Screenshot Modal */}

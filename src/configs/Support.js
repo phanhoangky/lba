@@ -73,6 +73,10 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id, isSign) {
+    const listSignature = await this.getSignatureDocument(hash_id);
+    if (listSignature !== null) {
+      return "Fail - File is already on server";
+    }
     console.log('====================================');
     console.log("callPromise>>>>>", hash_id, isSign);
     console.log('====================================');

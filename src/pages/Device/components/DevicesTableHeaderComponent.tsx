@@ -35,6 +35,16 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
     });
   };
 
+  setEditMultipleDevicesDrawer = async (param?: any) => {
+    this.props.dispatch({
+      type: 'deviceStore/setEditMultipleDevicesDrawerReducer',
+      payload: {
+        ...this.props.deviceStore.editMultipleDevicesDrawer,
+        ...param,
+      },
+    });
+  };
+
   setDevicesTableLoading = async (isLoading: boolean) => {
     await this.props.dispatch({
       type: 'deviceStore/setDevicesTableLoadingReducer',
@@ -94,7 +104,10 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
             //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
             //   payload: true,
             // });
-            this.setEditModalVisible(true);
+            // this.setEditModalVisible(true);
+            this.setEditMultipleDevicesDrawer({
+              visible: true,
+            });
           }}
         >
           Edit Multiple Devices

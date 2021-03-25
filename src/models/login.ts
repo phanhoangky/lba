@@ -2,10 +2,9 @@ import { stringify } from 'querystring';
 import type { Reducer, Effect } from 'umi';
 import { history } from 'umi';
 
-import { fakeAccountLogin } from '@/services/login';
+import { fakeAccountLogin, SignOut } from '@/services/login';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
-import { message } from 'antd';
 
 export type StateType = {
   status?: 'ok' | 'error';
@@ -61,12 +60,13 @@ const Model: LoginModelType = {
       // }
     },
 
-    logout() {
+    *logout(_, {call}) {
       const { redirect } = getPageQuery();
       // Note: There may be security issues, please note
       if (localStorage.getItem("JWT")) {
         localStorage.removeItem("JWT");
       }
+      yield call(SignOut);
       if (window.location.pathname !== '/account/login' && !redirect) {
         history.replace({
           pathname: '/account',
