@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import { Modal, Form, Input } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
@@ -67,14 +68,24 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
       isLoading: true,
     })
       .then(() => {
-        this.createPlaylist(values).then(() => {
-          this.callGetListPlaylist().then(() => {
-            this.setAddNewPlaylistModal({
-              visible: false,
-              isLoading: false,
+        this.createPlaylist(values)
+          .then(() => {
+            openNotification(
+              'success',
+              'Create playlist successfully',
+              `${values.title} was created`,
+            );
+            this.callGetListPlaylist().then(() => {
+              this.setAddNewPlaylistModal({
+                visible: false,
+                isLoading: false,
+              });
             });
+          })
+          .catch((error) => {
+            Promise.reject(error);
+            openNotification('error', 'Fail to create Playlist', `Fail to create ${values.title}`);
           });
-        });
       })
       .catch(() => {
         this.setAddNewPlaylistModal({

@@ -312,7 +312,7 @@ class Device extends React.Component<DeviceProps> {
                           type: 'deviceStore/setCurrentDevice',
                           payload: record,
                         });
-                        await this.updateDeviceFormRef.current?.componentDidMount();
+                        this.updateDeviceFormRef.current?.componentDidMount();
                         await this.setEditMultipleDevicesDrawer({
                           visible: true,
                         });
@@ -352,107 +352,6 @@ class Device extends React.Component<DeviceProps> {
             ></Column>
           </Table>
         </PageContainer>
-        {/* <Drawer
-          title={isUpdateMultiple ? 'Update Multiple Devices' : selectedDevice.name}
-          key="updateMultipleDevies"
-          visible={this.props.deviceStore.editMultipleDevicesDrawerVisible}
-          width={700}
-          closable={false}
-          onClose={() => {
-            this.props.dispatch({
-              type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-              payload: false,
-            });
-          }}
-          footer={
-            <div
-              style={{
-                textAlign: 'right',
-              }}
-            >
-              <Space>
-                <Button
-                  icon={<CloseSquareTwoTone />}
-                  onClick={async () => {
-                    await this.props.dispatch({
-                      type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                      payload: false,
-                    });
-                  }}
-                >
-                  Close Drawer
-                </Button>
-                <Button
-                  icon={<CloseSquareTwoTone />}
-                  onClick={async () => {
-                    if (isUpdateMultiple) {
-                      await this.onUpdateMultipleDevices();
-                    } else {
-                      await this.props.dispatch({
-                        type: 'deviceStore/deleteDevice',
-                        payload: selectedDevice.id,
-                      });
-
-                      this.props.dispatch({
-                        type: 'deviceStore/getDevices',
-                        payload: getDevicesParam,
-                      });
-                    }
-
-                    await this.props.dispatch({
-                      type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                      payload: false,
-                    });
-                  }}
-                >
-                  {isUpdateMultiple ? 'Delete Multiple Devices' : 'Delete Device'}
-                </Button>
-                <Button
-                  icon={<EditOutlined />}
-                  onClick={async () => {
-                    this.setState({
-                      tableLoading: true,
-                    });
-                    if (isUpdateMultiple) {
-                      this.onUpdateMultipleDevices()
-                        .then(() => {
-                          this.setState({
-                            tableLoading: false,
-                          });
-                        })
-                        .catch(() => {
-                          this.setState({
-                            tableLoading: false,
-                          });
-                        });
-                    } else {
-                      await this.onUpdateDevice()
-                        .then(() => {
-                          this.setState({
-                            tableLoading: false,
-                          });
-                        })
-                        .catch(() => {
-                          this.setState({
-                            tableLoading: false,
-                          });
-                        });
-                    }
-
-                    this.props.dispatch({
-                      type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                      payload: false,
-                    });
-                  }}
-                >
-                  {isUpdateMultiple ? 'Update Multiple Devices' : 'Update Device'}
-                </Button>
-              </Space>
-            </div>
-          }
-        >
-          <DrawerUpdateMultipleDevice {...this.props}></DrawerUpdateMultipleDevice>
-        </Drawer> */}
 
         {editMultipleDevicesDrawer?.visible && (
           <UpdateDeviceFormDrawer ref={this.updateDeviceFormRef} {...this.props} />

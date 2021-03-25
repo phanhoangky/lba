@@ -1,4 +1,5 @@
 import type { Area } from '@/models/Layout';
+import { notification } from 'antd';
 import moment from 'moment';
 import { parse } from 'querystring';
 
@@ -74,3 +75,20 @@ export const sortArea = (areas: Area[]) => {
     }
   });
 };
+
+export const openNotification = (type?: string, message?: string, description?: string) => {
+    if (type) {
+      notification[type]({
+        message: `${message}`,
+        description,
+      });
+    } else {
+      notification.open({
+        message: `${message}`,
+        description,
+        style: {
+          borderColor: 'green',
+        },
+      });
+    }
+  };

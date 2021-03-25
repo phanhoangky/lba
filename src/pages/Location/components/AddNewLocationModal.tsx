@@ -1,5 +1,5 @@
 import { geocoding } from '@/services/MapService/RapidAPI';
-import { Col, Input, Modal, Row, Select, Form } from 'antd';
+import { Col, Input, Modal, Row, Select, Form, notification } from 'antd';
 import * as React from 'react';
 import type {
   BrandModelState,
@@ -26,6 +26,23 @@ export type AddNewLocationModalProps = {
 
 export class AddNewLocationModal extends React.Component<AddNewLocationModalProps> {
   formRef = React.createRef<FormInstance<any>>();
+
+  openNotification = (type?: string, message?: string, description?: string) => {
+    if (type) {
+      notification[type]({
+        message: `${message}`,
+        description,
+      });
+    } else {
+      notification.open({
+        message: `${message}`,
+        description,
+        style: {
+          borderColor: 'green',
+        },
+      });
+    }
+  };
 
   setAddNewLocationModal = async (modal: any) => {
     await this.props.dispatch({
@@ -65,6 +82,7 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
         this.createNewLocation(values).then(() => {
           this.callGetListLocations().then(() => {
             this.clearCreateLocationParam().then(() => {
+              this.openNotification(undefined, 'Success', 'Create New Location Success');
               this.setAddNewLocationModal({
                 isLoading: false,
                 visible: false,
@@ -74,6 +92,7 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
         });
       })
       .catch(() => {
+        this.openNotification('error', 'Error', 'Create New Location Error');
         this.setAddNewLocationModal({
           isLoading: false,
           visible: false,
@@ -120,9 +139,6 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
       const coordination = location.split('-');
       const lat = Number.parseFloat(coordination[0]);
       const lon = Number.parseFloat(coordination[1]);
-      console.log('====================================');
-      console.log(coordination);
-      console.log('====================================');
       if (mapComponent) {
         if (mapComponent.map) {
           mapComponent.map.setView([lat, lon]);
@@ -157,16 +173,21 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
       },
     });
   };
+
+  setEditLocationModal = async (modal: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setEditLocationModalReduder`,
+      payload: {
+        ...this.props.location.editLocationModal,
+        ...modal,
+      },
+    });
+  };
   render() {
     const { addNewLocationModal, createLocationParam, mapComponent } = this.props.location;
 
     const { listDeviceTypes } = this.props.deviceStore;
 
-    const { listBrand } = this.props.brand;
-
-    console.log('====================================');
-    console.log(createLocationParam);
-    console.log('====================================');
     return (
       <>
         <Modal
@@ -177,18 +198,24 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
           width={'50%'}
           afterClose={() => {
             if (mapComponent) {
+              console.log('====================================');
+              console.log('Add New Location >>>', mapComponent);
+              console.log('====================================');
               if (mapComponent.map) {
-                this.setMapComponent({
-                  map: undefined,
-                });
+                // this.setMapComponent({
+                //   map: undefined,
+                // });
                 if (mapComponent.marker) {
-                  mapComponent.marker.removeFrom(mapComponent.map);
+                  mapComponent.marker.remove();
                   this.setMapComponent({
                     marker: undefined,
                   });
                 }
               }
             }
+            this.setEditLocationModal({
+              visible: true,
+            });
             this.clearCreateLocationParam();
           }}
           destroyOnClose={true}
@@ -231,9 +258,6 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
               <Select
                 style={{ width: '100%' }}
                 onChange={() => {
-                  // console.log('====================================');
-                  // console.log(e);
-                  // console.log('====================================');
                   // this.setCreateLocationParam({
                   //   typeId: e,
                   // });

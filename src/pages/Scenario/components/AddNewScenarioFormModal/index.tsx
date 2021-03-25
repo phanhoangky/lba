@@ -12,6 +12,7 @@ import { connect } from 'umi';
 import styles from '../../index.less';
 import TitleStep from './TitleStep';
 import { Animated } from 'react-animated-css';
+import { openNotification } from '@/utils/utils';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
@@ -145,10 +146,25 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
         onOk={async () => {
           if (addNewScenarioModal?.currentStep === 0) {
             this.formRef.current?.validateFields().then((values) => {
-              this.onCreateScenarios(values);
-              this.setAddNewScenarioModal({
-                currentStep: 1,
-              });
+              this.onCreateScenarios(values)
+                .then(() => {
+                  openNotification(
+                    'success',
+                    'Create Scenario Successfully',
+                    `Create campaign ${values.title} successfully`,
+                  );
+                })
+                .catch((error) => {
+                  Promise.reject(error);
+                  openNotification(
+                    'error',
+                    'Fail to Create Scenario',
+                    `Fail to Create campaign ${values.title}`,
+                  );
+                });
+              // this.setAddNewScenarioModal({
+              //   currentStep: 1,
+              // });
             });
           }
         }}

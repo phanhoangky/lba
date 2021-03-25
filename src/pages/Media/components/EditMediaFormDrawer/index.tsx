@@ -1,4 +1,5 @@
 import type { EditMediaParam } from '@/services/MediaSourceService';
+import { openNotification } from '@/utils/utils';
 import { DeleteTwoTone, EditOutlined } from '@ant-design/icons';
 import { Button, Drawer, Popconfirm, Form, Input, Row, Col, Image } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
@@ -66,7 +67,14 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
     });
   }
 
-  updateFile = async (modal?: any) => {
+  updateMedia = async (param: any) => {
+    await this.props.dispatch({
+      type: 'media/updateFile',
+      payload: param,
+    });
+  };
+
+  handleUpdateFile = async (modal?: any) => {
     const { selectedFile } = this.props.media;
 
     if (this.formRef.current) {
@@ -80,11 +88,7 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
           ...modal,
           ...values,
         };
-
-        this.props.dispatch({
-          type: 'media/updateFile',
-          payload: param,
-        });
+        this.updateMedia(param);
       });
     }
   };
@@ -121,15 +125,25 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
                       this.setEditFileDrawer({
                         visible: false,
                       }).then(() => {
-                        this.removeMedia(selectedFile).then(() => {
-                          this.callGetListMedia().then(() => {
-                            this.setListLoading(false).then(() => {
-                              this.setState({
-                                removeConfirmVisible: false,
+                        this.removeMedia(selectedFile)
+                          .then(() => {
+                            openNotification(
+                              'success',
+                              'remove media sucessfully',
+                              `${selectedFile.title} is removed`,
+                            );
+                            this.callGetListMedia().then(() => {
+                              this.setListLoading(false).then(() => {
+                                this.setState({
+                                  removeConfirmVisible: false,
+                                });
                               });
                             });
+                          })
+                          .catch((error) => {
+                            Promise.reject(error);
+                            openNotification('error', 'fail to remove media', error);
                           });
-                        });
                       });
                     })
                     .catch(() => {
@@ -166,11 +180,26 @@ class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProps> {
                   });
                   this.setListLoading(true)
                     .then(() => {
-                      this.updateFile().then(() => {
-                        this.callGetListMedia().then(() => {
+                      this.handleUpdateFile()
+                        .then(() => {
+                          openNotification(
+                            'success',
+                            'update media sucessfully',
+                            `${selectedFile.title} is updated`,
+                          );
+                          this.callGetListMedia().then(() => {
+                            this.setListLoading(false);
+                          });
+                        })
+                        .catch((error) => {
+                          Promise.reject(error);
+                          openNotification(
+                            'error',
+                            'Fail to update media ',
+                            `${selectedFile.title} is fail to update`,
+                          );
                           this.setListLoading(false);
                         });
-                      });
                     })
                     .catch(() => {
                       this.setListLoading(false);

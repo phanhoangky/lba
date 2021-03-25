@@ -25,7 +25,7 @@ import type {
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-import { sortArea } from '@/utils/utils';
+import { openNotification, sortArea } from '@/utils/utils';
 import { v4 as uuidv4 } from 'uuid';
 import SelectPlaylistDrawer from '../SelectPlaylistDrawer';
 import ReactPlayer from 'react-player';
@@ -127,21 +127,39 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
       });
   };
 
-  updateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
-    await this.setEditScenariosDrawer({
-      visible: false,
+  updateScenario = async (param: any) => {
+    await this.props.dispatch({
+      type: 'scenarios/updateScenario',
+      payload: param,
     });
+  };
 
-    await this.setTableLoading(true);
-    this.props
-      .dispatch({
-        type: 'scenarios/updateScenario',
-        payload: updateScenarioParam,
-      })
+  handleUpdateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
+    // await this.setEditScenariosDrawer({
+    //   visible: false,
+    // });
+
+    this.setTableLoading(true)
       .then(() => {
-        this.callGetListScenario().then(() => {
-          this.setTableLoading(false);
-        });
+        this.updateScenario(updateScenarioParam)
+          .then(() => {
+            openNotification(
+              'success',
+              'Edit Scenario Successfully',
+              `Edit campaign ${updateScenarioParam.title} successfully`,
+            );
+            this.callGetListScenario().then(() => {
+              this.setTableLoading(false);
+            });
+          })
+          .catch((error) => {
+            Promise.reject(error);
+            openNotification(
+              'error',
+              'Fail to edit scenario',
+              `Fail to edit scenario ${updateScenarioParam.title}`,
+            );
+          });
       })
       .catch(() => {
         this.setTableLoading(false);
@@ -176,9 +194,6 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     const selectedScenarioItem = selectedSenario?.scenarioItems.filter(
       (item) => item?.area?.id === selectedArea?.id,
     );
-    console.log('====================================');
-    console.log(selectedScenarioItem, selectedPlaylist);
-    console.log('====================================');
     if (selectedScenarioItem) {
       if (selectedScenarioItem.length > 0) {
         this.setSelectedScenario({
@@ -204,11 +219,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
           playlist: selectedPlaylist,
           scenario: selectedSenario,
         };
-
         selectedSenario?.scenarioItems.push(newScenarioItem);
-        console.log('====================================');
-        console.log(selectedSenario);
-        console.log('====================================');
         this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems,
         });
@@ -447,7 +458,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                           ...values,
                         };
 
-                        this.updateScenario(updateParam);
+                        this.handleUpdateScenario(updateParam);
                       });
                     }
                   }}
@@ -614,9 +625,6 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                       onRow={(record) => {
                         return {
                           onClick: () => {
-                            console.log('====================================');
-                            console.log(record);
-                            console.log('====================================');
                             this.setUrlAreasOfScenario(
                               selectedArea,
                               record.mediaSrc.urlPreview,

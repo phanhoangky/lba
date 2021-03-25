@@ -26,7 +26,7 @@ ApiHelper.interceptors.request.use(config => {
   return config;
   
 }, error => {
-    return Promise.reject(error)
+  return Promise.reject(error);
 })
 
 ApiHelper.interceptors.response.use(
@@ -34,8 +34,12 @@ ApiHelper.interceptors.response.use(
   error => {
     if (error.response) {
       const { status } = error.response;
-      if (status === 401) {
+      if (status) {
+        if (status === 401) {
         history.push("/account/login");
+      } else {
+        history.push('/exception/500')
+      }
       } else {
         history.push('/exception/500')
       }

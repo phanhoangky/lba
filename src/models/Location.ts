@@ -148,7 +148,7 @@ const LocationStore: LocationStoreModel = {
 
     editLocationModal: {
       isLoading: false,
-      visible: false
+      visible: true
     },
 
     addressSuggestList: [],

@@ -60,14 +60,13 @@ class Media extends React.Component<MediaSourceProps> {
       .then(() => {
         this.getCurrentUser().then(() => {
           this.readJWT().then(() => {
-            this.callGetListFolders().then(() => {
-              this.callGetListMedia().then(() => {
-                this.callGetListMediaType().then(() => {
-                  this.addBreadscrumbHome().then(() => {
-                    this.setListLoading(false);
-                  });
-                });
-              });
+            Promise.all([
+              this.callGetListFolders(),
+              this.callGetListMedia(),
+              this.callGetListMediaType(),
+              this.addBreadscrumbHome(),
+            ]).then(() => {
+              this.setListLoading(false);
             });
           });
         });
@@ -343,9 +342,6 @@ class Media extends React.Component<MediaSourceProps> {
             const { currentUser } = this.props.user;
 
             const signature = await currentUser?.ether?.signDocument(item.securityHash);
-            console.log('====================================');
-            console.log(item, currentUser?.ether, signature);
-            console.log('====================================');
             this.updateFile({
               isSigned: 1,
               hash: signature,
@@ -380,28 +376,6 @@ class Media extends React.Component<MediaSourceProps> {
   //       });
   //     });
   // };
-
-  createFolder = async () => {
-    const { breadScrumb, createFolderParam } = this.props.media;
-    const res = await this.props.dispatch({
-      type: 'media/createFolder',
-      payload: {
-        ...createFolderParam,
-        parent_id: breadScrumb[breadScrumb.length - 1].id,
-      },
-    });
-    console.log('====================================');
-    console.log('Created Folder >>>>', res);
-    console.log('====================================');
-    this.setListLoading(true);
-    this.callGetListFolders()
-      .then(() => {
-        this.setListLoading(false);
-      })
-      .catch(() => {
-        this.setListLoading(false);
-      });
-  };
 
   setEditFileDrawer = async (modal: any) => {
     await this.props.dispatch({

@@ -25,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash';
 import { MediasTableComponent } from './components/MediasTableComponent';
 import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPageService/PlaylistItemService';
+import { openNotification } from '@/utils/utils';
 
 export type ViewEditPlaylistComponentProps = {
   dispatch: Dispatch;
@@ -336,8 +337,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
       type: 'playlists/removePlaylist',
       payload: this.props.playlists.selectedPlaylist.id,
     });
-
-    await this.callGetListPlaylist();
   };
 
   handleRemovePlaylist = async () => {
@@ -351,11 +350,27 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
           isLoading: true,
         })
           .then(() => {
-            this.removePlaylist().then(() => {
-              this.setEditPlaylistDrawer({
-                isLoading: false,
+            this.removePlaylist()
+              .then(() => {
+                openNotification(
+                  'success',
+                  'Remove playlist successfully',
+                  `Playlist ${selectedPlaylist.title} was removed`,
+                );
+                this.callGetListPlaylist().then(() => {
+                  this.setEditPlaylistDrawer({
+                    isLoading: false,
+                  });
+                });
+              })
+              .catch((error) => {
+                Promise.reject(error);
+                openNotification(
+                  'error',
+                  'Fail to remove playlist',
+                  `Fail to remove playlist ${selectedPlaylist.title}`,
+                );
               });
-            });
           })
           .catch(() => {
             this.setEditPlaylistDrawer({
@@ -398,7 +413,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
           <Form.Item name="description" label="Description">
             <Input.TextArea rows={4} />
           </Form.Item>
-
           <Row>
             <Col span={12}>{this.renderPreviewMedia()}</Col>
             <Col span={12}>
@@ -525,17 +539,27 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                         });
                         this.updatePlaylist(values)
                           .then(() => {
+                            openNotification(
+                              'success',
+                              'update playlist successfully',
+                              `Playlist ${selectedPlaylist.title} was updated`,
+                            );
                             this.callGetListPlaylist().then(() => {
                               this.setEditPlaylistDrawer({
                                 isLoading: false,
-                                visible: false,
+                                // visible: false,
                               });
                             });
                           })
                           .catch(() => {
+                            openNotification(
+                              'error',
+                              'Fail tp update playlist',
+                              `Fail to update playlist ${selectedPlaylist.title}`,
+                            );
                             this.setEditPlaylistDrawer({
                               isLoading: false,
-                              visible: false,
+                              // visible: false,
                             });
                           });
                       });

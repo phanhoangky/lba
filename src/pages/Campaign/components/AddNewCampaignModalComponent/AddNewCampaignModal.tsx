@@ -21,6 +21,7 @@ import SelectScenarioPart from './SelectScenarioPart';
 import FilterDate from '../FilterDate';
 import TimeFilterComponent from '../TimeFilterComponent';
 import { v4 as uuidv4 } from 'uuid';
+import { openNotification } from '@/utils/utils';
 
 export type AddNewCampaignModalProps = {
   dispatch: Dispatch;
@@ -62,32 +63,15 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     });
   };
 
-  callGetListScenario = async (param?: any) => {
-    this.props.dispatch({
-      type: 'scenarios/getListScenarios',
-      payload: {
-        ...this.props.scenarios.getListScenarioParam,
-        ...param,
-      },
-    });
-  };
-
-  setTableLoading = async (loading: boolean) => {
-    await this.props.dispatch({
-      type: 'scenarios/setTableLoadingReducer',
-      payload: loading,
-    });
-  };
-
-  setGetListScenarioParam = async (modal: any) => {
-    await this.props.dispatch({
-      type: 'scenarios/setGetListScenarioParamReducer',
-      payload: {
-        ...this.props.scenarios.getListScenarioParam,
-        ...modal,
-      },
-    });
-  };
+  // callGetListScenario = async (param?: any) => {
+  //   this.props.dispatch({
+  //     type: 'scenarios/getListScenarios',
+  //     payload: {
+  //       ...this.props.scenarios.getListScenarioParam,
+  //       ...param,
+  //     },
+  //   });
+  // };
 
   selectScenario = async (id?: string) => {
     await this.props.dispatch({
@@ -113,25 +97,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
       type: `${LOCATION_DISPATCHER}/setListLocationsReducer`,
       payload,
     });
-  };
-
-  selectLocation = async (id: string) => {
-    const { listLocations } = this.props.location;
-
-    const newList = listLocations?.map((item) => {
-      if (item.id === id) {
-        return {
-          ...item,
-          isSelected: true,
-        };
-      }
-
-      return {
-        ...item,
-        isSelected: false,
-      };
-    });
-    await this.setListLocations(newList);
   };
 
   setMapComponent = async (payload: any) => {
@@ -164,16 +129,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     });
   };
 
-  callGetFee = async () => {
-    const res = await this.props.dispatch({
-      type: `${CAMPAIGN}/getListFee`,
-    });
-
-    await this.setAddNewCampaignModal({
-      fees: res.result.data,
-    });
-  };
-
   okConfirm = async () => {
     const { addNewCampaignModal } = this.props.campaign;
     const { currentUser } = this.props.user;
@@ -194,21 +149,43 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   addNewCampaignModal.fees.remainFee,
                   addNewCampaignModal.fees.cancelFee,
                 );
-                await this.createNewCampaign({
+                this.createNewCampaign({
                   campaignId,
                   hash,
                   ...values,
-                }).then(() => {
-                  this.callGetListCampaigns().then(() => {
+                })
+                  .then(() => {
+                    openNotification(
+                      'success',
+                      'Create New Campaign Successfully',
+                      `Created ${values.title} campaign`,
+                    );
+                    this.callGetListCampaigns().then(() => {
+                      this.setAddNewCampaignModal({
+                        visible: false,
+                        isLoading: false,
+                      });
+                    });
+                  })
+                  .catch(() => {
+                    openNotification(
+                      'error',
+                      'Fail to create new campaign',
+                      `Fail to created ${values.title} campaign`,
+                    );
                     this.setAddNewCampaignModal({
                       visible: false,
                       isLoading: false,
                     });
                   });
-                });
               }
             })
             .catch(() => {
+              openNotification(
+                'error',
+                'Fail to create new campaign',
+                `Fail to created ${values.title} campaign`,
+              );
               this.setAddNewCampaignModal({
                 visible: false,
                 isLoading: false,
@@ -364,30 +341,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     console.log('====================================');
     return (
       <>
-        {/* <Modal
-          width="80%"
-          title="Add New Campaign"
-          visible={addNewCampaignModal.visible}
-          centered
-          destroyOnClose={true}
-          confirmLoading={addNewCampaignModal.isLoading}
-          closable={false}
-          afterClose={() => {
-            this.clearCreateNewCampaignParam().then(() => {
-              this.selectScenario(undefined).then(() => {
-                this.resetMap();
-              });
-            });
-          }}
-          onOk={() => {
-            this.okConfirm();
-          }}
-          onCancel={() => {
-            this.setAddNewCampaignModal({
-              visible: false,
-            });
-          }}
-        > */}
         {addNewCampaignModal.visible && (
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
             <Form.Item

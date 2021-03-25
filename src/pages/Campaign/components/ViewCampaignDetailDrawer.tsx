@@ -22,7 +22,7 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
   componentDidMount() {
     const { mapComponent } = this.props.location;
 
-    if (mapComponent.map) {
+    if (mapComponent?.map) {
       const { selectedCampaign } = this.props.campaign;
       if (selectedCampaign.location.split('-').length >= 2) {
         // const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
@@ -57,7 +57,7 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
   componentDidUpdate = () => {
     const { mapComponent } = this.props.location;
 
-    if (mapComponent.map) {
+    if (mapComponent && mapComponent.map) {
       const { selectedCampaign } = this.props.campaign;
       if (selectedCampaign.location.split('-').length === 2) {
         const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
@@ -128,18 +128,20 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
           closable={false}
           afterVisibleChange={(e) => {
             if (!e) {
-              if (mapComponent.map) {
-                if (mapComponent.marker) {
-                  mapComponent.marker.remove();
-                  this.setMapComponent({
-                    marker: undefined,
-                  });
-                }
-                if (mapComponent.circle) {
-                  mapComponent.circle.remove();
-                  this.setMapComponent({
-                    circle: undefined,
-                  });
+              if (mapComponent) {
+                if (mapComponent.map) {
+                  if (mapComponent.marker) {
+                    mapComponent.marker.remove();
+                    this.setMapComponent({
+                      marker: undefined,
+                    });
+                  }
+                  if (mapComponent.circle) {
+                    mapComponent.circle.remove();
+                    this.setMapComponent({
+                      circle: undefined,
+                    });
+                  }
                 }
               }
             }

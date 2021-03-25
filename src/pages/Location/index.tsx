@@ -119,10 +119,10 @@ class LocationScreen extends React.Component<LocationScreenProps> {
         if (mapComponent) {
           if (mapComponent.map) {
             if (mapComponent.marker) {
-              mapComponent.marker.remove();
-              this.setMapComponent({
-                marker: undefined,
-              });
+              mapComponent.marker.setLatLng([item.latitude, item.longitude]);
+              // this.setMapComponent({
+              //   marker: undefined,
+              // });
             }
           }
         }
@@ -226,6 +226,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       totalItem,
       locationTableLoading,
       addNewLocationModal,
+      editLocationModal,
     } = this.props.location;
     return (
       <PageContainer>
@@ -330,11 +331,14 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           </Col>
           <Col span={12}>
             <Typography.Title level={4}>Edit Location Detail</Typography.Title>
-            <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
+            {editLocationModal?.visible && (
+              <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
+            )}
           </Col>
         </Row>
 
-        {addNewLocationModal?.visible && <AddNewLocationModal {...this.props} />}
+        {/* {addNewLocationModal?.visible && <AddNewLocationModal {...this.props} />} */}
+        <AddNewLocationModal {...this.props} />
         {/* {editLocationModal?.visible && <EditLocationModal {...this.props} />} */}
       </PageContainer>
     );

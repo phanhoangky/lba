@@ -191,24 +191,18 @@ class Playlist extends React.Component<PlaylistProps> {
                     await this.setEditPlaylistDrawer({
                       visible: true,
                       isLoading: true,
-                    }).then(() => {
-                      this.setSelectedPlaylist(record);
-                      this.setGetItemsByPlaylistIdParam({
-                        id: record.id,
-                      });
-                      this.calculateTotalDuration().then(() => {
-                        this.editPlaylistComponentRef.current?.componentDidMount();
-                        this.setEditPlaylistDrawer({
-                          isLoading: false,
-                        });
-                      });
-                    });
-                    this.callGetItemsByPlaylistId()
+                    })
                       .then(() => {
-                        this.calculateTotalDuration().then(() => {
-                          this.editPlaylistComponentRef.current?.componentDidMount();
-                          this.setEditPlaylistDrawer({
-                            isLoading: false,
+                        this.setSelectedPlaylist(record);
+                        this.setGetItemsByPlaylistIdParam({
+                          id: record.id,
+                        });
+                        this.callGetItemsByPlaylistId().then(() => {
+                          this.calculateTotalDuration().then(() => {
+                            this.editPlaylistComponentRef.current?.componentDidMount();
+                            this.setEditPlaylistDrawer({
+                              isLoading: false,
+                            });
                           });
                         });
                       })

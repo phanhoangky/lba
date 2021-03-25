@@ -1,5 +1,17 @@
 import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
-import { Button, Col, Divider, Form, Input, Modal, Row, Select, Skeleton, Space } from 'antd';
+import {
+  Button,
+  Col,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  notification,
+  Row,
+  Select,
+  Skeleton,
+  Space,
+} from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -33,6 +45,22 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     }
   };
 
+  // componentWillUnmount() {
+  //   const { mapComponent } = this.props.location;
+  //   if (mapComponent) {
+  //     if (mapComponent.map) {
+  //       this.setMapComponent({
+  //         map: undefined,
+  //       });
+  //       if (mapComponent.marker) {
+  //         mapComponent.marker.removeFrom(mapComponent.map);
+  //         this.setMapComponent({
+  //           marker: undefined,
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
   // componentDidUpdate() {
   //   this.initialMap();
   //   if (this.formRef.current) {
@@ -54,6 +82,9 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
       if (mapComponent.map && selectedLocation) {
         const lat = Number.parseFloat(selectedLocation.latitude);
         const lng = Number.parseFloat(selectedLocation.longitude);
+        console.log('====================================');
+        console.log('ViewLocation >>>', mapComponent);
+        console.log('====================================');
         mapComponent.map.setView([lat, lng]);
         if (!mapComponent.marker) {
           if (selectedLocation.longitude !== '' && selectedLocation?.latitude !== '') {
@@ -97,9 +128,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
       const coordination = address.split('-');
       const lat = Number.parseFloat(coordination[0]);
       const lon = Number.parseFloat(coordination[1]);
-      console.log('====================================');
-      console.log(coordination, lat.toString(), lon.toString());
-      console.log('====================================');
       if (mapComponent) {
         if (mapComponent.map) {
           mapComponent.map.setView([lat, lon]);
@@ -115,10 +143,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
           }
         }
       }
-
-      // console.log('====================================');
-      // console.log(coordination, lat.toString(), lon.toString());
-      // console.log('====================================');
 
       await this.setSelectedLocation({
         longitude: lon,
@@ -140,9 +164,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
 
   updateLocation = async (values: any) => {
     const { selectedLocation } = this.props.location;
-    console.log('====================================');
-    console.log('Update Location', selectedLocation);
-    console.log('====================================');
 
     if (selectedLocation) {
       const updateParam: UpdateLocationParam = {
@@ -156,9 +177,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
         typeId: selectedLocation.typeId,
         ...values,
       };
-      console.log('====================================');
-      console.log(selectedLocation, values);
-      console.log('====================================');
       await this.props.dispatch({
         type: `${LOCATION_DISPATCHER}/updateLocation`,
         payload: updateParam,
@@ -177,25 +195,24 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
   };
 
   updateConfirm = async (values: any) => {
-    console.log('====================================');
-    console.log(values);
-    console.log('====================================');
     this.setEditLocationModal({
       isLoading: true,
     })
       .then(() => {
         this.updateLocation(values).then(() => {
           this.callGetListLocations().then(() => {
+            this.openNotification('success', `Update ${values.name} successfully`);
             this.setEditLocationModal({
-              visible: false,
+              // visible: false,
               isLoading: false,
             });
           });
         });
       })
       .catch(() => {
+        this.openNotification('error', `Update ${values.name} error`);
         this.setEditLocationModal({
-          visible: false,
+          // visible: false,
           isLoading: false,
         });
       });
@@ -227,7 +244,8 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               isLoading: true,
             });
             this.deleteLocation(location.id).then(() => {
-              this.callGetListLocations().then(() => {
+              this.openNotification('success', `Delete ${location.name} successfully`);
+              this.callGetListLocations().then(async () => {
                 this.setLocationsTableLoading(false);
                 this.setEditLocationModal({
                   isLoading: false,
@@ -235,7 +253,11 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               });
             });
           })
-          .catch(() => {
+          .catch(async (error: any) => {
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
+            this.openNotification('error', `Delete ${location.name} error`);
             this.setLocationsTableLoading(false);
             this.setEditLocationModal({
               isLoading: false,
@@ -245,10 +267,29 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     });
   };
 
+  openNotification = (type?: string, message?: string, description?: string) => {
+    if (type) {
+      notification[type]({
+        message: `${message}`,
+        description,
+      });
+    } else {
+      notification.open({
+        message: `${message}`,
+        description,
+        style: {
+          borderColor: 'green',
+        },
+      });
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
+
   render() {
     const { selectedLocation, editLocationModal } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
+
     return (
       <>
         {selectedLocation && (
@@ -271,9 +312,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   <Select
                     style={{ width: '100%' }}
                     onChange={() => {
-                      // console.log('====================================');
-                      // console.log(e);
-                      // console.log('====================================');
                       // this.setCreateLocationParam({
                       //   typeId: e,
                       // });
@@ -351,6 +389,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               <Col>
                 <Space>
                   <Button
+                    disabled={!(selectedLocation && selectedLocation.id !== '')}
                     onClick={() => {
                       if (this.formRef.current) {
                         this.formRef.current.validateFields().then((values) => {
@@ -363,6 +402,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     Update
                   </Button>
                   <Button
+                    disabled={!(selectedLocation && selectedLocation.id !== '')}
                     danger
                     onClick={() => {
                       this.deleteConfirm(selectedLocation);

@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import { Card, Input, Modal, Skeleton, Form } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
@@ -23,7 +24,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
 
   createFolder = async (values: any) => {
     const { breadScrumb, createFolderParam } = this.props.media;
-    const res = await this.props.dispatch({
+    await this.props.dispatch({
       type: 'media/createFolder',
       payload: {
         ...createFolderParam,
@@ -31,15 +32,20 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
         ...values,
       },
     });
-    console.log('====================================');
-    console.log('Created Folder >>>>', res);
-    console.log('====================================');
-    this.setListLoading(true);
-    this.callGetListFolders()
+  };
+
+  handleCreateFolder = async (values: any) => {
+    this.createFolder(values)
       .then(() => {
-        this.setListLoading(false);
+        openNotification('success', 'Create Folder Successfully', `${values.name} was created`);
+        this.setListLoading(true).then(() => {
+          this.callGetListFolders().then(() => {
+            this.setListLoading(false);
+          });
+        });
       })
       .catch(() => {
+        openNotification('error', 'Create Folder fail', `Fail to create ${values.name}`);
         this.setListLoading(false);
       });
   };
@@ -106,7 +112,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
                 isLoading: true,
               });
 
-              this.createFolder(values)
+              this.handleCreateFolder(values)
                 .then(() => {
                   this.setAddNewFolderModal({
                     isLoading: false,

@@ -58,6 +58,16 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
     });
   };
 
+  setEditLocationModal = async (modal: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setEditLocationModalReduder`,
+      payload: {
+        ...this.props.location.editLocationModal,
+        ...modal,
+      },
+    });
+  };
+
   render() {
     const { mapComponent, getListLocationParam } = this.props.location;
     return (
@@ -149,16 +159,22 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
             <Button
               onClick={async () => {
                 this.clearCreateLocationParam().then(() => {
-                  if (mapComponent) {
-                    if (mapComponent.map) {
-                      if (mapComponent.marker) {
-                        mapComponent.marker.removeFrom(mapComponent.map);
-                        this.setMapComponent({
-                          marker: undefined,
-                        });
-                      }
-                    }
-                  }
+                  // if (mapComponent) {
+                  //   if (mapComponent.map) {
+                  //     this.setMapComponent({
+                  //       map: undefined,
+                  //     });
+                  //     if (mapComponent.marker) {
+                  //       mapComponent.marker.remove();
+                  //       this.setMapComponent({
+                  //         marker: undefined,
+                  //       });
+                  //     }
+                  //   }
+                  // }
+                  this.setEditLocationModal({
+                    visible: false,
+                  }).then(() => {});
                   this.setAddNewLocationModal({
                     visible: true,
                   });

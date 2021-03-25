@@ -7,6 +7,7 @@ import { Keccak } from 'sha3';
 import { v4 as uuidv4 } from 'uuid';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
+import { openNotification } from '@/utils/utils';
 
 export type AddNewFileFormModalProps = {
   dispatch: Dispatch;
@@ -76,10 +77,10 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
     console.log('====================================');
-    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether); 
+    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether);
     console.log('====================================');
     const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
-    if (signature && !signature.toLowerCase().includes('fail')) {
+    if (signature && !signature.toLowerCase().includes('Fail'.toLowerCase())) {
       console.log('====================================');
       console.log('Param  222>>>', security, signature);
       console.log('====================================');
@@ -103,7 +104,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
           ...param,
         },
       });
-
+      openNotification('success', 'Create File Successfully', `Create ${values.title}`);
       this.setListLoading(true)
         .then(() => {
           this.callGetListMedia().then(() => {
@@ -117,6 +118,8 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         .catch(() => {
           this.setListLoading(false);
         });
+    } else {
+      openNotification('error', 'Create File fail', signature);
     }
   };
 

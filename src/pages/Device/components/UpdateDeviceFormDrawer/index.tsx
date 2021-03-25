@@ -14,6 +14,7 @@ import {
   Drawer,
   Form,
   Input,
+  notification,
   Row,
   Select,
   Skeleton,
@@ -181,7 +182,25 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
     });
   };
 
+  openNotification = (type?: string, message?: string, description?: string) => {
+    if (type) {
+      notification[type]({
+        message: `${message}`,
+        description,
+      });
+    } else {
+      notification.open({
+        message: `${message}`,
+        description,
+        style: {
+          borderColor: 'green',
+        },
+      });
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
+
   render() {
     const { inputVisible } = this.state;
     const {
@@ -277,6 +296,11 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                             payload: selectedDevice?.id,
                           })
                           .then(() => {
+                            this.openNotification(
+                              'success',
+                              'Devices delete successfuly',
+                              `${selectedDevice?.name} was deleted`,
+                            );
                             this.callGetListDevices().then(() => {
                               this.setEditMultipleDevicesDrawer({
                                 isLoading: false,
@@ -307,16 +331,26 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                         ?.validateFields()
                         .then((values) => {
                           this.onUpdateMultipleDevices(values).then(() => {
+                            this.openNotification(
+                              'success',
+                              'Devices updated successfully',
+                              `${selectedDevice?.name} was updated`,
+                            );
                             this.setEditMultipleDevicesDrawer({
-                              isLoading: true,
-                              visible: false,
+                              isLoading: false,
+                              // visible: false,
                             });
                           });
                         })
                         .catch(() => {
+                          this.openNotification(
+                            'error',
+                            'Devices updated fail',
+                            `${selectedDevice?.name} was fail to update`,
+                          );
                           this.setEditMultipleDevicesDrawer({
-                            isLoading: true,
-                            visible: false,
+                            isLoading: false,
+                            // visible: false,
                           });
                         });
                     }
@@ -329,6 +363,11 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                           console.log(values);
                           console.log('====================================');
                           this.onUpdateDevice(values).then(() => {
+                            this.openNotification(
+                              'success',
+                              'Devices updated successfully',
+                              `${selectedDevice?.name} was updated`,
+                            );
                             this.setEditMultipleDevicesDrawer({
                               isLoading: false,
                               visible: false,
@@ -336,9 +375,14 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                           });
                         })
                         .catch(() => {
+                          this.openNotification(
+                            'error',
+                            'Devices updated fail',
+                            `${selectedDevice?.name} was fail to update`,
+                          );
                           this.setEditMultipleDevicesDrawer({
                             isLoading: false,
-                            visible: false,
+                            // visible: false,
                           });
                         });
                     }

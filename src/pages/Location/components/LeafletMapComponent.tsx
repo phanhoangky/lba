@@ -14,7 +14,7 @@ export type LeafletMapComponentProps = {
 };
 
 export class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
-  componentDidMount() {
+  componentDidMount = async () => {
     const { addNewLocationModal, editLocationModal } = this.props.location;
     const { addNewCampaignModal } = this.props.campaign;
 
@@ -28,15 +28,27 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
       zoomOffset: -1,
     }).addTo(mymap);
 
+    await this.setMapComponent({
+      map: mymap,
+    });
+
     mymap.on('click', async (e: any) => {
       const { mapComponent } = this.props.location;
       console.log('====================================');
-      console.log(e.latlng);
+      console.log(e.latlng, mapComponent);
       console.log('====================================');
       mymap.setView([e.latlng.lat, e.latlng.lng]);
-      if (mapComponent) {
+      if (mapComponent && mapComponent.map) {
+        console.log('====================================');
+        console.log(mapComponent);
+        console.log('====================================');
         if (mapComponent.marker !== undefined) {
+          mapComponent.marker.setLatLng(e.latlng);
+          console.log('====================================');
+          console.log('Remove Marker');
+          console.log('====================================');
           mapComponent.marker.remove();
+          mapComponent.marker.removeFrom(mymap);
           const marker = L.marker(e.latlng);
           marker.addTo(mymap);
           this.setMapComponent({
@@ -48,6 +60,9 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
           this.setMapComponent({
             marker,
           });
+          console.log('====================================');
+          console.log('NewMarker >>>', marker);
+          console.log('====================================');
         }
         if (mapComponent.circle) {
           mapComponent.circle.setLatLng([e.latlng.lat, e.latlng.lng]).redraw();
@@ -100,10 +115,7 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
         // });
       }
     });
-    this.setMapComponent({
-      map: mymap,
-    });
-  }
+  };
 
   setAddNewCampaignModal = async (modal: any) => {
     await this.props.dispatch({

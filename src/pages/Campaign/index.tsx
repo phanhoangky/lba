@@ -222,7 +222,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       this.setSelectedCampaign({
         address: data.display_name,
       }).then(() => {
-        if (mapComponent.map) {
+        if (mapComponent?.map) {
           if (mapComponent.marker) {
             mapComponent.marker.remove();
             this.setMapComponent({
@@ -295,7 +295,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             }}
             loading={campaignsTableLoading}
             pagination={{
-              current: getListCampaignParam.pageNumber + 1,
+              current: getListCampaignParam?.pageNumber ? getListCampaignParam.pageNumber + 1 : 1,
               pageSize: getListCampaignParam.pageLimitItem,
               total: totalCampaigns,
               onChange: async (e) => {
