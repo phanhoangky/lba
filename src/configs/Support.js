@@ -73,6 +73,21 @@ export default class EtherService {
     this.contract.provider.polling = false;
   }
 
+  async tranfer(addressReceiver, amount) {
+    const overrides = {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: ethers.BigNumber.from("10000000000000"),
+    };
+    try {
+      const callPromise = this.contract.transfer(addressReceiver, ethers.BigNumber.from(amount.toString()), overrides);
+      callPromise.then(function (result) {
+        console.log(result);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id, isSign) {
     const listSignature = await this.getSignatureDocument(`0x${hash_id}`);

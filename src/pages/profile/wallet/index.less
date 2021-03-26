@@ -10,37 +10,25 @@
 
 .addressCard {
   :global {
-    background-color: rgba(112, 112, 227, 1);
+    background-color: #7070e3;
     box-sizing:border-box;
     color: aliceblue; 
-    padding: 20px;
+    padding: 20px 0px;
     overflow-wrap: break-word;
     word-wrap: break-word;
-    border-radius: 20px;
+    border-radius: 5px;
   }
 }
 
 .balanceCard {
   :global {
-    background-color: rgba(90, 120, 240, 1);
+    background-color: #5a78f0;
     box-sizing:border-box;
     color: aliceblue;
-    padding: 20px;
+    padding: 20px 0px;
     overflow-wrap: break-word;
     word-wrap: break-word;
-    border-radius: 20px;
-  }
-}
-
-.networkCard {
-  :global {
-    background-color: rgba(37, 176, 232, 1);
-    box-sizing: border-box;
-    color: aliceblue;
-    padding: 20px;
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    border-radius: 20px;
+    border-radius: 5px;
   }
 }
 
@@ -64,4 +52,72 @@
 
 .descriptionStyle {
   &:global {}
+}
+
+:global {
+  .address-text {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    color: #fff;
+  }
+
+  .address-value {
+    color: #fff;
+    font-weight: 300;
+    word-break: break-all;
+    background-color: #7070e3;
+    line-height: 21px;
+    margin-bottom: 0!important;
+    font-display: block;
+    margin: 0;
+    padding: 0;
+  }
+  .action-wrapper {
+    border-radius: 5px;
+    color: #fff;
+    display: flex;
+    height: 100%;
+    position: relative;
+    align-items: flex-start;
+  }
+
+  .qr-button {
+    margin-right: 15px;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: #fff;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+  }
+
+  .copy-button {
+    margin-right: 15px;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: #fff;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    font-size:1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+  }
 }

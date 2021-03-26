@@ -90,46 +90,14 @@ class WalletScreen extends React.Component<WalletProps> {
     } = this.props.transaction;
     return (
       <PageContainer>
-        <WalletHeaderComponent {...this.props} />
-        <Divider orientation="right">View Transaction</Divider>
-        <Row gutter={20}>
-          <Col span={8}>
-            <div
-              style={{
-                width: 100,
-                height: 100,
-                margin: `0 auto`,
-              }}
-            >
-              <Avatar
-                size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
-                src={currentUser && currentUser.avatar}
-              />
-            </div>
-            <Space direction="vertical" wrap>
-              <Descriptions
-                title="User Info"
-                layout="vertical"
-                bordered
-                className={styles.descriptionStyle}
-                contentStyle={styles.contentProfileStyle}
-              >
-                <Descriptions.Item label="UserName">
-                  {currentUser && currentUser.name}
-                </Descriptions.Item>
-                <Descriptions.Item label="Telephone">1810000000</Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  {currentUser && currentUser.email}
-                </Descriptions.Item>
-                <Descriptions.Item label="Your Balance">
-                  {currentUser &&
-                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
-                  VND
-                </Descriptions.Item>
-              </Descriptions>
-            </Space>
-          </Col>
-          <Col span={16}>
+        <Row justify="space-between">
+          <Col span={15} offset={1}>
+            <Row>
+              <WalletHeaderComponent {...this.props} />
+            </Row>
+            <Divider orientation="left">View Transaction</Divider>
+            <Row>
+            <Col span={24}>
             <Table
               dataSource={listTransactions?.map((item) => {
                 return {
@@ -192,6 +160,52 @@ class WalletScreen extends React.Component<WalletProps> {
               {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
               <Column key="age" title="Age" dataIndex="age"></Column>
             </Table>
+          </Col>
+        
+            </Row>
+          </Col>
+          <Col span={7}>
+          <div
+              style={{
+                width: 100,
+                height: 100,
+                margin: `0 auto`,
+              }}
+            >
+              <Avatar
+                size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                src={currentUser && currentUser.avatar}
+                style={{
+                  border: '4px solid #fff',
+                  borderRadius: '50%',
+                  height: '100px',
+                  marginRight: '10px',
+                  width: '100px'
+                }}
+              />
+            </div>
+            <Space direction="vertical" wrap>
+              <Descriptions
+                title="User Info"
+                layout="vertical"
+                bordered
+                className={styles.descriptionStyle}
+                contentStyle={styles.contentProfileStyle}
+              >
+                <Descriptions.Item label="UserName">
+                  {currentUser && currentUser.name}
+                </Descriptions.Item>
+                <Descriptions.Item label="Telephone">1810000000</Descriptions.Item>
+                <Descriptions.Item label="Email">
+                  {currentUser && currentUser.email}
+                </Descriptions.Item>
+                <Descriptions.Item label="Your Balance">
+                  {currentUser &&
+                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
+                  VND
+                </Descriptions.Item>
+              </Descriptions>
+            </Space>
           </Col>
         </Row>
       </PageContainer>
