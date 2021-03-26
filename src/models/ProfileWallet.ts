@@ -38,6 +38,11 @@ export type ProfileWalletModelState = {
     isLoading: boolean;
   },
 
+  sendModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
   linkTransferParam?: GetLinkTransferParam;
 
   refreshBalanceLoading?: boolean,
@@ -62,6 +67,7 @@ export type WalletStoreType = {
     setTransTableLoadingReducer: Reducer<ProfileWalletModelState>;
     setQRModalReducer: Reducer<ProfileWalletModelState>;
     setDepositModalReducer: Reducer<ProfileWalletModelState>;
+    setSendModalReducer: Reducer<ProfileWalletModelState>;
     setRefreshBalanceLoadingReducer: Reducer<ProfileWalletModelState>;
 
   }
@@ -92,6 +98,11 @@ const WalletModel: WalletStoreType = {
     depositModal: {
       isLoading: false,
       visible: false,
+    },
+
+    sendModal: {
+      visible: false,
+      isLoading: false,
     },
 
     refreshBalanceLoading: false,
@@ -178,6 +189,13 @@ const WalletModel: WalletStoreType = {
       return {
         ...state,
         depositModal: payload
+      }
+    },
+
+    setSendModalReducer(state, { payload }) {
+      return {
+        ...state,
+        sendModal: payload
       }
     },
 
