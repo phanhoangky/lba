@@ -92,7 +92,7 @@ export default class EtherService {
   async addDocument(hash_id, isSign) {
     const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
     console.log("listSignature>>>>>>>", listSignature);
-    if (listSignature !== null) {
+    if (listSignature !== null || listSignature.length === 0) {
       let isSigned = false;
       listSignature.forEach(e => {
         if (e === this.wallet.address) {
@@ -101,7 +101,7 @@ export default class EtherService {
       });
       if (isSigned) return "Fail - File is already signed";
 
-      return "Fail - CSCD is on the way";
+      return "Fail";
     }
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),

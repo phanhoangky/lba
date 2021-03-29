@@ -20,12 +20,7 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
 import type { UpdateLocationParam } from '@/services/LocationService/LocationService';
-import {
-  DeleteTwoTone,
-  EditFilled,
-  EditTwoTone,
-  ExclamationCircleOutlined,
-} from '@ant-design/icons';
+import { DeleteTwoTone, EditFilled, ExclamationCircleOutlined } from '@ant-design/icons';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 
 export type ViewLocationDetailComponentProps = {

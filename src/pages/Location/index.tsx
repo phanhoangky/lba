@@ -302,7 +302,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       ...clone,
                       address: data.display_name,
                     });
-                    // this.viewLocationRef.current?.initialMap();
+                    this.viewLocationRef.current?.initialMap();
                     this.viewLocationRef.current?.componentDidMount();
                     await this.setEditLocationModal({
                       visible: true,
