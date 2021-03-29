@@ -1,4 +1,4 @@
-import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
+import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import {
   Button,
   Col,
@@ -20,7 +20,13 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
 import type { UpdateLocationParam } from '@/services/LocationService/LocationService';
-import { DeleteTwoTone, EditTwoTone, ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  DeleteTwoTone,
+  EditFilled,
+  EditTwoTone,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
+import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 
 export type ViewLocationDetailComponentProps = {
   dispatch: Dispatch;
@@ -45,58 +51,40 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     }
   };
 
-  // componentWillUnmount() {
-  //   const { mapComponent } = this.props.location;
-  //   if (mapComponent) {
-  //     if (mapComponent.map) {
-  //       this.setMapComponent({
-  //         map: undefined,
-  //       });
-  //       if (mapComponent.marker) {
-  //         mapComponent.marker.removeFrom(mapComponent.map);
-  //         this.setMapComponent({
-  //           marker: undefined,
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
-  // componentDidUpdate() {
-  //   this.initialMap();
-  //   if (this.formRef.current) {
-  //     const { selectedLocation } = this.props.location;
-  //     if (selectedLocation) {
-  //       this.formRef.current.setFieldsValue({
-  //         name: selectedLocation.name,
-  //         description: selectedLocation.description,
-  //         typeId: selectedLocation.typeId,
-  //         address: selectedLocation.address,
-  //       });
-  //     }
-  //   }
-  // }
-
-  initialMap = () => {
+  initialMap = async () => {
     const { mapComponent, selectedLocation } = this.props.location;
     if (mapComponent) {
       if (mapComponent.map && selectedLocation) {
         const lat = Number.parseFloat(selectedLocation.latitude);
         const lng = Number.parseFloat(selectedLocation.longitude);
-        console.log('====================================');
-        console.log('ViewLocation >>>', mapComponent);
-        console.log('====================================');
         mapComponent.map.setView([lat, lng]);
+        console.log('====================================');
+        console.log(mapComponent);
+        console.log('====================================');
         if (!mapComponent.marker) {
           if (selectedLocation.longitude !== '' && selectedLocation?.latitude !== '') {
+            console.log('====================================');
+            console.log('Location New Marker >>>', lat, lng);
+            console.log('====================================');
             const marker = L.marker([lat, lng]);
             marker.addTo(mapComponent.map);
 
-            this.setMapComponent({
+            await this.setMapComponent({
               marker,
             });
           }
         } else {
-          mapComponent.marker.setLatLng([lat, lng]);
+          console.log('====================================');
+          console.log('Location Remove Marker >>>', lat, lng);
+          console.log('====================================');
+          mapComponent.marker.remove();
+          mapComponent.marker.removeFrom(mapComponent.map);
+          const marker = L.marker([lat, lng]);
+          marker.addTo(mapComponent.map);
+
+          await this.setMapComponent({
+            marker,
+          });
         }
       }
     }
@@ -149,6 +137,43 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
         latitude: lat,
         address,
       });
+    }
+  };
+
+  onAutoCompleteSelect = async (address: string) => {
+    const { mapComponent } = this.props.location;
+    if (address !== '') {
+      const listLocations = await forwardGeocoding(address);
+      console.log('====================================');
+      console.log('List Location >>>', listLocations);
+      console.log('====================================');
+      if (listLocations.length > 0) {
+        const location = listLocations[0];
+        const lat = Number.parseFloat(location.lat);
+        const lon = Number.parseFloat(location.lon);
+
+        if (mapComponent) {
+          if (mapComponent.map) {
+            mapComponent.map.setView([lat, lon]);
+
+            if (mapComponent.marker) {
+              mapComponent.marker.setLatLng([lat, lon]);
+            } else {
+              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+              // marker.setPopupContent('Marker');
+              this.setMapComponent({
+                marker,
+              });
+            }
+          }
+        }
+
+        await this.setSelectedLocation({
+          longitude: lon,
+          latitude: lat,
+          address,
+        });
+      }
     }
   };
 
@@ -254,9 +279,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
             });
           })
           .catch(async (error: any) => {
-            console.log('====================================');
-            console.log(error);
-            console.log('====================================');
+            Promise.reject(error);
             this.openNotification('error', `Delete ${location.name} error`);
             this.setLocationsTableLoading(false);
             this.setEditLocationModal({
@@ -286,10 +309,14 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
 
   formRef = React.createRef<FormInstance<any>>();
 
+  autoCompleteRef = React.createRef<AutoCompleteComponent>();
   render() {
     const { selectedLocation, editLocationModal } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
 
+    console.log('====================================');
+    console.log(selectedLocation);
+    console.log('====================================');
     return (
       <>
         {selectedLocation && (
@@ -302,13 +329,25 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               }}
             >
               <Skeleton active loading={editLocationModal?.isLoading}>
-                <Form.Item label="Name" name="name">
+                <Form.Item
+                  label="Name"
+                  name="name"
+                  rules={[
+                    { required: true, message: 'Please enter location name' },
+                    { max: 50, message: 'Name have maximum 50 characters' },
+                  ]}
+                >
                   <Input placeholder="input placeholder" />
                 </Form.Item>
               </Skeleton>
 
               <Skeleton active loading={editLocationModal?.isLoading}>
-                <Form.Item label="Type" name="typeId" style={{ width: '50%' }}>
+                <Form.Item
+                  label="Type"
+                  name="typeId"
+                  style={{ width: '50%' }}
+                  rules={[{ required: true, message: 'Please select location type' }]}
+                >
                   <Select
                     style={{ width: '100%' }}
                     onChange={() => {
@@ -354,33 +393,49 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   style={{
                     width: '100%',
                   }}
+                  // rules={[{ required: true, message: 'Please enter location address' }]}
                 >
                   <AutoCompleteComponent
+                    ref={this.autoCompleteRef}
                     {...this.props}
-                    inputValue={selectedLocation?.address}
-                    value={{
-                      label: selectedLocation?.address,
-                      value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
-                    }}
-                    // onInputChange={(e: any) => {
-                    //   this.setSelectedLocation({
-                    //     address: e,
-                    //   });
+                    inputValue={selectedLocation.address}
+                    address={selectedLocation.address}
+                    // value={{
+                    //   label: selectedLocation?.address,
+                    //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
                     // }}
-                    onChange={async (e: any, address: any) => {
-                      await this.handleAutoCompleteSearch(e);
-                      const coordination = e.split('-');
-                      const lat = coordination[0];
-                      const lon = coordination[1];
-                      this.setSelectedLocation({
-                        longitude: lon,
-                        latitude: lat,
-                        address,
+                    onInputChange={async (e) => {
+                      await this.setSelectedLocation({
+                        address: e,
                       });
+
+                      // await this.autoCompleteRef.current?.forceUpdate();
+                    }}
+                    onChange={async (address) => {
+                      // await this.handleAutoCompleteSearch(e);
+                      // const coordination = e.split('-');
+                      // const lat = coordination[0];
+                      // const lon = coordination[1];
+                      // this.setSelectedLocation({
+                      //   longitude: lon,
+                      //   latitude: lat,
+                      //   address,
+                      // });
+                      await this.onAutoCompleteSelect(address);
                     }}
                   />
                 </Form.Item>
               </Skeleton>
+              {selectedLocation.address === '' && (
+                <p
+                  style={{
+                    color: 'red',
+                    transition: 'ease 0.5s',
+                  }}
+                >
+                  Please enter location address
+                </p>
+              )}
               <Divider></Divider>
             </Form>
             <LeafletMapComponent {...this.props} />
@@ -390,19 +445,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 <Space>
                   <Button
                     disabled={!(selectedLocation && selectedLocation.id !== '')}
-                    onClick={() => {
-                      if (this.formRef.current) {
-                        this.formRef.current.validateFields().then((values) => {
-                          this.updateConfirm(values);
-                        });
-                      }
-                    }}
-                  >
-                    <EditTwoTone />
-                    Update
-                  </Button>
-                  <Button
-                    disabled={!(selectedLocation && selectedLocation.id !== '')}
                     danger
                     onClick={() => {
                       this.deleteConfirm(selectedLocation);
@@ -410,6 +452,23 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   >
                     <DeleteTwoTone twoToneColor="#f93e3e" />
                     Remove
+                  </Button>
+                  <Button
+                    disabled={!selectedLocation || selectedLocation.id === ''}
+                    type="primary"
+                    onClick={() => {
+                      if (this.formRef.current) {
+                        if (!selectedLocation.address || selectedLocation.address === '') {
+                          return;
+                        }
+                        this.formRef.current.validateFields().then((values) => {
+                          this.updateConfirm(values);
+                        });
+                      }
+                    }}
+                  >
+                    <EditFilled />
+                    Update
                   </Button>
                 </Space>
               </Col>

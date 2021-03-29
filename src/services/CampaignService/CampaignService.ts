@@ -16,11 +16,14 @@ export type CreateCampaignParam = {
   radius: number;
   address?: string;
   hash?: string;
+  name: string;
 }
 
 export type UpdateCampaignParam = {
   id: string;
   status: number;
+  isActive: boolean;
+  name: string;
 }
 
 export type DeleteCampaignParam = {

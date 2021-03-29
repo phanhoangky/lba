@@ -4,6 +4,7 @@ import type {
 } from '@/services/CampaignService/CampaignService';
 import { CAMPAIGN_STATUS } from '@/services/CampaignService/CampaignService';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
+import { openNotification } from '@/utils/utils';
 import {
   CaretRightOutlined,
   DeleteTwoTone,
@@ -51,13 +52,14 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           this.callGetListDeviceTypes(),
           this.callGetListScenario(),
           this.callGetListLocations(),
-          this.readJWT(),
           this.callGetFee(),
-        ]).then(() => {
+        ]).then(async () => {
+          this.readJWT();
           this.setCampaignTableLoading(false);
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        Promise.reject(error);
         this.setCampaignTableLoading(false);
       });
   };
@@ -143,9 +145,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       type: `${CAMPAIGN}/deleteCampaign`,
       payload: param,
     });
-    console.log('====================================');
-    console.log(param);
-    console.log('====================================');
   };
 
   deleteCampaignConfirm = async (item: Campaign) => {
@@ -162,22 +161,30 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             if (currentUser) {
               const result = await currentUser.ether?.cancelCampaign(item.id);
               console.log('====================================');
-              console.log(result);
+              console.log('Hash >>>>', result);
+              console.log('====================================');
               if (isObject(result)) {
                 const deleteParam: DeleteCampaignParam = {
                   id: item.id,
                   hash: result.hash,
                   value: result.feeCancel,
                 };
-                console.log('====================================');
-                console.log(result);
-                console.log(deleteParam);
-                console.log('====================================');
-                this.deleteCampaign(deleteParam).then(() => {
-                  this.callGetListCampaigns().then(() => {
+                this.deleteCampaign(deleteParam)
+                  .then(async () => {
+                    openNotification(
+                      'success',
+                      'Delete campaign successfully',
+                      `${item.name} was deleted`,
+                    );
+                    this.callGetListCampaigns().then(() => {
+                      this.setCampaignTableLoading(false);
+                    });
+                  })
+                  .catch((error) => {
+                    Promise.reject(error);
+                    openNotification('error', 'Fail to delete campaign', error);
                     this.setCampaignTableLoading(false);
                   });
-                });
               }
             }
           })
@@ -259,20 +266,51 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   };
 
   handleChangeStatusCampaign = async (item: any, status: number) => {
-    this.setCampaignTableLoading(true)
+    this.setLoadingCampaignRecord(item, true)
       .then(() => {
         const updateParam: UpdateCampaignParam = {
           id: item.id,
           status,
+          isActive: item.isActive,
+          name: item.name,
         };
-        this.updateCampaign(updateParam).then(() => {
-          this.callGetListCampaigns();
-          this.setCampaignTableLoading(false);
-        });
+        this.updateCampaign(updateParam)
+          .then(async () => {
+            openNotification('success', 'Update Campaign Successfully', `${item.name} was updated`);
+            this.callGetListCampaigns().then(() => {
+              this.setLoadingCampaignRecord(item, false);
+            });
+          })
+          .catch((error) => {
+            openNotification('error', 'Fail to update campaign', error);
+            this.setLoadingCampaignRecord(item, false);
+            Promise.reject(error);
+          });
       })
       .catch(() => {
-        this.setCampaignTableLoading(false);
+        this.setLoadingCampaignRecord(item, false);
       });
+  };
+
+  setLoadingCampaignRecord = async (item: any, isLoading: boolean) => {
+    const { listCampaign } = this.props.campaign;
+    const newList = listCampaign.map((campaign) => {
+      if (campaign.id === item.id) {
+        return {
+          ...campaign,
+          isLoading,
+        };
+      }
+      return campaign;
+    });
+    this.setListCampaigns(newList);
+  };
+
+  setListCampaigns = async (list: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setListCampaignReducer`,
+      payload: list,
+    });
   };
 
   addNewModalRef = React.createRef<AddNewCampaignModal>();
@@ -314,6 +352,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             }}
             title={() => <CampaignTableHeaderComponent {...this.props} />}
           >
+            <Column key="name" dataIndex="name" title="Name"></Column>
             <Column key="description" dataIndex="description" title="Description"></Column>
             <Column
               align="center"
@@ -338,6 +377,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                   <>
                     <Switch
                       checked={record.status === 0}
+                      loading={record.isLoading}
                       onChange={(e) => {
                         this.handleChangeStatusCampaign(
                           record,
@@ -384,6 +424,8 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               }}
             ></Column>
           </Table>
+
+          {/* Add New Campaign Modal */}
           <Modal
             width="50%"
             title="Add New Campaign"
@@ -409,6 +451,8 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
             )}
           </Modal>
+          {/* End Add New Campaign Modal */}
+
           <ViewCampaignDetailDrawer {...this.props} />
         </PageContainer>
       </>

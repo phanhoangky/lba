@@ -1,8 +1,9 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Card, Alert, Typography } from 'antd';
+import { Card, Alert, Typography, Divider, Button, Row } from 'antd';
 import { useIntl, FormattedMessage } from 'umi';
 import styles from './Welcome.less';
+import { Animated } from 'react-animated-css';
 
 const CodePreview: React.FC = ({ children }) => (
   <pre className={styles.pre}>
@@ -16,7 +17,7 @@ export default (): React.ReactNode => {
   const intl = useIntl();
   return (
     <PageContainer>
-      <Card>
+      {/* <Card>
         <Alert
           message={intl.formatMessage({
             id: 'pages.welcome.alertMessage',
@@ -56,8 +57,25 @@ export default (): React.ReactNode => {
             <FormattedMessage id="pages.welcome.link" defaultMessage="欢迎使用" />
           </a>
         </Typography.Text>
-        <CodePreview>yarn add @ant-design/pro-layout</CodePreview>
-      </Card>
+        <CodePreview>yarn add @ant-design/pro-layout</CodePreview>  
+      </Card> */}
+
+      <div className={styles.welcomeWrapper}>
+        <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}>
+          <div className="welcome-text-wrapper">
+            <h1>
+              Hi, my name is <span className="text-color-main">Your Name</span> <br /> I'm the
+              Unknown Developer.
+            </h1>
+          </div>
+        </Animated>
+
+        <br />
+        <Button className="signin-btn">
+          <div className="sign-in-btn-overlap"></div>
+          <div className="sign-in-btn-text">SIGN IN</div>
+        </Button>
+      </div>
     </PageContainer>
   );
 };

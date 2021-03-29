@@ -12,9 +12,7 @@ export type CreateLocationParam = {
   longitude: string;
   latitude: string;
   typeId: string;
-  brandId: string;
   address: string;
-
 }
 
 export type UpdateLocationParam = {

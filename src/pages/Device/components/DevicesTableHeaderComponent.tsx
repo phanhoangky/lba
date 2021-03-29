@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import { ControlTwoTone, FilterTwoTone } from '@ant-design/icons';
 import { Button, Input, Select, Space } from 'antd';
 import * as React from 'react';
@@ -59,9 +60,20 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
         <Input.Search
           placeholder="Input search text"
           onSearch={(value) => {
-            this.callGetListDevices({
-              name: value.trim(),
-            });
+            this.setDevicesTableLoading(true)
+              .then(() => {
+                this.callGetListDevices({
+                  name: value.trim(),
+                }).then(() => {
+                  this.setDevicesTableLoading(false);
+                });
+              })
+              .catch((error) => {
+                openNotification('error', 'Error', error);
+                Promise.reject(error);
+                this.setDevicesTableLoading(false);
+              });
+
             // this.props.dispatch({
             //   type: 'deviceStore/getDevices',
             //   payload: {

@@ -114,7 +114,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
   };
 
   onSortEnd = ({ oldIndex, newIndex }: any) => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     if (oldIndex !== newIndex) {
       const array: PlaylistItem[] = [];
       const newData = arrayMove(
@@ -133,16 +133,17 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
           };
         }),
       });
-      this.props.dispatch({
-        type: 'playlists/setSelectedPlaylistItemsReducer',
-        payload: newData.map((playlist, index) => {
-          return {
-            ...playlist,
-            displayOrder: index,
-            index,
-          };
-        }),
-      });
+
+      // this.props.dispatch({
+      //   type: 'playlists/setSelectedPlaylistItemsReducer',
+      //   payload: newData.map((playlist, index) => {
+      //     return {
+      //       ...playlist,
+      //       displayOrder: index,
+      //       index,
+      //     };
+      //   }),
+      // });
     }
   };
 
@@ -160,7 +161,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
   };
 
   DraggableBodyRow = ({ className, style, ...restProps }: any) => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     // function findIndex base on Table rowKey props and should always be a right array index
     const index = selectedPlaylist.playlistItems.findIndex(
       (x) => x.index === restProps['data-row-key'],
@@ -181,7 +182,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
   };
 
   setSelectedPlaylistItemsDuration = async (record?: any, duration?: number) => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     if (record && duration) {
       const clone = cloneDeep(selectedPlaylist.playlistItems);
       const newItems = clone.map((item) => {
@@ -208,7 +209,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
   };
 
   calculateTotalDuration = async () => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
     let total: number = 0;
     selectedPlaylist.playlistItems.forEach((item) => {
@@ -237,7 +238,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
   };
 
   removeItem = async (record: any) => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     this.setSelectedPlaylist({
       playlistItems: selectedPlaylist.playlistItems
         .filter((item) => item.id !== record.id)
@@ -313,7 +314,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
   };
 
   updatePlaylist = async (param: any) => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
     const updateParam: UpdatePlaylistItemsByPlaylistIdParam = {
       id: selectedPlaylist.id,
@@ -390,7 +391,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
       maxDuration,
       minDuration,
       // listMediaNotBelongToPlaylist,
-      selectedPlaylistItems,
+      // selectedPlaylistItems,
       selectedPlaylist,
     } = this.props.playlists;
 
@@ -434,20 +435,22 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                 <Column
                   key="drag"
                   dataIndex="sort"
-                  className={styles.dragVisible}
+                  width={30}
+                  className="drag-visible"
                   render={() => <DragHandle />}
                 ></Column>
                 <Column key="index" title="No" dataIndex="index"></Column>
                 <Column
                   key="title"
                   title="Title"
-                  dataIndex="title"
+                  dataIndex={['mediaSrc', 'title']}
                   className="drag-visible"
                 ></Column>
 
                 <Column
                   key="Duration"
                   title="Duration"
+                  className="drag-visible"
                   render={(record) => {
                     return (
                       <>
@@ -474,6 +477,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                 <Column
                   key="action"
                   title="Action"
+                  className="drag-visible"
                   render={(record: any) => {
                     return (
                       <>

@@ -1,4 +1,4 @@
-import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
+import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
 import { Col, DatePicker, Divider, Form, Input, InputNumber, Row, Select, Space } from 'antd';
@@ -22,6 +22,7 @@ import FilterDate from '../FilterDate';
 import TimeFilterComponent from '../TimeFilterComponent';
 import { v4 as uuidv4 } from 'uuid';
 import { openNotification } from '@/utils/utils';
+import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 
 export type AddNewCampaignModalProps = {
   dispatch: Dispatch;
@@ -130,12 +131,21 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   };
 
   okConfirm = async () => {
-    const { addNewCampaignModal } = this.props.campaign;
+    const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
     const { currentUser } = this.props.user;
     if (this.formRef.current) {
       this.formRef.current
         .validateFields()
         .then(async (values) => {
+          console.log('====================================');
+          console.log(values);
+          console.log('====================================');
+          if (
+            (createCampaignParam && !createCampaignParam.address) ||
+            createCampaignParam.address === ''
+          ) {
+            return;
+          }
           this.setAddNewCampaignModal({
             isLoading: true,
           })
@@ -149,16 +159,17 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   addNewCampaignModal.fees.remainFee,
                   addNewCampaignModal.fees.cancelFee,
                 );
+                // throw new Error('sdsd');
                 this.createNewCampaign({
                   campaignId,
                   hash,
-                  ...values,
+                  // ...values,
                 })
                   .then(() => {
                     openNotification(
                       'success',
                       'Create New Campaign Successfully',
-                      `Created ${values.title} campaign`,
+                      `Created ${values.name} campaign`,
                     );
                     this.callGetListCampaigns().then(() => {
                       this.setAddNewCampaignModal({
@@ -167,7 +178,11 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                       });
                     });
                   })
-                  .catch(() => {
+                  .catch((error) => {
+                    console.log('====================================');
+                    console.log('error');
+                    console.log('====================================');
+                    Promise.reject(new Error(error));
                     openNotification(
                       'error',
                       'Fail to create new campaign',
@@ -325,8 +340,50 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
       });
     });
   };
+
+  onAutoCompleteSelect = async (address: string) => {
+    const { mapComponent } = this.props.location;
+    if (address !== '') {
+      const listLocations = await forwardGeocoding(address);
+
+      console.log('====================================');
+      console.log('List Location >>>', listLocations);
+      console.log('====================================');
+      if (listLocations.length > 0) {
+        const location = listLocations[0];
+        const lat = Number.parseFloat(location.lat);
+        const lon = Number.parseFloat(location.lon);
+
+        if (mapComponent) {
+          if (mapComponent.map) {
+            mapComponent.map.setView([lat, lon]);
+
+            if (mapComponent.marker) {
+              mapComponent.marker.remove();
+              // mapComponent.marker.setLatLng([lat, lon]);
+              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+              // marker.setPopupContent('Marker');
+              this.setMapComponent({
+                marker,
+              });
+            } else {
+              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+              // marker.setPopupContent('Marker');
+              this.setMapComponent({
+                marker,
+              });
+            }
+          }
+        }
+
+        await this.setCreateNewCampaignParam({ location: `${lat}-${lon}`, address });
+      }
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
   datePickerRef = React.createRef<any>();
+  autoCompleteRef = React.createRef<AutoCompleteComponent>();
   render() {
     const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
 
@@ -334,15 +391,29 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
 
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
 
-    const { mapComponent } = this.props.location;
+    // const { mapComponent } = this.props.location;
 
     console.log('====================================');
-    console.log(mapComponent);
+    console.log(this.props.campaign.createCampaignParam);
     console.log('====================================');
     return (
       <>
         {addNewCampaignModal.visible && (
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
+            <Form.Item
+              name="name"
+              label="Name"
+              rules={[
+                { required: true, message: 'Please input the name of campaign!' },
+                // { min: 100000, message: 'Budeget must larger than 100.000' },
+              ]}
+            >
+              <Input
+              // onChange={(e) => {
+              //   this.hanldeOnChangeBudget(e);
+              // }}
+              />
+            </Form.Item>
             <Form.Item
               name="budget"
               label="Budget"
@@ -359,9 +430,9 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 }}
               />
             </Form.Item>
-            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
-            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee}</Row>
-            <Row>{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row>
+            <Row>Total Fee {addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
+            <Row>Remain Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee}</Row>
+            <Row>Cancel Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row>
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={4} />
             </Form.Item>
@@ -467,28 +538,36 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
             <Row style={{ textAlign: 'center' }}>
               <Col span={24}>Choose Location</Col>
             </Row>
-            <Row>
-              <Col span={10}>Address</Col>
-              <Col span={14}>
-                <AutoCompleteComponent
-                  {...this.props}
-                  di
-                  inputValue={createCampaignParam.address}
-                  value={{
-                    label: createCampaignParam.address,
-                    value: createCampaignParam.location,
-                  }}
-                  // onInputChange={(e: any) => {
-                  //   // this.setCreateNewCampaignParam({
-                  //   //   address: e,
-                  //   // });
-                  // }}
-                  onChange={(value: any, address: any) => {
-                    this.handleAutoCompleteSearch(value, address);
-                  }}
-                />
-              </Col>
-            </Row>
+            <Form.Item
+              label="Address"
+              name="address"
+              rules={[{ required: true, message: 'Please enter address' }]}
+            >
+              <AutoCompleteComponent
+                ref={this.autoCompleteRef}
+                {...this.props}
+                inputValue={createCampaignParam?.address}
+                address={createCampaignParam?.address}
+                onInputChange={async (e) => {
+                  await this.setCreateNewCampaignParam({
+                    address: e,
+                  });
+                }}
+                onChange={async (address) => {
+                  await this.onAutoCompleteSelect(address);
+                }}
+              />
+            </Form.Item>
+            {createCampaignParam?.address === '' && (
+              <p
+                style={{
+                  color: 'red',
+                  transition: 'ease 0.5s',
+                }}
+              >
+                Please enter campaign address
+              </p>
+            )}
             <Row>
               <Col span={24}>
                 <LeafletMapComponent {...this.props} />

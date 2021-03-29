@@ -23,7 +23,9 @@ export type Campaign = {
   modifyTime?: string;
   isActive: boolean;
   address: string;
-  types: any[]
+  types: any[];
+  name: string;
+  isLoading?: boolean;
 };
 
 export type CampaignModelState = {
@@ -90,6 +92,7 @@ const CampaignStore: CampaignModelStore = {
     totalCampaigns: 0,
 
     selectedCampaign: {
+      name: "",
       id: "",
       budget: 0,
       description: "",
@@ -118,7 +121,9 @@ const CampaignStore: CampaignModelStore = {
       maxBid: 0,
       radius: 0,
       scenarioId: "",
-      typeIds: []
+      typeIds: [],
+      address: "",
+      name: ""
     },
 
     getListCampaignParam: {
@@ -235,10 +240,7 @@ const CampaignStore: CampaignModelStore = {
     setCreateCampaignParamReducer(state, { payload }) {
       return {
         ...state,
-        createCampaignParam: {
-          ...state?.createCampaignParam,
-          ...payload
-        }
+        createCampaignParam: payload
       }
     },
 
@@ -256,7 +258,9 @@ const CampaignStore: CampaignModelStore = {
           maxBid: 0,
           radius: 0,
           scenarioId: "",
-          typeIds: []
+          typeIds: [],
+          name: "",
+          address: ""
         }
       }
     },

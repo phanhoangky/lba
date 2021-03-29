@@ -1,3 +1,4 @@
+import { openNotification } from "@/utils/utils";
 import axios from "axios";
 import { history } from "umi";
 
@@ -32,6 +33,7 @@ ApiHelper.interceptors.request.use(config => {
 ApiHelper.interceptors.response.use(
   response => response,
   error => {
+    
     if (error.response) {
       const { status } = error.response;
       if (status) {
@@ -46,6 +48,10 @@ ApiHelper.interceptors.response.use(
     } else {
       history.push('/exception/500')
     }
+    // Promise.reject(new Error(error)).catch(e => {
+    //   openNotification("error", "Error", e)
+    // });
+    // throw new Error(error);
   }
 )
 

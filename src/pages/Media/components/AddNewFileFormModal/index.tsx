@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import { openNotification } from '@/utils/utils';
+import { LIST_SUPPORTED_FILES } from '@/services/constantUrls';
 
 export type AddNewFileFormModalProps = {
   dispatch: Dispatch;
@@ -157,6 +158,8 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
       breadScrumb,
       createFileParam,
     } = this.props.media;
+    console.log('====================================');
+    console.log('====================================');
     return (
       <Modal
         centered
@@ -191,7 +194,30 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               className="avatar-uploader"
               // fileList={addNewFileModal.fileList}
               showUploadList={true}
+              beforeUpload={(file) => {
+                console.log('====================================');
+                console.log(file);
+                console.log('====================================');
+                LIST_SUPPORTED_FILES.includes(file.type);
+                if (LIST_SUPPORTED_FILES.includes(file.type)) {
+                  openNotification('error', 'file is not support');
+                  return Upload.LIST_IGNORE;
+                }
+                if (file.size > 25 * (1000 * 1000)) {
+                  // Promise.reject(new Error('Oversize'));
+                  openNotification('error', 'file is oversize', `File must smaller than ${25}MB`);
+                  return Upload.LIST_IGNORE;
+                }
+                return true;
+                // return file.type === 'image/png' ? true : Upload.LIST_IGNORE;
+              }}
               onChange={async (file) => {
+                if (file.file.size > 2500) {
+                  console.log('====================================');
+                  console.log(file.file);
+                  console.log('====================================');
+                }
+
                 this.setCreateFileParam({
                   ...createFileParam,
                   file: file.file.originFileObj,

@@ -24,22 +24,37 @@ export const LOCATION_DISPATCHER = 'location';
 class LocationScreen extends React.Component<LocationScreenProps> {
   componentDidMount = async () => {
     this.setLocationsTableLoading(true)
-      .then(() => {
-        this.callGetListLocations().then(() => {
-          this.props
-            .dispatch({
-              type: 'deviceStore/getDeviceType',
-            })
-            .then(() => {
-              this.setLocationsTableLoading(false);
-              this.readJWT().then(() => {
-                const { listLocations } = this.props.location;
-                this.setSelectedLocation(
-                  listLocations && listLocations.length > 0 && listLocations[0],
-                );
+      .then(async () => {
+        this.readJWT();
+        Promise.all([this.callGetListLocations(), this.callGetListDeviceTypes()]).then(async () => {
+          this.setLocationsTableLoading(false).then(async () => {
+            const { listLocations } = this.props.location;
+            if (listLocations && listLocations.length > 0) {
+              const location = listLocations[0];
+              const { data } = await this.reverseGeocoding(location.latitude, location.longitude);
+              const clone = cloneDeep(location);
+              await this.setSelectedLocation({
+                ...clone,
+                address: data.display_name,
               });
-            });
+              this.setSelectedLocation(
+                listLocations && listLocations.length > 0 && listLocations[0],
+              );
+              this.viewLocationRef.current?.componentDidMount();
+            }
+          });
         });
+        // this.callGetListLocations().then(() => {
+        //   this.callGetListDeviceTypes().then(() => {
+        //     this.setLocationsTableLoading(false);
+        //     this.readJWT().then(() => {
+        //       const { listLocations } = this.props.location;
+        //       this.setSelectedLocation(
+        //         listLocations && listLocations.length > 0 && listLocations[0],
+        //       );
+        //     });
+        //   });
+        // });
       })
       .catch(() => {
         this.setLocationsTableLoading(false);
@@ -49,6 +64,12 @@ class LocationScreen extends React.Component<LocationScreenProps> {
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
+    });
+  };
+
+  callGetListDeviceTypes = async () => {
+    await this.props.dispatch({
+      type: 'deviceStore/getDeviceType',
     });
   };
 
@@ -225,7 +246,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       listLocations,
       totalItem,
       locationTableLoading,
-      addNewLocationModal,
       editLocationModal,
     } = this.props.location;
     return (
@@ -282,7 +302,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       ...clone,
                       address: data.display_name,
                     });
-                    this.viewLocationRef.current?.initialMap();
+                    // this.viewLocationRef.current?.initialMap();
                     this.viewLocationRef.current?.componentDidMount();
                     await this.setEditLocationModal({
                       visible: true,
@@ -294,43 +314,12 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
               <Column key="name" dataIndex="name" title="Name"></Column>
               <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
-              {/* <Column
-                  key="action"
-                  width={150}
-                  title="Action"
-                  render={(text, record: any) => {
-                    return (
-                      <>
-                        <Space>
-                          <Button
-                            onClick={async () => {
-                              this.setSelectedLocation(record).then(() => {
-                                this.setLocationAddressInMap(record).then(() => {
-                                  this.setEditLocationModal({
-                                    visible: true,
-                                  });
-                                });
-                              });
-                            }}
-                          >
-                            <EditTwoTone />
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              this.deleteConfirm(record);
-                            }}
-                          >
-                            <DeleteTwoTone twoToneColor="#f93e3e" />
-                          </Button>
-                        </Space>
-                      </>
-                    );
-                  }}
-                ></Column> */}
             </Table>
           </Col>
           <Col span={12}>
-            <Typography.Title level={4}>Edit Location Detail</Typography.Title>
+            {editLocationModal?.visible && (
+              <Typography.Title level={4}>Edit Location Detail</Typography.Title>
+            )}
             {editLocationModal?.visible && (
               <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
             )}

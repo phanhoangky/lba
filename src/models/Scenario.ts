@@ -64,7 +64,9 @@ export type ScenarioModelState = {
     visible: boolean;
     isLoading: boolean;
     totalItem: number;
-    listPlaylists: Playlist[]
+    listPlaylists: Playlist[];
+    urlPreview?: string;
+    mediaType?: string;
   },
 
   getListPlaylistParam?: GetListPlaylistParam;
@@ -173,7 +175,7 @@ const ScenarioStore: ScenarioStoreModel = {
       isLoading: false,
       visible: false,
       totalItem: 0,
-      listPlaylists: []
+      listPlaylists: [],
     },
 
     getListPlaylistParam: {

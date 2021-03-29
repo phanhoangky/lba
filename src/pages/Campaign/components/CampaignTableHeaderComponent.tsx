@@ -3,7 +3,7 @@ import {
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Menu, Select, Space } from 'antd';
+import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { CampaignModelState, Dispatch, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
@@ -60,6 +60,23 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
     const { getListCampaignParam } = this.props.campaign;
     return (
       <Space>
+        <Input.Search
+          enterButton
+          onSearch={(e) => {
+            this.setCampaignTableLoading(true)
+              .then(() => {
+                this.callGetListCampaigns({
+                  searchValue: e,
+                  pageNumber: 0,
+                }).then(() => {
+                  this.setCampaignTableLoading(false);
+                });
+              })
+              .catch(() => {
+                this.setCampaignTableLoading(false);
+              });
+          }}
+        />
         <Button
           onClick={async () => {
             this.setListScenarioWithAtLeastOneItems().then(() => {

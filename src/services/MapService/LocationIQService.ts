@@ -21,8 +21,8 @@ export async function forwardGeocoding(address: string) {
     q: address,
     format:'json'
   }
-  const res = await LocationIQ_ApiHelper.get(`${CONSTANTS_LOCATIONIQ.GEOCODING}`, { params: { ...param } });
-  return res;
+  const {data} = await LocationIQ_ApiHelper.get(`${CONSTANTS_LOCATIONIQ.GEOCODING}`, { params: { ...param } });
+  return data;
 }
 
 export async function autoComplete(address: string) {

@@ -584,12 +584,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 dataSource={selectedPlaylistItems}
                 pagination={false}
               >
-                <Column
-                  key="drag"
-                  dataIndex="sort"
-                  className={styles.dragVisible}
-                  render={() => <DragHandle />}
-                ></Column>
+                <Column key="drag" dataIndex="sort" render={() => <DragHandle />}></Column>
                 <Column key="index" title="No" dataIndex="index"></Column>
                 <Column
                   key="title"

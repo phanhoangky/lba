@@ -201,7 +201,7 @@ const UserModel: UserModelType = {
 
       //
       yield put({
-        type: "setCurrentUser",
+        type: "saveCurrentUser",
         payload: {
           id: decoded.Id,
           email: decoded.email,

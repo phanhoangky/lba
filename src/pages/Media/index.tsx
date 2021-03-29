@@ -4,17 +4,11 @@ import {
   Button,
   Modal,
   Divider,
-  Space,
-  // Drawer,
+  Drawer,
   List,
   Card,
   Skeleton,
   Breadcrumb,
-  // Popconfirm,
-  Input,
-  Row,
-  Col,
-  Select,
   Alert,
 } from 'antd';
 import * as React from 'react';
@@ -35,14 +29,15 @@ import {
   FolderOpenTwoTone,
   FormOutlined,
   HomeTwoTone,
-  PlusSquareTwoTone,
   SettingTwoTone,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
 import type { EditMediaParam } from '@/services/MediaSourceService';
 import { AddNewFolderFormModal } from './components/AddNewFolderFormModal';
 import { AddNewFileFormModal } from './components/AddNewFileFormModal';
-import EditMediaFormDrawer from './components/EditMediaFormDrawer';
+import { EditMediaFormDrawer } from './components/EditMediaFormDrawer';
+import { ListMediasHeaderComponent } from './components/ListMediasHeaderComponent';
+import { EditDrawerFooter } from './components/EditMediaFormDrawer/EditDrawerFooter';
 
 export type MediaSourceProps = {
   dispatch: Dispatch;
@@ -58,28 +53,17 @@ class Media extends React.Component<MediaSourceProps> {
   componentDidMount = () => {
     this.setListLoading(true)
       .then(() => {
-        this.getCurrentUser().then(() => {
-          this.readJWT().then(() => {
-            Promise.all([
-              this.callGetListFolders(),
-              this.callGetListMedia(),
-              this.callGetListMediaType(),
-              this.addBreadscrumbHome(),
-            ]).then(() => {
-              this.setListLoading(false);
-            });
+        this.getCurrentUser().then(async () => {
+          this.readJWT();
+          Promise.all([
+            this.callGetListFolders(),
+            this.callGetListMedia(),
+            this.callGetListMediaType(),
+            this.addBreadscrumbHome(),
+          ]).then(() => {
+            this.setListLoading(false);
           });
         });
-        // Promise.all([
-        //   this.getCurrentUser(),
-        //   this.readJWT(),
-        //   this.callGetListFolders(),
-        //   this.callGetListMedia(),
-        //   this.callGetListMediaType(),
-        //   this.addBreadscrumbHome(),
-        // ]).then(() => {
-        //   this.setListLoading(false);
-        // });
       })
       .catch(() => {
         this.setListLoading(false);
@@ -89,7 +73,6 @@ class Media extends React.Component<MediaSourceProps> {
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
   addBreadscrumbHome = async () => {
@@ -121,18 +104,17 @@ class Media extends React.Component<MediaSourceProps> {
       type: 'user/getCurrentUser',
       payload: '',
     });
-
-    await this.setCreateFileParam({
-      accountId: this.props.user.currentUser?.id,
-    });
-
-    await this.setGetListFilesParam({
-      folder: res.rootFolderId,
-    });
-
-    await this.setGetListFolderParam({
-      parent_id: res.rootFolderId,
-    });
+    Promise.all([
+      this.setCreateFileParam({
+        accountId: this.props.user.currentUser?.id,
+      }),
+      this.setGetListFilesParam({
+        folder: res.rootFolderId,
+      }),
+      this.setGetListFolderParam({
+        parent_id: res.rootFolderId,
+      }),
+    ]);
   };
 
   setCreateFileParam = async (param: any) => {
@@ -165,7 +147,7 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  async callGetListMedia(payload?: any) {
+  callGetListMedia = async (payload?: any) => {
     const { dispatch, media } = this.props;
     await dispatch({
       type: 'media/getListMediaFromFileId',
@@ -174,7 +156,7 @@ class Media extends React.Component<MediaSourceProps> {
         ...payload,
       },
     });
-  }
+  };
 
   callSearchListMedia = async (payload?: any) => {
     await this.props.dispatch({
@@ -305,16 +287,24 @@ class Media extends React.Component<MediaSourceProps> {
     });
 
     this.setListLoading(true)
-      .then(() => {
-        this.callGetListMedia().then(() => {
-          this.callGetListFolders().then(() => {
-            this.clearCreateFileParam().then(() => {
-              this.clearFilelist().then(() => {
-                this.setListLoading(false);
-              });
-            });
-          });
+      .then(async () => {
+        Promise.all([
+          this.callGetListMedia(),
+          this.callGetListFolders(),
+          this.clearCreateFileParam(),
+          this.clearFilelist(),
+        ]).then(() => {
+          this.setListLoading(false);
         });
+        // this.callGetListMedia().then(() => {
+        //   this.callGetListFolders().then(() => {
+        //     this.clearCreateFileParam().then(() => {
+        //       this.clearFilelist().then(() => {
+        //         this.setListLoading(false);
+        //       });
+        //     });
+        //   });
+        // });
       })
       .catch(() => {
         this.setListLoading(false);
@@ -462,15 +452,18 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  setSearchListMediaParam = async (params: any) => {
-    await this.props.dispatch({
-      type: 'media/setSearchListMediaParamReducer',
-      payload: {
-        ...this.props.media.searchListMediaParam,
-        ...params,
-      },
-    });
-  };
+  // setSearchListMediaParam = async (params: any) => {
+  //   await this.props.dispatch({
+  //     type: 'media/setSearchListMediaParamReducer',
+  //     payload: {
+  //       ...this.props.media.searchListMediaParam,
+  //       ...params,
+  //     },
+  //   });
+  // };
+
+  editMediaFormRef = React.createRef<EditMediaFormDrawer>();
+  editMediaFooterRef = React.createRef<EditDrawerFooter>();
   render() {
     const {
       totalItem,
@@ -481,6 +474,7 @@ class Media extends React.Component<MediaSourceProps> {
       breadScrumb,
       editFileDrawer,
       searchListMediaParam,
+      selectedFile,
     } = this.props.media;
 
     const signatureOfMedia = (status: number) => {
@@ -524,132 +518,10 @@ class Media extends React.Component<MediaSourceProps> {
               })}
             </Breadcrumb>
           </Skeleton>
-
+          <Divider></Divider>
           {/* ========================================================================================================================== */}
 
-          <Skeleton active loading={listLoading}>
-            <Row>
-              <Col span={12}>
-                <Space>
-                  <Input.Search
-                    style={{
-                      width: '100%',
-                    }}
-                    enterButton
-                    value={searchListMediaParam.title}
-                    onChange={async (e) => {
-                      this.setSearchListMediaParam({
-                        title: e.target.value,
-                      });
-                    }}
-                    onSearch={async (e) => {
-                      await this.setListLoading(true);
-                      if (e !== '') {
-                        this.callSearchListMedia({
-                          title: e,
-                        })
-                          .then(() => {
-                            this.setListLoading(false);
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      } else {
-                        this.callGetListMedia({
-                          folder: breadScrumb[breadScrumb.length - 1].id,
-                        })
-                          .then(() => {
-                            this.setListLoading(false);
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      }
-                    }}
-                  />
-                  <Select
-                    style={{ width: '100px' }}
-                    defaultValue={-1}
-                    value={searchListMediaParam.isSigned}
-                    onChange={(e) => {
-                      this.setListLoading(true)
-                        .then(() => {
-                          this.callSearchListMedia({
-                            isSigned: e === -1 ? undefined : e,
-                          }).then(() => {
-                            this.setListLoading(false);
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }}
-                  >
-                    <Select.Option key={'all'} value={-1}>
-                      All
-                    </Select.Option>
-                    <Select.Option key={'Not Sign'} value={0}>
-                      Not Sign
-                    </Select.Option>
-                    <Select.Option key={'Waiting'} value={1}>
-                      Waiting
-                    </Select.Option>
-                    <Select.Option key={'Approved'} value={2}>
-                      Approved
-                    </Select.Option>
-                  </Select>
-                </Space>
-              </Col>
-              <Col span={12}>
-                <div style={{ textAlign: 'right' }}>
-                  <Space>
-                    <Button
-                      onClick={() => {
-                        this.setAddNewFolderModal({
-                          visible: true,
-                        });
-                      }}
-                    >
-                      <PlusSquareTwoTone />
-                      Add New Folder
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        this.setAddNewFileModal({
-                          visible: true,
-                        });
-                      }}
-                    >
-                      <PlusSquareTwoTone />
-                      Add New File
-                    </Button>
-
-                    {/* <Select
-                      defaultValue={'Current Files'}
-                      value={
-                        getListFileParam.filter_privacy === 'public'
-                          ? 'Current Files'
-                          : 'Deleted Files'
-                      }
-                      showSearch
-                      onChange={async (e) => {
-                        this.callGetListMedia({
-                          filter_privacy: e,
-                        });
-                      }}
-                    >
-                      <Select.Option key={'Public'} value={'public'}>
-                        Current Files
-                      </Select.Option>
-                      <Select.Option key={'Private'} value={'private'}>
-                        Deleted Files
-                      </Select.Option>
-                    </Select> */}
-                  </Space>
-                </div>
-              </Col>
-            </Row>
-          </Skeleton>
+          <ListMediasHeaderComponent {...this.props} />
           <Divider></Divider>
           {/* ========================================================================================================================== */}
 
@@ -831,8 +703,36 @@ class Media extends React.Component<MediaSourceProps> {
 
           {/** Edit File */}
           {/* ========================================================================================================================== */}
-          {editFileDrawer.visible && <EditMediaFormDrawer {...this.props} />}
-
+          {/* {editFileDrawer.visible && <EditMediaFormDrawer {...this.props} />} */}
+          <Drawer
+            closable={false}
+            destroyOnClose={true}
+            visible={editFileDrawer.visible}
+            width={700}
+            onClose={async () => {
+              await this.setEditFileDrawer({
+                visible: false,
+              });
+            }}
+            title={
+              <>
+                <div>{selectedFile.title}</div>
+              </>
+            }
+            footer={
+              <>
+                <EditDrawerFooter
+                  ref={this.editMediaFooterRef}
+                  handleUpdate={async () => {
+                    this.editMediaFormRef.current?.handleUpdateFile();
+                  }}
+                  {...this.props}
+                />
+              </>
+            }
+          >
+            <EditMediaFormDrawer ref={this.editMediaFormRef} {...this.props} />
+          </Drawer>
           {/* ========================================================================================================================== */}
         </PageContainer>
       </>

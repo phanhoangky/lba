@@ -41,7 +41,6 @@ export type UpdateListDevicesParam = {
   timeFilter: string[],
   dateFilter: string[],
   minBid: 0,
-  currentType: string;
   defaultScenarioId?: string;
 }
 

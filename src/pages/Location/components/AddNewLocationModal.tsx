@@ -13,8 +13,10 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '..';
 import LeafletMapComponent from './LeafletMapComponent';
 import L from 'leaflet';
-import AutoCompleteComponent from '@/pages/common/AutoCompleteComponent';
+import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import type { FormInstance } from 'antd/lib/form';
+import { forwardGeocoding } from '@/services/MapService/LocationIQService';
+import { openNotification } from '@/utils/utils';
 
 export type AddNewLocationModalProps = {
   dispatch: Dispatch;
@@ -79,20 +81,29 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
       isLoading: true,
     })
       .then(() => {
-        this.createNewLocation(values).then(() => {
-          this.callGetListLocations().then(() => {
-            this.clearCreateLocationParam().then(() => {
-              this.openNotification(undefined, 'Success', 'Create New Location Success');
-              this.setAddNewLocationModal({
-                isLoading: false,
-                visible: false,
+        this.createNewLocation(values)
+          .then(() => {
+            this.callGetListLocations().then(() => {
+              this.clearCreateLocationParam().then(() => {
+                openNotification(
+                  'success',
+                  'Create New Location Success',
+                  `Location ${values.name} was created`,
+                );
+                this.setAddNewLocationModal({
+                  isLoading: false,
+                  visible: false,
+                });
               });
             });
+          })
+          .catch((error) => {
+            Promise.reject(error);
+            openNotification('error', 'Error', error);
           });
-        });
       })
       .catch(() => {
-        this.openNotification('error', 'Error', 'Create New Location Error');
+        openNotification('error', 'Error', 'Create New Location Error');
         this.setAddNewLocationModal({
           isLoading: false,
           visible: false,
@@ -183,6 +194,52 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
       },
     });
   };
+
+  onAutoCompleteSelect = async (address: string) => {
+    const { mapComponent } = this.props.location;
+    if (address !== '') {
+      const listLocations = await forwardGeocoding(address);
+
+      console.log('====================================');
+      console.log('List Location >>>', listLocations);
+      console.log('====================================');
+      if (listLocations.length > 0) {
+        const location = listLocations[0];
+        const lat = Number.parseFloat(location.lat);
+        const lon = Number.parseFloat(location.lon);
+
+        if (mapComponent) {
+          if (mapComponent.map) {
+            mapComponent.map.setView([lat, lon]);
+
+            if (mapComponent.marker) {
+              mapComponent.marker.remove();
+              // mapComponent.marker.setLatLng([lat, lon]);
+              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+              // marker.setPopupContent('Marker');
+              this.setMapComponent({
+                marker,
+              });
+            } else {
+              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+              // marker.setPopupContent('Marker');
+              this.setMapComponent({
+                marker,
+              });
+            }
+          }
+        }
+
+        await this.setCreateLocationParam({
+          longitude: lon,
+          latitude: lat,
+          address,
+        });
+      }
+    }
+  };
+
+  autoCompleteRef = React.createRef<AutoCompleteComponent>();
   render() {
     const { addNewLocationModal, createLocationParam, mapComponent } = this.props.location;
 
@@ -198,9 +255,6 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
           width={'50%'}
           afterClose={() => {
             if (mapComponent) {
-              console.log('====================================');
-              console.log('Add New Location >>>', mapComponent);
-              console.log('====================================');
               if (mapComponent.map) {
                 // this.setMapComponent({
                 //   map: undefined,
@@ -225,6 +279,9 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
               this.formRef.current
                 .validateFields()
                 .then((values) => {
+                  if (!createLocationParam || createLocationParam?.address === '') {
+                    return;
+                  }
                   this.onCreateNewLocation(values).then(() => {
                     this.formRef.current?.resetFields();
                   });
@@ -272,56 +329,56 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
                 })}
               </Select>
             </Form.Item>
-            {/* <Form.Item
-              name="brandId"
-              label="Brand"
-              rules={[{ required: true, message: 'Please input address' }]}
-            >
-              <Select
-                style={{ width: '100%' }}
-                onChange={() => {
-                  // this.setCreateLocationParam({
-                  //   brandId: e,
-                  // });
-                }}
-              >
-                {listBrand.map((brand) => {
-                  return (
-                    <Select.Option key={brand.id} value={brand.id}>
-                      {brand.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item> */}
 
-            {/* <Form.Item
-              name="address"
+            <Form.Item
               label="Address"
-              rules={[{ required: true, message: 'Please input address' }]}
-            ></Form.Item> */}
-          </Form>
-          <Row>
-            <Col flex="2">Address</Col>
-            <Col flex="6">
+              name="address"
+              // rules={[{ required: true, message: 'Please enter address' }]}
+            >
               <AutoCompleteComponent
+                ref={this.autoCompleteRef}
                 {...this.props}
                 inputValue={createLocationParam?.address}
-                value={{
-                  label: createLocationParam?.address,
-                  value: `${createLocationParam?.longitude}-${createLocationParam?.latitude}`,
-                }}
-                onInputChange={(e: any) => {
-                  this.setCreateLocationParam({
+                address={createLocationParam?.address}
+                // value={{
+                //   label: selectedLocation?.address,
+                //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
+                // }}
+                onInputChange={async (e) => {
+                  console.log('====================================');
+                  console.log('ADDD', e);
+                  console.log('====================================');
+                  await this.setCreateLocationParam({
                     address: e,
                   });
+
+                  // await this.autoCompleteRef.current?.forceUpdate();
                 }}
-                onChange={(e: any, address: any) => {
-                  this.handleAutoCompleteSearch(e, address);
+                onChange={async (address) => {
+                  // await this.handleAutoCompleteSearch(e);
+                  // const coordination = e.split('-');
+                  // const lat = coordination[0];
+                  // const lon = coordination[1];
+                  // this.setSelectedLocation({
+                  //   longitude: lon,
+                  //   latitude: lat,
+                  //   address,
+                  // });
+                  await this.onAutoCompleteSelect(address);
                 }}
               />
-            </Col>
-          </Row>
+            </Form.Item>
+            {createLocationParam?.address === '' && (
+              <p
+                style={{
+                  color: 'red',
+                  transition: 'ease 0.5s',
+                }}
+              >
+                Please enter location address
+              </p>
+            )}
+          </Form>
           <Row>
             <Col span={24}>
               <LeafletMapComponent {...this.props} />

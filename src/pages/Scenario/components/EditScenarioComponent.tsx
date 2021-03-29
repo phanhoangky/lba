@@ -1,5 +1,10 @@
-import { sortArea } from '@/utils/utils';
-import { DeleteTwoTone, SettingTwoTone, UploadOutlined } from '@ant-design/icons';
+import { openNotification, sortArea } from '@/utils/utils';
+import {
+  CloseSquareOutlined,
+  DeleteTwoTone,
+  SettingTwoTone,
+  UploadOutlined,
+} from '@ant-design/icons';
 import {
   Col,
   Form,
@@ -117,6 +122,9 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
   };
 
   setSelectedScenario = async (item: any) => {
+    console.log('====================================');
+    console.log({ ...this.props.scenarios.selectedSenario, ...item });
+    console.log('====================================');
     await this.props.dispatch({
       type: 'scenarios/setSelectedScenarioReducer',
       payload: {
@@ -225,9 +233,6 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
     const selectedScenarioItem = selectedSenario?.scenarioItems.filter(
       (item) => item?.area?.id === selectedArea?.id,
     );
-    console.log('====================================');
-    console.log(selectedScenarioItem, selectedPlaylist);
-    console.log('====================================');
     if (selectedScenarioItem) {
       if (selectedScenarioItem.length > 0) {
         this.setSelectedScenario({
@@ -255,9 +260,6 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
         };
 
         selectedSenario?.scenarioItems.push(newScenarioItem);
-        console.log('====================================');
-        console.log(selectedSenario);
-        console.log('====================================');
         this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems,
         });
@@ -298,10 +300,7 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
       title: selectedSenario?.title,
       ...values,
     };
-    console.log('====================================');
-    console.log(updateParam);
-    console.log('====================================');
-    this.updateScenario(updateParam);
+    await this.updateScenario(updateParam);
   };
 
   updateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
@@ -328,13 +327,23 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
           isLoading: true,
         })
           .then(() => {
-            this.removeScenario(record.id).then(() => {
-              this.callGetListScenario().then(() => {
-                this.setEditScenariosDrawer({
-                  isLoading: false,
+            this.removeScenario(record.id)
+              .then(async () => {
+                openNotification(
+                  'success',
+                  'Remove Scenario Successfully',
+                  `${record.title} was removed`,
+                );
+                this.callGetListScenario().then(() => {
+                  this.setEditScenariosDrawer({
+                    isLoading: false,
+                  });
                 });
+              })
+              .catch((error) => {
+                Promise.reject(error);
+                openNotification('error', 'Fail to remove scenario ', error);
               });
-            });
           })
           .catch(() => {
             this.setEditScenariosDrawer({
@@ -344,6 +353,15 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
       },
     });
   };
+
+  removeScenarioItems = async (item: any) => {
+    const { selectedSenario } = this.props.scenarios;
+    const newScenarioItem = selectedSenario?.scenarioItems.filter((s) => s.id !== item.id);
+    await this.setSelectedScenario({
+      scenarioItems: newScenarioItem,
+    });
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -376,20 +394,7 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
           {/* AREA */}
           <Row gutter={20}>
             <Col span={12}>
-              <div
-                id="areaWrapper"
-                style={{
-                  margin: `0 auto`,
-                  display: 'flex',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  // border: '2px solid transparent',
-                  // background: `linear-gradient(#000, #000) padding-box,
-                  // radial-gradient(farthest-corner at var(--x) var(--y), #00C9A7, #845EC2) border-box`,
-                }}
-              >
+              <div id="areaWrapper" className="area-wrapper">
                 {selectedSenario &&
                   selectedSenario.layout.areas &&
                   sortArea(selectedSenario.layout.areas).map((area) => {
@@ -424,16 +429,15 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                         {scenarioItem ? (
                           <>
                             <div
-                              style={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '80%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column',
+                              className="remove-btn"
+                              onClick={(e) => {
+                                this.removeScenarioItems(scenarioItem);
+                                e.stopPropagation();
                               }}
                             >
+                              <CloseSquareOutlined />
+                            </div>
+                            <div className="media-wrapper">
                               <div>{scenarioItem?.playlist?.title}</div>
                               <div
                                 style={{
@@ -465,28 +469,8 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                                     ></video>
                                   )}
                               </div>
-                              {/* {!area.urlPreview && (
-                              <ReactPlayer
-                                url={scenarioItem.playlist?.playlistItems.map((item) => {
-                                  return item.mediaSrc.urlPreview;
-                                })}
-                                playing
-                                height="100%"
-                                controls={true}
-                                width={'100%'}
-                              />
-                            )} */}
                             </div>
-                            <div
-                              style={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '20%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                            >
+                            <div className="audio-checkbox">
                               <Checkbox
                                 checked={scenarioItem.audioArea}
                                 onChange={(e) => {
@@ -523,9 +507,6 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                         onRow={(record) => {
                           return {
                             onClick: () => {
-                              console.log('====================================');
-                              console.log(record);
-                              console.log('====================================');
                               this.setUrlAreasOfScenario(
                                 selectedArea,
                                 record.mediaSrc.urlPreview,
@@ -569,20 +550,31 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                 </Button>
                 <Button
                   type="primary"
-                  onClick={async () => {
+                  onClick={(e) => {
                     this.setEditScenariosDrawer({
                       isLoading: true,
                     })
                       .then(() => {
                         this.formRef.current?.validateFields().then((values) => {
-                          this.saveChange(values).then(() => {
-                            this.callGetListScenario().then(() => {
-                              this.setEditScenariosDrawer({
-                                isLoading: false,
+                          this.saveChange(values)
+                            .then(async () => {
+                              openNotification(
+                                'success',
+                                'Save Scenario Successfully',
+                                `${values.title} was saved`,
+                              );
+                              this.callGetListScenario().then(() => {
+                                this.setEditScenariosDrawer({
+                                  isLoading: false,
+                                });
                               });
+                            })
+                            .catch((error) => {
+                              Promise.reject(error);
+                              openNotification('error', 'Save Scenario Fail', error);
                             });
-                          });
                         });
+                        e.stopPropagation();
                       })
                       .catch(() => {
                         this.setEditScenariosDrawer({
@@ -602,15 +594,19 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
 
         <Drawer
           title="Playlist"
-          width={`80%`}
+          width={`50%`}
           closable={false}
           destroyOnClose={true}
-          afterVisibleChange={() => {
-            this.clearSelectedPlaylistItems();
+          afterVisibleChange={(e) => {
+            if (!e) {
+              this.clearSelectedPlaylistItems();
+            }
           }}
           onClose={() => {
             this.setPlaylistDrawer({
               visible: false,
+              urlPreview: undefined,
+              mediaType: undefined,
             });
           }}
           visible={playlistsDrawer?.visible}

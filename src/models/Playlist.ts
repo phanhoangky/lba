@@ -250,7 +250,14 @@ const PlaylistStore: PlaylistModel = {
         payload: data.result.data.map((playlist: any) => {
           return {
             ...playlist,
-            key: playlist.id
+            key: playlist.id,
+            playlistItems: playlist.playlistItems.map((playlistItem: any, index: any) => {
+              return {
+                ...playlistItem,
+                key: playlistItem.id,
+                index
+              }
+            })
           }
         }),
       })

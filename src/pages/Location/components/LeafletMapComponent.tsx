@@ -65,7 +65,12 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
           console.log('====================================');
         }
         if (mapComponent.circle) {
-          mapComponent.circle.setLatLng([e.latlng.lat, e.latlng.lng]).redraw();
+          mapComponent.circle.remove();
+          const circle = L.circle([e.latlng.lat, e.latlng.lng]);
+          circle.addTo(mymap);
+          this.setMapComponent({
+            circle,
+          });
         }
         const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
 
@@ -98,10 +103,14 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
                   circle,
                 });
               } else {
-                mapComponent.circle
-                  ?.setLatLng([data.lat, data.lon])
-                  .setRadius(createCampaignParam.radius * 1000)
-                  .redraw();
+                mapComponent.circle?.remove();
+                const circle = L.circle(e.latlng, {
+                  radius: createCampaignParam.radius * 1000,
+                });
+                circle.addTo(mapComponent.map);
+                await this.setMapComponent({
+                  circle,
+                });
               }
             }
           }

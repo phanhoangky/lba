@@ -48,6 +48,16 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
     });
   };
 
+  setCurrentUser = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/saveCurrentUser',
+      payload: {
+        ...this.props.user.currentUser,
+        ...param,
+      },
+    });
+  };
+
   setDepositModal = async (modal?: any) => {
     await this.props.dispatch({
       type: 'profileWallet/setDepositModalReducer',
@@ -70,10 +80,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
 
   generateQR = async (text: any) => {
     try {
-      const result = await QRCode.toDataURL(text);
-      console.log('====================================');
-      console.log('QR >>>', result);
-      console.log('====================================');
+      // const result = await QRCode.toDataURL(text);
 
       QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
         if (err) {
@@ -103,7 +110,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
   };
 
   handleDepositMoney = async (param?: any) => {
-    this.depositMoney().then(() => {
+    this.depositMoney(param).then(() => {
       const { linkDepositMoney } = this.props.momo;
       this.generateQR(linkDepositMoney);
     });
@@ -125,6 +132,21 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
     });
   };
 
+  onRefreshBalance = async () => {
+    this.setRefreshBalanceLoading(true)
+      .then(() => {
+        this.props.user.currentUser?.ether?.getBalance().then((res) => {
+          this.setCurrentUser({
+            balance: res.toString(),
+          }).then(() => {
+            this.setRefreshBalanceLoading(false);
+          });
+        });
+      })
+      .catch(() => {
+        this.setRefreshBalanceLoading(false);
+      });
+  };
   depositModalRef = React.createRef<DepositModal>();
   render() {
     const { currentUser } = this.props.user;
@@ -280,15 +302,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                               width={'25px'}
                               height={'25px'}
                               onClick={() => {
-                                this.setRefreshBalanceLoading(true)
-                                  .then(() => {
-                                    this.props.user.currentUser?.ether?.getBalance().then(() => {
-                                      this.setRefreshBalanceLoading(false);
-                                    });
-                                  })
-                                  .catch(() => {
-                                    this.setRefreshBalanceLoading(false);
-                                  });
+                                this.onRefreshBalance();
                               }}
                             />
                           )}

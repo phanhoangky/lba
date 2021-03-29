@@ -35,14 +35,11 @@ class WalletScreen extends React.Component<WalletProps> {
 
   componentDidMount = async () => {
     this.setTransTableLoading(true)
-      .then(() => {
-        this.readJWT()
-          .then(() => {
-            this.getListTransactions();
-          })
-          .then(() => {
-            this.setTransTableLoading(false);
-          });
+      .then(async () => {
+        this.readJWT();
+        Promise.all([this.getListTransactions()]).then(() => {
+          this.setTransTableLoading(false);
+        });
       })
       .catch(() => {
         this.setTransTableLoading(false);
@@ -52,19 +49,12 @@ class WalletScreen extends React.Component<WalletProps> {
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
 
   getListTransactions = async (param?: any) => {
     const { getListTransactionsParam } = this.props.transaction;
-    // const payload = {
-    //   holder: this.props.user.currentUser?.ether?.wallet.address,
-    //   token: this.props.user.currentUser?.ether?.evn.SUPPORT_ADDRESS,
-    //   limit: getTransactionsParam?.limit ? getTransactionsParam.limit : 10,
-    //   page: getTransactionsParam?.page ? getTransactionsParam.page : 1,
-    //   ...param,
-    // };
+
     await this.props.dispatch({
       type: `${TRANSACTION_STORE}/getListTransactions`,
       payload: {
@@ -80,6 +70,7 @@ class WalletScreen extends React.Component<WalletProps> {
       payload: isLoading,
     });
   };
+
   render() {
     const { currentUser } = this.props.user;
     const {
@@ -97,75 +88,74 @@ class WalletScreen extends React.Component<WalletProps> {
             </Row>
             <Divider orientation="left">View Transaction</Divider>
             <Row>
-            <Col span={24}>
-            <Table
-              dataSource={listTransactions?.map((item) => {
-                return {
-                  ...item,
-                  key: uuidv4(),
-                };
-              })}
-              loading={transTableLoading}
-              scroll={{
-                x: 500,
-                y: 400,
-              }}
-              pagination={{
-                current: getListTransactionsParam?.pageNumber
-                  ? getListTransactionsParam?.pageNumber + 1
-                  : 1,
-                pageSize: getListTransactionsParam?.pageLimitItem
-                  ? getListTransactionsParam?.pageLimitItem
-                  : 10,
-                total: totalItem,
-                onChange: (e) => {
-                  this.setTransTableLoading(true)
-                    .then(() => {
-                      this.getListTransactions({
-                        pageNumber: e - 1,
-                      }).then(() => {
-                        this.setTransTableLoading(false);
-                      });
-                    })
-                    .catch(() => {
-                      this.setTransTableLoading(false);
-                    });
-                },
-              }}
-            >
-              <Column
-                key="sender"
-                title="Sender"
-                dataIndex={['senderNavigation', 'email']}
-              ></Column>
-              <Column
-                key="receiver"
-                title="Receiver"
-                dataIndex={['receiverNavigation', 'email']}
-              ></Column>
-              <Column
-                key="type"
-                title="Type"
-                render={(record) => {
-                  return TYPE_TRANSACTIONS[record.type];
-                }}
-              ></Column>
-              <Column
-                key="value"
-                title="Value"
-                render={(record) => {
-                  return <>{record.value} VND</>;
-                }}
-              ></Column>
-              {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
-              <Column key="age" title="Age" dataIndex="age"></Column>
-            </Table>
-          </Col>
-        
+              <Col span={24}>
+                <Table
+                  dataSource={listTransactions?.map((item) => {
+                    return {
+                      ...item,
+                      key: uuidv4(),
+                    };
+                  })}
+                  loading={transTableLoading}
+                  scroll={{
+                    x: 500,
+                    y: 400,
+                  }}
+                  pagination={{
+                    current: getListTransactionsParam?.pageNumber
+                      ? getListTransactionsParam?.pageNumber + 1
+                      : 1,
+                    pageSize: getListTransactionsParam?.pageLimitItem
+                      ? getListTransactionsParam?.pageLimitItem
+                      : 10,
+                    total: totalItem,
+                    onChange: (e) => {
+                      this.setTransTableLoading(true)
+                        .then(() => {
+                          this.getListTransactions({
+                            pageNumber: e - 1,
+                          }).then(() => {
+                            this.setTransTableLoading(false);
+                          });
+                        })
+                        .catch(() => {
+                          this.setTransTableLoading(false);
+                        });
+                    },
+                  }}
+                >
+                  <Column
+                    key="sender"
+                    title="Sender"
+                    dataIndex={['senderNavigation', 'email']}
+                  ></Column>
+                  <Column
+                    key="receiver"
+                    title="Receiver"
+                    dataIndex={['receiverNavigation', 'email']}
+                  ></Column>
+                  <Column
+                    key="type"
+                    title="Type"
+                    render={(record) => {
+                      return TYPE_TRANSACTIONS[record.type];
+                    }}
+                  ></Column>
+                  <Column
+                    key="value"
+                    title="Value"
+                    render={(record) => {
+                      return <>{record.value} VND</>;
+                    }}
+                  ></Column>
+                  {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
+                  <Column key="age" title="Age" dataIndex="age"></Column>
+                </Table>
+              </Col>
             </Row>
           </Col>
           <Col span={7}>
-          <div
+            <div
               style={{
                 width: 100,
                 height: 100,
@@ -180,7 +170,7 @@ class WalletScreen extends React.Component<WalletProps> {
                   borderRadius: '50%',
                   height: '100px',
                   marginRight: '10px',
-                  width: '100px'
+                  width: '100px',
                 }}
               />
             </div>

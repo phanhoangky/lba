@@ -58,9 +58,14 @@ export type DeviceModelState = {
   viewScreenshotModal?: {
     visible: boolean;
     isLoading: boolean;
+    metadata?: ScreenShotMetadata
   }
 };
 
+export type ScreenShotMetadata = {
+  url: string;
+  createDate: string;
+}
 export type DeviceModelType = {
   // 1. Namespace
   namespace: string;
@@ -156,7 +161,6 @@ const DeviceModel: DeviceModelType = {
       endDate: moment().format('YYYY-MM-DD'),
       isPublished: false,
       idList: [],
-      typeId: '',
       minBid: 0,
       timeFilter: [
         '0',
@@ -194,7 +198,11 @@ const DeviceModel: DeviceModelType = {
     devicesTableLoading: false,
     viewScreenshotModal: {
       isLoading: false,
-      visible: false
+      visible: false,
+      // metadata: {
+      //   url: "",
+      //   createDate: ""
+      // }
     }
   },
 
@@ -268,14 +276,14 @@ const DeviceModel: DeviceModelType = {
 
     *updateListDevice({ payload }, { call }) {
       const param: UpdateListDevicesParam = {
-        currentType: '',
         dateFilter: payload.updateDevicesState.dateFilter.toString().replaceAll(',', ''),
         timeFilter: payload.updateDevicesState.timeFilter.toString().replaceAll(',', ''),
         startDate: payload.updateDevicesState.startDate,
         endDate: payload.updateDevicesState.endDate,
         idList: payload.listId,
         minBid: payload.updateDevicesState.minBid,
-        isPublished: payload.isPublish
+        isPublished: payload.updateDevicesState.isPublish,
+        defaultScenarioId: payload.updateDevicesState.scenarioId
       };
       yield call(UpdateListDevices, param);
     },

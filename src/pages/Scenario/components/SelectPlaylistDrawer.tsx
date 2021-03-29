@@ -1,9 +1,10 @@
-import { List, Skeleton, Image, Row, Col, Divider } from 'antd';
+import { Skeleton, Image, Row, Col, Divider, Table } from 'antd';
+import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import ReactPlayer from 'react-player';
 import type { Dispatch, PlayListModelState, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
-import styles from '../index.less';
+// import styles from '../index.less';
 
 export type SelectPlaylistDrawerProps = {
   dispatch: Dispatch;
@@ -104,13 +105,14 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
   };
 
   getSelectedPlaylistItem = () => {
-    const { selectedPlaylistItems } = this.props.playlists;
+    const { playlistsDrawer } = this.props.scenarios;
 
-    if (selectedPlaylistItems.length > 0) {
-      const playlistItem = selectedPlaylistItems.filter((item) => item.isSelected);
+    if (playlistsDrawer && playlistsDrawer.listPlaylists?.length > 0) {
+      const playlist = playlistsDrawer?.listPlaylists.filter((item: any) => item.isSelected);
 
-      if (playlistItem.length > 0) {
-        return playlistItem[0];
+      if (playlist.length > 0) {
+        const selectedPlaylistItem = playlist[0].playlistItems.filter((p) => p.isSelected);
+        return selectedPlaylistItem[0];
       }
     }
 
@@ -118,20 +120,21 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
   };
 
   renderPreviewMedia = () => {
-    const selectedPlaylistItem = this.getSelectedPlaylistItem();
-    if (selectedPlaylistItem) {
-      if (selectedPlaylistItem.typeName === 'Image') {
+    // const selectedPlaylistItem = this.getSelectedPlaylistItem();
+    const { playlistsDrawer } = this.props.scenarios;
+    if (playlistsDrawer) {
+      if (playlistsDrawer.mediaType === 'Image') {
         return (
           <>
-            <Image src={selectedPlaylistItem.url} loading="lazy" />
+            <Image src={playlistsDrawer.urlPreview} loading="lazy" />
           </>
         );
       }
 
-      if (selectedPlaylistItem.typeName === 'Video') {
+      if (playlistsDrawer.mediaType === 'Video') {
         return (
           <>
-            <ReactPlayer url={selectedPlaylistItem.url} controls={true} width={'100%'} />
+            <ReactPlayer url={playlistsDrawer.urlPreview} controls={true} width={'100%'} />
           </>
         );
       }
@@ -146,10 +149,12 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
     });
   };
   render() {
-    const { playlistsDrawer, getListPlaylistParam } = this.props.scenarios;
+    const { playlistsDrawer } = this.props.scenarios;
+    // const { listPlaylists } = playlistsDrawer ? playlistsDrawer : undefined;
 
-    const { selectedPlaylistItems } = this.props.playlists;
-
+    const selectedPlaylist = playlistsDrawer?.listPlaylists.filter(
+      (playlist) => playlist.isSelected,
+    )?.[0];
     return (
       <>
         <Row>
@@ -160,7 +165,39 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
           </Col>
           <Col span={12}>
             <Row>
-              <List
+              <Table
+                dataSource={playlistsDrawer?.listPlaylists}
+                pagination={false}
+                onRow={(record) => {
+                  return {
+                    onClick: () => {
+                      this.setPlaylistDrawer({
+                        isLoading: true,
+                      })
+                        .then(() => {
+                          this.setSelectedPlaylist(record).then(() => {
+                            this.setPlaylistDrawer({
+                              isLoading: false,
+                            });
+                          });
+                          // this.callGetItemsByPlaylistId({
+                          //   id: record.id,
+                          // }).then(() => {
+
+                          // });
+                        })
+                        .catch(() => {
+                          this.setPlaylistDrawer({
+                            isLoading: false,
+                          });
+                        });
+                    },
+                  };
+                }}
+              >
+                <Column key="title" dataIndex="title" title="Title"></Column>
+              </Table>
+              {/* <List
                 itemLayout="vertical"
                 bordered
                 size="large"
@@ -207,14 +244,50 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                     </List.Item>
                   </Skeleton>
                 )}
-              ></List>
+              ></List> */}
             </Row>
 
             <Divider />
 
             <Row>
               <Skeleton active loading={playlistsDrawer?.isLoading}>
-                <List
+                <Table
+                  dataSource={selectedPlaylist?.playlistItems}
+                  pagination={false}
+                  onRow={(record) => {
+                    return {
+                      onClick: () => {
+                        this.setPlaylistDrawer({
+                          urlPreview: record.mediaSrc.urlPreview,
+                          mediaType: record.mediaSrc.type.name,
+                        });
+                        // this.setSelectedPlaylistItems(
+                        //   selectedPlaylistItems.map((p) => {
+                        //     if (p.id === record.id) {
+                        //       return {
+                        //         ...p,
+                        //         isSelected: true,
+                        //       };
+                        //     }
+                        //     return {
+                        //       ...p,
+                        //       isSelected: false,
+                        //     };
+                        //   }),
+                        // );
+                      },
+                    };
+                  }}
+                >
+                  <Column key="title" dataIndex={['mediaSrc', 'title']} title="Title"></Column>
+                  <Column
+                    key="description"
+                    dataIndex={['mediaSrc', 'description']}
+                    title="Description"
+                  ></Column>
+                  <Column key="duration" dataIndex="duration" title="Duration"></Column>
+                </Table>
+                {/* <List
                   style={{ width: '100%' }}
                   itemLayout="vertical"
                   dataSource={selectedPlaylistItems}
@@ -248,7 +321,7 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                       </>
                     );
                   }}
-                ></List>
+                ></List> */}
               </Skeleton>
             </Row>
           </Col>

@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import {
   CheckOutlined,
   ClockCircleTwoTone,
@@ -14,7 +15,6 @@ import {
   Drawer,
   Form,
   Input,
-  notification,
   Row,
   Select,
   Skeleton,
@@ -29,6 +29,7 @@ import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } f
 import { connect } from 'umi';
 // import DrawerUpdateMultipleDevice from '../DrawerUpdateMultipleDevice';
 import FilterDate from '../FilterDate';
+import { UpdateDeviceDrawerFooter } from './components/UpdateDeviceDrawerFooter';
 
 export type UpdateDeviceFormDrawerProps = {
   dispatch: Dispatch;
@@ -83,9 +84,9 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
       payload: {
         updateDevicesState: {
           ...this.props.deviceStore.updateDevicesState,
-          ...values,
           startDate: values.startEnd[0],
           endDate: values.startEnd[1],
+          ...values,
         },
         listId: this.props.deviceStore.selectedDevices?.map((device) => {
           return device.id;
@@ -182,25 +183,8 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
     });
   };
 
-  openNotification = (type?: string, message?: string, description?: string) => {
-    if (type) {
-      notification[type]({
-        message: `${message}`,
-        description,
-      });
-    } else {
-      notification.open({
-        message: `${message}`,
-        description,
-        style: {
-          borderColor: 'green',
-        },
-      });
-    }
-  };
-
   formRef = React.createRef<FormInstance<any>>();
-
+  updateDeviceFooterRef = React.createRef<UpdateDeviceDrawerFooter>();
   render() {
     const { inputVisible } = this.state;
     const {
@@ -262,137 +246,165 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
           });
         }}
         footer={
-          <div
-            style={{
-              textAlign: 'right',
-            }}
-          >
-            <Space>
-              <Button
-                icon={<CloseSquareTwoTone />}
-                onClick={async () => {
-                  // await this.props.dispatch({
-                  //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-                  //   payload: false,
-                  // });
-                  this.setEditMultipleDevicesDrawer({
-                    visible: false,
-                  });
-                }}
-              >
-                Close Drawer
-              </Button>
-              {!isUpdateMultiple && (
-                <Button
-                  icon={<CloseSquareTwoTone />}
-                  onClick={async () => {
-                    this.setEditMultipleDevicesDrawer({
-                      isLoading: true,
-                    })
-                      .then(() => {
-                        this.props
-                          .dispatch({
-                            type: 'deviceStore/deleteDevice',
-                            payload: selectedDevice?.id,
-                          })
-                          .then(() => {
-                            this.openNotification(
-                              'success',
-                              'Devices delete successfuly',
-                              `${selectedDevice?.name} was deleted`,
-                            );
-                            this.callGetListDevices().then(() => {
-                              this.setEditMultipleDevicesDrawer({
-                                isLoading: false,
-                                visible: false,
-                              });
-                            });
-                          });
-                      })
-                      .catch(() => {
-                        this.setEditMultipleDevicesDrawer({
-                          isLoading: false,
-                          visible: false,
-                        });
-                      });
-                  }}
-                >
-                  Delete Device
-                </Button>
-              )}
-              <Button
-                icon={<EditOutlined />}
-                onClick={async () => {
-                  this.setEditMultipleDevicesDrawer({
-                    isLoading: true,
-                  }).then(() => {
-                    if (isUpdateMultiple) {
-                      this.formRef.current
-                        ?.validateFields()
-                        .then((values) => {
-                          this.onUpdateMultipleDevices(values).then(() => {
-                            this.openNotification(
-                              'success',
-                              'Devices updated successfully',
-                              `${selectedDevice?.name} was updated`,
-                            );
-                            this.setEditMultipleDevicesDrawer({
-                              isLoading: false,
-                              // visible: false,
-                            });
-                          });
-                        })
-                        .catch(() => {
-                          this.openNotification(
-                            'error',
-                            'Devices updated fail',
-                            `${selectedDevice?.name} was fail to update`,
-                          );
-                          this.setEditMultipleDevicesDrawer({
-                            isLoading: false,
-                            // visible: false,
-                          });
-                        });
-                    }
-
-                    if (this.formRef.current) {
-                      this.formRef.current
-                        .validateFields()
-                        .then((values) => {
-                          console.log('====================================');
-                          console.log(values);
-                          console.log('====================================');
-                          this.onUpdateDevice(values).then(() => {
-                            this.openNotification(
-                              'success',
-                              'Devices updated successfully',
-                              `${selectedDevice?.name} was updated`,
-                            );
-                            this.setEditMultipleDevicesDrawer({
-                              isLoading: false,
-                              visible: false,
-                            });
-                          });
-                        })
-                        .catch(() => {
-                          this.openNotification(
-                            'error',
-                            'Devices updated fail',
-                            `${selectedDevice?.name} was fail to update`,
-                          );
-                          this.setEditMultipleDevicesDrawer({
-                            isLoading: false,
-                            // visible: false,
-                          });
-                        });
-                    }
-                  });
-                }}
-              >
-                {isUpdateMultiple ? 'Update Multiple Devices' : 'Update Device'}
-              </Button>
-            </Space>
-          </div>
+          <>
+            <UpdateDeviceDrawerFooter
+              ref={this.updateDeviceFooterRef}
+              onUpdateDevice={async () => {
+                this.formRef.current?.validateFields().then((values) => {
+                  this.onUpdateDevice(values);
+                });
+              }}
+              onUpdateMultipleDevices={async () => {
+                this.formRef.current?.validateFields().then((values) => {
+                  this.onUpdateMultipleDevices(values);
+                });
+              }}
+              {...this.props}
+            />
+          </>
+          // <div
+          //   style={{
+          //     textAlign: 'right',
+          //   }}
+          // >
+          //   <Space>
+          //     <Button
+          //       icon={<CloseSquareTwoTone />}
+          //       onClick={async () => {
+          //         // await this.props.dispatch({
+          //         //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+          //         //   payload: false,
+          //         // });
+          //         this.setEditMultipleDevicesDrawer({
+          //           visible: false,
+          //         });
+          //       }}
+          //     >
+          //       Close Drawer
+          //     </Button>
+          //     {!isUpdateMultiple && (
+          //       <Button
+          //         icon={<CloseSquareTwoTone />}
+          //         onClick={async () => {
+          //           this.setEditMultipleDevicesDrawer({
+          //             isLoading: true,
+          //           })
+          //             .then(() => {
+          //               this.props
+          //                 .dispatch({
+          //                   type: 'deviceStore/deleteDevice',
+          //                   payload: selectedDevice?.id,
+          //                 })
+          //                 .then(() => {
+          //                   openNotification(
+          //                     'success',
+          //                     'Devices delete successfuly',
+          //                     `${selectedDevice?.name} was deleted`,
+          //                   );
+          //                   this.callGetListDevices().then(() => {
+          //                     this.setEditMultipleDevicesDrawer({
+          //                       isLoading: false,
+          //                       visible: false,
+          //                     });
+          //                   });
+          //                 });
+          //             })
+          //             .catch(() => {
+          //               this.setEditMultipleDevicesDrawer({
+          //                 isLoading: false,
+          //                 visible: false,
+          //               });
+          //             });
+          //         }}
+          //       >
+          //         Delete Device
+          //       </Button>
+          //     )}
+          //     <Button
+          //       icon={<EditOutlined />}
+          //       onClick={async () => {
+          //         this.setEditMultipleDevicesDrawer({
+          //           isLoading: true,
+          //         }).then(() => {
+          //           if (isUpdateMultiple) {
+          //             console.log('====================================');
+          //             console.log('Multiple >>>', isUpdateMultiple);
+          //             console.log('====================================');
+          //             this.formRef.current
+          //               ?.validateFields()
+          //               .then((values) => {
+          //                 console.log('====================================');
+          //                 console.log('Multiple >>>', values);
+          //                 console.log('====================================');
+          //                 this.onUpdateMultipleDevices(values).then(() => {
+          //                   const { selectedDevices } = this.props.deviceStore;
+          //                   openNotification(
+          //                     'success',
+          //                     'Devices updated successfully',
+          //                     selectedDevices &&
+          //                       selectedDevices
+          //                         .map((d) => `${d.name} was update sucessfully \n`)
+          //                         .join(''),
+          //                   );
+          //                   this.setEditMultipleDevicesDrawer({
+          //                     isLoading: false,
+          //                     // visible: false,
+          //                   });
+          //                 });
+          //               })
+          //               .catch(() => {
+          //                 const { selectedDevices } = this.props.deviceStore;
+          //                 openNotification(
+          //                   'error',
+          //                   'Devices updated fail',
+          //                   selectedDevices
+          //                     ?.map((d) => `${d.name} was fail to updated  \n`)
+          //                     .toString(),
+          //                 );
+          //                 this.setEditMultipleDevicesDrawer({
+          //                   isLoading: false,
+          //                   // visible: false,
+          //                 });
+          //               });
+          //           } else if (this.formRef.current) {
+          //             this.formRef.current
+          //               .validateFields()
+          //               .then((values) => {
+          //                 console.log('====================================');
+          //                 console.log(values);
+          //                 console.log('====================================');
+          //                 this.onUpdateDevice(values).then(() => {
+          //                   openNotification(
+          //                     'success',
+          //                     'Devices updated successfully',
+          //                     `${selectedDevice?.name} was updated`,
+          //                   );
+          //                   this.setEditMultipleDevicesDrawer({
+          //                     isLoading: false,
+          //                     visible: false,
+          //                   });
+          //                 });
+          //               })
+          //               .catch((error) => {
+          //                 Promise.reject(error);
+          //                 openNotification(
+          //                   'error',
+          //                   'Devices updated fail',
+          //                   `${selectedDevice?.name} was fail to update`,
+          //                 );
+          //                 this.setEditMultipleDevicesDrawer({
+          //                   isLoading: false,
+          //                   // visible: false,
+          //                 });
+          //               });
+          //           }
+          //         });
+          //       }}
+          //     >
+          //       {isUpdateMultiple ? 'Update Multiple Devices' : 'Update Device'}
+          //     </Button>
+          //   </Space>
+          // </div>
         }
       >
         {/* <DrawerUpdateMultipleDevice {...this.props}></DrawerUpdateMultipleDevice> */}

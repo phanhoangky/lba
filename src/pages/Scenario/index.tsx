@@ -6,6 +6,7 @@ import type {
   Dispatch,
   LayoutModelState,
   PlayListModelState,
+  Scenario,
   ScenarioItem,
   ScenarioModelState,
   UserModelState,
@@ -21,6 +22,7 @@ import AddNewScenarioFormModal from './components/AddNewScenarioFormModal';
 // import EditScenarioFormDrawer from './components/EditScenarioFormDrawer';
 import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
 import { EditScenarioComponent } from './components/EditScenarioComponent';
+import moment from 'moment';
 
 type ScenarioProps = {
   dispatch: Dispatch;
@@ -30,12 +32,12 @@ type ScenarioProps = {
   layouts: LayoutModelState;
 };
 
-class Scenario extends React.Component<ScenarioProps> {
+class ScenarioScreen extends React.Component<ScenarioProps> {
   componentDidMount = async () => {
     this.setTableLoading(true)
-      .then(() => {
-        Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(async () => {
-          this.readJWT();
+      .then(async () => {
+        this.readJWT();
+        Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(() => {
           this.setTableLoading(false);
         });
       })
@@ -47,7 +49,6 @@ class Scenario extends React.Component<ScenarioProps> {
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
 
@@ -311,7 +312,13 @@ class Scenario extends React.Component<ScenarioProps> {
               }}
             >
               <Column dataIndex="title" title="Title" key="title"></Column>
-              <Column dataIndex="createTime" title="Create Time" key="createTime"></Column>
+              <Column
+                title="Create Time"
+                key="createTime"
+                render={(record: Scenario) => {
+                  return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
+                }}
+              ></Column>
             </Table>
           </Col>
           <Col span={14}>
@@ -331,4 +338,4 @@ class Scenario extends React.Component<ScenarioProps> {
   }
 }
 
-export default connect((state: any) => ({ ...state }))(Scenario);
+export default connect((state: any) => ({ ...state }))(ScenarioScreen);

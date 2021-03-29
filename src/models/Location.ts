@@ -123,7 +123,6 @@ const LocationStore: LocationStoreModel = {
     // },
     
     createLocationParam: {
-      brandId: "",
       description: "",
       latitude: "",
       longitude: "",
@@ -148,7 +147,7 @@ const LocationStore: LocationStoreModel = {
 
     editLocationModal: {
       isLoading: false,
-      visible: true
+      visible: true,
     },
 
     addressSuggestList: [],

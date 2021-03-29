@@ -37,17 +37,16 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
 
   addNewItemToSelectedItems = async (media?: any) => {
     const {
-      selectedPlaylistItems,
       selectedPlaylist,
       // currentNewItemDuration,
     } = this.props.playlists;
 
-    const newList = cloneDeep(selectedPlaylistItems);
+    const newList = cloneDeep(selectedPlaylist.playlistItems);
 
     newList.push({
       id: uuidv4(),
-      index: selectedPlaylistItems.length,
-      displayOrder: selectedPlaylistItems.length,
+      index: selectedPlaylist.playlistItems.length,
+      displayOrder: selectedPlaylist.playlistItems.length,
       duration: 10,
       isActive: true,
       key: `${uuidv4()}`,
@@ -80,7 +79,7 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
   };
 
   calculateTotalDuration = async () => {
-    const { selectedPlaylistItems, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
     let total: number = 0;
     selectedPlaylist.playlistItems.forEach((item) => {
@@ -137,7 +136,6 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
       maxDuration,
       minDuration,
       listMediaNotBelongToPlaylist,
-      selectedPlaylistItems,
       selectedPlaylist,
     } = this.props.playlists;
 
@@ -149,7 +147,12 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
     return (
       <>
         <Table
-          dataSource={listMedia}
+          dataSource={listMedia.map((item) => {
+            return {
+              ...item,
+              key: item.id,
+            };
+          })}
           pagination={false}
           loading={editPlaylistDrawer.isLoading}
           scroll={{

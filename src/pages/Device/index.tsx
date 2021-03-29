@@ -38,7 +38,8 @@ class Device extends React.Component<DeviceProps> {
 
   componentDidMount = async () => {
     this.setDevicesTableLoading(true)
-      .then(() => {
+      .then(async () => {
+        this.readJWT();
         Promise.all([
           this.callGetListScenarios({ isPaging: false }),
           this.callGetListDevices(),
@@ -105,14 +106,13 @@ class Device extends React.Component<DeviceProps> {
   };
 
   onUpdateDevice = async () => {
-    this.props
-      .dispatch({
-        type: 'deviceStore/updateDevice',
-        payload: this.props.deviceStore.selectedDevice,
-      })
-      .then(() => {
-        this.callGetListDevices();
-      });
+    this.props.dispatch({
+      type: 'deviceStore/updateDevice',
+      payload: this.props.deviceStore.selectedDevice,
+    });
+    // .then(() => {
+    //   this.callGetListDevices();
+    // });
 
     // await this.props.dispatch({
     //   type: 'deviceStore/getDevices',
@@ -183,6 +183,15 @@ class Device extends React.Component<DeviceProps> {
     });
   };
 
+  setSelectedDevice = async (record?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/setCurrentDevice',
+      payload: {
+        ...this.props.deviceStore.selectedDevice,
+        ...record,
+      },
+    });
+  };
   updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
 
   render() {
@@ -191,7 +200,6 @@ class Device extends React.Component<DeviceProps> {
       getDevicesParam,
       // editMultipleDevicesDrawerVisible,
       viewScreenshotModal,
-      editMultipleDevicesDrawer,
       devicesTableLoading,
     } = this.props.deviceStore;
 
@@ -306,15 +314,14 @@ class Device extends React.Component<DeviceProps> {
                   <Space>
                     <Button
                       onClick={async () => {
-                        this.setMultipleUpdateMode(false);
-
-                        await this.props.dispatch({
-                          type: 'deviceStore/setCurrentDevice',
-                          payload: record,
-                        });
-                        this.updateDeviceFormRef.current?.componentDidMount();
-                        await this.setEditMultipleDevicesDrawer({
-                          visible: true,
+                        this.setMultipleUpdateMode(false).then(() => {
+                          this.setSelectedDevice(record).then(() => {
+                            this.setEditMultipleDevicesDrawer({
+                              visible: true,
+                            }).then(() => {
+                              this.updateDeviceFormRef.current?.componentDidMount();
+                            });
+                          });
                         });
 
                         // this.setEditModalVisible(true);
@@ -335,12 +342,10 @@ class Device extends React.Component<DeviceProps> {
                   <Space>
                     <Button
                       onClick={async () => {
-                        await this.props.dispatch({
-                          type: 'deviceStore/setCurrentDevice',
-                          payload: record,
-                        });
-                        await this.setViewScreenshotModal({
-                          visible: true,
+                        this.setSelectedDevice(record).then(() => {
+                          this.setViewScreenshotModal({
+                            visible: true,
+                          });
                         });
                       }}
                     >
@@ -353,9 +358,11 @@ class Device extends React.Component<DeviceProps> {
           </Table>
         </PageContainer>
 
-        {editMultipleDevicesDrawer?.visible && (
+        {/* {editMultipleDevicesDrawer?.visible && ( */}
+        <>
           <UpdateDeviceFormDrawer ref={this.updateDeviceFormRef} {...this.props} />
-        )}
+        </>
+        {/* )} */}
         {/* <UpdateDeviceFormDrawer {...this.props} /> */}
 
         {/** Screenshot Modal */}

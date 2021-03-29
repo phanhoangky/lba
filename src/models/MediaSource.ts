@@ -84,6 +84,7 @@ export type MediaSourceModelState = {
   editFileDrawer: {
     visible: boolean,
     isLoading: boolean,
+    removeConfirmVisible: boolean;
     
   },
 
@@ -209,7 +210,8 @@ const MediaSourceStore: MediaSourceModel = {
 
     editFileDrawer: {
       isLoading: false,
-      visible: false
+      visible: false,
+      removeConfirmVisible: false
     },
 
     selectedFile: {

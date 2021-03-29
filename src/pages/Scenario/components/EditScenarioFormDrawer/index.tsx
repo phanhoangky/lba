@@ -1,5 +1,5 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
-import { UploadOutlined } from '@ant-design/icons';
+import { CloseSquareOutlined, UploadOutlined } from '@ant-design/icons';
 import {
   Button,
   Drawer,
@@ -30,6 +30,9 @@ import { v4 as uuidv4 } from 'uuid';
 import SelectPlaylistDrawer from '../SelectPlaylistDrawer';
 import ReactPlayer from 'react-player';
 import Column from 'antd/lib/table/Column';
+import styles from './index.less';
+import undefined from '@/e2e/__mocks__/antd-pro-merge-less';
+import undefined from '@/e2e/__mocks__/antd-pro-merge-less';
 
 export type EditScenarioFormDrawerProps = {
   dispatch: Dispatch;
@@ -548,6 +551,23 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                               flexDirection: 'column',
                             }}
                           >
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                height: '25px',
+                                width: '25px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexDirection: 'column',
+                              }}
+                              onClick={() => {}}
+                            >
+                              asd
+                              <CloseSquareOutlined />
+                            </div>
                             <div>{scenarioItem?.playlist?.title}</div>
                             <div>
                               {area &&
@@ -663,6 +683,8 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
           onClose={() => {
             this.setPlaylistDrawer({
               visible: false,
+              urlPreview: undefined,
+              mediaType: undefined,
             });
           }}
           visible={playlistsDrawer?.visible}

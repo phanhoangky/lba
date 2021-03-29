@@ -18,7 +18,7 @@ export type ViewCampaignDetailDrawerProps = {
   location: LocationModelState;
 };
 
-class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerProps> {
+export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerProps> {
   componentDidMount() {
     const { mapComponent } = this.props.location;
 
@@ -157,21 +157,21 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
           getContainer={false}
         >
           <Row>
-            <Col span={10}>Budget</Col>
-            <Col span={14}>
+            <Col span={4}>Name</Col>
+            <Col span={20}>
+              <Input readOnly value={selectedCampaign.name} />
+            </Col>
+          </Row>
+          <Row>
+            <Col span={4}>Budget</Col>
+            <Col span={20}>
               <Input readOnly value={selectedCampaign.budget} />
             </Col>
           </Row>
           <Divider></Divider>
           <Row>
-            <Col span={10}>Max Bid</Col>
-            <Col span={14}>
-              <Input readOnly value={selectedCampaign.maxBid} />
-            </Col>
-          </Row>
-          <Row>
-            <Col span={10}>Types</Col>
-            <Col span={14}>
+            <Col span={4}>Types</Col>
+            <Col span={20}>
               {selectedCampaign.types.map((type) => {
                 return type.name;
               })}
@@ -179,8 +179,8 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
           </Row>
           <Divider></Divider>
           <Row>
-            <Col span={10}>From - To</Col>
-            <Col span={14}>
+            <Col span={4}>From - To</Col>
+            <Col span={20}>
               <DatePicker.RangePicker
                 disabled={true}
                 value={[
@@ -193,8 +193,8 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
           </Row>
           <Divider></Divider>
           <Row>
-            <Col span={10}>Time Filter</Col>
-            <Col span={14}>
+            <Col span={4}>Time Filter</Col>
+            <Col span={20}>
               <Space wrap={true}>
                 {selectedCampaign.timeFilter.split('').map((time, index) => {
                   const start = index;
@@ -214,8 +214,8 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
           </Row>
           <Divider></Divider>
           <Row>
-            <Col span={10}>Date Filter</Col>
-            <Col span={14}>
+            <Col span={4}>Date Filter</Col>
+            <Col span={20}>
               <Space wrap={true}>
                 {selectedCampaign.dateFilter.split('').map((date, index) => {
                   return (
@@ -235,8 +235,8 @@ class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetailDrawerP
           </Row>
           <Divider></Divider>
           <Row>
-            <Col span={10}>Address</Col>
-            <Col span={14}>{selectedCampaign.address}</Col>
+            <Col span={4}>Address</Col>
+            <Col span={20}>{selectedCampaign.address}</Col>
           </Row>
           <Row>
             <Col span={24}>
