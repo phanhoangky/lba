@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Row, Table } from 'antd';
+import { Button, Col, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -21,8 +21,10 @@ import { cloneDeep } from 'lodash';
 import AddNewScenarioFormModal from './components/AddNewScenarioFormModal';
 // import EditScenarioFormDrawer from './components/EditScenarioFormDrawer';
 import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
-import { EditScenarioComponent } from './components/EditScenarioComponent';
+import { ViewScenarioDetailComponent } from './components/ViewScenarioDetailComponent';
 import moment from 'moment';
+import { EditScenarioFormDrawer } from './components/EditScenarioFormDrawer';
+import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
 
 type ScenarioProps = {
   dispatch: Dispatch;
@@ -32,6 +34,7 @@ type ScenarioProps = {
   layouts: LayoutModelState;
 };
 
+export const SCENARIO_STORE = 'scenarios';
 class ScenarioScreen extends React.Component<ScenarioProps> {
   componentDidMount = async () => {
     this.setTableLoading(true)
@@ -253,9 +256,27 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
     });
   };
 
-  editScenarioComponentRef = React.createRef<EditScenarioComponent>();
+  setViewScenarioDetailComponent = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${SCENARIO_STORE}/setViewScenarioDetailComponentReducer`,
+      payload: {
+        ...this.props.scenarios.viewScenarioDetailComponent,
+        ...param,
+      },
+    });
+  };
+
+  viewScenarioDetailComponentRef = React.createRef<ViewScenarioDetailComponent>();
+
+  editScenarioModalRef = React.createRef<EditScenarioFormDrawer>();
   render() {
-    const { getListScenarioParam, totalItem, listScenario, tableLoading } = this.props.scenarios;
+    const {
+      getListScenarioParam,
+      totalItem,
+      listScenario,
+      tableLoading,
+      viewScenarioDetailComponent,
+    } = this.props.scenarios;
 
     return (
       <PageContainer>
@@ -294,16 +315,16 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                         const clone = cloneDeep(item);
                         this.setSelectedScenario(clone).then(async () => {
                           this.clearAreas();
-                          this.setEditScenariosDrawer({
+                          this.setViewScenarioDetailComponent({
                             visible: true,
                             isLoading: false,
                           });
-                          this.editScenarioComponentRef.current?.componentDidMount();
+                          this.viewScenarioDetailComponentRef.current?.componentDidMount();
                           this.clearSelectedPlaylistItems();
                         });
                       })
                       .catch(() => {
-                        this.setEditScenariosDrawer({
+                        this.setViewScenarioDetailComponent({
                           isLoading: false,
                         });
                       });
@@ -319,10 +340,49 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                   return <>{moment(record.createTime).format('YYYY-MM-DD')}</>;
                 }}
               ></Column>
+              <Column
+                title="Action"
+                key="action"
+                render={(record) => {
+                  return (
+                    <Space>
+                      <Button
+                        onClick={() => {
+                          const clone = cloneDeep(record);
+                          this.setSelectedScenario(clone).then(() => {
+                            this.setViewScenarioDetailComponent({
+                              visible: false,
+                            }).then(() => {
+                              this.setEditScenariosDrawer({
+                                visible: true,
+                              }).then(async () => {
+                                this.clearAreas();
+                                this.editScenarioModalRef.current?.componentDidMount();
+                                this.clearSelectedPlaylistItems();
+                              });
+                            });
+                          });
+                        }}
+                        type="primary"
+                      >
+                        <EditFilled />
+                      </Button>
+                      <Button danger onClick={() => {}}>
+                        <DeleteTwoTone twoToneColor="#f93e3e" />
+                      </Button>
+                    </Space>
+                  );
+                }}
+              ></Column>
             </Table>
           </Col>
           <Col span={14}>
-            <EditScenarioComponent ref={this.editScenarioComponentRef} {...this.props} />
+            {viewScenarioDetailComponent?.visible && (
+              <ViewScenarioDetailComponent
+                ref={this.viewScenarioDetailComponentRef}
+                {...this.props}
+              />
+            )}
           </Col>
         </Row>
 
@@ -333,6 +393,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
         {/* Edit Scenario Drawer */}
 
         {/* {editScenarioDrawer?.visible && <EditScenarioFormDrawer {...this.props} />} */}
+        <EditScenarioFormDrawer ref={this.editScenarioModalRef} {...this.props} />
       </PageContainer>
     );
   }

@@ -1,6 +1,6 @@
 import type { CreateFileParam } from '@/services/PublitioService/PublitioService';
 import { UploadOutlined } from '@ant-design/icons';
-import { Form, Input, Modal, Select, Skeleton, Switch, Upload } from 'antd';
+import { Form, Input, Modal, Select, Skeleton, Upload } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import { Keccak } from 'sha3';
@@ -77,10 +77,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     const byte = await values.upload.file.originFileObj.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
-    console.log('====================================');
-    console.log('Param >>>', security, createFileParam.isSigned, currentUser?.ether);
-    console.log('====================================');
-    const signature = await currentUser?.ether?.addDocument(security, createFileParam.isSigned);
+    const signature = await currentUser?.ether?.addDocument(security);
     if (signature && !signature.toLowerCase().includes('Fail'.toLowerCase())) {
       console.log('====================================');
       console.log('Param  222>>>', security, signature);
@@ -91,9 +88,9 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         securityHash: security,
         public_id: security,
         accountId: currentUser?.id,
-        hash: createFileParam.isSigned === 1 ? signature : undefined,
+        hash: signature,
         fileId: createFileParam.fileId,
-        isSigned: createFileParam.isSigned,
+        isSigned: 1,
         mediaSrcId: uuidv4(),
       };
       console.log('====================================');
@@ -212,12 +209,6 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
                 // return file.type === 'image/png' ? true : Upload.LIST_IGNORE;
               }}
               onChange={async (file) => {
-                if (file.file.size > 2500) {
-                  console.log('====================================');
-                  console.log(file.file);
-                  console.log('====================================');
-                }
-
                 this.setCreateFileParam({
                   ...createFileParam,
                   file: file.file.originFileObj,
@@ -262,7 +253,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               // }}
             ></Input>
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             name="isSign"
             label="Sign Media"
             rules={[{ required: true, message: 'select sign media or later' }]}
@@ -275,7 +266,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
                 });
               }}
             />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             name="typeId"
             label="Type"

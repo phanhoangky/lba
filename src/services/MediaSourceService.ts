@@ -1,6 +1,7 @@
 import { CONSTANTS_LBA } from './constantUrls';
 import  ApiHelper  from '@/apis/LBA_API';
 import qs from 'qs';
+import type { UpdateFileParam } from './PublitioService/PublitioService';
 
 export type GetMediaSourcesParam = {
   isSort: boolean;
@@ -33,7 +34,7 @@ export type EditMediaParam = {
   typeId: string;
   description: string;
   isSigned: number;
-  hash?: string;
+  txHash?: string;
 }
 
 export async function GetListMediaSource(param: GetMediaSourcesParam) {
@@ -75,6 +76,9 @@ export async function EditMediaSource(param: EditMediaParam) {
 }
 
 
-export async function RemoveMediaSource(id: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${id}`);
+export async function RemoveMediaSource(param: UpdateFileParam) {
+  console.log('====================================');
+  console.log("Param >>>", param);
+  console.log('====================================');
+  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`, { params: { txHash: param.txHash }});
 }

@@ -17,8 +17,8 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
     const { selectedFile } = this.props.media;
     if (this.formRef.current) {
       this.formRef.current.setFieldsValue({
-        title: selectedFile.title,
-        description: selectedFile.description,
+        title: selectedFile?.title,
+        description: selectedFile?.description,
       });
     }
   }
@@ -78,11 +78,11 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
     if (this.formRef.current) {
       this.formRef.current.validateFields().then((values) => {
         const param: EditMediaParam = {
-          id: selectedFile.id,
-          description: selectedFile.description,
-          title: selectedFile.title,
-          typeId: selectedFile.type.id,
-          isSigned: selectedFile.isSigned,
+          id: selectedFile?.id,
+          description: selectedFile?.description,
+          title: selectedFile?.title,
+          typeId: selectedFile?.type.id,
+          isSigned: selectedFile?.isSigned,
           ...modal,
           ...values,
         };
@@ -227,13 +227,13 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
         </Form.Item>
         <Row>
           <Col span={24}>
-            {selectedFile.type.name === 'Image' && (
+            {selectedFile?.type.name === 'Image' && (
               <>
                 <Image src={selectedFile.urlPreview} width="100%"></Image>
               </>
             )}
 
-            {selectedFile.type.name === 'Video' && (
+            {selectedFile?.type.name === 'Video' && (
               <>
                 <ReactPlayer
                   url={selectedFile.urlPreview}

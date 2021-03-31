@@ -89,19 +89,11 @@ export default class EtherService {
   }
 
   // Add document to smart contract for identify it with wallet
-  async addDocument(hash_id, isSign) {
+  async addDocument(hash_id) {
     const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
     console.log("listSignature>>>>>>>", listSignature);
-    if (listSignature !== null || listSignature.length === 0) {
-      let isSigned = false;
-      listSignature.forEach(e => {
-        if (e === this.wallet.address) {
-          isSigned = true;
-        }
-      });
-      if (isSigned) return "Fail - File is already signed";
-
-      return "Fail";
+    if (listSignature.length !== 0) {
+      return "Fail - File is existed on server";
     }
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
@@ -113,9 +105,7 @@ export default class EtherService {
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
-    if (isSign === 1) {
-      await this.signDocument(hash_id);
-    }
+    await this.signDocument(hash_id);
     return receipt.transactionHash;
   }
 
@@ -124,13 +114,40 @@ export default class EtherService {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
     };
+    const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
+    console.log("listSignature>>>>>>>", listSignature);
+    if (listSignature.length !== 0) {
+      listSignature.forEach(e => {
+        if (e === this.wallet.address) {
+          return "Fail - You have already signed";
+        }
+      });
+    }
 
     const signDocumentFunction = await this.contract.signDocument(`0x${hash_id}`, overrides);
     const receipt = await signDocumentFunction.wait();
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
-    return signDocumentFunction.transactionHash;
+    return receipt.transactionHash;
+  }
+
+  async deleteDocument(hash_id) {
+    const overrides = {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: ethers.BigNumber.from("10000000000000"),
+    };
+    const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
+    if (listSignature.length === 0) return "Fail - File is not on server";
+    const deleteDocumentFunction = await this.contract.deleteDocument(`0x${hash_id}`, overrides);
+    const receipt = await deleteDocumentFunction.wait();
+    if (receipt.status !== 1) {
+      return "Fail On Server Blockchain";
+    }
+    console.log('====================================');
+    console.log("deleteDocument>>>", receipt);
+    console.log('====================================');
+    return receipt.transactionHash;
   }
 
   async getSignatureDocument(id) {

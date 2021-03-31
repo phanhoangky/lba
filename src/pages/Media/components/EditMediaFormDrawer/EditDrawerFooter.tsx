@@ -35,12 +35,13 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
     });
   };
 
-  removeMedia = async (item: any) => {
+  removeMedia = async (item: any, hash: string) => {
     await this.props.dispatch({
       type: 'media/removeMedia',
       payload: {
         ...item,
         privacy: 0,
+        hash,
       },
     });
   };
@@ -66,11 +67,11 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
     const { selectedFile } = this.props.media;
 
     const param: EditMediaParam = {
-      id: selectedFile.id,
-      description: selectedFile.description,
-      title: selectedFile.title,
-      typeId: selectedFile.type.id,
-      isSigned: selectedFile.isSigned,
+      id: selectedFile?.id,
+      description: selectedFile?.description,
+      title: selectedFile?.title,
+      typeId: selectedFile?.type.id,
+      isSigned: selectedFile?.isSigned,
       ...modal,
       // ...values,
     };
@@ -93,40 +94,54 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
 
   render() {
     const { selectedFile } = this.props.media;
+    const { currentUser } = this.props.user;
     return (
       <>
         <div style={{ textAlign: 'right' }}>
           <Space>
             <Popconfirm
-              title={`Remove ${selectedFile.title}`}
+              title={`Remove ${selectedFile?.title}`}
               visible={this.state.removeConfirmVisible}
               onConfirm={async () => {
                 this.setListLoading(true)
-                  .then(() => {
-                    this.removeMedia(selectedFile)
-                      .then(() => {
-                        openNotification(
-                          'success',
-                          'remove media sucessfully',
-                          `${selectedFile.title} is removed`,
-                        );
-                        this.callGetListMedia().then(() => {
-                          this.setListLoading(false).then(() => {
-                            this.setEditFileDrawer({
-                              visible: false,
-                            });
-                            this.setState({
-                              removeConfirmVisible: false,
+                  .then(async () => {
+                    const signature: string = await currentUser?.ether?.deleteDocument(
+                      selectedFile?.securityHash,
+                    );
+                    console.log('====================================');
+                    console.log('Remove Media >>>', selectedFile, signature);
+                    console.log('====================================');
+                    if (signature && !signature.toLowerCase().includes('fail')) {
+                      this.removeMedia(selectedFile, signature)
+                        .then(() => {
+                          openNotification(
+                            'success',
+                            'remove media sucessfully',
+                            `${selectedFile?.title} is removed`,
+                          );
+                          this.callGetListMedia().then(() => {
+                            this.setListLoading(false).then(() => {
+                              this.setEditFileDrawer({
+                                visible: false,
+                              });
+                              this.setState({
+                                removeConfirmVisible: false,
+                              });
                             });
                           });
+                        })
+                        .catch((error) => {
+                          openNotification('error', 'fail to remove media', error);
+                          Promise.reject(error);
                         });
-                      })
-                      .catch((error) => {
-                        Promise.reject(error);
-                        openNotification('error', 'fail to remove media', error);
-                      });
+                    } else {
+                      // throw new Error(signature);
+                      openNotification('error', 'fail to remove media', signature);
+                    }
                   })
-                  .catch(() => {
+                  .catch((error) => {
+                    openNotification('error', 'fail to remove media', error);
+                    Promise.reject(error);
                     this.setListLoading(false).then(() => {
                       this.setState({
                         removeConfirmVisible: false,
@@ -166,7 +181,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                         openNotification(
                           'success',
                           'update media sucessfully',
-                          `${selectedFile.title} is updated`,
+                          `${selectedFile?.title} is updated`,
                         );
                         this.callGetListMedia().then(() => {
                           this.setListLoading(false);
@@ -177,7 +192,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                         openNotification(
                           'error',
                           'Fail to update media ',
-                          `${selectedFile.title} is fail to update`,
+                          `${selectedFile?.title} is fail to update`,
                         );
                         this.setListLoading(false);
                       });

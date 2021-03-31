@@ -163,7 +163,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 this.createNewCampaign({
                   campaignId,
                   hash,
-                  // ...values,
+                  ...values,
                 })
                   .then(() => {
                     openNotification(

@@ -1,5 +1,11 @@
-import { MenuOutlined, PlaySquareTwoTone } from '@ant-design/icons';
-import { Col, Form, Input, Row, Table, Image, Space, Button, Divider, Modal } from 'antd';
+import {
+  DeleteTwoTone,
+  EditTwoTone,
+  MenuOutlined,
+  MinusSquareTwoTone,
+  PlaySquareTwoTone,
+} from '@ant-design/icons';
+import { Col, Form, Input, Row, Table, Image, Slider, Space, Button, Divider, Modal } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
@@ -17,6 +23,7 @@ import styles from '../../index.less';
 import ReactPlayer from 'react-player';
 import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash';
+import { MediasTableComponent } from './components/MediasTableComponent';
 import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPageService/PlaylistItemService';
 import { openNotification } from '@/utils/utils';
 
@@ -33,7 +40,7 @@ const DragHandle = SortableHandle(() => (
 const SortableItemComponent = SortableElement((props: any) => <tr {...props} />);
 const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
 
-export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistComponentProps> {
+export class Edit extends React.Component<ViewEditPlaylistComponentProps> {
   componentDidMount() {
     const {
       selectedPlaylist,
@@ -460,7 +467,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                   render={(record) => {
                     return (
                       <>
-                        {/* <Slider
+                        <Slider
                           min={minDuration}
                           max={maxDuration}
                           disabled={availableDuration < minDuration}
@@ -474,8 +481,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                               this.calculateTotalDuration();
                             }
                           }}
-                        ></Slider> */}
-                        {record.duration}
+                        ></Slider>
                       </>
                     );
                   }}
@@ -503,7 +509,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                           >
                             <PlaySquareTwoTone size={20} />
                           </Button>
-                          {/* <Button
+                          <Button
                             danger
                             onClick={async () => {
                               this.removeItem(record).then(() => {
@@ -514,7 +520,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                             }}
                           >
                             <MinusSquareTwoTone size={20} twoToneColor="#f93e3e" />
-                          </Button> */}
+                          </Button>
                         </Space>
                       </>
                     );
@@ -524,11 +530,11 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
             </Col>
           </Row>
           <Divider></Divider>
-          {/* <Row>
+          <Row>
             <MediasTableComponent {...this.props} />
-          </Row> */}
+          </Row>
           <Divider></Divider>
-          {/* <Row>
+          <Row>
             <Col>
               <Space>
                 <Button
@@ -582,11 +588,11 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                 </Button>
               </Space>
             </Col>
-          </Row> */}
+          </Row>
         </Form>
       </>
     );
   }
 }
 
-export default connect((state: any) => ({ ...state }))(ViewEditPlaylistComponent);
+export default connect((state: any) => ({ ...state }))(Edit);

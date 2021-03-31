@@ -1,13 +1,7 @@
 import { geocoding } from '@/services/MapService/RapidAPI';
 import { Col, Input, Modal, Row, Select, Form, notification } from 'antd';
 import * as React from 'react';
-import type {
-  BrandModelState,
-  CampaignModelState,
-  DeviceModelState,
-  Dispatch,
-  LocationModelState,
-} from 'umi';
+import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState } from 'umi';
 import { connect } from 'umi';
 // import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import { LOCATION_DISPATCHER } from '..';
@@ -17,12 +11,12 @@ import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import type { FormInstance } from 'antd/lib/form';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 import { openNotification } from '@/utils/utils';
+import { ViewLocationDetailComponent } from './ViewLocationDetailComponent';
 
 export type AddNewLocationModalProps = {
   dispatch: Dispatch;
   location: LocationModelState;
   deviceStore: DeviceModelState;
-  brand: BrandModelState;
   campaign: CampaignModelState;
 };
 
@@ -109,6 +103,20 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
           visible: false,
         });
       });
+  };
+
+  handleCreateNewLocation = async () => {
+    const { createLocationParam } = this.props.location;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        if (!createLocationParam || createLocationParam?.address === '') {
+          return;
+        }
+        this.onCreateNewLocation(values).then(() => {
+          this.formRef.current?.resetFields();
+        });
+      });
+    }
   };
 
   callGetListLocations = async (param?: any) => {
@@ -239,39 +247,57 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
     }
   };
 
+  setViewLocationDetailComponent = async (modal?: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setViewLocationDetailComponentReducer`,
+      payload: {
+        ...this.props.location.viewLocationDetailComponent,
+        ...modal,
+      },
+    });
+  };
+
+  resetMap = async () => {
+    const { mapComponent } = this.props.location;
+    if (mapComponent) {
+      if (mapComponent.map) {
+        await this.setMapComponent({
+          map: undefined,
+        });
+        if (mapComponent.marker) {
+          mapComponent.marker.remove();
+          await this.setMapComponent({
+            marker: undefined,
+          });
+        }
+
+        if (mapComponent.circle) {
+          mapComponent.circle.remove();
+          await this.setMapComponent({
+            circle: undefined,
+          });
+        }
+      }
+    }
+  };
+
   autoCompleteRef = React.createRef<AutoCompleteComponent>();
+
+  viewLocationDetailComponentRef = React.createRef<ViewLocationDetailComponent>();
   render() {
-    const { addNewLocationModal, createLocationParam, mapComponent } = this.props.location;
+    const { addNewLocationModal, createLocationParam } = this.props.location;
 
     const { listDeviceTypes } = this.props.deviceStore;
 
     return (
       <>
-        <Modal
+        {/* <Modal
           title="Add New Location"
           visible={addNewLocationModal?.visible}
           centered
           confirmLoading={addNewLocationModal?.isLoading}
           width={'50%'}
-          afterClose={() => {
-            if (mapComponent) {
-              if (mapComponent.map) {
-                // this.setMapComponent({
-                //   map: undefined,
-                // });
-                if (mapComponent.marker) {
-                  mapComponent.marker.remove();
-                  this.setMapComponent({
-                    marker: undefined,
-                  });
-                }
-              }
-            }
-            this.setEditLocationModal({
-              visible: true,
-            });
-            this.clearCreateLocationParam();
-          }}
+          afterClose={() => {}}
           destroyOnClose={true}
           closable={false}
           onOk={() => {
@@ -290,101 +316,94 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
             }
           }}
           onCancel={() => {
+            this.clearCreateLocationParam();
             this.setAddNewLocationModal({
               visible: false,
+            }).then(() => {
+              this.resetMap().then(() => {
+                this.setViewLocationDetailComponent({
+                  visible: true,
+                });
+              });
             });
           }}
-        >
-          <Form ref={this.formRef} layout="vertical" name="add_location_modal_form">
-            <Form.Item
-              name="name"
-              label="Name"
-              rules={[{ required: true, message: 'Please input the name of location!' }]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item name="description" label="Description">
-              <Input.TextArea rows={4} autoSize />
-            </Form.Item>
+        > */}
+        <Form ref={this.formRef} layout="vertical" name="add_location_modal_form">
+          <Form.Item
+            name="name"
+            label="Name"
+            rules={[{ required: true, message: 'Please input the name of location!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea rows={4} autoSize />
+          </Form.Item>
 
-            <Form.Item
-              name="typeId"
-              label="Type"
-              rules={[{ required: true, message: 'Please input address' }]}
+          <Form.Item
+            name="typeId"
+            label="Type"
+            rules={[{ required: true, message: 'Please input address' }]}
+          >
+            <Select
+              style={{ width: '100%' }}
+              onChange={() => {
+                // this.setCreateLocationParam({
+                //   typeId: e,
+                // });
+              }}
             >
-              <Select
-                style={{ width: '100%' }}
-                onChange={() => {
-                  // this.setCreateLocationParam({
-                  //   typeId: e,
-                  // });
-                }}
-              >
-                {listDeviceTypes?.map((type: any) => {
-                  return (
-                    <Select.Option key={type.id} value={type.id}>
-                      {type.typeName}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
+              {listDeviceTypes?.map((type: any) => {
+                return (
+                  <Select.Option key={type.id} value={type.id}>
+                    {type.typeName}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Form.Item>
 
-            <Form.Item
-              label="Address"
-              name="address"
-              // rules={[{ required: true, message: 'Please enter address' }]}
+          <Form.Item
+            label="Address"
+            name="address"
+            // rules={[{ required: true, message: 'Please enter address' }]}
+          >
+            <AutoCompleteComponent
+              ref={this.autoCompleteRef}
+              {...this.props}
+              inputValue={createLocationParam?.address}
+              address={createLocationParam?.address}
+              // value={{
+              //   label: selectedLocation?.address,
+              //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
+              // }}
+              onInputChange={async (e) => {
+                await this.setCreateLocationParam({
+                  address: e,
+                });
+              }}
+              onChange={async (address) => {
+                await this.onAutoCompleteSelect(address);
+              }}
+            />
+          </Form.Item>
+          {createLocationParam?.address === '' && (
+            <p
+              style={{
+                color: 'red',
+                transition: 'ease 0.5s',
+              }}
             >
-              <AutoCompleteComponent
-                ref={this.autoCompleteRef}
-                {...this.props}
-                inputValue={createLocationParam?.address}
-                address={createLocationParam?.address}
-                // value={{
-                //   label: selectedLocation?.address,
-                //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
-                // }}
-                onInputChange={async (e) => {
-                  console.log('====================================');
-                  console.log('ADDD', e);
-                  console.log('====================================');
-                  await this.setCreateLocationParam({
-                    address: e,
-                  });
-
-                  // await this.autoCompleteRef.current?.forceUpdate();
-                }}
-                onChange={async (address) => {
-                  // await this.handleAutoCompleteSearch(e);
-                  // const coordination = e.split('-');
-                  // const lat = coordination[0];
-                  // const lon = coordination[1];
-                  // this.setSelectedLocation({
-                  //   longitude: lon,
-                  //   latitude: lat,
-                  //   address,
-                  // });
-                  await this.onAutoCompleteSelect(address);
-                }}
-              />
-            </Form.Item>
-            {createLocationParam?.address === '' && (
-              <p
-                style={{
-                  color: 'red',
-                  transition: 'ease 0.5s',
-                }}
-              >
-                Please enter location address
-              </p>
-            )}
-          </Form>
-          <Row>
-            <Col span={24}>
-              <LeafletMapComponent {...this.props} />
-            </Col>
-          </Row>
-        </Modal>
+              Please enter location address
+            </p>
+          )}
+        </Form>
+        <Row>
+          <Col span={24}>
+            <LeafletMapComponent {...this.props} />
+          </Col>
+        </Row>
+        {/* </Modal> */}
       </>
     );
   }

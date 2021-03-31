@@ -1,17 +1,5 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
-import {
-  Button,
-  Col,
-  Divider,
-  Form,
-  Input,
-  Modal,
-  notification,
-  Row,
-  Select,
-  Skeleton,
-  Space,
-} from 'antd';
+import { Divider, Form, Input, Modal, notification, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -20,7 +8,7 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
 import type { UpdateLocationParam } from '@/services/LocationService/LocationService';
-import { DeleteTwoTone, EditFilled, ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 
 export type ViewLocationDetailComponentProps = {
@@ -54,27 +42,27 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
         const lng = Number.parseFloat(selectedLocation.longitude);
         mapComponent.map.setView([lat, lng]);
         console.log('====================================');
-        console.log(mapComponent);
+        console.log(mapComponent, lat, lng);
         console.log('====================================');
         if (!mapComponent.marker) {
           if (selectedLocation.longitude !== '' && selectedLocation?.latitude !== '') {
-            console.log('====================================');
-            console.log('Location New Marker >>>', lat, lng);
-            console.log('====================================');
             const marker = L.marker([lat, lng]);
             marker.addTo(mapComponent.map);
 
             await this.setMapComponent({
               marker,
             });
+            console.log('====================================');
+            console.log('VIew Location >>', mapComponent, marker);
+            console.log('====================================');
           }
         } else {
-          console.log('====================================');
-          console.log('Location Remove Marker >>>', lat, lng);
-          console.log('====================================');
           mapComponent.marker.remove();
           mapComponent.marker.removeFrom(mapComponent.map);
           const marker = L.marker([lat, lng]);
+          console.log('====================================');
+          console.log('Remove Marker >>>>', marker);
+          console.log('====================================');
           marker.addTo(mapComponent.map);
 
           await this.setMapComponent({
@@ -139,9 +127,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     const { mapComponent } = this.props.location;
     if (address !== '') {
       const listLocations = await forwardGeocoding(address);
-      console.log('====================================');
-      console.log('List Location >>>', listLocations);
-      console.log('====================================');
       if (listLocations.length > 0) {
         const location = listLocations[0];
         const lat = Number.parseFloat(location.lat);
@@ -215,14 +200,14 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
   };
 
   updateConfirm = async (values: any) => {
-    this.setEditLocationModal({
+    this.setViewLocationDetailComponent({
       isLoading: true,
     })
       .then(() => {
         this.updateLocation(values).then(() => {
           this.callGetListLocations().then(() => {
             this.openNotification('success', `Update ${values.name} successfully`);
-            this.setEditLocationModal({
+            this.setViewLocationDetailComponent({
               // visible: false,
               isLoading: false,
             });
@@ -231,7 +216,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
       })
       .catch(() => {
         this.openNotification('error', `Update ${values.name} error`);
-        this.setEditLocationModal({
+        this.setViewLocationDetailComponent({
           // visible: false,
           isLoading: false,
         });
@@ -260,14 +245,14 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
       onOk: async () => {
         this.setLocationsTableLoading(true)
           .then(() => {
-            this.setEditLocationModal({
+            this.setViewLocationDetailComponent({
               isLoading: true,
             });
             this.deleteLocation(location.id).then(() => {
               this.openNotification('success', `Delete ${location.name} successfully`);
               this.callGetListLocations().then(async () => {
                 this.setLocationsTableLoading(false);
-                this.setEditLocationModal({
+                this.setViewLocationDetailComponent({
                   isLoading: false,
                 });
               });
@@ -277,7 +262,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
             Promise.reject(error);
             this.openNotification('error', `Delete ${location.name} error`);
             this.setLocationsTableLoading(false);
-            this.setEditLocationModal({
+            this.setViewLocationDetailComponent({
               isLoading: false,
             });
           });
@@ -302,16 +287,23 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     }
   };
 
+  setViewLocationDetailComponent = async (modal?: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setViewLocationDetailComponentReducer`,
+      payload: {
+        ...this.props.location.viewLocationDetailComponent,
+        ...modal,
+      },
+    });
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   autoCompleteRef = React.createRef<AutoCompleteComponent>();
   render() {
-    const { selectedLocation, editLocationModal } = this.props.location;
+    const { selectedLocation, viewLocationDetailComponent } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
 
-    console.log('====================================');
-    console.log(selectedLocation);
-    console.log('====================================');
     return (
       <>
         {selectedLocation && (
@@ -323,7 +315,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 boxSizing: 'border-box',
               }}
             >
-              <Skeleton active loading={editLocationModal?.isLoading}>
+              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
                   label="Name"
                   name="name"
@@ -336,7 +328,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 </Form.Item>
               </Skeleton>
 
-              <Skeleton active loading={editLocationModal?.isLoading}>
+              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
                   label="Type"
                   name="typeId"
@@ -363,7 +355,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               </Skeleton>
 
               <Divider></Divider>
-              <Skeleton active loading={editLocationModal?.isLoading}>
+              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
                   name="description"
                   label="Description"
@@ -381,44 +373,15 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 </Form.Item>
               </Skeleton>
               <Divider></Divider>
-              <Skeleton active loading={editLocationModal?.isLoading}>
+              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
                   label="Address"
                   name="address"
                   style={{
                     width: '100%',
                   }}
-                  // rules={[{ required: true, message: 'Please enter location address' }]}
                 >
-                  <AutoCompleteComponent
-                    ref={this.autoCompleteRef}
-                    {...this.props}
-                    inputValue={selectedLocation.address}
-                    address={selectedLocation.address}
-                    // value={{
-                    //   label: selectedLocation?.address,
-                    //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
-                    // }}
-                    onInputChange={async (e) => {
-                      await this.setSelectedLocation({
-                        address: e,
-                      });
-
-                      // await this.autoCompleteRef.current?.forceUpdate();
-                    }}
-                    onChange={async (address) => {
-                      // await this.handleAutoCompleteSearch(e);
-                      // const coordination = e.split('-');
-                      // const lat = coordination[0];
-                      // const lon = coordination[1];
-                      // this.setSelectedLocation({
-                      //   longitude: lon,
-                      //   latitude: lat,
-                      //   address,
-                      // });
-                      await this.onAutoCompleteSelect(address);
-                    }}
-                  />
+                  <Input />
                 </Form.Item>
               </Skeleton>
               {selectedLocation.address === '' && (
@@ -433,9 +396,9 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               )}
               <Divider></Divider>
             </Form>
-            <LeafletMapComponent {...this.props} />
+            <LeafletMapComponent disabled={true} {...this.props} />
             <Divider></Divider>
-            <Row>
+            {/* <Row>
               <Col>
                 <Space>
                   <Button
@@ -467,7 +430,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   </Button>
                 </Space>
               </Col>
-            </Row>
+            </Row> */}
           </>
         )}
       </>

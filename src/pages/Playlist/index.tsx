@@ -1,8 +1,14 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Col, Row, Table } from 'antd';
+import { Button, Col, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
-import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
+import type {
+  Dispatch,
+  MediaSourceModelState,
+  Playlist,
+  PlayListModelState,
+  UserModelState,
+} from 'umi';
 import { connect } from 'umi';
 // import AddNewPlaylistItemDrawer from './components/AddNewPlaylistItemDrawer';
 // import AddNewPlaylistModal from './components/AddNewPlaylistModal';
@@ -11,6 +17,8 @@ import { EditPlaylistFormDrawer } from './components/EditPlaylistFormDrawer';
 import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 import { PlaylistTableHeaderComponent } from './components/PlaylistTableHeaderComponent';
 import { ViewEditPlaylistComponent } from './components/ViewEditPlaylistComponent';
+import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { openNotification } from '@/utils/utils';
 
 type PlaylistProps = {
   dispatch: Dispatch;
@@ -19,7 +27,7 @@ type PlaylistProps = {
   media: MediaSourceModelState;
 };
 
-class Playlist extends React.Component<PlaylistProps> {
+class PlaylistScreen extends React.Component<PlaylistProps> {
   state = {};
 
   componentDidMount = async () => {
@@ -31,9 +39,7 @@ class Playlist extends React.Component<PlaylistProps> {
         });
       })
       .catch((error) => {
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
+        Promise.reject(error);
         this.setTableLoading(false);
       });
   };
@@ -143,7 +149,7 @@ class Playlist extends React.Component<PlaylistProps> {
     const { selectedPlaylistItems } = this.props.playlists;
 
     let total: number = 0;
-    selectedPlaylistItems.forEach((item) => {
+    selectedPlaylistItems?.forEach((item) => {
       total += item.duration;
     });
     await this.setTotalDuration(total);
@@ -156,15 +162,68 @@ class Playlist extends React.Component<PlaylistProps> {
     });
   };
 
-  editPlaylistComponentRef = React.createRef<ViewEditPlaylistComponent>();
+  setViewPlaylistDetailComponent = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'playlists/setViewPlaylistDetailComponentReducer',
+      payload: {
+        ...this.props.playlists.viewPlaylistDetailComponent,
+        ...param,
+      },
+    });
+  };
+
+  removePlaylist = async (record: Playlist) => {
+    await this.props.dispatch({
+      type: 'playlists/removePlaylist',
+      payload: record.id,
+    });
+
+    await this.callGetListPlaylist();
+  };
+
+  handleRemovePlaylist = async (record: Playlist) => {
+    const { selectedPlaylist } = this.props.playlists;
+    Modal.confirm({
+      title: `Are you sure you want to remove ${record?.title}`,
+      centered: true,
+      closable: false,
+      onOk: async () => {
+        this.setTableLoading(true)
+          .then(() => {
+            this.removePlaylist(record)
+              .then(() => {
+                openNotification(
+                  'success',
+                  'Remove playlist successfully',
+                  `Playlist ${record?.title} was removed`,
+                );
+                this.callGetListPlaylist().then(() => {
+                  this.setTableLoading(false);
+                });
+              })
+              .catch((error) => {
+                Promise.reject(error);
+                openNotification('error', 'Fail to remove playlist', error);
+              });
+          })
+          .catch(() => {
+            this.setTableLoading(false);
+          });
+      },
+    });
+  };
+
+  viewPlaylistComponentRef = React.createRef<ViewEditPlaylistComponent>();
+
+  editPlaylistModalRef = React.createRef<EditPlaylistFormDrawer>();
+
   render() {
     const {
       listPlaylist,
-      addNewPlaylistModal,
       getPlaylistParam,
       totalItem,
       tableLoading,
-      editPlaylistDrawer,
+      viewPlaylistDetailComponent,
     } = this.props.playlists;
 
     return (
@@ -188,7 +247,7 @@ class Playlist extends React.Component<PlaylistProps> {
               onRow={(record) => {
                 return {
                   onClick: async () => {
-                    await this.setEditPlaylistDrawer({
+                    await this.setViewPlaylistDetailComponent({
                       visible: true,
                       isLoading: true,
                     })
@@ -199,15 +258,15 @@ class Playlist extends React.Component<PlaylistProps> {
                         });
                         this.callGetItemsByPlaylistId().then(() => {
                           this.calculateTotalDuration().then(() => {
-                            this.editPlaylistComponentRef.current?.componentDidMount();
-                            this.setEditPlaylistDrawer({
+                            this.viewPlaylistComponentRef.current?.componentDidMount();
+                            this.setViewPlaylistDetailComponent({
                               isLoading: false,
                             });
                           });
                         });
                       })
                       .catch(() => {
-                        this.setEditPlaylistDrawer({
+                        this.setViewPlaylistDetailComponent({
                           isLoading: false,
                         });
                       });
@@ -220,19 +279,63 @@ class Playlist extends React.Component<PlaylistProps> {
             >
               <Column key="title" title="Title" dataIndex="title"></Column>
               <Column key="createTime" title="Create Time" dataIndex="createTime"></Column>
+              <Column
+                key="action"
+                title="Action"
+                render={(record) => {
+                  return (
+                    <Space>
+                      <Button
+                        onClick={(e) => {
+                          this.setViewPlaylistDetailComponent({
+                            visible: false,
+                          }).then(() => {
+                            this.setSelectedPlaylist(record);
+                            this.setGetItemsByPlaylistIdParam({
+                              id: record.id,
+                            });
+                            this.callGetItemsByPlaylistId();
+                            this.setEditPlaylistDrawer({
+                              visible: true,
+                            }).then(() => {
+                              this.editPlaylistModalRef.current?.componentDidMount();
+                            });
+                          });
+                          e.stopPropagation();
+                        }}
+                        type="primary"
+                      >
+                        <EditFilled />
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          this.handleRemovePlaylist(record);
+                          e.stopPropagation();
+                        }}
+                        danger
+                      >
+                        <DeleteTwoTone twoToneColor="#f93e3e" />
+                      </Button>
+                    </Space>
+                  );
+                }}
+              ></Column>
             </Table>
           </Col>
           <Col span={14}>
-            <ViewEditPlaylistComponent ref={this.editPlaylistComponentRef} {...this.props} />
+            {viewPlaylistDetailComponent?.visible && (
+              <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />
+            )}
           </Col>
         </Row>
 
-        {addNewPlaylistModal.visible && <AddNewPlaylistFormModal {...this.props} />}
+        {/* {addNewPlaylistModal.visible && <AddNewPlaylistFormModal {...this.props} />} */}
+        <AddNewPlaylistFormModal {...this.props} />
 
-        {/* {editPlaylistDrawer.visible && <EditPlaylistFormDrawer {...this.props} />} */}
+        <EditPlaylistFormDrawer ref={this.editPlaylistModalRef} {...this.props} />
       </PageContainer>
     );
   }
 }
 
-export default connect((state: any) => ({ ...state }))(Playlist);
+export default connect((state: any) => ({ ...state }))(PlaylistScreen);

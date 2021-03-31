@@ -58,6 +58,12 @@ export type ScenarioModelState = {
     playlistLoading: boolean;
   };
 
+  viewScenarioDetailComponent?: {
+    visible: boolean;
+    isLoading: boolean;
+    playlistLoading: boolean;
+  }
+
   selectedArea?: Area;
 
   playlistsDrawer?: {
@@ -103,6 +109,8 @@ export type ScenarioStoreModel = {
     setSelectedAreaReducer: Reducer<ScenarioModelState>;
     setSelectedPlaylistReducer: Reducer<ScenarioModelState>;
     setSelectedPlaylistItemsReducer: Reducer<ScenarioModelState>;
+
+    setViewScenarioDetailComponentReducer: Reducer<ScenarioModelState>;
   };
 };
 
@@ -226,9 +234,6 @@ const ScenarioStore: ScenarioStoreModel = {
     },
 
     *createScenario({ payload }, { call, put }) {
-      console.log('====================================');
-      console.log('Effects Create scenarios');
-      console.log('====================================');
       yield call(CreateNewScenario, payload);
 
       yield put({
@@ -263,9 +268,6 @@ const ScenarioStore: ScenarioStoreModel = {
     },
 
     *updateScenario({ payload }, { call }) {
-      console.log('====================================');
-      console.log("UpdateScenario >>>>");
-      console.log('====================================');
       yield call(UpdateScenario, payload);
     },
 
@@ -401,6 +403,13 @@ const ScenarioStore: ScenarioStoreModel = {
       return {
         ...state,
         selectedPlaylistItems: payload
+      }
+    },
+
+    setViewScenarioDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewScenarioDetailComponent: payload
       }
     }
   },

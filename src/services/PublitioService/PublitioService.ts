@@ -44,6 +44,8 @@ export type UpdateFileParam = {
   title?: string; //
   description?: string; //
   privacy?: number | string;
+  txHash?: string;
+  docId?: string;
 }
 
 

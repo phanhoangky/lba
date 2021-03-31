@@ -50,6 +50,10 @@ export type LocationModelState = {
     isLoading: boolean;
   },
 
+  viewLocationDetailComponent?: {
+    visible: boolean;
+    isLoading: boolean;
+  }
   addressSuggestList?: any[];
 
   mapComponent?: {
@@ -91,6 +95,8 @@ export type LocationStoreModel = {
     setAddressSearchListReducer: Reducer<LocationModelState>;
 
     setMapComponentReducer: Reducer<LocationModelState>;
+
+    setViewLocationDetailComponentReducer: Reducer<LocationModelState>;
   }
 }
 
@@ -147,7 +153,7 @@ const LocationStore: LocationStoreModel = {
 
     editLocationModal: {
       isLoading: false,
-      visible: true,
+      visible: false,
     },
 
     addressSuggestList: [],
@@ -156,6 +162,11 @@ const LocationStore: LocationStoreModel = {
       map: undefined,
       marker: undefined,
       circle: undefined
+    },
+
+    viewLocationDetailComponent: {
+      isLoading: false,
+      visible: true
     }
   },
 
@@ -333,6 +344,13 @@ const LocationStore: LocationStoreModel = {
           address: "",
           isSelected: false
         }
+      }
+    },
+
+    setViewLocationDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewLocationDetailComponent: payload
       }
     }
   }

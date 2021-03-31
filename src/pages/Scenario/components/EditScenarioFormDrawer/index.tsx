@@ -1,5 +1,10 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
-import { CloseSquareOutlined, UploadOutlined } from '@ant-design/icons';
+import {
+  CloseSquareOutlined,
+  DeleteTwoTone,
+  SettingFilled,
+  UploadOutlined,
+} from '@ant-design/icons';
 import {
   Button,
   Drawer,
@@ -12,6 +17,7 @@ import {
   Col,
   Checkbox,
   Table,
+  Modal,
 } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
@@ -30,9 +36,6 @@ import { v4 as uuidv4 } from 'uuid';
 import SelectPlaylistDrawer from '../SelectPlaylistDrawer';
 import ReactPlayer from 'react-player';
 import Column from 'antd/lib/table/Column';
-import styles from './index.less';
-import undefined from '@/e2e/__mocks__/antd-pro-merge-less';
-import undefined from '@/e2e/__mocks__/antd-pro-merge-less';
 
 export type EditScenarioFormDrawerProps = {
   dispatch: Dispatch;
@@ -42,7 +45,7 @@ export type EditScenarioFormDrawerProps = {
   layouts: LayoutModelState;
 };
 
-class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps> {
+export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps> {
   componentDidMount() {
     const { selectedSenario } = this.props.scenarios;
     if (this.formRef.current) {
@@ -303,8 +306,8 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
   getSelectedPlaylistItem = () => {
     const { selectedPlaylistItems } = this.props.playlists;
 
-    const result = selectedPlaylistItems.filter((p) => p.isSelected);
-    if (result.length > 0) {
+    const result = selectedPlaylistItems?.filter((p) => p.isSelected);
+    if (result && result.length > 0) {
       return result[0];
     }
 
@@ -415,12 +418,13 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
 
     const selectedScenarioItem = selectedSenario?.scenarioItems?.filter((s) => s.isSelected)[0];
     return (
-      <Drawer
+      <Modal
         visible={editScenarioDrawer?.visible}
         destroyOnClose={true}
-        getContainer={false}
+        confirmLoading={editScenarioDrawer?.isLoading}
+        centered
         title="Edit Scenario"
-        afterVisibleChange={() => {
+        afterClose={() => {
           this.clearSelectedPlaylistItems();
         }}
         closable={false}
@@ -436,9 +440,11 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                     }
                   }}
                 >
+                  <DeleteTwoTone twoToneColor="#f93e3e" />
                   Remove
                 </Button>
                 <Button
+                  type="primary"
                   onClick={() => {
                     if (this.formRef.current) {
                       this.formRef.current.validateFields().then((values) => {
@@ -466,18 +472,18 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                     }
                   }}
                 >
-                  Save Change
+                  <SettingFilled /> Save Change
                 </Button>
               </Space>
             </div>
           </>
         }
-        onClose={() => {
+        onCancel={() => {
           this.setEditScenariosDrawer({
             visible: false,
           });
         }}
-        width={'80%'}
+        width={'50%'}
       >
         {/* <EditScenarioDrawer {...this.props} /> */}
         <Form name="edit_scenario_form" layout="vertical" ref={this.formRef}>
@@ -565,7 +571,6 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                               }}
                               onClick={() => {}}
                             >
-                              asd
                               <CloseSquareOutlined />
                             </div>
                             <div>{scenarioItem?.playlist?.title}</div>
@@ -655,7 +660,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
                       }}
                     >
                       <Column key="title" dataIndex={['mediaSrc', 'title']} title="Title"></Column>
-                      <Column key="title" dataIndex="duration" title="Duration"></Column>
+                      <Column key="duration" dataIndex="duration" title="Duration"></Column>
                     </Table>
                   </>
                 ) : (
@@ -700,7 +705,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
         >
           <SelectPlaylistDrawer {...this.props} />
         </Drawer>
-      </Drawer>
+      </Modal>
     );
   }
 }

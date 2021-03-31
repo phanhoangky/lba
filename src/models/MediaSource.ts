@@ -44,6 +44,8 @@ export type FileType = {
   updated_at: string;
   isSelected?: boolean;
   isSigned: number;
+  securityHash: string;
+  fileId: string;
 }
 
 export type MediaSourceTypeModel = {
@@ -88,7 +90,7 @@ export type MediaSourceModelState = {
     
   },
 
-  selectedFile: FileType,
+  selectedFile?: FileType,
   listMediaType: MediaType[]
 }
 
@@ -214,34 +216,35 @@ const MediaSourceStore: MediaSourceModel = {
       removeConfirmVisible: false
     },
 
-    selectedFile: {
-      id: "",
-      folder_id: null,
-      title: "",
-      description: "",
-      type: {
-        id: "",
-        description: "",
-        name: ""
-      },
-      extension: "",
-      size: 0,
-      width: 0,
-      height: 0,
-      privacy: "",
-      option_download: "",
-      option_ad: "",
-      option_transform: "",
-      wm_id: "",
-      urlPreview: "",
-      url_thumbnail: "",
-      url_download: "",
-      versions: 0,
-      hits: 0,
-      created_at: "",
-      updated_at: "",
-      isSigned: 0
-    },
+    // selectedFile: {
+    //   securityHash: "",
+    //   id: "",
+    //   folder_id: null,
+    //   title: "",
+    //   description: "",
+    //   type: {
+    //     id: "",
+    //     description: "",
+    //     name: ""
+    //   },
+    //   extension: "",
+    //   size: 0,
+    //   width: 0,
+    //   height: 0,
+    //   privacy: "",
+    //   option_download: "",
+    //   option_ad: "",
+    //   option_transform: "",
+    //   wm_id: "",
+    //   urlPreview: "",
+    //   url_thumbnail: "",
+    //   url_download: "",
+    //   versions: 0,
+    //   hits: 0,
+    //   created_at: "",
+    //   updated_at: "",
+    //   isSigned: 0
+    // },
     listMediaType: []
     
   },
@@ -364,10 +367,15 @@ const MediaSourceStore: MediaSourceModel = {
         id: payload.fileId,
         title: payload.title,
         description: payload.description,
-        privacy: 0
+        privacy: 0,
+        txHash: payload.hash,
+        docId: payload.id
       }
+      console.log('====================================');
+      console.log(updateParam);
+      console.log('====================================');
       yield call(UpdateFile, updateParam);
-      yield call(RemoveMediaSource, payload.id);
+      yield call(RemoveMediaSource, updateParam);
     }
   },
 

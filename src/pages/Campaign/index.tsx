@@ -30,7 +30,7 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../Location';
 import { AddNewCampaignModal } from './components/AddNewCampaignModalComponent/AddNewCampaignModal';
 import { CampaignTableHeaderComponent } from './components/CampaignTableHeaderComponent';
-import ViewCampaignDetailDrawer from './components/ViewCampaignDetailDrawer';
+import { ViewCampaignDetailDrawer } from './components/ViewCampaignDetailDrawer';
 
 export type CampaignScreenProps = {
   dispatch: Dispatch;
@@ -314,6 +314,8 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   };
 
   addNewModalRef = React.createRef<AddNewCampaignModal>();
+
+  viewCampaignDetailRef = React.createRef<ViewCampaignDetailDrawer>();
   render() {
     const {
       listCampaign,
@@ -404,6 +406,8 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                             this.setLocationAddressInMap(record).then(() => {
                               this.setEditCampaignDrawer({
                                 visible: true,
+                              }).then(() => {
+                                this.viewCampaignDetailRef.current?.componentDidMount();
                               });
                             });
                           });
@@ -453,7 +457,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           </Modal>
           {/* End Add New Campaign Modal */}
 
-          <ViewCampaignDetailDrawer {...this.props} />
+          <ViewCampaignDetailDrawer ref={this.viewCampaignDetailRef} {...this.props} />
         </PageContainer>
       </>
     );

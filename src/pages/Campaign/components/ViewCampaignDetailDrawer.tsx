@@ -22,41 +22,6 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
   componentDidMount() {
     const { mapComponent } = this.props.location;
 
-    if (mapComponent?.map) {
-      const { selectedCampaign } = this.props.campaign;
-      if (selectedCampaign.location.split('-').length >= 2) {
-        // const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
-        // const lng = Number.parseFloat(selectedCampaign.location.split('-')[1]);
-        // mapComponent.map.setView([lat, lng]);
-        // if (!mapComponent.marker) {
-        //   if (lat && lng) {
-        //     const marker = L.marker([lat, lng]);
-        //     marker.addTo(mapComponent.map);
-        //     this.setMapComponent({
-        //       marker,
-        //     });
-        //   }
-        // } else {
-        //   mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
-        // }
-        // if (mapComponent.circle) {
-        //   mapComponent.circle.setLatLng([lat, lng]);
-        //   mapComponent.circle.setRadius(selectedCampaign.radius * 1000);
-        //   mapComponent.circle.redraw();
-        // } else {
-        //   const circle = L.circle([lat, lng]).setRadius(selectedCampaign.radius * 1000);
-        //   circle.addTo(mapComponent.map);
-        //   this.setMapComponent({
-        //     circle,
-        //   });
-        // }
-      }
-    }
-  }
-
-  componentDidUpdate = () => {
-    const { mapComponent } = this.props.location;
-
     if (mapComponent && mapComponent.map) {
       const { selectedCampaign } = this.props.campaign;
       if (selectedCampaign.location.split('-').length === 2) {
@@ -78,7 +43,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
         if (mapComponent.circle) {
           mapComponent.circle.setLatLng([lat, lng]);
           mapComponent.circle.setRadius(selectedCampaign.radius * 1000);
-          mapComponent.circle.redraw();
+          // mapComponent.circle.redraw();
         } else {
           const circle = L.circle([lat, lng]).setRadius(selectedCampaign.radius * 1000);
           circle.addTo(mapComponent.map);
@@ -88,6 +53,40 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
         }
       }
     }
+  }
+
+  componentDidUpdate = () => {
+    // const { mapComponent } = this.props.location;
+    // if (mapComponent && mapComponent.map) {
+    //   const { selectedCampaign } = this.props.campaign;
+    //   if (selectedCampaign.location.split('-').length === 2) {
+    //     const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
+    //     const lng = Number.parseFloat(selectedCampaign.location.split('-')[1]);
+    //     mapComponent.map.setView([lat, lng]);
+    //     if (!mapComponent.marker) {
+    //       if (lat && lng) {
+    //         const marker = L.marker([lat, lng]);
+    //         marker.addTo(mapComponent.map);
+    //         this.setMapComponent({
+    //           marker,
+    //         });
+    //       }
+    //     } else {
+    //       mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
+    //     }
+    //     if (mapComponent.circle) {
+    //       mapComponent.circle.setLatLng([lat, lng]);
+    //       mapComponent.circle.setRadius(selectedCampaign.radius * 1000);
+    //       // mapComponent.circle.redraw();
+    //     } else {
+    //       const circle = L.circle([lat, lng]).setRadius(selectedCampaign.radius * 1000);
+    //       circle.addTo(mapComponent.map);
+    //       this.setMapComponent({
+    //         circle,
+    //       });
+    //     }
+    //   }
+    // }
   };
 
   setMapComponent = async (payload: any) => {
@@ -137,6 +136,9 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                     });
                   }
                   if (mapComponent.circle) {
+                    console.log('====================================');
+                    console.log('Remove Circle >>>>', mapComponent.circle);
+                    console.log('====================================');
                     mapComponent.circle.remove();
                     this.setMapComponent({
                       circle: undefined,

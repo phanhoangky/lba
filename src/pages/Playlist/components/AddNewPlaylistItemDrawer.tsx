@@ -92,7 +92,7 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
 
     await this.props.dispatch({
       type: 'playlists/setListMediaNotBelongToPlaylistReducer',
-      payload: listMediaNotBelongToPlaylist.map((media: any) => {
+      payload: listMediaNotBelongToPlaylist?.map((media: any) => {
         if (media.id === record.id) {
           return {
             ...media,
@@ -130,17 +130,18 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
     });
   };
 
-  setNewPlaylistItemParam = async (modal: any) => {
-    const { newPlaylistItemParam } = this.props.playlists;
+  // setNewPlaylistItemParam = async (modal: any) => {
+  //   const { newPlaylistItemParam } = this.props.playlists;
 
-    await this.props.dispatch({
-      type: 'playlists/setNewPlaylistItemParamReducer',
-      payload: {
-        ...newPlaylistItemParam,
-        ...modal,
-      },
-    });
-  };
+  //   await this.props.dispatch({
+  //     type: 'playlists/setNewPlaylistItemParamReducer',
+  //     payload: {
+  //       ...newPlaylistItemParam,
+  //       ...modal,
+  //     },
+  //   });
+  // };
+
   setCurrentNewItemDuration = async (duration: number) => {
     await this.props.dispatch({
       type: 'playlists/setCurrentDurationReducer',
@@ -163,7 +164,7 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
     console.log('====================================');
     return (
       <>
-        <Skeleton active loading={addNewPlaylistItemsDrawer.isLoading}>
+        <Skeleton active loading={addNewPlaylistItemsDrawer?.isLoading}>
           <Row style={{ verticalAlign: 'middle', alignItems: 'center' }}>
             <Col span={8}>Select Duration (seconds)</Col>
             <Col span={16}>
@@ -237,21 +238,23 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
             split
             pagination={{
               pageSize: 10,
-              current: getListMediaParam.pageNumber + 1,
-              total: addNewPlaylistItemsDrawer.totalItem,
+              current: getListMediaParam?.pageNumber ? getListMediaParam?.pageNumber + 1 : 1,
+              total: addNewPlaylistItemsDrawer?.totalItem
+                ? addNewPlaylistItemsDrawer?.totalItem
+                : 10,
               onChange: (e) => {
                 this.getMediaNotBelongToPlaylist({
                   pageNumber: e - 1,
                 });
               },
             }}
-            loading={addNewPlaylistItemsDrawer.isLoading}
+            loading={addNewPlaylistItemsDrawer?.isLoading}
             style={{ height: 500 }}
             header={
               <>
                 <Input.Search
                   placeholder="input search text"
-                  value={getListMediaParam.title}
+                  value={getListMediaParam?.title}
                   onSearch={(e) => {
                     this.getMediaNotBelongToPlaylist({ title: e, pageNumber: 0 });
                   }}

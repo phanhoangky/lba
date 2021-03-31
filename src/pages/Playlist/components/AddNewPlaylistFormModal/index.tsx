@@ -102,9 +102,9 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
     return (
       <Modal
         title="Add New Playlist"
-        visible={addNewPlaylistModal.visible}
+        visible={addNewPlaylistModal?.visible}
         destroyOnClose={true}
-        confirmLoading={addNewPlaylistModal.isLoading}
+        confirmLoading={addNewPlaylistModal?.isLoading}
         onCancel={async () => {
           await this.setAddNewPlaylistModal({
             visible: false,

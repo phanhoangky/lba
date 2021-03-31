@@ -1,52 +1,21 @@
 import { openNotification, sortArea } from '@/utils/utils';
-import {
-  CloseSquareOutlined,
-  DeleteTwoTone,
-  SettingTwoTone,
-  UploadOutlined,
-} from '@ant-design/icons';
-import {
-  Col,
-  Form,
-  Input,
-  Row,
-  Image,
-  Checkbox,
-  Divider,
-  Table,
-  Drawer,
-  Button,
-  Space,
-  Modal,
-  Spin,
-} from 'antd';
+import { CloseSquareOutlined, UploadOutlined } from '@ant-design/icons';
+import { Col, Form, Input, Row, Image, Checkbox, Divider, Table, Modal, Spin } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
-import type {
-  Area,
-  Dispatch,
-  LayoutModelState,
-  PlayListModelState,
-  ScenarioItem,
-  ScenarioModelState,
-  UserModelState,
-} from 'umi';
+import type { Area, Dispatch, PlayListModelState, ScenarioItem, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
-import SelectPlaylistDrawer from './SelectPlaylistDrawer';
 import { v4 as uuidv4 } from 'uuid';
-import styles from '../index.less';
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
 
-export type EditScenarioComponentProps = {
+export type ViewScenarioDetailProps = {
   dispatch: Dispatch;
   scenarios: ScenarioModelState;
-  user: UserModelState;
   playlists: PlayListModelState;
-  layouts: LayoutModelState;
 };
 
-export class EditScenarioComponent extends React.Component<EditScenarioComponentProps> {
+export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDetailProps> {
   componentDidMount() {
     const { selectedSenario } = this.props.scenarios;
     if (this.formRef.current) {
@@ -122,9 +91,6 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
   };
 
   setSelectedScenario = async (item: any) => {
-    console.log('====================================');
-    console.log({ ...this.props.scenarios.selectedSenario, ...item });
-    console.log('====================================');
     await this.props.dispatch({
       type: 'scenarios/setSelectedScenarioReducer',
       payload: {
@@ -365,17 +331,12 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
-    const {
-      editScenarioDrawer,
-      selectedSenario,
-      playlistsDrawer,
-      selectedArea,
-    } = this.props.scenarios;
+    const { selectedSenario, viewScenarioDetailComponent, selectedArea } = this.props.scenarios;
 
     const selectedScenarioItem = selectedSenario?.scenarioItems?.filter((s) => s.isSelected)[0];
     return (
       <>
-        {editScenarioDrawer?.isLoading && <Spin size="large" />}
+        {viewScenarioDetailComponent?.isLoading && <Spin size="large" />}
 
         <>
           <Form name="edit_scenario_form" layout="vertical" ref={this.formRef}>
@@ -416,11 +377,11 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                           transition: 'ease',
                           transitionDuration: '1s',
                         }}
-                        onDoubleClick={() => {
-                          this.setPlaylistDrawer({
-                            visible: true,
-                          });
-                        }}
+                        // onDoubleClick={() => {
+                        //   this.setPlaylistDrawer({
+                        //     visible: true,
+                        //   });
+                        // }}
                         onClick={async () => {
                           this.setSelectedScenarioItem(scenarioItem);
                           this.setSelectedArea(area);
@@ -499,7 +460,7 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                             key: item.id,
                           };
                         })}
-                        loading={editScenarioDrawer?.playlistLoading}
+                        loading={viewScenarioDetailComponent?.playlistLoading}
                         scroll={{
                           x: 400,
                           y: 400,
@@ -535,7 +496,7 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
           {/* END AREA */}
 
           <Divider></Divider>
-          <Row>
+          {/* <Row>
             <Col>
               <Space>
                 <Button
@@ -587,12 +548,12 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
                 </Button>
               </Space>
             </Col>
-          </Row>
+          </Row> */}
         </>
 
         {/** Select Playlist Drawer */}
 
-        <Drawer
+        {/* <Drawer
           title="Playlist"
           width={`50%`}
           closable={false}
@@ -621,10 +582,10 @@ export class EditScenarioComponent extends React.Component<EditScenarioComponent
           }
         >
           <SelectPlaylistDrawer {...this.props} />
-        </Drawer>
+        </Drawer> */}
       </>
     );
   }
 }
 
-export default connect((state: any) => ({ ...state }))(EditScenarioComponent);
+export default connect((state: any) => ({ ...state }))(ViewScenarioDetailComponent);

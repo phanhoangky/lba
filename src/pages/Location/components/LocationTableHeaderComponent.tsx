@@ -68,8 +68,42 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
     });
   };
 
+  setViewLocationDetailComponent = async (modal?: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setViewLocationDetailComponentReducer`,
+      payload: {
+        ...this.props.location.viewLocationDetailComponent,
+        ...modal,
+      },
+    });
+  };
+
+  resetMap = async () => {
+    const { mapComponent } = this.props.location;
+    if (mapComponent) {
+      if (mapComponent.map) {
+        this.setMapComponent({
+          map: undefined,
+        });
+        if (mapComponent.marker) {
+          mapComponent.marker.remove();
+          this.setMapComponent({
+            marker: undefined,
+          });
+        }
+
+        if (mapComponent.circle) {
+          mapComponent.circle.remove();
+          this.setMapComponent({
+            circle: undefined,
+          });
+        }
+      }
+    }
+  };
+
   render() {
-    const { mapComponent, getListLocationParam } = this.props.location;
+    const { getListLocationParam } = this.props.location;
     return (
       <Row>
         <Col span={12}>
@@ -159,20 +193,8 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
             <Button
               onClick={async () => {
                 this.clearCreateLocationParam().then(() => {
-                  // if (mapComponent) {
-                  //   if (mapComponent.map) {
-                  //     this.setMapComponent({
-                  //       map: undefined,
-                  //     });
-                  //     if (mapComponent.marker) {
-                  //       mapComponent.marker.remove();
-                  //       this.setMapComponent({
-                  //         marker: undefined,
-                  //       });
-                  //     }
-                  //   }
-                  // }
-                  this.setEditLocationModal({
+                  this.resetMap().then(() => {});
+                  this.setViewLocationDetailComponent({
                     visible: false,
                   }).then(() => {});
                   this.setAddNewLocationModal({

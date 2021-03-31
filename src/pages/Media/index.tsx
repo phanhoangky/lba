@@ -270,7 +270,7 @@ class Media extends React.Component<MediaSourceProps> {
     const security = hash.digest('hex');
     if (currentUser) {
       if (createFileParam.isSigned) {
-        await currentUser.ether?.addDocument(security, createFileParam.isSigned);
+        await currentUser.ether?.addDocument(security);
       }
     }
 
@@ -391,11 +391,11 @@ class Media extends React.Component<MediaSourceProps> {
     const { selectedFile } = this.props.media;
 
     const param: EditMediaParam = {
-      id: selectedFile.id,
-      description: selectedFile.description,
-      title: selectedFile.title,
-      typeId: selectedFile.type.id,
-      isSigned: selectedFile.isSigned,
+      id: selectedFile?.id,
+      description: selectedFile?.description,
+      title: selectedFile?.title,
+      typeId: selectedFile?.type.id,
+      isSigned: selectedFile?.isSigned,
       ...modal,
     };
 
@@ -716,7 +716,7 @@ class Media extends React.Component<MediaSourceProps> {
             }}
             title={
               <>
-                <div>{selectedFile.title}</div>
+                <div>{selectedFile?.title}</div>
               </>
             }
             footer={
