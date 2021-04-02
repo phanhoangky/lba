@@ -1,9 +1,10 @@
-import { sortArea } from '@/utils/utils';
-import { Col, List, Row } from 'antd';
+import { EyeFilled } from '@ant-design/icons';
+import { Button, Col, List, Modal, Row } from 'antd';
 import * as React from 'react';
 import type { CampaignModelState, Dispatch, LocationModelState, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '../..';
+import { ViewScenarioDetailComponent } from './ViewScenarioDetailComponent';
 
 export type SelectScenarioPartProps = {
   dispatch: Dispatch;
@@ -65,10 +66,48 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
     }
   };
 
+  setSelectedScenario = async (item: any) => {
+    await this.props.dispatch({
+      type: 'scenarios/setSelectedScenarioReducer',
+      payload: {
+        ...this.props.scenarios.selectedSenario,
+        ...item,
+      },
+    });
+  };
+
+  setAddNewCampaignModal = async (modal: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setAddNewCampaignModalReducer`,
+      payload: {
+        ...this.props.campaign.addNewCampaignModal,
+        ...modal,
+      },
+    });
+  };
+
+  setPreviewScenarioModal = async (param?: any) => {
+    await this.setAddNewCampaignModal({
+      previewScenarioModal: {
+        ...this.props.campaign.addNewCampaignModal.previewScenarioModal,
+        ...param,
+      },
+    });
+  };
+
+  handlePreviewScenario = async (item: any) => {
+    await this.setPreviewScenarioModal({
+      visible: true,
+    });
+
+    await this.setSelectedScenario(item);
+  };
+
   render() {
     const { listScenario, getListScenarioParam, totalItem, tableLoading } = this.props.scenarios;
+    const { addNewCampaignModal } = this.props.campaign;
 
-    const selectedScenario = listScenario?.filter((s) => s.isSelected)[0];
+    // const selectedScenario = listScenario?.filter((s) => s.isSelected)[0];
 
     return (
       <>
@@ -106,49 +145,38 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
                       });
                     });
                   }}
+                  extra={
+                    <>
+                      <Button
+                        className="lba-btn"
+                        onClick={() => {
+                          this.handlePreviewScenario(item);
+                        }}
+                      >
+                        <EyeFilled /> Detail
+                      </Button>
+                    </>
+                  }
                 >
                   <List.Item.Meta title={item.title} description={item.description} />
                 </List.Item>
               )}
             ></List>
           </Col>
-          {/* <Col span={12}>
-            <div
-              id="areaWrapper"
-              style={{
-                margin: `0 auto`,
-                display: 'flex',
-                width: '100%',
-                boxSizing: 'border-box',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {selectedScenario &&
-                sortArea(selectedScenario?.layout.areas).map((area) => {
-                  return (
-                    <>
-                      <div
-                        key={area.id}
-                        style={{
-                          flex: `${area.width * 100}%`,
-                          position: 'relative',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          height: `${area.height * 100}%`,
-                          textAlign: 'center',
-                          border: `2px solid black`,
-                          transition: 'ease',
-                          transitionDuration: '1s',
-                        }}
-                      ></div>
-                    </>
-                  );
-                })}
-            </div>
-          </Col> */}
+          <Modal
+            visible={addNewCampaignModal.previewScenarioModal?.visible}
+            closable={false}
+            destroyOnClose={true}
+            onCancel={() => {
+              this.setPreviewScenarioModal({
+                visible: false,
+              });
+            }}
+          >
+            {addNewCampaignModal.previewScenarioModal?.visible && (
+              <ViewScenarioDetailComponent {...this.props} />
+            )}
+          </Modal>
         </Row>
       </>
     );

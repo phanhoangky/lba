@@ -1,20 +1,24 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Col, Descriptions, Divider, Row, Space, Table } from 'antd';
+import { Avatar, Col, Divider, Form, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
+  CampaignModelState,
   DeviceModelState,
   Dispatch,
+  MediaSourceModelState,
   MomoModelState,
   ProfileWalletModelState,
   TransactionModelState,
   UserModelState,
 } from 'umi';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import { WalletHeaderComponent } from './components/WalletHeaderComponent';
-import styles from './index.less';
+// import styles from './index.less';
 import { v4 as uuidv4 } from 'uuid';
 import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
+import type { TransactionType } from '@/models/transaction';
+import { CAMPAIGN } from '@/pages/Campaign';
 
 type WalletProps = {
   dispatch: Dispatch;
@@ -23,6 +27,8 @@ type WalletProps = {
   momo: MomoModelState;
   transaction: TransactionModelState;
   profileWallet: ProfileWalletModelState;
+  campaign: CampaignModelState;
+  media: MediaSourceModelState;
 };
 
 export const TRANSACTION_STORE = 'transaction';
@@ -69,6 +75,43 @@ class WalletScreen extends React.Component<WalletProps> {
       type: `${TRANSACTION_STORE}/setTransTableLoadingReducer`,
       payload: isLoading,
     });
+  };
+
+  setGetListCampaignParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setGetListCampaignParamReducer`,
+      payload: {
+        ...this.props.campaign.getListCampaignParam,
+        ...param,
+      },
+    });
+  };
+
+  setGetListFileParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: `media/setGetListFileParamReducer`,
+      payload: {
+        ...this.props.media,
+        ...param,
+      },
+    });
+  };
+
+  redirectByTypeTransaction = async (record: TransactionType) => {
+    if (record.type === 1) {
+      this.setGetListCampaignParam({
+        id: record.id,
+      }).then(() => {
+        history.push('/campaign');
+      });
+    }
+    if (record.type === 3) {
+      this.setGetListFileParam({
+        id: record.id,
+      }).then(() => {
+        history.push('/medias');
+      });
+    }
   };
 
   render() {
@@ -123,6 +166,13 @@ class WalletScreen extends React.Component<WalletProps> {
                         });
                     },
                   }}
+                  onRow={(record) => {
+                    return {
+                      onDoubleClick: () => {
+                        this.redirectByTypeTransaction(record);
+                      },
+                    };
+                  }}
                 >
                   <Column
                     key="sender"
@@ -175,7 +225,7 @@ class WalletScreen extends React.Component<WalletProps> {
               />
             </div>
             <Space direction="vertical" wrap>
-              <Descriptions
+              {/* <Descriptions
                 title="User Info"
                 layout="vertical"
                 bordered
@@ -194,7 +244,15 @@ class WalletScreen extends React.Component<WalletProps> {
                     currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
                   VND
                 </Descriptions.Item>
-              </Descriptions>
+              </Descriptions> */}
+              <Form layout="horizontal">
+                <Form.Item label="Username">{currentUser && currentUser.name}</Form.Item>
+                <Form.Item label="Email">{currentUser && currentUser.email}</Form.Item>
+                <Form.Item label="Your Balance">
+                  {currentUser &&
+                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                </Form.Item>
+              </Form>
             </Space>
           </Col>
         </Row>

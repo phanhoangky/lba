@@ -409,16 +409,16 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
 
     return (
       <>
-        <Form name="edit_playlists_form_drawer" layout="vertical" ref={this.formRef}>
+        <Form name="view_playlists_form_drawer" layout="vertical" ref={this.formRef}>
           <Form.Item
             name="title"
             label="Title"
             rules={[{ required: true, message: 'Please input title' }]}
           >
-            <Input />
+            <Input readOnly />
           </Form.Item>
           <Form.Item name="description" label="Description">
-            <Input.TextArea rows={4} />
+            <Input.TextArea readOnly rows={4} />
           </Form.Item>
           <Row>
             <Col span={12}>{this.renderPreviewMedia()}</Col>
@@ -458,26 +458,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                   title="Duration"
                   className="drag-visible"
                   render={(record) => {
-                    return (
-                      <>
-                        {/* <Slider
-                          min={minDuration}
-                          max={maxDuration}
-                          disabled={availableDuration < minDuration}
-                          value={record.duration}
-                          onChange={(e: any) => {
-                            if (totalDuration + e < maxDuration) {
-                              // console.log('====================================');
-                              // console.log(e, record.duration);
-                              // console.log('====================================');
-                              this.setSelectedPlaylistItemsDuration(record, e);
-                              this.calculateTotalDuration();
-                            }
-                          }}
-                        ></Slider> */}
-                        {record.duration}
-                      </>
-                    );
+                    return <>{record.duration}</>;
                   }}
                 ></Column>
 
@@ -492,29 +473,17 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                           <Button
                             onClick={() => {
                               // this.selectPlaylistItem(record);
-                              // console.log('====================================');
-                              // console.log(record);
-                              // console.log('====================================');
+                              console.log('====================================');
+                              console.log(record);
+                              console.log('====================================');
                               this.setViewPlaylistDetailComponent({
-                                playingUrl: record.url,
-                                playlingMediaType: record.typeName,
+                                playingUrl: record.mediaSrc.urlPreview,
+                                playlingMediaType: record.mediaSrc.type.name,
                               });
                             }}
                           >
                             <PlaySquareTwoTone size={20} />
                           </Button>
-                          {/* <Button
-                            danger
-                            onClick={async () => {
-                              this.removeItem(record).then(() => {
-                                this.calculateTotalDuration().then(() => {
-                                  this.clearDuration();
-                                });
-                              });
-                            }}
-                          >
-                            <MinusSquareTwoTone size={20} twoToneColor="#f93e3e" />
-                          </Button> */}
                         </Space>
                       </>
                     );

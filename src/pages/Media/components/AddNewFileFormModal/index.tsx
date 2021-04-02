@@ -195,8 +195,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
                 console.log('====================================');
                 console.log(file);
                 console.log('====================================');
-                LIST_SUPPORTED_FILES.includes(file.type);
-                if (LIST_SUPPORTED_FILES.includes(file.type)) {
+                if (!LIST_SUPPORTED_FILES.some((f) => file.type.includes(f))) {
                   openNotification('error', 'file is not support');
                   return Upload.LIST_IGNORE;
                 }

@@ -9,7 +9,7 @@ import {
   CaretRightOutlined,
   DeleteTwoTone,
   ExclamationCircleOutlined,
-  EyeTwoTone,
+  EyeFilled,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Modal, Space, Switch, Table } from 'antd';
@@ -313,6 +313,15 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     });
   };
 
+  setViewCampaignDetailComponent = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setViewCampaignDetailComponentReducer`,
+      payload: {
+        ...this.props.campaign.viewCampaignDetailComponent,
+        ...param,
+      },
+    });
+  };
   addNewModalRef = React.createRef<AddNewCampaignModal>();
 
   viewCampaignDetailRef = React.createRef<ViewCampaignDetailDrawer>();
@@ -355,7 +364,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             title={() => <CampaignTableHeaderComponent {...this.props} />}
           >
             <Column key="name" dataIndex="name" title="Name"></Column>
-            <Column key="description" dataIndex="description" title="Description"></Column>
             <Column
               align="center"
               key="dateRange"
@@ -371,6 +379,23 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               }}
             ></Column>
             <Column key="budget" dataIndex="budget" title="Budget"></Column>
+            <Column
+              key="activity"
+              title="activity"
+              render={(record: Campaign) => {
+                const now = moment();
+                const diffStart = now.diff(record.startDate);
+                const diffEnd = now.diff(record.endDate);
+
+                return (
+                  <>
+                    {diffStart > 0 && diffEnd < 0 && 'Running'}
+                    {diffEnd > 0 && 'Ended'}
+                    {diffStart < 0 && 'To be considered'}
+                  </>
+                );
+              }}
+            ></Column>
             <Column
               key="status"
               title="Status"
@@ -401,6 +426,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                   <>
                     <Space align={'center'}>
                       <Button
+                        type="primary"
                         onClick={() => {
                           this.setSelectedCampaign(record).then(() => {
                             this.setLocationAddressInMap(record).then(() => {
@@ -413,9 +439,10 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                           });
                         }}
                       >
-                        <EyeTwoTone />
+                        <EyeFilled />
                       </Button>
                       <Button
+                        danger
                         onClick={() => {
                           this.deleteCampaignConfirm(record);
                         }}
@@ -431,16 +458,14 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
 
           {/* Add New Campaign Modal */}
           <Modal
-            width="50%"
+            width="65%"
             title="Add New Campaign"
             visible={addNewCampaignModal.visible}
             centered
             destroyOnClose={true}
             confirmLoading={addNewCampaignModal.isLoading}
             closable={false}
-            afterClose={() => {
-              this.addNewModalRef.current?.handleAfterClose();
-            }}
+            afterClose={() => {}}
             onOk={() => {
               // this.okConfirm();
               this.addNewModalRef.current?.okConfirm();
@@ -448,6 +473,8 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             onCancel={() => {
               this.setAddNewCampaignModal({
                 visible: false,
+              }).then(() => {
+                this.addNewModalRef.current?.handleAfterClose();
               });
             }}
           >

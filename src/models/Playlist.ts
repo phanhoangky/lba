@@ -198,7 +198,7 @@ const PlaylistStore: PlaylistModel = {
       currentPage: 0,
       isLoading: false,
       totalItem: 0,
-      visible: false,
+      visible: true,
     },
 
     listMediaNotBelongToPlaylist: [],

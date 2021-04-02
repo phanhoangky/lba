@@ -1,8 +1,9 @@
-import { Col, Divider, InputNumber, Row } from 'antd';
+import { Col, Divider, InputNumber, Row, Skeleton } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MomoModelState, ProfileWalletModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import QRCode from 'qrcode';
+import styles from './index.less';
 
 export type DepositModalProps = {
   dispatch: Dispatch;
@@ -46,7 +47,9 @@ export class DepositModal extends React.Component<DepositModalProps> {
 
         const container = document.getElementById('qr-container');
         if (container) {
-          container.appendChild(canvas);
+          const qr = canvas;
+          qr.style.width = '100%';
+          container.appendChild(qr);
         }
       });
     } catch (err) {
@@ -75,6 +78,13 @@ export class DepositModal extends React.Component<DepositModalProps> {
 
   render() {
     const { currentUser } = this.props.user;
+    const { linkDepositParam } = this.props.momo;
+    const { depositModal } = this.props.profileWallet;
+    const equivalent =
+      linkDepositParam &&
+      currentUser &&
+      currentUser.balance &&
+      linkDepositParam?.amount + Number.parseFloat(currentUser.balance.toString());
     return (
       <>
         <Row gutter={20}>
@@ -92,16 +102,6 @@ export class DepositModal extends React.Component<DepositModalProps> {
             </Row>
             <Divider></Divider>
             <Row>
-              <Col span={12}>Equivalent Balance</Col>
-              <Col
-                span={12}
-                style={{
-                  textAlign: 'left',
-                }}
-              ></Col>
-            </Row>
-            <Divider></Divider>
-            <Row>
               <Col>
                 <InputNumber
                   width={200}
@@ -114,9 +114,24 @@ export class DepositModal extends React.Component<DepositModalProps> {
                 />
               </Col>
             </Row>
+            <Divider></Divider>
+            <Row>
+              <Col span={12}>Equivalent Balance</Col>
+              <Col
+                span={12}
+                style={{
+                  textAlign: 'left',
+                }}
+              >
+                {equivalent}
+              </Col>
+            </Row>
+            <Divider></Divider>
           </Col>
-          <Col span={12}>
-            <div id="qr-container"></div>
+          <Col span={12} className={styles.QRConstainer}>
+            <Skeleton active loading={depositModal?.isLoading}>
+              <div id="qr-container"></div>
+            </Skeleton>
           </Col>
         </Row>
       </>

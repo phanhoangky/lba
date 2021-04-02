@@ -24,6 +24,7 @@ import WalletSVG from '@/assets/wallet.svg';
 // import { bold } from 'chalk';
 import { message } from 'antd';
 import QRCode from 'qrcode';
+import { openNotification } from '@/utils/utils';
 
 const success = () => {
   message.success('Copied', 3);
@@ -337,9 +338,11 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
         {/** Deposit Modal */}
         <Modal
           centered
+          title="Deposit Money"
           closable={false}
           width={'60%'}
           visible={depositModal?.visible}
+          confirmLoading={depositModal?.isLoading}
           destroyOnClose={true}
           onCancel={() => {
             this.setDepositModal({
@@ -348,16 +351,38 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
           }}
           onOk={() => {
             // this.depositMoney();
-            this.depositModalRef.current?.handleDepositMoney();
+            this.setDepositModal({
+              isLoading: true
+            }).then(() => {
+              this.depositModalRef.current?.handleDepositMoney().then(() => {
+                openNotification(
+                  'success',
+                  'Generate QR code successfil',
+                  'Please Scan QR Code By Momo Wallet to Deposit money',
+                );
+                this.setDepositModal({
+                  isLoading: false
+              })
+              }).catch((error) => {
+                Promise.reject(error);
+                openNotification("error", "Fail to perform deposit action", error);
+                this.setDepositModal({
+                isLoading: false
+              })
+            });
+            })
           }}
         >
           {depositModal?.visible && <DepositModal ref={this.depositModalRef} {...this.props} />}
         </Modal>
 
+        {/* Send Money Modal */}
         <Modal
+          title="Send Money"
           centered
           closable={false}
           width={'40%'}
+          confirmLoading={sendModal?.isLoading}
           visible={sendModal?.visible}
           destroyOnClose={true}
           onCancel={() => {

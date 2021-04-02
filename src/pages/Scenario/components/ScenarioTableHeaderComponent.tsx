@@ -64,16 +64,6 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
               });
           }}
         />
-        <Button
-          onClick={() => {
-            this.setAddNewScenarioModal({
-              visible: true,
-            });
-          }}
-          icon={<PlusSquareTwoTone />}
-        >
-          Add New Scenario
-        </Button>
 
         <Dropdown
           overlay={
@@ -126,6 +116,16 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
           <Select.Option value="">Default</Select.Option>
           <Select.Option value="createDate">Create Date</Select.Option>
         </Select>
+        <Button
+          onClick={() => {
+            this.setAddNewScenarioModal({
+              visible: true,
+            });
+          }}
+          icon={<PlusSquareTwoTone />}
+        >
+          Add New Scenario
+        </Button>
       </Space>
     );
   }

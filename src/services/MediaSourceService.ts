@@ -43,7 +43,12 @@ export async function GetListMediaSource(param: GetMediaSourcesParam) {
   return res;
 }
 
-export async function GetListMEdiaFromFiledId(listId: any) {
+export async function GetMediaSourceById(id: string) {
+  const { data } = await ApiHelper.get(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${id}`);
+  return data;
+}
+
+export async function GetListMediaFromFiledId(listId: any) {
   console.log('====================================');
   console.log(listId);
   console.log('====================================');
@@ -81,4 +86,13 @@ export async function RemoveMediaSource(param: UpdateFileParam) {
   console.log("Param >>>", param);
   console.log('====================================');
   await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`, { params: { txHash: param.txHash }});
+}
+
+export async function RemoveFolder(listFileIds: string[]) {
+  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}`, { params: {
+      listFileId: listFileIds
+    },
+    paramsSerializer: params => {
+      return qs.stringify(params);
+    }})
 }

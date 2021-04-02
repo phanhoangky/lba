@@ -9,6 +9,7 @@ export type GetFilesParam = {
   filter_privacy?: string;
   filter_type?: string;
   order?: string;
+  id?: string;
 }
 
 export type GetFoldersParam = {
@@ -74,4 +75,8 @@ export async function UpdateFile(param: UpdateFileParam) {
 
   const res = await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FILE_URL}/${param.id}`, "PUT", param);
   return res;
+}
+
+export async function RemoveFolder(id: string) {
+  await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`);
 }

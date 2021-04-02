@@ -1,5 +1,6 @@
 /** Request 网络请求工具 更详细的 api 文档: https://github.com/umijs/umi-request */
 import { extend } from 'umi-request';
+import type { RequestOptionsInit } from 'umi-request';
 import { notification } from 'antd';
 
 const codeMessage: Record<number, string> = {
@@ -28,13 +29,13 @@ const errorHandler = (error: { response: Response }): Response => {
     const { status, url } = response;
 
     notification.error({
-      message: `请求错误 ${status}: ${url}`,
+      message: `Error ${status}: ${url}`,
       description: errorText,
     });
   } else if (!response) {
     notification.error({
-      description: '您的网络发生异常，无法连接服务器',
-      message: '网络异常',
+      description: 'Your network is abnormal and you cannot connect to the server ',
+      message: 'Network anomaly',
     });
   }
   return response;
@@ -44,6 +45,47 @@ const errorHandler = (error: { response: Response }): Response => {
 const request = extend({
   errorHandler, // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
+  // prefix: "https://location-base-advertising.herokuapp.com/api/v1/",
+  prefix: "https://localhost:44333/api/v1/",
+  headers: {
+    "Accept": "application/json",
+    'Access-Control-Allow-Origin':  '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+  },
 });
+const authHeaderInterceptor = (url: string, options: RequestOptionsInit) => {
+  const jwt = localStorage.getItem("JWT");
+  if (jwt) {
+    const authHeader = { 'Authorization': `Bearer ${jwt}` };
+    return {
+      url: `${url}`,
+      options: { ...options, interceptors: true, headers: authHeader },
+    };
+  }
 
+  return {
+    url: `${url}`,
+    options: { ...options, interceptors: true },
+  };
+};
+
+request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
+  const jwt = localStorage.getItem("JWT");
+  if (jwt) {
+    console.log('====================================');
+    console.log("Itercepting >>> ", jwt);
+    console.log('====================================');
+    const authHeader = { 'Authorization': `Bearer ${jwt}` };
+    return {
+      url: `${url}`,
+      options: { ...options, interceptors: true, headers: authHeader },
+    };
+  }
+
+  return {
+    url: `${url}`,
+    options: { ...options, interceptors: true },
+  };
+});
 export default request;

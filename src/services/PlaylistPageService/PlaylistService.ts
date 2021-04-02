@@ -18,11 +18,9 @@ export type UpdatePlaylistParam = {
 
 
 export async function GetListPlaylist(params: GetListPlaylistParam) {
-  const res = await ApiHelper.get(`${CONSTANTS_LBA.PLAYLIST_URL}`, { params: { ...params } });
-  console.log('====================================');
-  console.log(res.data);
-  console.log('====================================');
+  const res = await ApiHelper.get(`${CONSTANTS_LBA.PLAYLIST_URL}`, { params: { ...params} });
   return res;
+  // const res = await request.get(`${CONSTANTS_LBA.PLAYLIST_URL}`, { params: { ...params }, });
 }
 
 export async function AddNewPlaylist(params: AddNewPlaylistParam) {

@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Row, Space, Table } from 'antd';
+import { Button, Col, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -37,15 +37,31 @@ type ScenarioProps = {
 export const SCENARIO_STORE = 'scenarios';
 class ScenarioScreen extends React.Component<ScenarioProps> {
   componentDidMount = async () => {
+    this.setViewScenarioDetailComponent({
+      isLoading: true,
+    });
     this.setTableLoading(true)
       .then(async () => {
         this.readJWT();
         Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(() => {
+          const { listScenario } = this.props.scenarios;
+          const first = listScenario && listScenario.length > 0 ? listScenario[0] : null;
+          if (first) {
+            this.setSelectedScenario(first).then(() => {
+              this.viewScenarioDetailComponentRef.current?.componentDidMount();
+            });
+          }
           this.setTableLoading(false);
+          this.setViewScenarioDetailComponent({
+            isLoading: false,
+          });
         });
       })
       .catch(() => {
         this.setTableLoading(false);
+        this.setViewScenarioDetailComponent({
+          isLoading: false,
+        });
       });
   };
 
@@ -308,19 +324,21 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
               onRow={(item) => {
                 return {
                   onClick: async () => {
-                    this.setEditScenariosDrawer({
+                    this.setViewScenarioDetailComponent({
                       isLoading: true,
                     })
                       .then(() => {
                         const clone = cloneDeep(item);
                         this.setSelectedScenario(clone).then(async () => {
                           this.clearAreas();
+                          this.clearSelectedPlaylistItems();
+
                           this.setViewScenarioDetailComponent({
                             visible: true,
                             isLoading: false,
+                          }).then(() => {
+                            this.viewScenarioDetailComponentRef.current?.componentDidMount();
                           });
-                          this.viewScenarioDetailComponentRef.current?.componentDidMount();
-                          this.clearSelectedPlaylistItems();
                         });
                       })
                       .catch(() => {
@@ -347,7 +365,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                   return (
                     <Space>
                       <Button
-                        onClick={() => {
+                        onClick={(e) => {
                           const clone = cloneDeep(record);
                           this.setSelectedScenario(clone).then(() => {
                             this.setViewScenarioDetailComponent({
@@ -362,12 +380,29 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                               });
                             });
                           });
+                          e.stopPropagation();
                         }}
                         type="primary"
                       >
                         <EditFilled />
                       </Button>
-                      <Button danger onClick={() => {}}>
+                      <Button
+                        danger
+                        onClick={() => {
+                          this.setTableLoading(true)
+                            .then(() => {
+                              this.editScenarioModalRef.current
+                                ?.handleRemoveScenario(record)
+                                .then(() => {
+                                  this.setTableLoading(false);
+                                });
+                            })
+                            .catch((error) => {
+                              Promise.reject(error);
+                              this.setTableLoading(false);
+                            });
+                        }}
+                      >
                         <DeleteTwoTone twoToneColor="#f93e3e" />
                       </Button>
                     </Space>
@@ -377,6 +412,9 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
             </Table>
           </Col>
           <Col span={14}>
+            {viewScenarioDetailComponent?.visible && (
+              <Typography.Title level={4}>Scenario Detail</Typography.Title>
+            )}
             {viewScenarioDetailComponent?.visible && (
               <ViewScenarioDetailComponent
                 ref={this.viewScenarioDetailComponentRef}

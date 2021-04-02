@@ -4,7 +4,7 @@ import type { CampaignModelState, DeviceModelState, Dispatch } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '..';
 import { v4 as uuidv4 } from 'uuid';
-import { CloseOutlined, PlusSquareTwoTone } from '@ant-design/icons';
+import { ClockCircleTwoTone, CloseOutlined, PlusSquareTwoTone } from '@ant-design/icons';
 
 export type TimeFilterComponentProps = {
   dispatch: Dispatch;
@@ -87,7 +87,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
     const timeArray = createCampaignParam.timeFilter.split('');
     return (
       <>
-        <Space wrap={true}>
+        <Space wrap={true} direction="horizontal">
           {timeArray.map((time, index) => {
             const startTime = index;
             const endTime = index + 1 === timeArray.length ? 0 : index + 1;
@@ -97,6 +97,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
                   value={`${startTime} h - ${endTime} h`}
                   readOnly
                   key={uuidv4()}
+                  prefix={<ClockCircleTwoTone className="site-form-item-icon" />}
                   suffix={
                     <Button
                       onClick={() => {
@@ -148,4 +149,4 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(TimeFilterCamponent);
+export default connect((state: any) => ({ ...state }))(TimeFilterCamponent);

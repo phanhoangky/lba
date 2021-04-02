@@ -3,7 +3,6 @@ import type { GetListTransactionParam } from '@/services/TOMOService';
 import { diffTwoDate } from "@/utils/utils";
 import moment from "moment";
 import type { Effect, Reducer } from "umi";
-import type { GetLinkTransferParam } from "@/services/MomopaymentService";
 
 export type TransactionType = {
   address: string;

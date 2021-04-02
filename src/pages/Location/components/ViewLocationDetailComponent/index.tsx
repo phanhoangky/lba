@@ -324,7 +324,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     { max: 50, message: 'Name have maximum 50 characters' },
                   ]}
                 >
-                  <Input placeholder="input placeholder" />
+                  <Input readOnly placeholder="input placeholder" />
                 </Form.Item>
               </Skeleton>
 
@@ -336,6 +336,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   rules={[{ required: true, message: 'Please select location type' }]}
                 >
                   <Select
+                    disabled
                     style={{ width: '100%' }}
                     onChange={() => {
                       // this.setCreateLocationParam({
@@ -364,6 +365,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   }}
                 >
                   <Input.TextArea
+                    readOnly
                     rows={4}
                     style={{
                       width: '100%',
@@ -381,7 +383,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     width: '100%',
                   }}
                 >
-                  <Input />
+                  <Input readOnly />
                 </Form.Item>
               </Skeleton>
               {selectedLocation.address === '' && (

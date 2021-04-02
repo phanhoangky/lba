@@ -1,6 +1,6 @@
-import {  AddNewMediaSource, EditMediaSource, GetListMEdiaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, RemoveMediaSource } from '@/services/MediaSourceService';
+import {  AddNewMediaSource, EditMediaSource, GetListMediaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, GetMediaSourceById, RemoveMediaSource } from '@/services/MediaSourceService';
 import type {AddNewMediaParam, EditMediaParam, GetMediaSourcesParam} from '@/services/MediaSourceService'
-import { CreateFolder, CreateMedia, GetFiles, GetFolders, UpdateFile } from '@/services/PublitioService/PublitioService';
+import { CreateFolder, CreateMedia, GetFiles, GetFolders, RemoveFolder, UpdateFile } from '@/services/PublitioService/PublitioService';
 import type { UpdateFileParam } from '@/services/PublitioService/PublitioService';
 import type { CreateFileParam, CreateFolderParam, GetFilesParam, GetFoldersParam } from '@/services/PublitioService/PublitioService';
 import type { Effect, Reducer } from 'umi';
@@ -61,29 +61,29 @@ export type MediaType = {
 }
 
 export type MediaSourceModelState = {
-  listMedia: any[];
-  listFolder: any[];
-  listLoading: boolean;
-  totalItem: number;
-  breadScrumb: FolderType[];
-  getListFileParam: GetFilesParam;
-  searchListMediaParam: GetMediaSourcesParam;
-  getListFolderParam: GetFoldersParam;
-  createFolderParam: CreateFolderParam;
-  createFileParam: CreateFileParam;
-  updateFileParam: EditMediaParam;
-  addNewFolderModal: {
+  listMedia?: any[];
+  listFolder?: any[];
+  listLoading?: boolean;
+  totalItem?: number;
+  breadScrumb?: FolderType[];
+  getListFileParam?: GetFilesParam;
+  searchListMediaParam?: GetMediaSourcesParam;
+  getListFolderParam?: GetFoldersParam;
+  createFolderParam?: CreateFolderParam;
+  createFileParam?: CreateFileParam;
+  updateFileParam?: EditMediaParam;
+  addNewFolderModal?: {
     visible: boolean,
     isLoading: boolean,
   },
 
-  addNewFileModal: {
+  addNewFileModal?: {
     visible: boolean;
     isLoading: boolean;
     fileList: any;
   };
 
-  editFileDrawer: {
+  editFileDrawer?: {
     visible: boolean,
     isLoading: boolean,
     removeConfirmVisible: boolean;
@@ -91,7 +91,7 @@ export type MediaSourceModelState = {
   },
 
   selectedFile?: FileType,
-  listMediaType: MediaType[]
+  listMediaType?: MediaType[]
 }
 
 
@@ -109,6 +109,7 @@ export type MediaSourceModel = {
     createFolder: Effect;
     updateFile: Effect;
     removeMedia: Effect;
+    removeFolder: Effect;
   },
 
   reducers: {
@@ -172,7 +173,7 @@ const MediaSourceStore: MediaSourceModel = {
       offset: 0,
       folder: "/",
       pageNumber: 0,
-
+      order: "date"
     },
 
     searchListMediaParam: {
@@ -252,17 +253,32 @@ const MediaSourceStore: MediaSourceModel = {
   effects: {
     *getListMediaFromFileId({ payload }, { call, put }) {
 
-      const listFile = yield call(GetFiles, payload);
-      const listId = listFile.files.map((file: any) => {
-        return file.id
-      })
-      const {data} = yield call(GetListMEdiaFromFiledId, listId);
-
-
-      
+      let data: any = [];
+      if (payload.id) {
+        const {result} = call(GetMediaSourceById, payload.id);
+        if (result) {
+          data.push(result);
+        }
+      } else {
+        const listFile = yield call(GetFiles, payload);
+        const listId = listFile.files.map((file: any) => {
+          return file.id
+        })
+        data = yield call(GetListMediaFromFiledId, listId);
+        console.log('====================================');
+        console.log("File >>>>", data, payload);
+        console.log('====================================');
+        yield put({
+          type: "setTotalItemReducer",
+          payload: listFile.files_total
+        })
+      }
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
       yield put({
         type: "setListMediaReducer",
-        payload: data.result.data
+        payload: data.data.result.data
       })
 
       yield put({
@@ -270,10 +286,7 @@ const MediaSourceStore: MediaSourceModel = {
         payload
       })
 
-      yield put({
-        type: "setTotalItemReducer",
-        payload: listFile.files_total
-      })
+      
       
     },
     *searchListMedia({ payload }, { call, put }) {
@@ -376,6 +389,10 @@ const MediaSourceStore: MediaSourceModel = {
       console.log('====================================');
       yield call(UpdateFile, updateParam);
       yield call(RemoveMediaSource, updateParam);
+    },
+
+    *removeFolder({ payload }, { call }) {
+      yield call(RemoveFolder, payload);
     }
   },
 
@@ -425,9 +442,6 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     setGetListFileParamReducer(state, { payload }) {
-      console.log('====================================');
-      console.log("Files >>>>", payload);
-      console.log('====================================');
       return {
         ...state,
         getListFileParam: {
@@ -438,9 +452,6 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     setGetListFolderParamReducer(state, { payload }) {
-      console.log('====================================');
-      console.log("Folders >>>>", payload);
-      console.log('====================================');
       return {
         ...state,
         getListFolderParam: {
@@ -552,7 +563,15 @@ const MediaSourceStore: MediaSourceModel = {
           title: "",
           typeId: "",
           url_preview: "",
-          description: ""
+          description: "",
+          accountId: "",
+          fileId: "",
+          folder: "",
+          isSigned: -1,
+          mediaSrcId: "",
+          public_id: "",
+          tags: "",
+          typeName: "",
         }
       }
     },

@@ -205,7 +205,13 @@ const ScenarioStore: ScenarioStoreModel = {
       isSelected: false
     },
 
-    selectedPlaylistItems: []
+    selectedPlaylistItems: [],
+
+    viewScenarioDetailComponent: {
+      visible: true,
+      isLoading: false,
+      playlistLoading: false
+    }
   },
 
   effects: {

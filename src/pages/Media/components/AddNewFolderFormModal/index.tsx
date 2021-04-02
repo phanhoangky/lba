@@ -28,14 +28,14 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
       type: 'media/createFolder',
       payload: {
         ...createFolderParam,
-        parent_id: breadScrumb[breadScrumb.length - 1].id,
+        parent_id: breadScrumb?.[breadScrumb.length - 1].id,
         ...values,
       },
     });
   };
 
   handleCreateFolder = async (values: any) => {
-    this.createFolder(values)
+    await this.createFolder(values)
       .then(() => {
         openNotification('success', 'Create Folder Successfully', `${values.name} was created`);
         this.setListLoading(true).then(() => {
@@ -91,18 +91,12 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
-    const { listLoading, addNewFolderModal } = this.props.media;
+    const { addNewFolderModal } = this.props.media;
     return (
       <Modal
-        title={
-          <>
-            <Skeleton active loading={listLoading}>
-              Create New Folder
-            </Skeleton>
-          </>
-        }
-        visible={addNewFolderModal.visible}
-        confirmLoading={addNewFolderModal.isLoading}
+        title={<>Create New Folder</>}
+        visible={addNewFolderModal?.visible}
+        confirmLoading={addNewFolderModal?.isLoading}
         closable={false}
         destroyOnClose={true}
         onOk={() => {
@@ -111,7 +105,6 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
               this.setAddNewFolderModal({
                 isLoading: true,
               });
-
               this.handleCreateFolder(values)
                 .then(() => {
                   this.setAddNewFolderModal({
@@ -136,21 +129,23 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
       >
         <Card title={'Enter new folder name'}>
           <Form ref={this.formRef} layout="vertical" name="Create_Folder">
-            <Form.Item
-              label="Folder Name"
-              name="name"
-              rules={[{ required: true, message: 'Please input name' }]}
-            >
-              <Input
-                type="text"
-                // value={createFolderParam.name}
-                onChange={() => {
-                  // this.setAddNewFolderParam({
-                  //   name: e.target.value,
-                  // });
-                }}
-              />
-            </Form.Item>
+            <Skeleton active loading={addNewFolderModal?.isLoading}>
+              <Form.Item
+                label="Folder Name"
+                name="name"
+                rules={[{ required: true, message: 'Please input name' }]}
+              >
+                <Input
+                  type="text"
+                  // value={createFolderParam.name}
+                  onChange={() => {
+                    // this.setAddNewFolderParam({
+                    //   name: e.target.value,
+                    // });
+                  }}
+                />
+              </Form.Item>
+            </Skeleton>
           </Form>
         </Card>
       </Modal>

@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Modal, Row, Space, Table } from 'antd';
+import { Button, Col, Modal, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
 import type {
@@ -31,15 +31,31 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
   state = {};
 
   componentDidMount = async () => {
+    this.setViewPlaylistDetailComponent({
+      isLoading: true,
+    });
     this.setTableLoading(true)
       .then(() => {
-        Promise.all([this.callGetListPlaylist()]).then(() => {
+        Promise.all([this.callGetListPlaylist()]).then(async () => {
           this.readJWT();
+          const { listPlaylist } = this.props.playlists;
+          const first = listPlaylist && listPlaylist.length > 0 ? listPlaylist[0] : null;
+          if (first) {
+            this.setSelectedPlaylist(first).then(() => {
+              this.viewPlaylistComponentRef.current?.componentDidMount();
+            });
+          }
+          this.setViewPlaylistDetailComponent({
+            isLoading: false,
+          });
           this.setTableLoading(false);
         });
       })
       .catch((error) => {
         Promise.reject(error);
+        this.setViewPlaylistDetailComponent({
+          isLoading: false,
+        });
         this.setTableLoading(false);
       });
   };
@@ -47,7 +63,6 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
 
@@ -182,7 +197,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
   };
 
   handleRemovePlaylist = async (record: Playlist) => {
-    const { selectedPlaylist } = this.props.playlists;
+    // const { selectedPlaylist } = this.props.playlists;
     Modal.confirm({
       title: `Are you sure you want to remove ${record?.title}`,
       centered: true,
@@ -309,7 +324,16 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                       </Button>
                       <Button
                         onClick={(e) => {
-                          this.handleRemovePlaylist(record);
+                          this.setTableLoading(true)
+                            .then(() => {
+                              this.handleRemovePlaylist(record).then(() => {
+                                this.setTableLoading(false);
+                              });
+                            })
+                            .catch((error) => {
+                              this.setTableLoading(false);
+                              Promise.reject(error);
+                            });
                           e.stopPropagation();
                         }}
                         danger
@@ -323,6 +347,9 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
             </Table>
           </Col>
           <Col span={14}>
+            {viewPlaylistDetailComponent?.visible && (
+              <Typography.Title level={4}>Playlist Detail</Typography.Title>
+            )}
             {viewPlaylistDetailComponent?.visible && (
               <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />
             )}

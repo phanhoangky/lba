@@ -30,6 +30,7 @@ export enum CONSTANTS_PUBLITIO {
   GET_FOLDERS_URL = '/folders/list',
   CREATE_FOLDER_URL = '/folders/create',
   UPDATE_FILE_URL = '/files/update',
+  REMOVE_FOLDER_URL = '/folders/delete',
 }
 
 export enum CONSTANTS_RAPID {

@@ -26,6 +26,8 @@ export type Campaign = {
   types: any[];
   name: string;
   isLoading?: boolean;
+  percentMoneyUsed?: number;
+  percentWin?: number;
 };
 
 export type CampaignModelState = {
@@ -34,7 +36,7 @@ export type CampaignModelState = {
   totalCampaigns: number; 
   selectedCampaign: Campaign;
   
-  getListCampaignParam: BaseGetRequest & {mail: string};
+  getListCampaignParam: BaseGetRequest & {mail: string, id?: string};
 
   createCampaignParam: CreateCampaignParam;
 
@@ -44,10 +46,18 @@ export type CampaignModelState = {
     address: string;
     currentStep: number;
     fees?: any;
-    
+    previewScenarioModal?: {
+      visible: boolean;
+      isLoading: boolean;
+    }
   };
 
   editCampaignDrawer: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
+  viewCampaignDetailComponent?: {
     visible: boolean;
     isLoading: boolean;
   }
@@ -80,6 +90,8 @@ export type CampaignModelStore = {
     setSelectedCampaignReducer: Reducer<CampaignModelState>;
 
     setEditCampaignReducer: Reducer<CampaignModelState>;
+
+    setViewCampaignDetailComponentReducer: Reducer<CampaignModelState>;
   }
 };
 
@@ -141,12 +153,22 @@ const CampaignStore: CampaignModelStore = {
       isLoading: false,
       address: "",
       currentStep: 1,
+      previewScenarioModal: {
+        isLoading: false,
+        visible :false
+      }
     },
 
     editCampaignDrawer: {
       isLoading: false,
       visible: false,
-    }
+    },
+
+    viewCampaignDetailComponent: {
+      visible: false,
+      isLoading: false,
+    },
+    
   },
 
   effects: {
@@ -283,8 +305,15 @@ const CampaignStore: CampaignModelStore = {
           ...payload
         }
       }
+    },
+
+    setViewCampaignDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewCampaignDetailComponent: payload
+      }
     }
-  }
+   }
 }
 
 

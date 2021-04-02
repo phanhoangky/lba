@@ -11,6 +11,7 @@ import type { ConnectState } from '@/models/connect';
 import lba from '@/assets/lba.png';
 
 import styles from './index.less';
+import { Animated } from 'react-animated-css';
 
 export type LoginProps = {
   dispatch: Dispatch;
@@ -73,29 +74,108 @@ const Login: React.FC<LoginProps> = (props) => {
     // });
   };
 
+  const getCurrentUser = async () => {
+    await props.dispatch({
+      type: 'user/getCurrentUser',
+    });
+  };
+
   const handleEmailSubmit = async () => {
     emailLogin().then(() => {
       setToken();
     });
   };
   return (
-    <div className={styles.main}>
-      <ProForm
-        initialValues={{
-          autoLogin: true,
-        }}
-        // submitter={{
-        //   render: (_, dom) => dom.pop(),
-        //   submitButtonProps: {
-        //     loading: submitting,
-        //     size: 'large',
-        //     style: {
-        //       width: '100%',
-        //     },
-        //   },
-        // }}
-        submitter={false}
-      >
+    // <div className={styles.main}>
+    //   <ProForm
+    //     initialValues={{
+    //       autoLogin: true,
+    //     }}
+    //     // submitter={{
+    //     //   render: (_, dom) => dom.pop(),
+    //     //   submitButtonProps: {
+    //     //     loading: submitting,
+    //     //     size: 'large',
+    //     //     style: {
+    //     //       width: '100%',
+    //     //     },
+    //     //   },
+    //     // }}
+    //     submitter={false}
+    //   >
+    //     <div
+    //       style={{
+    //         width: '80%',
+    //         height: 'auto',
+    //         margin: '0 auto',
+    //       }}
+    //     >
+    //       <Image src={lba} preview={false} width={'100%'} />
+    //     </div>
+    //     <Divider></Divider>
+    //     <Button
+    //       style={{
+    //         width: '100%',
+    //         marginBottom: 24,
+    //         height: 'auto',
+    //         padding: '1em',
+    //       }}
+    //       type="primary"
+    //       block
+    //       onClick={() => {
+    //         handleSubmitGoogle();
+    //       }}
+    //     >
+    //       <Space wrap direction="horizontal">
+    //         <GoogleCircleFilled
+    //           style={{
+    //             fontSize: '1.2em',
+    //           }}
+    //         />
+    //         Login with Google
+    //       </Space>
+    //     </Button>
+    //     <Divider />
+    //     <Button
+    //       style={{
+    //         width: '100%',
+    //         marginBottom: 24,
+    //         height: 'auto',
+    //         padding: '1em',
+    //       }}
+    //       type="primary"
+    //       block
+    //       onClick={() => {
+    //         handleEmailSubmit();
+    //       }}
+    //     >
+    //       <Space wrap direction="horizontal">
+    //         <MailTwoTone
+    //           style={{
+    //             fontSize: '1.2em',
+    //           }}
+    //         />
+    //         Login with Email
+    //       </Space>
+    //     </Button>
+    //     <div
+    //       style={{
+    //         marginBottom: 24,
+    //       }}
+    //     ></div>
+    //   </ProForm>
+
+    // </div>
+    <>
+      <div className={styles.welcomeWrapper}>
+        <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}>
+          <div className="welcome-text-wrapper">
+            <h1>
+              Hi, my name is <span className="text-color-main">Your Name</span> <br /> I'm the
+              Unknown Developer.
+            </h1>
+          </div>
+        </Animated>
         <div
           style={{
             width: '80%',
@@ -103,10 +183,10 @@ const Login: React.FC<LoginProps> = (props) => {
             margin: '0 auto',
           }}
         >
-          <Image src={lba} preview={false} width={'100%'} />
+          {/* <Image src={lba} preview={false} width={'100%'} /> */}
         </div>
         <Divider></Divider>
-        <Button
+        {/* <Button
           style={{
             width: '100%',
             marginBottom: 24,
@@ -127,37 +207,29 @@ const Login: React.FC<LoginProps> = (props) => {
             />
             Login with Google
           </Space>
+        </Button> */}
+        <br />
+        <Button className="signin-btn">
+          <div className="sign-in-btn-overlap"></div>
+          <div
+            className="sign-in-btn-text"
+            onClick={() => {
+              handleSubmitGoogle();
+            }}
+          >
+            <Space>
+              <GoogleCircleFilled
+                className="google-icon"
+                style={{
+                  fontSize: '1.2em',
+                }}
+              />
+              Login with Google
+            </Space>
+          </div>
         </Button>
-        <Divider />
-        <Button
-          style={{
-            width: '100%',
-            marginBottom: 24,
-            height: 'auto',
-            padding: '1em',
-          }}
-          type="primary"
-          block
-          onClick={() => {
-            handleEmailSubmit();
-          }}
-        >
-          <Space wrap direction="horizontal">
-            <MailTwoTone
-              style={{
-                fontSize: '1.2em',
-              }}
-            />
-            Login with Email
-          </Space>
-        </Button>
-        <div
-          style={{
-            marginBottom: 24,
-          }}
-        ></div>
-      </ProForm>
-    </div>
+      </div>
+    </>
   );
 };
 

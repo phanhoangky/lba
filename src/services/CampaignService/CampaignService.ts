@@ -43,6 +43,11 @@ export async function getListCampaigns(param: BaseGetRequest) {
   return res;
 }
 
+export async function getCampaignById(id: string) {
+  const { data } = await ApiHelper.get(`${CONSTANTS_LBA.CAMPAIGN_URL}/${id}`);
+  return data;
+}
+
 export async function createCampaign(param: CreateCampaignParam) {
   await ApiHelper.post(`${CONSTANTS_LBA.CAMPAIGN_URL}`, param);
 }

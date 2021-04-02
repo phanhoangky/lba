@@ -41,7 +41,7 @@ class FilterDateComponent extends React.Component<FilterDateComponentProps> {
     const { createCampaignParam } = this.props.campaign;
     return (
       <>
-        <Space>
+        <Space wrap>
           {createCampaignParam.dateFilter.split('').map((date, index) => {
             return (
               <Button

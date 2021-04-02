@@ -219,7 +219,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       };
 
       console.log('====================================');
-      console.log(updateParam, param, selectedPlaylist);
+      console.log(updateParam);
       console.log('====================================');
       await this.props.dispatch({
         type: 'playlists/updatePlaylist',
@@ -336,36 +336,20 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
-  // clearSelectedMedia = async () => {
-  //   const { listMediaNotBelongToPlaylist } = this.props.playlists;
-  //   await this.props.dispatch({
-  //     type: 'playlists/clearSelectedMediaReducer',
-  //   });
-
-  //   await this.setListMediaNotBelongToPlaylist(
-  //     listMediaNotBelongToPlaylist.map((media: any) => {
-  //       return {
-  //         ...media,
-  //         isSelected: false,
-  //       };
-  //     }),
-  //   );
-  // };
-
   onSortEnd = ({ oldIndex, newIndex }: any) => {
     if (oldIndex !== newIndex) {
-      const { selectedPlaylistItems } = this.props.playlists;
+      const { selectedPlaylist } = this.props.playlists;
 
-      if (selectedPlaylistItems) {
+      if (selectedPlaylist && selectedPlaylist.playlistItems) {
         const array: PlaylistItem[] = [];
-        const newData = arrayMove(array.concat(selectedPlaylistItems), oldIndex, newIndex).filter(
-          (el) => !!el,
-        );
-        // console.log('Sorted items: ', newData);
+        const newData = arrayMove(
+          array.concat(selectedPlaylist.playlistItems),
+          oldIndex,
+          newIndex,
+        ).filter((el) => !!el);
 
-        this.props.dispatch({
-          type: 'playlists/setSelectedPlaylistItemsReducer',
-          payload: newData.map((playlist, index) => {
+        this.setSelectedPlaylist({
+          playlistItems: newData.map((playlist, index) => {
             return {
               ...playlist,
               displayOrder: index,
@@ -373,6 +357,16 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
             };
           }),
         });
+        // this.props.dispatch({
+        //   type: 'playlists/setSelectedPlaylistItemsReducer',
+        //   payload: newData.map((playlist, index) => {
+        //     return {
+        //       ...playlist,
+        //       displayOrder: index,
+        //       index,
+        //     };
+        //   }),
+        // });
       }
     }
   };
@@ -697,8 +691,8 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                           <Button
                             onClick={() => {
                               this.setEditPlaylistDrawer({
-                                playingUrl: record.url,
-                                playlingMediaType: record.typeName,
+                                playingUrl: record.mediaSrc.urlPreview,
+                                playlingMediaType: record.mediaSrc.type.name,
                               });
                             }}
                           >
@@ -728,47 +722,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
             <MediasTableComponent {...this.props} />
           </Row>
         </Form>
-        {/* <Table
-          dataSource={listMedia}
-          pagination={false}
-          loading={editPlaylistDrawer?.isLoading}
-          scroll={{
-            x: 400,
-            y: 300,
-          }}
-        >
-          <Column key="Title" dataIndex="title" title="Title"></Column>
-          <Column key="Title"></Column>
-          <Column
-            key="action"
-            title="Action"
-            render={(record) => {
-              return (
-                <Space>
-                  <Button
-                    disabled={availableDuration < minDuration}
-                    onClick={() => {
-                      this.addNewPlaylistItem(record);
-                    }}
-                  >
-                    <PlusSquareTwoTone />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      this.setEditPlaylistDrawer({
-                        playingUrl: record.urlPreview,
-                        playlingMediaType: record.type.name ? record.type.name : record.typeName,
-                      });
-                    }}
-                  >
-                    <PlaySquareTwoTone />
-                  </Button>
-                </Space>
-              );
-            }}
-          ></Column>
-        </Table> */}
-        {/* Add New Playlist Item */}
       </Modal>
     );
   }

@@ -47,12 +47,26 @@ export async function PostAuthentication(params: AuthenticationRequest) {
   return res
 }
 
-export async function EmailLogin() {
-  const provider = new firebase.auth.EmailAuthProvider();
-  const res = await firebase
-    .auth()
-    .signInWithPopup(provider);
-  return res;
+export async function EmailLogin(email: string, password: string) {
+  firebase.auth().signInWithEmailAndPassword(email, password)
+  .then((userCredential) => {
+    // Signed in
+    const {user} = userCredential;
+    console.log('====================================');
+    console.log(user);
+    console.log('====================================');
+    return user;
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.log('====================================');
+    console.log(errorCode, errorMessage);
+    console.log('====================================');
+    throw new Error(error);
+  });
+
 }
 
 export async function SignOut() {

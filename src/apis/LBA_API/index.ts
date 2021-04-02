@@ -1,3 +1,4 @@
+import { openNotification } from "@/utils/utils";
 import axios from "axios";
 import { history } from "umi";
 
@@ -32,23 +33,32 @@ ApiHelper.interceptors.request.use(config => {
 ApiHelper.interceptors.response.use(
   response => response,
   error => {
-    
+    console.log('====================================');
+    console.error(error.response);
+    console.log('====================================');
     if (error.response) {
-      const { status } = error.response;
+      const { status, data } = error.response;
       if (status) {
         if (status === 401) {
-        history.push("/account/login");
+          history.replace("/account/login");
+        } else {
+          history.replace('/exception/500')
+        }
       } else {
-        history.push('/exception/500')
+        history.replace('/exception/500')
       }
-      } else {
-        history.push('/exception/500')
-      }
+      const { errors } = data;
+      let listError = "";
+      errors.id.forEach((element: string) => {
+        listError = listError.concat(`${element} \n`);
+      });
+      openNotification("error", error.response.status, listError);
     } else {
-      history.push('/exception/500')
+      history.replace('/exception/500');
+      openNotification("error", error.response.status, error.response.status)
     }
     // Promise.reject(new Error(error)).catch(e => {
-    //   openNotification("error", "Error", e)
+      
     // });
     // throw new Error(error);
   }

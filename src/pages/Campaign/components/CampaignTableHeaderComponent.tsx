@@ -77,18 +77,7 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
               });
           }}
         />
-        <Button
-          onClick={async () => {
-            this.setListScenarioWithAtLeastOneItems().then(() => {
-              this.setAddNewCampaignModal({
-                visible: true,
-              });
-            });
-          }}
-          icon={<PlusSquareTwoTone />}
-        >
-          Add New Campaign
-        </Button>
+
         <Dropdown
           overlay={
             <Menu
@@ -97,6 +86,7 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
                   .then(() => {
                     this.callGetListCampaigns({
                       isDescending: e.key === 'desc',
+                      isSort: true,
                     }).then(() => {
                       this.setCampaignTableLoading(false);
                     });
@@ -127,7 +117,8 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
             this.setCampaignTableLoading(true)
               .then(() => {
                 this.callGetListCampaigns({
-                  orderBy: e,
+                  orderBy: e === '' ? undefined : e,
+                  isSort: true,
                 }).then(() => {
                   this.setCampaignTableLoading(false);
                 });
@@ -140,6 +131,18 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
           <Select.Option value="">Default</Select.Option>
           <Select.Option value="createDate">Create Date</Select.Option>
         </Select>
+        <Button
+          onClick={async () => {
+            this.setListScenarioWithAtLeastOneItems().then(() => {
+              this.setAddNewCampaignModal({
+                visible: true,
+              });
+            });
+          }}
+          icon={<PlusSquareTwoTone />}
+        >
+          Add New Campaign
+        </Button>
       </Space>
     );
   }

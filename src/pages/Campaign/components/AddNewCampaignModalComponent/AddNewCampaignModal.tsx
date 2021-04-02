@@ -1,7 +1,17 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
-import { Col, DatePicker, Divider, Form, Input, InputNumber, Row, Select, Space } from 'antd';
+import {
+  Col,
+  DatePicker,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  Space,
+} from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import L from 'leaflet';
 import moment from 'moment';
@@ -62,6 +72,8 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     await this.props.dispatch({
       type: `${CAMPAIGN}/clearCreateCampaignParamReducer`,
     });
+
+    this.formRef.current?.resetFields();
   };
 
   // callGetListScenario = async (param?: any) => {
@@ -137,9 +149,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
       this.formRef.current
         .validateFields()
         .then(async (values) => {
-          console.log('====================================');
-          console.log(values);
-          console.log('====================================');
           if (
             (createCampaignParam && !createCampaignParam.address) ||
             createCampaignParam.address === ''
@@ -179,9 +188,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                     });
                   })
                   .catch((error) => {
-                    console.log('====================================');
-                    console.log('error');
-                    console.log('====================================');
                     Promise.reject(new Error(error));
                     openNotification(
                       'error',
@@ -207,10 +213,11 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
               });
             });
         })
-        .catch((info) => {
+        .catch((error) => {
           console.log('====================================');
-          console.log('Info >>>', info);
+          console.error(error);
           console.log('====================================');
+          openNotification('error', 'Fail to create new campaign', 'fail');
         });
     }
   };
@@ -241,48 +248,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
           });
         }
       }
-    }
-  };
-
-  handleAutoCompleteSearch = async (coordination: string, address: string) => {
-    if (address !== '') {
-      const { createCampaignParam } = this.props.campaign;
-      const { mapComponent } = this.props.location;
-      const lat = Number.parseFloat(coordination.split('-')[0]);
-      const lon = Number.parseFloat(coordination.split('-')[1]);
-
-      if (mapComponent) {
-        if (mapComponent.map) {
-          mapComponent.map.setView([lat, lon]);
-
-          if (mapComponent.marker) {
-            mapComponent.marker.setLatLng([lat, lon]);
-            L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
-          } else {
-            const marker = L.marker([lat, lon]).addTo(mapComponent.map);
-            L.popup().setLatLng([lat, lon]).setContent(address).openOn(mapComponent.map);
-            await this.setMapComponent({
-              marker,
-            });
-          }
-
-          if (mapComponent.circle) {
-            mapComponent.circle.setLatLng([lat, lon]).redraw();
-
-            if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
-              mapComponent.circle.setRadius(createCampaignParam.radius * 1000);
-            }
-          } else if (createCampaignParam.radius && createCampaignParam.radius !== 0) {
-            const circle = L.circle([lat, lon]).setRadius(createCampaignParam.radius);
-            circle.addTo(mapComponent.map);
-            await this.setMapComponent({
-              circle,
-            });
-          }
-        }
-      }
-
-      await this.setCreateNewCampaignParam({ location: coordination, address });
     }
   };
 
@@ -346,9 +311,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     if (address !== '') {
       const listLocations = await forwardGeocoding(address);
 
-      console.log('====================================');
-      console.log('List Location >>>', listLocations);
-      console.log('====================================');
       if (listLocations.length > 0) {
         const location = listLocations[0];
         const lat = Number.parseFloat(location.lat);
@@ -388,190 +350,203 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
 
     const { listDeviceTypes } = this.props.deviceStore;
-
+    const { currentUser } = this.props.user;
+    const maxBudget = currentUser?.balance ? Number.parseFloat(currentUser.balance.toString()) : 0;
+    console.log('====================================');
+    console.log(maxBudget);
+    console.log('====================================');
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
 
     // const { mapComponent } = this.props.location;
 
-    console.log('====================================');
-    console.log(this.props.campaign.createCampaignParam);
-    console.log('====================================');
     return (
       <>
         {addNewCampaignModal.visible && (
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
-            <Form.Item
-              name="name"
-              label="Name"
-              rules={[
-                { required: true, message: 'Please input the name of campaign!' },
-                // { min: 100000, message: 'Budeget must larger than 100.000' },
-              ]}
-            >
-              <Input
-              // onChange={(e) => {
-              //   this.hanldeOnChangeBudget(e);
-              // }}
-              />
-            </Form.Item>
-            <Form.Item
-              name="budget"
-              label="Budget"
-              rules={[
-                { required: true, message: 'Please input the name of collection!' },
-                // { min: 100000, message: 'Budeget must larger than 100.000' },
-              ]}
-            >
-              <InputNumber
-                style={{ width: 200 }}
-                min={100000}
-                onChange={(e) => {
-                  this.hanldeOnChangeBudget(e);
-                }}
-              />
-            </Form.Item>
-            <Row>Total Fee {addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
+            <Row gutter={20}>
+              {/* Start Column */}
+              <Col span={12}>
+                <Form.Item
+                  name="name"
+                  label="Name"
+                  rules={[
+                    { required: true, message: 'Please input the name of campaign!' },
+                    // { min: 100000, message: 'Budeget must larger than 100.000' },
+                  ]}
+                >
+                  <Input
+                  // onChange={(e) => {
+                  //   this.hanldeOnChangeBudget(e);
+                  // }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="budget"
+                  label="Budget"
+                  rules={[
+                    { required: true, message: 'Please input the name of collection!' },
+                    // { min: 100000, message: 'Budeget must larger than 100.000' },
+                    // { max: maxBudget, message: 'Budeget must smaller than your balance' },
+                  ]}
+                >
+                  <InputNumber
+                    style={{ width: '100%' }}
+                    min={100000}
+                    max={maxBudget}
+                    onChange={(e) => {
+                      this.hanldeOnChangeBudget(e);
+                    }}
+                  />
+                </Form.Item>
+                {/* <Row>Total Fee {addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
             <Row>Remain Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee}</Row>
-            <Row>Cancel Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row>
-            <Form.Item name="description" label="Description">
-              <Input.TextArea rows={4} />
-            </Form.Item>
-            <Row>
-              <Col span={10}>Time Filter</Col>
-            </Row>
-            <Row>
-              <Col span={24}>
-                <TimeFilterComponent {...this.props} />
-              </Col>
-            </Row>
-            <Divider></Divider>
-            <Row>
-              <Col span={10}>Date Filter</Col>
-              <Col span={14}></Col>
-            </Row>
-            <Space>
-              <FilterDate {...this.props} />
-            </Space>
-            <Divider></Divider>
-            <Form.Item
-              name="startEnd"
-              label="Start-End"
-              rules={[{ type: 'array' as const, required: true, message: 'Please select time!' }]}
-            >
-              <DatePicker.RangePicker
-                ref={this.datePickerRef}
-                format={'YYYY/MM/DD'}
-                disabledDate={(current) => {
-                  return current < moment().endOf('day');
-                }}
-                onChange={(e) => {
-                  if (e) {
-                    if (e[0] && e[1]) {
-                      const startDate = e[0].format('YYYY-MM-DD');
-                      const endDate = e[1].format('YYYY-MM-DD');
-                      this.setCreateNewCampaignParam({
-                        startDate,
-                        endDate,
-                      });
-                      if (this.datePickerRef) {
-                        this.datePickerRef.current.blur();
+            <Row>Cancel Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row> */}
+                <Form.Item name="description" label="Description">
+                  <Input.TextArea rows={4} />
+                </Form.Item>
+
+                <Divider></Divider>
+                <Form.Item
+                  name="startEnd"
+                  label="Start-End"
+                  rules={[
+                    { type: 'array' as const, required: true, message: 'Please select time!' },
+                  ]}
+                >
+                  <DatePicker.RangePicker
+                    ref={this.datePickerRef}
+                    format={'YYYY/MM/DD'}
+                    disabledDate={(current) => {
+                      return current < moment().endOf('day');
+                    }}
+                    onChange={(e) => {
+                      if (e) {
+                        if (e[0] && e[1]) {
+                          const startDate = e[0].format('YYYY-MM-DD');
+                          const endDate = e[1].format('YYYY-MM-DD');
+                          this.setCreateNewCampaignParam({
+                            startDate,
+                            endDate,
+                          });
+                          if (this.datePickerRef) {
+                            this.datePickerRef.current.blur();
+                          }
+                        }
                       }
-                    }
-                  }
-                }}
-              ></DatePicker.RangePicker>
-            </Form.Item>
-            <Form.Item
-              name="typeIds"
-              label="Type"
-              rules={[{ required: true, message: 'Please select type' }]}
-            >
-              <Select
-                mode="multiple"
-                style={{ width: '100%' }}
-                // onChange={(e) => {
-                //   this.setCreateNewCampaignParam({
-                //     typeIds: e,
-                //   });
-                // }}
-                autoClearSearchValue={false}
-                // defaultValue={listDeviceTypes[0]?.id}
-                showSearch
-                // value={createCampaignParam.typeIds}
-              >
-                {listDeviceTypes?.map((type) => {
-                  return (
-                    <Select.Option key={type.id} value={type.id}>
-                      {type.typeName}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-            <Form.Item
-              name="radius"
-              label="Radius"
-              rules={[{ required: true, message: 'Please input address' }]}
-            >
-              <InputNumber
-                min={0}
-                width="200px"
-                // value={createCampaignParam.radius}
-                onChange={async (e) => {
-                  if (e) {
-                    this.setCreateNewCampaignParam({
-                      radius: e,
-                    }).then(() => {
-                      this.setRadiusOfLocation(Number.parseFloat(e) * 1000);
-                    });
-                  }
-                }}
-              />
-            </Form.Item>
-
-            <Row style={{ textAlign: 'center' }}>
-              <Col span={24}>Choose Scenario</Col>
-            </Row>
-
-            <SelectScenarioPart {...this.props} />
-
-            <Row style={{ textAlign: 'center' }}>
-              <Col span={24}>Choose Location</Col>
-            </Row>
-            <Form.Item
-              label="Address"
-              name="address"
-              rules={[{ required: true, message: 'Please enter address' }]}
-            >
-              <AutoCompleteComponent
-                ref={this.autoCompleteRef}
-                {...this.props}
-                inputValue={createCampaignParam?.address}
-                address={createCampaignParam?.address}
-                onInputChange={async (e) => {
-                  await this.setCreateNewCampaignParam({
-                    address: e,
-                  });
-                }}
-                onChange={async (address) => {
-                  await this.onAutoCompleteSelect(address);
-                }}
-              />
-            </Form.Item>
-            {createCampaignParam?.address === '' && (
-              <p
-                style={{
-                  color: 'red',
-                  transition: 'ease 0.5s',
-                }}
-              >
-                Please enter campaign address
-              </p>
-            )}
-            <Row>
-              <Col span={24}>
-                <LeafletMapComponent {...this.props} />
+                    }}
+                  ></DatePicker.RangePicker>
+                </Form.Item>
+                <Form.Item
+                  name="typeIds"
+                  label="Type"
+                  rules={[{ required: true, message: 'Please select type' }]}
+                >
+                  <Select
+                    mode="multiple"
+                    style={{ width: '100%' }}
+                    // onChange={(e) => {
+                    //   this.setCreateNewCampaignParam({
+                    //     typeIds: e,
+                    //   });
+                    // }}
+                    autoClearSearchValue={false}
+                    // defaultValue={listDeviceTypes[0]?.id}
+                    showSearch
+                    // value={createCampaignParam.typeIds}
+                  >
+                    {listDeviceTypes?.map((type) => {
+                      return (
+                        <Select.Option key={type.id} value={type.id}>
+                          {type.typeName}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  name="radius"
+                  label="Radius"
+                  rules={[{ required: true, message: 'Please input address' }]}
+                >
+                  <InputNumber
+                    min={0}
+                    style={{ width: '100%' }}
+                    // value={createCampaignParam.radius}
+                    onChange={async (e) => {
+                      if (e) {
+                        this.setCreateNewCampaignParam({
+                          radius: e,
+                        }).then(() => {
+                          this.setRadiusOfLocation(Number.parseFloat(e) * 1000);
+                        });
+                      }
+                    }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="Address"
+                  name="address"
+                  // rules={[{ required: true, message: 'Please enter address' }]}
+                >
+                  <AutoCompleteComponent
+                    ref={this.autoCompleteRef}
+                    {...this.props}
+                    inputValue={createCampaignParam?.address}
+                    address={createCampaignParam?.address}
+                    onInputChange={async (e) => {
+                      await this.setCreateNewCampaignParam({
+                        address: e,
+                      });
+                    }}
+                    onChange={async (address) => {
+                      await this.onAutoCompleteSelect(address);
+                    }}
+                  />
+                </Form.Item>
+                {createCampaignParam?.address === '' && (
+                  <p
+                    style={{
+                      color: 'red',
+                      transition: 'ease 0.5s',
+                    }}
+                  >
+                    Please enter campaign address
+                  </p>
+                )}
+                <Row>
+                  <Col span={24}>
+                    <LeafletMapComponent {...this.props} />
+                  </Col>
+                </Row>
               </Col>
+              {/* End Column */}
+
+              {/* Start Column */}
+              <Col span={12}>
+                <Row>
+                  <Col span={10}>Time Filter</Col>
+                </Row>
+                <Row>
+                  <Col span={24}>
+                    <TimeFilterComponent {...this.props} />
+                  </Col>
+                </Row>
+                <Divider></Divider>
+                <Row>
+                  <Col span={10}>Date Filter</Col>
+                  <Col span={14}></Col>
+                </Row>
+                <Space>
+                  <FilterDate {...this.props} />
+                </Space>
+                <Divider></Divider>
+                <Row style={{ textAlign: 'center' }}>
+                  <Col span={24}>Choose Scenario</Col>
+                </Row>
+
+                <SelectScenarioPart {...this.props} />
+              </Col>
+              {/* End Column */}
             </Row>
           </Form>
         )}

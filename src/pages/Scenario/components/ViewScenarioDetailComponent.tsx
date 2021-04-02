@@ -1,6 +1,6 @@
 import { openNotification, sortArea } from '@/utils/utils';
-import { CloseSquareOutlined, UploadOutlined } from '@ant-design/icons';
-import { Col, Form, Input, Row, Image, Checkbox, Divider, Table, Modal, Spin } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+import { Col, Form, Input, Row, Image, Divider, Table, Modal, Skeleton } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
@@ -18,6 +18,9 @@ export type ViewScenarioDetailProps = {
 export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDetailProps> {
   componentDidMount() {
     const { selectedSenario } = this.props.scenarios;
+    console.log('====================================');
+    console.log(selectedSenario, this.formRef.current);
+    console.log('====================================');
     if (this.formRef.current) {
       this.formRef.current.setFieldsValue({
         title: selectedSenario?.title,
@@ -43,6 +46,13 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
   }
 
   componentDidUpdate() {
+    // const { selectedSenario } = this.props.scenarios;
+    // if (this.formRef.current) {
+    //   this.formRef.current.setFieldsValue({
+    //     title: selectedSenario?.title,
+    //     description: selectedSenario?.description,
+    //   });
+    // }
     this.ratioCalculation();
   }
 
@@ -311,7 +321,9 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                 openNotification('error', 'Fail to remove scenario ', error);
               });
           })
-          .catch(() => {
+          .catch((error) => {
+            Promise.reject(error);
+            openNotification('error', 'Fail to remove scenario ', error);
             this.setEditScenariosDrawer({
               isLoading: false,
             });
@@ -336,253 +348,160 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
     const selectedScenarioItem = selectedSenario?.scenarioItems?.filter((s) => s.isSelected)[0];
     return (
       <>
-        {viewScenarioDetailComponent?.isLoading && <Spin size="large" />}
+        {/* {viewScenarioDetailComponent?.isLoading && <Spin size="large" />} */}
 
         <>
-          <Form name="edit_scenario_form" layout="vertical" ref={this.formRef}>
-            <Form.Item
-              name="title"
-              label="Title"
-              rules={[{ required: true, message: 'Please input title' }]}
-            >
-              <Input />
-            </Form.Item>
+          <Form name="view_scenario_detail" layout="vertical" ref={this.formRef}>
+            <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
+              <Form.Item
+                name="title"
+                label="Title"
+                rules={[{ required: true, message: 'Please input title' }]}
+              >
+                <Input readOnly />
+              </Form.Item>
+            </Skeleton>
 
-            <Form.Item name="description" label="Description">
-              <Input.TextArea rows={4} />
-            </Form.Item>
+            <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
+              <Form.Item name="description" label="Description">
+                <Input.TextArea readOnly rows={4} />
+              </Form.Item>
+            </Skeleton>
           </Form>
           {/* AREA */}
           <Row gutter={20}>
             <Col span={12}>
-              <div id="areaWrapper" className="area-wrapper">
-                {selectedSenario &&
-                  selectedSenario.layout.areas &&
-                  sortArea(selectedSenario.layout.areas).map((area) => {
-                    const scenarioItem = this.checkAreaIsUsed(area);
-                    return (
-                      <div
-                        key={area.id}
-                        style={{
-                          flex: `${area.width * 100}%`,
-                          position: 'relative',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          height: `${area.height * 100}%`,
-                          textAlign: 'center',
-                          border:
-                            selectedArea?.id === area.id ? `5px ridge red` : `2px solid black`,
-                          transition: 'ease',
-                          transitionDuration: '1s',
-                        }}
-                        // onDoubleClick={() => {
-                        //   this.setPlaylistDrawer({
-                        //     visible: true,
-                        //   });
-                        // }}
-                        onClick={async () => {
-                          this.setSelectedScenarioItem(scenarioItem);
-                          this.setSelectedArea(area);
-                        }}
-                      >
-                        {scenarioItem ? (
-                          <>
-                            <div
-                              className="remove-btn"
-                              onClick={(e) => {
-                                this.removeScenarioItems(scenarioItem);
-                                e.stopPropagation();
-                              }}
-                            >
-                              <CloseSquareOutlined />
-                            </div>
-                            <div className="media-wrapper">
-                              <div>{scenarioItem?.playlist?.title}</div>
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  width: '100%',
-                                  height: '100%',
-                                  left: 0,
-                                  top: 0,
-                                }}
-                              >
-                                {area &&
-                                  area.typeMediaName &&
-                                  area.typeMediaName.toLowerCase().includes('image') && (
-                                    <Image
-                                      src={area.urlPreview}
-                                      width={'100%'}
-                                      height={'100%'}
-                                      preview={false}
-                                    />
-                                  )}
-                                {area &&
-                                  area.typeMediaName &&
-                                  area.typeMediaName.toLowerCase().includes('video') && (
-                                    <video
-                                      src={area.urlPreview}
-                                      width={'100%'}
-                                      autoPlay
-                                      controls
-                                    ></video>
-                                  )}
+              <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
+                <div id="areaWrapper" className="area-wrapper">
+                  {selectedSenario &&
+                    selectedSenario.layout.areas &&
+                    sortArea(selectedSenario.layout.areas).map((area) => {
+                      const scenarioItem = this.checkAreaIsUsed(area);
+                      return (
+                        <div
+                          key={area.id}
+                          style={{
+                            flex: `${area.width * 100}%`,
+                            position: 'relative',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: `${area.height * 100}%`,
+                            textAlign: 'center',
+                            border:
+                              selectedArea?.id === area.id ? `5px ridge red` : `2px solid black`,
+                            transition: 'ease',
+                            transitionDuration: '1s',
+                          }}
+                          onClick={async () => {
+                            this.setSelectedScenarioItem(scenarioItem);
+                            this.setSelectedArea(area);
+                          }}
+                        >
+                          {scenarioItem ? (
+                            <>
+                              <div className="media-wrapper">
+                                <div>{scenarioItem?.playlist?.title}</div>
+                                <div
+                                  style={{
+                                    position: 'absolute',
+                                    width: '100%',
+                                    height: '100%',
+                                    left: 0,
+                                    top: 0,
+                                  }}
+                                >
+                                  {area &&
+                                    area.typeMediaName &&
+                                    area.typeMediaName.toLowerCase().includes('image') && (
+                                      <Image
+                                        src={area.urlPreview}
+                                        width={'100%'}
+                                        height={'100%'}
+                                        preview={false}
+                                      />
+                                    )}
+                                  {area &&
+                                    area.typeMediaName &&
+                                    area.typeMediaName.toLowerCase().includes('video') && (
+                                      <video
+                                        src={area.urlPreview}
+                                        width={'100%'}
+                                        autoPlay
+                                        controls
+                                      ></video>
+                                    )}
+                                </div>
                               </div>
-                            </div>
-                            <div className="audio-checkbox">
-                              <Checkbox
-                                checked={scenarioItem.audioArea}
-                                onChange={(e) => {
-                                  this.setAudioArea(scenarioItem.id, e.target.checked);
-                                }}
-                              />
-                            </div>
-                          </>
-                        ) : (
-                          <UploadOutlined />
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
+                              {/* <div className="audio-checkbox">
+                                <Checkbox
+                                  checked={scenarioItem.audioArea}
+                                  onChange={(e) => {
+                                    this.setAudioArea(scenarioItem.id, e.target.checked);
+                                  }}
+                                />
+                              </div> */}
+                            </>
+                          ) : (
+                            <UploadOutlined />
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </Skeleton>
             </Col>
             <Col span={12}>
-              <Row gutter={20}>
-                <Col span={24}>
-                  {selectedScenarioItem?.playlist ? (
-                    <>
-                      <Table
-                        dataSource={selectedScenarioItem?.playlist?.playlistItems.map((item) => {
-                          return {
-                            ...item,
-                            key: item.id,
-                          };
-                        })}
-                        loading={viewScenarioDetailComponent?.playlistLoading}
-                        scroll={{
-                          x: 400,
-                          y: 400,
-                        }}
-                        onRow={(record) => {
-                          return {
-                            onClick: () => {
-                              this.setUrlAreasOfScenario(
-                                selectedArea,
-                                record.mediaSrc.urlPreview,
-                                record.mediaSrc.type.name,
-                              );
-                            },
-                          };
-                        }}
-                      >
-                        <Column
-                          key="title"
-                          dataIndex={['mediaSrc', 'title']}
-                          title="Title"
-                        ></Column>
-                        <Column key="title" dataIndex="duration" title="Duration"></Column>
-                      </Table>
-                    </>
-                  ) : (
-                    ''
-                  )}
-                </Col>
-              </Row>
+              <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
+                <Row gutter={20}>
+                  <Col span={24}>
+                    {selectedScenarioItem?.playlist ? (
+                      <>
+                        <Table
+                          dataSource={selectedScenarioItem?.playlist?.playlistItems.map((item) => {
+                            return {
+                              ...item,
+                              key: item.id,
+                            };
+                          })}
+                          loading={viewScenarioDetailComponent?.playlistLoading}
+                          scroll={{
+                            y: 400,
+                          }}
+                          onRow={(record) => {
+                            return {
+                              onClick: () => {
+                                this.setUrlAreasOfScenario(
+                                  selectedArea,
+                                  record.mediaSrc.urlPreview,
+                                  record.mediaSrc.type.name,
+                                );
+                              },
+                            };
+                          }}
+                        >
+                          <Column
+                            key="title"
+                            dataIndex={['mediaSrc', 'title']}
+                            title="Title"
+                          ></Column>
+                          <Column key="title" dataIndex="duration" title="Duration"></Column>
+                        </Table>
+                      </>
+                    ) : (
+                      ''
+                    )}
+                  </Col>
+                </Row>
+              </Skeleton>
             </Col>
           </Row>
 
           {/* END AREA */}
 
           <Divider></Divider>
-          {/* <Row>
-            <Col>
-              <Space>
-                <Button
-                  danger
-                  onClick={() => {
-                    if (selectedSenario) {
-                      this.handleRemoveScenario(selectedSenario);
-                    }
-                  }}
-                >
-                  <DeleteTwoTone twoToneColor="#f93e3e" /> Delete
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={(e) => {
-                    this.setEditScenariosDrawer({
-                      isLoading: true,
-                    })
-                      .then(() => {
-                        this.formRef.current?.validateFields().then((values) => {
-                          this.saveChange(values)
-                            .then(async () => {
-                              openNotification(
-                                'success',
-                                'Save Scenario Successfully',
-                                `${values.title} was saved`,
-                              );
-                              this.callGetListScenario().then(() => {
-                                this.setEditScenariosDrawer({
-                                  isLoading: false,
-                                });
-                              });
-                            })
-                            .catch((error) => {
-                              Promise.reject(error);
-                              openNotification('error', 'Save Scenario Fail', error);
-                            });
-                        });
-                        e.stopPropagation();
-                      })
-                      .catch(() => {
-                        this.setEditScenariosDrawer({
-                          isLoading: false,
-                        });
-                      });
-                  }}
-                >
-                  <SettingTwoTone /> Save Changes
-                </Button>
-              </Space>
-            </Col>
-          </Row> */}
         </>
-
-        {/** Select Playlist Drawer */}
-
-        {/* <Drawer
-          title="Playlist"
-          width={`50%`}
-          closable={false}
-          destroyOnClose={true}
-          afterVisibleChange={(e) => {
-            if (!e) {
-              this.clearSelectedPlaylistItems();
-            }
-          }}
-          onClose={() => {
-            this.setPlaylistDrawer({
-              visible: false,
-              urlPreview: undefined,
-              mediaType: undefined,
-            });
-          }}
-          visible={playlistsDrawer?.visible}
-          footer={
-            <>
-              <div style={{ textAlign: 'right' }}>
-                <Button type="primary" onClick={() => this.choosePlaylist()}>
-                  Choose Playlist
-                </Button>
-              </div>
-            </>
-          }
-        >
-          <SelectPlaylistDrawer {...this.props} />
-        </Drawer> */}
       </>
     );
   }

@@ -1,10 +1,11 @@
-import { Skeleton, Image, Row, Col, Divider, Table } from 'antd';
+import { Skeleton, Image, Row, Col, Divider, Table, Empty, Tooltip } from 'antd';
 import Column from 'antd/lib/table/Column';
+import { cloneDeep } from 'lodash';
 import * as React from 'react';
 import ReactPlayer from 'react-player';
-import type { Dispatch, PlayListModelState, ScenarioModelState } from 'umi';
+import type { Dispatch, Playlist, PlayListModelState, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
-// import styles from '../index.less';
+import styles from '../index.less';
 
 export type SelectPlaylistDrawerProps = {
   dispatch: Dispatch;
@@ -94,6 +95,66 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
     });
   };
 
+  setSelectedPlaylistItem = async (item: any) => {
+    const { playlistsDrawer } = this.props.scenarios;
+    if (playlistsDrawer) {
+      const { listPlaylists } = playlistsDrawer;
+      const clone = cloneDeep(listPlaylists);
+      const newList = clone.map((playlist) => {
+        if (playlist.isSelected) {
+          return {
+            ...playlist,
+            playlistItems: playlist.playlistItems.map((playlistItem) => {
+              if (playlistItem.id === item.id) {
+                return {
+                  ...playlistItem,
+                  isSelected: true,
+                };
+              }
+              return {
+                ...playlistItem,
+                isSelected: false,
+              };
+            }),
+          };
+        }
+
+        return playlist;
+      });
+      console.log('====================================');
+      console.log(newList);
+      console.log('====================================');
+      // const newList = clone.forEach((playlist) => {
+      //   const selectedPlaylist = listPlaylists.filter((p) => p.isSelected)[0];
+      //   if (selectedPlaylist.id === playlist.id) {
+      //     // const { playlistItems } = playlist;
+      //     playlist.playlistItems.forEach((playlistItem) => {
+      //       if (playlistItem.id === item.id) {
+      //         return {
+      //           ...playlistItem,
+      //           isSelected: true,
+      //         };
+      //       }
+      //       return {
+      //         ...playlistItem,
+      //         isSelected: false,
+      //       };
+      //     });
+      //     console.log('====================================');
+      //     console.log(selectedPlaylist, playlist);
+      //     console.log('====================================');
+      //   }
+      //   return playlist;
+      // });
+      // console.log('====================================');
+      // console.log(clone, listPlaylists);
+      // console.log('====================================');
+      await this.setPlaylistDrawer({
+        listPlaylists: newList,
+      });
+    }
+  };
+
   callGetItemsByPlaylistId = async (params: any) => {
     await this.props.dispatch({
       type: 'playlists/getItemsByPlaylist',
@@ -104,23 +165,7 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
     });
   };
 
-  getSelectedPlaylistItem = () => {
-    const { playlistsDrawer } = this.props.scenarios;
-
-    if (playlistsDrawer && playlistsDrawer.listPlaylists?.length > 0) {
-      const playlist = playlistsDrawer?.listPlaylists.filter((item: any) => item.isSelected);
-
-      if (playlist.length > 0) {
-        const selectedPlaylistItem = playlist[0].playlistItems.filter((p) => p.isSelected);
-        return selectedPlaylistItem[0];
-      }
-    }
-
-    return null;
-  };
-
   renderPreviewMedia = () => {
-    // const selectedPlaylistItem = this.getSelectedPlaylistItem();
     const { playlistsDrawer } = this.props.scenarios;
     if (playlistsDrawer) {
       if (playlistsDrawer.mediaType === 'Image') {
@@ -141,33 +186,51 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
     }
     return null;
   };
-
-  setSelectedPlaylistItems = async (modal: any) => {
-    await this.props.dispatch({
-      type: 'playlists/setSelectedPlaylistItemsReducer',
-      payload: modal,
-    });
-  };
   render() {
     const { playlistsDrawer } = this.props.scenarios;
-    // const { listPlaylists } = playlistsDrawer ? playlistsDrawer : undefined;
+    const listPlaylists = playlistsDrawer ? playlistsDrawer.listPlaylists : undefined;
 
-    const selectedPlaylist = playlistsDrawer?.listPlaylists.filter(
-      (playlist) => playlist.isSelected,
-    )?.[0];
+    const selectedPlaylist = listPlaylists?.filter((playlist) => playlist.isSelected)?.[0];
+
+    const items = selectedPlaylist?.playlistItems;
+    console.log('====================================');
+    console.log(selectedPlaylist);
+    console.log('====================================');
     return (
       <>
-        <Row>
+        <Row gutter={20}>
           <Col span={12}>
             <Skeleton active loading={playlistsDrawer?.isLoading}>
-              {this.renderPreviewMedia()}
+              {/* <Card
+                cover={() => {
+                  const preview = this.renderPreviewMedia();
+                  if (preview) {
+                    return preview;
+                  }
+
+                  return <Empty description={<>Preview Media</>} />;
+                }}
+              ></Card> */}
+              {this.renderPreviewMedia() !== null ? (
+                this.renderPreviewMedia()
+              ) : (
+                <Empty description={<>Preview Media</>} />
+              )}
             </Skeleton>
           </Col>
           <Col span={12}>
-            <Row>
+            <Row wrap gutter={20}>
+              <Divider orientation="left">Select Playlist</Divider>
               <Table
+                scroll={{
+                  y: 400,
+                }}
+                style={{ width: '100%' }}
                 dataSource={playlistsDrawer?.listPlaylists}
                 pagination={false}
+                rowClassName={(record) => {
+                  return record.isSelected ? 'selected-playlist' : '';
+                }}
                 onRow={(record) => {
                   return {
                     onClick: () => {
@@ -196,85 +259,47 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                 }}
               >
                 <Column key="title" dataIndex="title" title="Title"></Column>
-              </Table>
-              {/* <List
-                itemLayout="vertical"
-                bordered
-                size="large"
-                pagination={{
-                  current: getListPlaylistParam?.pageNumber
-                    ? getListPlaylistParam.pageNumber + 1
-                    : 1,
-                  onChange: (e) => {
-                    this.setGetPlaylistParam({
-                      pageNumber: e - 1,
+                <Column
+                  key="totalDuration"
+                  title="Total Duration"
+                  render={(record: Playlist) => {
+                    let duration = 0;
+                    record.playlistItems.forEach((item) => {
+                      duration += item.duration;
                     });
-                  },
-                }}
-                style={{ transition: `1s ease`, width: '100%' }}
-                dataSource={playlistsDrawer?.listPlaylists}
-                renderItem={(item) => (
-                  <Skeleton active loading={playlistsDrawer?.isLoading}>
-                    <List.Item
-                      key={item.id}
-                      onClick={async () => {
-                        this.setPlaylistDrawer({
-                          isLoading: true,
-                        })
-                          .then(() => {
-                            this.callGetItemsByPlaylistId({
-                              id: item.id,
-                            }).then(() => {
-                              this.setSelectedPlaylist(item).then(() => {
-                                this.setPlaylistDrawer({
-                                  isLoading: false,
-                                });
-                              });
-                            });
-                          })
-                          .catch(() => {
-                            this.setPlaylistDrawer({
-                              isLoading: false,
-                            });
-                          });
-                      }}
-                      style={item.isSelected ? styles.selectedPlaylist : {}}
-                    >
-                      <List.Item.Meta title={item.title}></List.Item.Meta>
-                    </List.Item>
-                  </Skeleton>
-                )}
-              ></List> */}
+                    return <>{`${duration} s`}</>;
+                  }}
+                ></Column>
+              </Table>
             </Row>
 
-            <Divider />
+            <Divider orientation="left">Preview Media Detail</Divider>
 
             <Row>
               <Skeleton active loading={playlistsDrawer?.isLoading}>
+                {/* Media Table */}
                 <Table
-                  dataSource={selectedPlaylist?.playlistItems}
+                  style={{ width: '100%' }}
+                  scroll={{
+                    y: 400,
+                  }}
+                  dataSource={items}
+                  rowClassName={(record) => {
+                    console.log('====================================');
+                    console.log(items, record);
+                    console.log('====================================');
+                    return record.isSelected ? 'selected-media' : '';
+                  }}
                   pagination={false}
                   onRow={(record) => {
                     return {
                       onClick: () => {
+                        this.setSelectedPlaylistItem(record);
                         this.setPlaylistDrawer({
                           urlPreview: record.mediaSrc.urlPreview,
                           mediaType: record.mediaSrc.type.name,
                         });
-                        // this.setSelectedPlaylistItems(
-                        //   selectedPlaylistItems.map((p) => {
-                        //     if (p.id === record.id) {
-                        //       return {
-                        //         ...p,
-                        //         isSelected: true,
-                        //       };
-                        //     }
-                        //     return {
-                        //       ...p,
-                        //       isSelected: false,
-                        //     };
-                        //   }),
-                        // );
+                        this.forceUpdate();
                       },
                     };
                   }}
@@ -284,44 +309,17 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                     key="description"
                     dataIndex={['mediaSrc', 'description']}
                     title="Description"
+                    ellipsis={{ showTitle: false }}
+                    render={(record) => {
+                      return (
+                        <Tooltip placement="topLeft" title={record}>
+                          {record}
+                        </Tooltip>
+                      );
+                    }}
                   ></Column>
                   <Column key="duration" dataIndex="duration" title="Duration"></Column>
                 </Table>
-                {/* <List
-                  style={{ width: '100%' }}
-                  itemLayout="vertical"
-                  dataSource={selectedPlaylistItems}
-                  renderItem={(item) => {
-                    return (
-                      <>
-                        <Skeleton active loading={playlistsDrawer?.isLoading}>
-                          <List.Item
-                            key={item.id}
-                            style={item.isSelected ? { backgroundColor: '#424ef5' } : {}}
-                            onClick={() => {
-                              this.setSelectedPlaylistItems(
-                                selectedPlaylistItems.map((p) => {
-                                  if (p.id === item.id) {
-                                    return {
-                                      ...p,
-                                      isSelected: true,
-                                    };
-                                  }
-                                  return {
-                                    ...p,
-                                    isSelected: false,
-                                  };
-                                }),
-                              );
-                            }}
-                          >
-                            <List.Item.Meta title={item.title} description={item.typeName} />
-                          </List.Item>
-                        </Skeleton>
-                      </>
-                    );
-                  }}
-                ></List> */}
               </Skeleton>
             </Row>
           </Col>

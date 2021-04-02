@@ -9,8 +9,6 @@ export type SendModalProps = {
   profileWallet: ProfileWalletModelState;
 };
 
-
-
 export class SendModal extends React.Component<SendModalProps> {
   setSendModal = async (modal?: any) => {
     await this.props.dispatch({
@@ -20,58 +18,42 @@ export class SendModal extends React.Component<SendModalProps> {
         ...modal,
       },
     });
-    };
+  };
   render() {
     const { currentUser } = this.props.user;
     return (
       <>
         <Row>
           <Col span={12}>Total Balance</Col>
-          <Col
-            span={12}
-            style={{
-              textAlign: 'right',
-            }}
-          >
-            {currentUser && currentUser.balance?.toString()}
-          </Col>
+          <Col>{currentUser && currentUser.balance?.toString()}</Col>
         </Row>
         <Divider></Divider>
         <Row>
           <Col span={12}>Amount</Col>
-          <Col
-            span={12}
-            style={{
-              textAlign: 'right',
-            }}
-          ></Col>
+          <Col></Col>
         </Row>
         <Row>
           <Col>
-            <Input
-              width={'100%'}
-            />
+            <Input width={'100%'} />
           </Col>
         </Row>
         <Divider></Divider>
         <Row>
           <Col>
-            <InputNumber
-              min={1000}
-              width={'100%'}
-            />
+            <InputNumber min={1000} width={'100%'} />
           </Col>
         </Row>
         <Row>
           <Col>
             <Button
               onClick={() => {
-                currentUser?.ether?.tranfer("0x62968E23DAc1a041405534d321dCd1AbC3D3e547", 100000);
+                currentUser?.ether?.tranfer('0x62968E23DAc1a041405534d321dCd1AbC3D3e547', 100000);
               }}
-            >Transfer</Button>
+            >
+              Transfer
+            </Button>
           </Col>
         </Row>
-
       </>
     );
   }
