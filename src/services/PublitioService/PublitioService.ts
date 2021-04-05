@@ -49,6 +49,11 @@ export type UpdateFileParam = {
   docId?: string;
 }
 
+export type UpdateFolderParam = {
+  id: string;
+  name: string;
+}
+
 
 export async function CreateMedia(param: any) {
 
@@ -79,4 +84,8 @@ export async function UpdateFile(param: UpdateFileParam) {
 
 export async function RemoveFolder(id: string) {
   await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`);
+}
+
+export async function UpdateFolder(param: UpdateFolderParam) {
+  await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FOLDER_URL}/${param.id}`, "PUT", param);
 }

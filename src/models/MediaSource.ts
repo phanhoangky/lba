@@ -1,6 +1,6 @@
 import {  AddNewMediaSource, EditMediaSource, GetListMediaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, GetMediaSourceById, RemoveMediaSource } from '@/services/MediaSourceService';
 import type {AddNewMediaParam, EditMediaParam, GetMediaSourcesParam} from '@/services/MediaSourceService'
-import { CreateFolder, CreateMedia, GetFiles, GetFolders, RemoveFolder, UpdateFile } from '@/services/PublitioService/PublitioService';
+import { CreateFolder, CreateMedia, GetFiles, GetFolders, RemoveFolder, UpdateFile, UpdateFolder } from '@/services/PublitioService/PublitioService';
 import type { UpdateFileParam } from '@/services/PublitioService/PublitioService';
 import type { CreateFileParam, CreateFolderParam, GetFilesParam, GetFoldersParam } from '@/services/PublitioService/PublitioService';
 import type { Effect, Reducer } from 'umi';
@@ -91,7 +91,12 @@ export type MediaSourceModelState = {
   },
 
   selectedFile?: FileType,
-  listMediaType?: MediaType[]
+  listMediaType?: MediaType[],
+
+  renameFolderModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  }
 }
 
 
@@ -110,6 +115,7 @@ export type MediaSourceModel = {
     updateFile: Effect;
     removeMedia: Effect;
     removeFolder: Effect;
+    updateFolder: Effect;
   },
 
   reducers: {
@@ -133,6 +139,7 @@ export type MediaSourceModel = {
     setSelectedFileReducer: Reducer<MediaSourceModelState>;
     clearCreateFileParamReducer: Reducer<MediaSourceModelState>;
     clearSearchListMediaParamReducer: Reducer<MediaSourceModelState>;
+    setRenameFolderModalReducer: Reducer<MediaSourceModelState>;
   }
 }
 
@@ -252,12 +259,15 @@ const MediaSourceStore: MediaSourceModel = {
 
   effects: {
     *getListMediaFromFileId({ payload }, { call, put }) {
-
       let data: any = [];
       if (payload.id) {
-        const {result} = call(GetMediaSourceById, payload.id);
+        const {result} = yield call(GetMediaSourceById, payload.id);
         if (result) {
           data.push(result);
+          yield put({
+            type: "setListMediaReducer",
+            payload: data
+          })
         }
       } else {
         const listFile = yield call(GetFiles, payload);
@@ -265,21 +275,18 @@ const MediaSourceStore: MediaSourceModel = {
           return file.id
         })
         data = yield call(GetListMediaFromFiledId, listId);
-        console.log('====================================');
-        console.log("File >>>>", data, payload);
-        console.log('====================================');
+        
         yield put({
           type: "setTotalItemReducer",
           payload: listFile.files_total
         })
+
+        yield put({
+          type: "setListMediaReducer",
+          payload: data.data.result.data
+        })
       }
-      console.log('====================================');
-      console.log(data);
-      console.log('====================================');
-      yield put({
-        type: "setListMediaReducer",
-        payload: data.data.result.data
-      })
+      
 
       yield put({
         type: "setGetListFileParamReducer",
@@ -310,10 +317,6 @@ const MediaSourceStore: MediaSourceModel = {
     *getListFolder({ payload }, { call, put }) {
       
       const result = yield call(GetFolders, payload);
-
-      console.log('====================================');
-      console.log(result);
-      console.log('====================================');
 
       yield put({
         type: "setListFolderReducer",
@@ -384,15 +387,16 @@ const MediaSourceStore: MediaSourceModel = {
         txHash: payload.hash,
         docId: payload.id
       }
-      console.log('====================================');
-      console.log(updateParam);
-      console.log('====================================');
       yield call(UpdateFile, updateParam);
       yield call(RemoveMediaSource, updateParam);
     },
 
     *removeFolder({ payload }, { call }) {
       yield call(RemoveFolder, payload);
+    },
+
+    *updateFolder({ payload }, { call }) {
+      yield call(UpdateFolder, payload);
     }
   },
 
@@ -419,9 +423,6 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     setCreateFileParamReducer(state, { payload }) {
-      console.log('====================================');
-      console.log("Create File Param >>>>", payload);
-      console.log('====================================');
       return {
         ...state,
         createFileParam: {
@@ -599,6 +600,13 @@ const MediaSourceStore: MediaSourceModel = {
           title: "",
           isSigned: -1
         }
+      }
+    },
+
+    setRenameFolderModalReducer(state, { payload }) {
+      return {
+        ...state,
+        renameFolderModal: payload
       }
     }
   }

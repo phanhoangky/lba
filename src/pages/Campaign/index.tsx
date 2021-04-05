@@ -47,6 +47,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   componentDidMount = () => {
     this.setCampaignTableLoading(true)
       .then(async () => {
+        this.readJWT();
         Promise.all([
           this.callGetListCampaigns(),
           this.callGetListDeviceTypes(),
@@ -54,7 +55,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           this.callGetListLocations(),
           this.callGetFee(),
         ]).then(async () => {
-          this.readJWT();
+          this.setGetListCampaignParam({
+            id: undefined,
+          });
           this.setCampaignTableLoading(false);
         });
       })
@@ -68,6 +71,16 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     await this.props.dispatch({
       type: `scenarios/setListScenarioReducer`,
       payload: list,
+    });
+  };
+
+  setGetListCampaignParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setGetListCampaignParamReducer`,
+      payload: {
+        ...this.props.campaign.getListCampaignParam,
+        ...param,
+      },
     });
   };
 

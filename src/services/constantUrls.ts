@@ -31,6 +31,7 @@ export enum CONSTANTS_PUBLITIO {
   CREATE_FOLDER_URL = '/folders/create',
   UPDATE_FILE_URL = '/files/update',
   REMOVE_FOLDER_URL = '/folders/delete',
+  UPDATE_FOLDER_URL = "/folders/update",
 }
 
 export enum CONSTANTS_RAPID {
@@ -52,4 +53,6 @@ export enum CONSTANTS_LOCATIONIQ {
 
 export const TYPE_TRANSACTIONS: string[] = ["Transfer", "Create Campaign", "Delete Campaign", "Sign Media"]
 
-export const LIST_SUPPORTED_FILES: string[] = ["jpg", 'jpeg', 'jpe', 'png', 'gif', 'bmp', 'psd', 'webp', 'ai', 'tif', 'tiff', 'svg', 'ico', 'mp4']
+export const LIST_SUPPORTED_FILES: string[] = ["jpg", 'jpeg', 'jpe', 'png', 'gif', 'bmp', 'psd', 'webp', 'ai', 'tif', 'tiff', 'svg', 'ico', 'mp4'];
+
+export const LIST_AVATAR_SUPPORTED_FILES: string[] = ["jpg", 'jpeg', 'jpe', 'png', 'gif'];

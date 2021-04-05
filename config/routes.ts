@@ -13,6 +13,27 @@
             path: '/account/login',
             component: './User/login',
           },
+          {
+            name: 'register-result',
+            icon: 'smile',
+            path: '/account/register-result',
+            component: './user/register-result',
+          },
+          {
+            name: 'register',
+            icon: 'smile',
+            path: '/account/register',
+            component: './User/register',
+          },
+          {
+            name: 'forgot-password',
+            icon: 'smile',
+            path: '/account/forgot-password',
+            component: './User/forgot-password',
+          },
+          {
+            component: '404',
+          },
         ],
       },
       {

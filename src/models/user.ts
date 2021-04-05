@@ -5,8 +5,8 @@ import { GetAccountById } from '@/services/AccountService/Account';
 import EtherService from '@/configs/Support';
 import { getPageQuery } from '@/utils/utils';
 import firebase from 'firebase';
-import { CreateFolder } from '@/services/PublitioService/PublitioService';
-import {  EmailLogin, GoogleLogin, PostAuthentication } from '@/services/login';
+import { CreateFolder, CreateMedia } from '@/services/PublitioService/PublitioService';
+import { GoogleLogin, PostAuthentication } from '@/services/login';
 import type { AuthenticationRequest } from '@/services/login';
 
 export type CurrentUser = {
@@ -27,10 +27,22 @@ export type CurrentUser = {
   balance?: number | string;
   rootFolderId?: string;
   isActive?: boolean;
+  password?: string;
 };
 
 export type UserModelState = {
   currentUser?: CurrentUser;
+  credential?: any;
+  updateProfileParam?: {
+    file?: any;
+    name?: string;
+  },
+
+  changePasswordModal?: {
+    visible: boolean;
+    isLoading: boolean;
+    currentStep: number;
+  }
 };
 
 export type UserModelType = {
@@ -42,14 +54,27 @@ export type UserModelType = {
     readJWT: Effect;
     getCurrentUser: Effect;
     googleLogin: Effect;
-    setToken: Effect;
+    redirectToHomePage: Effect;
 
     emailLogin: Effect;
+
+    registerEmail: Effect;
+
+    updateProfile: Effect;
+
+    sendResetPassword: Effect;
+
+    changePassword: Effect;
   };
   reducers: {
     saveCurrentUser: Reducer<UserModelState>;
     changeNotifyCount: Reducer<UserModelState>;
     clearCurrentUser: Reducer<UserModelState>;
+
+    setUpdateProfileParamReducer: Reducer<UserModelState>;
+
+    setChangePasswordModalReducer: Reducer<UserModelState>;
+    
   };
 };
 
@@ -58,11 +83,15 @@ const UserModel: UserModelType = {
 
   state: {
     currentUser: {},
+
+    changePasswordModal: {
+      isLoading: false,
+      currentStep: 0,
+      visible: false
+    }
   },
 
   effects: {
-
-    
     *getCurrentUser(_, { call, put }) {
       const {data} = yield call(GetAccountById);
       yield put({
@@ -77,12 +106,15 @@ const UserModel: UserModelType = {
       // const token = yield localStorage.getItem("JWT");
       // const res = yield call(CreateFolder, { name: token.user_id });
       const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
-      if (tokenFirebase && tokenFirebase.includes(".")) {
+      if (tokenFirebase) {
         const decode = yield jwt_decode(tokenFirebase);
+        // console.log('====================================');
+        // console.log(decode, Date.now() >= decode.exp * 1000);
+        // console.log('====================================');
         if (decode.claims) {
-          if (Date.now() >= decode.exp * 1000) {
-            history.replace("/account/login");
-          }
+          // if (Date.now() >= decode.exp * 1000) {
+          //   history.replace("/account/login");
+          // }
           const ether = yield EtherService.build();
           yield ether.readKeyStoreJson(decode.claims.WalletKeyStore, decode.claims.user_id)
           yield ether.initContracts();
@@ -100,32 +132,38 @@ const UserModel: UserModelType = {
             }
           })
         } else {
-          if (Date.now() >= decode.exp * 1000) {
-            history.replace("/account/login");
-          }
+          // if (Date.now() >= decode.exp * 1000) {
+          //   history.replace("/account/login");
+          // }
           const ether = yield EtherService.build();
-          yield ether.readKeyStoreJson(decode.WalletKeyStore, decode.user_id)
-          yield ether.initContracts();
-          const balance = yield ether.getBalance();
-          yield put({
-            type: "saveCurrentUser",
-            payload: {
-              id: decode.Id,
-              name: decode.name,
-              avatar: decode.picture,
-              email: decode.email,
-              userid: decode.user_id,
-              balance,
-              ether
-            }
-          })
+          if (decode.WalletKeyStore) {
+            yield ether.readKeyStoreJson(decode.WalletKeyStore, decode.user_id)
+            yield ether.initContracts();
+            const balance = yield ether.getBalance();
+            yield put({
+              type: "saveCurrentUser",
+              payload: {
+                id: decode.Id,
+                name: decode.name,
+                avatar: decode.picture,
+                email: decode.email,
+                userid: decode.user_id,
+                balance,
+                ether
+              }
+            })
+          } else {
+            history.replace("account/login");
+            throw new Error("Doesn't have wallet");
+          }
+          
         }
       } else {
         history.replace("account/login");
       }
     },
 
-    setToken() {
+    redirectToHomePage() {
       
       const urlParams = new URL(window.location.href);
       const params = getPageQuery();
@@ -148,7 +186,10 @@ const UserModel: UserModelType = {
 
     *googleLogin(_, { call, put }) {
       const firebaseResponse = yield call(GoogleLogin);
-      const {credential} = firebaseResponse;
+      const { credential } = firebaseResponse;
+      console.log('====================================');
+      console.log("Firebase Reponse >>>>", firebaseResponse);
+      console.log('====================================');
       const ether = yield EtherService.build();
       const tokenFirebase = yield firebase.auth().currentUser?.getIdToken(); // Mac ke
       
@@ -179,7 +220,6 @@ const UserModel: UserModelType = {
         }
         const newToken = yield call(PostAuthentication, param); 
         
-        
         decoded = yield jwt_decode(newToken.data.result);
         yield ether.readKeyStoreJson(decoded.claims.WalletKeyStore, firebaseResponse.user.uid);
         yield localStorage.setItem("JWT", newToken.data.result);
@@ -192,10 +232,18 @@ const UserModel: UserModelType = {
       const newToken = yield firebase.auth().currentUser?.getIdToken();
       yield localStorage.setItem("JWT", newToken);
 
+      if (newToken) {
+        decoded = yield jwt_decode(newToken);
+      }
+      console.log('====================================');
+      console.log("Final Decode >>>" ,decoded);
+      console.log('====================================');
+
       // const {data} = yield call(GetAccountById);
       yield put({
         type: "saveCurrentUser",
         payload: {
+          ...firebaseResponse.user,
           id: decoded.Id,
           email: decoded.email,
           name: decoded.name,
@@ -209,14 +257,175 @@ const UserModel: UserModelType = {
       });
     },
 
-    *emailLogin(_, { call }) {
-      yield call(EmailLogin);
+    *emailLogin({ payload }, { put }) {
       
+      const ether = yield EtherService.build();
+      // const data: firebase.User = yield call(EmailLogin, payload.email, payload.password);
+      // const { credential }: {credential: firebase.auth.AuthCredential} = payload;
+      const { user }: {user: firebase.User} = payload;
+      console.log('====================================');
+      console.log("Store >>>>", payload);
+      console.log('====================================');
+      if (payload && user) {
+
+        const tokenFirebase = yield user.getIdToken();
+        // const param: AuthenticationRequest = {
+        //   firebaseToken: tokenFirebase,
+        //   uid: user.uid,
+        //   // walletAddress: ether.wallet.address,
+        // }
+        // const newToken = yield call(PostAuthentication, param);
+        // yield user.reauthenticateWithCredential(credential);
+
+        // const refreshToken = yield user.getIdToken();
+        const decoded = yield jwt_decode(tokenFirebase);
+        yield ether.readKeyStoreJson(decoded.WalletKeyStore, user.uid);
+        yield ether.initContracts();
+        console.log('====================================');
+        console.log("Refresh Token >>>>", decoded, tokenFirebase);
+        console.log('====================================');
+        // yield ether.readKeyStoreJson(decoded.claims.WalletKeyStore, data.uid);
+
+        yield localStorage.setItem("JWT", tokenFirebase);
+
+        const balance = yield ether.getBalance();
+        yield put({
+          type: "saveCurrentUser",
+          payload: {
+            ...user,
+            id: decoded.Id,
+            email: decoded.email,
+            name: decoded.name,
+            avatar: decoded.picture,
+            uid: decoded.user_id,
+            userid: decoded.user_id,
+            balance,
+            ether,
+            // ...data.result
+          }
+        });
+      }
+    },
+
+    *registerEmail({ payload }, { call }) {
+      // const data: firebase.User = yield call(CreateUserWithEmailAndPasswordHandler, payload.email, payload.password);
+      console.log('====================================');
+      console.log("Register User>>>", payload);
+      console.log('====================================');
+      // const { credential }: {credential: firebase.auth.AuthCredential} = payload;
+      const { user }: { user: firebase.User } = payload;
+      if (payload && user) {
+        yield user.sendEmailVerification();
+        const res = yield call(CreateFolder, { name: user.uid });
+        const ether = yield EtherService.build();
+        const tokenFirebase = yield user.getIdToken(true);
+        
+        console.log('====================================');
+        console.log('====================================', tokenFirebase);
+        console.log('====================================');
+        yield ether.createAccount();
+        const walletKeyStore: any = yield ether.createKeyStoreJson(user.uid);
+        const param: AuthenticationRequest = {
+          firebaseToken: tokenFirebase,
+          uid: user.uid,
+          walletKeyStore,
+          walletAddress: ether.wallet.address,
+          rootFolderId: res.id,
+        }
+        // console.log(param);
+
+        yield call(PostAuthentication, param);
+
+        // yield user.reauthenticateWithCredential(credential);
+
+        // const newToken = yield user.getIdToken(true);
+
+        // console.log('====================================');
+        // // console.log(credential);
+        // console.log('====================================');
+        // yield ether.initContracts();
+        // yield localStorage.setItem("JWT", newToken);
+        // const decoded = yield jwt_decode(newToken);
+        // console.log('====================================');
+        // console.log("Refresh Totken>>>", newToken, decoded);
+        // console.log('====================================');
+        // const balance = yield ether.getBalance();
+        // yield put({
+        //   type: "saveCurrentUser",
+        //   payload: {
+        //     ...user,
+        //     id: decoded.Id,
+        //     email: decoded.email,
+        //     name: decoded.name,
+        //     avatar: decoded.picture,
+        //     uid: decoded.user_id,
+        //     userid: decoded.user_id,
+        //     balance,
+        //     ether,
+        //     // ...data.result
+        //   }
+        // });
+      }
+      history.push('/account/register-result')
+    },
+
+    *updateProfile({ payload }, { call }) {
+      const { currentUser }: { currentUser: firebase.User } = yield firebase.auth();
+
+      console.log('====================================');
+      console.log(payload);
+      console.log('====================================');
+      if (payload.file) {
+        const file = yield call(CreateMedia, {
+          file: payload.file
+        })
+
+        yield currentUser.updateProfile({
+          displayName: payload.name,
+          photoURL: file.url_preview,
+        })
+      } else {
+        yield currentUser.updateProfile({
+          displayName: payload.name,
+        })
+      }
+      
+      firebase.auth().onAuthStateChanged((user) => {
+        console.log('====================================');
+        console.log("OnAuthStateChange" ,user);
+        console.log('====================================');
+        return user;
+        // put({
+        //   type: "saveCurrentUser",
+        //   payload: {
+        //     name: user?.displayName,
+        //     avatar: user?.photoURL,
+        //     email: user?.email,
+        //     userid: user?.uid,
+        //   }
+        // })
+      }, (error) => {
+        throw new Error(error.message);
+      })
+    },
+
+    *sendResetPassword({ payload }, { call }) {
+      yield firebase.auth().sendPasswordResetEmail(payload);
+    },
+
+    *changePassword({ payload }, { put }) {
+      const user: firebase.User = yield firebase.auth().currentUser;
+      
+      yield user.updatePassword(payload);
+
     }
   },
 
   reducers: {
     saveCurrentUser(state, action) {
+      console.log('====================================');
+      console.log("Action >>>", action);
+      console.log('====================================');
       return {
         ...state,
         currentUser: {
@@ -254,6 +463,20 @@ const UserModel: UserModelType = {
           title: undefined,
           userid: undefined
         }
+      }
+    },
+
+    setUpdateProfileParamReducer(state, { payload }) {
+      return {
+        ...state,
+        updateProfileParam: payload
+      }
+    },
+
+      setChangePasswordModalReducer(state, { payload }) {
+      return {
+        ...state,
+        changePasswordModal: payload
       }
     }
   },

@@ -36,6 +36,7 @@ import { AddNewFileFormModal } from './components/AddNewFileFormModal';
 import { EditMediaFormDrawer } from './components/EditMediaFormDrawer';
 import { ListMediasHeaderComponent } from './components/ListMediasHeaderComponent';
 import { EditDrawerFooter } from './components/EditMediaFormDrawer/EditDrawerFooter';
+import { RenameFolderModal } from './components/RenameFolderModal';
 
 export type MediaSourceProps = {
   dispatch: Dispatch;
@@ -409,17 +410,39 @@ class Media extends React.Component<MediaSourceProps> {
   // handleRemoveFolder = async (id: string) => {};
 
   handleFolderContextMenuClick = async (menu: any, item: any) => {
-    if (menu === 'open') {
+    console.log('====================================');
+    console.log(menu, item);
+    console.log('====================================');
+    if (menu.key === 'open') {
       this.toNextFolder(item);
     }
 
-    if (menu === 'remove') {
+    if (menu.key === 'remove') {
       this.removeFolder(item.id);
     }
+
+    if (menu.key === 'rename') {
+      this.setSelectedFolder(item).then(() => {
+        this.setRenameFolderModal({
+          visible: true,
+        });
+      });
+    }
+  };
+
+  setRenameFolderModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: `media/setRenameFolderModalReducer`,
+      payload: {
+        ...this.props.media.renameFolderModal,
+        ...param,
+      },
+    });
   };
 
   editMediaFormRef = React.createRef<EditMediaFormDrawer>();
   editMediaFooterRef = React.createRef<EditDrawerFooter>();
+  renameFolderModalRef = React.createRef<RenameFolderModal>();
   render() {
     const {
       totalItem,
@@ -431,6 +454,7 @@ class Media extends React.Component<MediaSourceProps> {
       editFileDrawer,
       searchListMediaParam,
       selectedFile,
+      renameFolderModal,
     } = this.props.media;
 
     const signatureOfMedia = (status: number) => {
@@ -510,6 +534,9 @@ class Media extends React.Component<MediaSourceProps> {
                             >
                               <Menu.Item key="open" icon={<FolderOpenFilled />}>
                                 Open
+                              </Menu.Item>
+                              <Menu.Item key="rename" icon={<FormOutlined />}>
+                                Rename
                               </Menu.Item>
                               <Menu.Item key="remove" icon={<CloseCircleFilled />}>
                                 Remove
@@ -713,6 +740,30 @@ class Media extends React.Component<MediaSourceProps> {
             <EditMediaFormDrawer ref={this.editMediaFormRef} {...this.props} />
           </Drawer>
           {/* ========================================================================================================================== */}
+
+          {/* ========================================================================================================================== */}
+          {/* Rename Folder Modal */}
+          <Modal
+            visible={renameFolderModal?.visible}
+            confirmLoading={renameFolderModal?.isLoading}
+            destroyOnClose={true}
+            closable={false}
+            centered
+            onCancel={() => {
+              this.setRenameFolderModal({
+                visible: false,
+                isLoading: false,
+              });
+            }}
+            onOk={() => {
+              this.renameFolderModalRef.current?.handleUpdateFolder();
+            }}
+          >
+            {renameFolderModal?.visible && (
+              <RenameFolderModal ref={this.renameFolderModalRef} {...this.props} />
+            )}
+          </Modal>
+          {/* End Rename Folder Modal */}
         </PageContainer>
       </>
     );

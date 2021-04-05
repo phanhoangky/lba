@@ -42,6 +42,11 @@ export type ProfileWalletModelState = {
     isLoading: boolean;
   },
 
+  updateProfileModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
   refreshBalanceLoading?: boolean,
 }
 
@@ -53,7 +58,7 @@ export type WalletStoreType = {
   state: ProfileWalletModelState,
 
   effects: {
-    setListTransactions: Effect
+    setListTransactions: Effect;
   },
 
   reducers: {
@@ -66,6 +71,7 @@ export type WalletStoreType = {
     setDepositModalReducer: Reducer<ProfileWalletModelState>;
     setSendModalReducer: Reducer<ProfileWalletModelState>;
     setRefreshBalanceLoadingReducer: Reducer<ProfileWalletModelState>;
+    setUpdateProfileModalReducer: Reducer<ProfileWalletModelState>;
 
   }
 
@@ -201,7 +207,14 @@ const WalletModel: WalletStoreType = {
         ...state,
         refreshBalanceLoading: payload
       }
-    }
+    },
+
+    setUpdateProfileModalReducer(state, { payload }) {
+      return {
+        ...state,
+        updateProfileModal: payload
+      }
+    },
   }
 }
 

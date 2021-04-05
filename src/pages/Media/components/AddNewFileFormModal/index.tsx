@@ -1,6 +1,6 @@
 import type { CreateFileParam } from '@/services/PublitioService/PublitioService';
 import { UploadOutlined } from '@ant-design/icons';
-import { Form, Input, Modal, Select, Skeleton, Upload } from 'antd';
+import { Form, Input, Modal, Skeleton, Upload } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import { Keccak } from 'sha3';
@@ -89,7 +89,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         public_id: security,
         accountId: currentUser?.id,
         hash: signature,
-        fileId: createFileParam.fileId,
+        fileId: createFileParam?.fileId,
         isSigned: 1,
         mediaSrcId: uuidv4(),
       };
@@ -148,15 +148,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
-    const {
-      listLoading,
-      addNewFileModal,
-      listMediaType,
-      breadScrumb,
-      createFileParam,
-    } = this.props.media;
-    console.log('====================================');
-    console.log('====================================');
+    const { listLoading, addNewFileModal, listMediaType, breadScrumb } = this.props.media;
     return (
       <Modal
         centered
@@ -167,13 +159,13 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
             </Skeleton>
           </>
         }
-        visible={addNewFileModal.visible}
+        visible={addNewFileModal?.visible}
         closable={false}
         onOk={() => {
           this.showConfirmCreateNewFile();
         }}
         destroyOnClose={true}
-        confirmLoading={addNewFileModal.isLoading}
+        confirmLoading={addNewFileModal?.isLoading}
         onCancel={() => {
           this.clearFilelist();
         }}
@@ -208,10 +200,18 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
                 // return file.type === 'image/png' ? true : Upload.LIST_IGNORE;
               }}
               onChange={async (file) => {
+                const mediaType = listMediaType?.filter((type) =>
+                  file.file.originFileObj?.type.toLowerCase().includes(type.name.toLowerCase()),
+                )[0];
+                if (mediaType) {
+                  this.setCreateFileParam({
+                    typeId: mediaType.id,
+                    typeName: mediaType.name,
+                  });
+                }
                 this.setCreateFileParam({
-                  ...createFileParam,
                   file: file.file.originFileObj,
-                  folder: breadScrumb[breadScrumb.length - 1].id,
+                  folder: breadScrumb?.[breadScrumb.length - 1].id,
                 }).then(() => {
                   this.setAddNewFileModal({
                     fileList: file.fileList,
@@ -219,7 +219,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
                 });
               }}
             >
-              {addNewFileModal.fileList.length >= 1 ? null : <UploadOutlined />}
+              {addNewFileModal?.fileList.length >= 1 ? null : <UploadOutlined />}
             </Upload>
           </Form.Item>
           <Form.Item
@@ -266,7 +266,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               }}
             />
           </Form.Item> */}
-          <Form.Item
+          {/* <Form.Item
             name="typeId"
             label="Type"
             rules={[{ required: true, message: 'Please select type' }]}
@@ -288,7 +288,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               // }}
               // value={createFileParam.typeName}
             >
-              {listMediaType.map((type) => {
+              {listMediaType?.map((type) => {
                 return (
                   <Select.Option key={type.id} value={type.id}>
                     {type.name}
@@ -296,7 +296,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
                 );
               })}
             </Select>
-          </Form.Item>
+          </Form.Item> */}
         </Form>
       </Modal>
     );

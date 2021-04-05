@@ -1,5 +1,5 @@
 import type { BaseGetRequest } from "@/services/BaseRequest";
-import { createCampaign, deleteCampaign, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
+import { createCampaign, deleteCampaign, getCampaignById, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
 import type { CreateCampaignParam } from '@/services/CampaignService/CampaignService';
 import moment from "moment";
 import type { Effect, Reducer } from "umi";
@@ -173,23 +173,33 @@ const CampaignStore: CampaignModelStore = {
 
   effects: {
     *getListCampaigns({ payload }, { call, put }) {
-      const { data } = yield call(getListCampaigns, payload);
 
+      let list: any = [];
+      if (payload.id) {
+        const campaign = yield call(getCampaignById, payload.id);
+        list.push(campaign.result);
+      } else {
+        const { data } = yield call(getListCampaigns, payload);
+        list = data.result.data;
+      }
+      console.log('====================================');
+      console.log("List Campaign >>>>", list);
+      console.log('====================================');
       yield put({
         type: "setListCampaignReducer",
-        payload: data.result.data.map((campaign: any) => {
+        payload: list.map((c: any) => {
           return {
-            key: campaign.id,
-            ...campaign,
-            maxBid: campaign.maxBid.toFixed(2),
-            budget: campaign.budget.toFixed(2),
+            key: c.id,
+            ...c,
+            maxBid: c.maxBid.toFixed(2),
+            budget: c.budget.toFixed(2),
           }
         })
       })
 
       yield put({
         type: "setTotalCampaignReducer",
-        payload: data.result.totalItem
+        payload: list.length
       })
 
       yield put({

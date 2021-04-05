@@ -23,6 +23,10 @@ export type AuthenticationRequest = {
   newUser?: string;
 }
 
+export type UpdateProfileParam = {
+  displayName: string;
+  photoUrl: string;
+}
 // export async function fakeAccountLogin(params: LoginParamsType) {
 //   return request('/api/login/account', {
 //     method: 'POST',
@@ -48,25 +52,57 @@ export async function PostAuthentication(params: AuthenticationRequest) {
 }
 
 export async function EmailLogin(email: string, password: string) {
-  firebase.auth().signInWithEmailAndPassword(email, password)
+  return firebase.auth().signInWithEmailAndPassword(email, password)
   .then((userCredential) => {
     // Signed in
     const {user} = userCredential;
     console.log('====================================');
+    console.log("Login >>>", user);
+    console.log('====================================');
+    return userCredential;
+    // ...
+  }).catch((error) => {
+    throw error
+  })
+}
+
+export async function CreateUserWithEmailAndPasswordHandler(email: string, password: string) {
+  return firebase.auth().createUserWithEmailAndPassword(email, password)
+  .then((userCredential) => {
+     // Signed up
+    const {user} = userCredential;
+    console.log('====================================');
     console.log(user);
     console.log('====================================');
-    return user;
+    return userCredential;
     // ...
+  }).catch((error) => {
+    throw error;
   })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log('====================================');
-    console.log(errorCode, errorMessage);
-    console.log('====================================');
-    throw new Error(error);
-  });
+}
 
+export async function SendEmailLink(email: string) {
+    const actionCodeSettings = {
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be in the authorized domains list in the Firebase Console.
+    url: 'http://localhost:8000/account/login',
+    // This must be true.
+    handleCodeInApp: true,
+    iOS: {
+      bundleId: 'com.example.ios'
+    },
+    android: {
+      packageName: 'com.example.android',
+      installApp: true,
+      minimumVersion: '12'
+    },
+    dynamicLinkDomain: 'example.page.link'
+  };
+  return firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings).then((userCredential) => {
+    return userCredential;
+  }).catch((error) => {
+    throw error;
+  })
 }
 
 export async function SignOut() {

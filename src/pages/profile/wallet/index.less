@@ -8,6 +8,17 @@
   }
 }
 
+.uploadInput {
+  & .ant-upload.ant-upload-select-picture-card {
+    width: 100%;
+  }
+  :global {
+    .ant-upload.ant-upload-select-picture-card {
+      width: 100%;
+    }
+  }
+}
+
 .addressCard {
   :global {
     background-color: #7070e3;
@@ -120,4 +131,5 @@
     border-radius: .25rem;
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
   }
+
 }

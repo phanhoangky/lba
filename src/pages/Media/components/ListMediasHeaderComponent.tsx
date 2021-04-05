@@ -92,7 +92,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                       });
                   } else {
                     this.callGetListMedia({
-                      folder: breadScrumb[breadScrumb.length - 1].id,
+                      folder: breadScrumb?.[breadScrumb.length - 1].id,
                     })
                       .then(() => {
                         this.setListLoading(false);

@@ -37,8 +37,18 @@ ApiHelper.interceptors.response.use(
     console.error(error.response);
     console.log('====================================');
     if (error.response) {
+      
       const { status, data } = error.response;
+      const { errors } = data;
+      let listError = "";
+      errors.id.forEach((element: string) => {
+        listError = listError.concat(`${element} \n`);
+      });
+      console.log('====================================');
+      console.log(data ,status);
+      console.log('====================================');
       if (status) {
+        openNotification("error", error.response.status, listError);
         if (status === 401) {
           history.replace("/account/login");
         } else {
@@ -47,15 +57,12 @@ ApiHelper.interceptors.response.use(
       } else {
         history.replace('/exception/500')
       }
-      const { errors } = data;
-      let listError = "";
-      errors.id.forEach((element: string) => {
-        listError = listError.concat(`${element} \n`);
-      });
-      openNotification("error", error.response.status, listError);
+      
+      
     } else {
-      history.replace('/exception/500');
       openNotification("error", error.response.status, error.response.status)
+      history.replace('/exception/500');
+      
     }
     // Promise.reject(new Error(error)).catch(e => {
       

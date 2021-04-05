@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Col, Divider, Form, Row, Space, Table } from 'antd';
+import { Avatar, Button, Col, Divider, Form, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -19,6 +19,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
 import type { TransactionType } from '@/models/transaction';
 import { CAMPAIGN } from '@/pages/Campaign';
+import { EditTwoTone, LockFilled } from '@ant-design/icons';
+import { UpdateProfileModal } from './components/UpdateProfileModal';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
 
 type WalletProps = {
   dispatch: Dispatch;
@@ -39,7 +42,7 @@ class WalletScreen extends React.Component<WalletProps> {
     tableLoading: false,
   };
 
-  componentDidMount = async () => {
+  componentDidMount = () => {
     this.setTransTableLoading(true)
       .then(async () => {
         this.readJWT();
@@ -50,6 +53,16 @@ class WalletScreen extends React.Component<WalletProps> {
       .catch(() => {
         this.setTransTableLoading(false);
       });
+  };
+
+  setCurrentUser = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/saveCurrentUser',
+      payload: {
+        ...this.props.user.currentUser,
+        ...param,
+      },
+    });
   };
 
   readJWT = async () => {
@@ -91,7 +104,17 @@ class WalletScreen extends React.Component<WalletProps> {
     await this.props.dispatch({
       type: `media/setGetListFileParamReducer`,
       payload: {
-        ...this.props.media,
+        ...this.props.media.getListFileParam,
+        ...param,
+      },
+    });
+  };
+
+  setUpdateProfileModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'profileWallet/setUpdateProfileModalReducer',
+      payload: {
+        ...this.props.profileWallet.updateProfileModal,
         ...param,
       },
     });
@@ -100,31 +123,58 @@ class WalletScreen extends React.Component<WalletProps> {
   redirectByTypeTransaction = async (record: TransactionType) => {
     if (record.type === 1) {
       this.setGetListCampaignParam({
-        id: record.id,
+        id: record.campaignId,
       }).then(() => {
         history.push('/campaign');
       });
     }
+
     if (record.type === 3) {
       this.setGetListFileParam({
-        id: record.id,
+        id: record.mediaSrcId,
       }).then(() => {
         history.push('/medias');
       });
+
+      // history.push('/medias');
     }
   };
 
+  setUpdateProfileParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/setUpdateProfileParamReducer',
+      payload: {
+        ...this.props.user.updateProfileParam,
+        ...param,
+      },
+    });
+  };
+
+  setChangePasswordModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/setChangePasswordModalReducer',
+      payload: {
+        ...this.props.user.changePasswordModal,
+        ...param,
+      },
+    });
+  };
+
+  updateProfileModalRef = React.createRef<UpdateProfileModal>();
+  changePasswordModalRef = React.createRef<ChangePasswordModal>();
   render() {
-    const { currentUser } = this.props.user;
+    const { currentUser, changePasswordModal } = this.props.user;
     const {
       getListTransactionsParam,
       listTransactions,
       transTableLoading,
       totalItem,
     } = this.props.transaction;
+
+    const { updateProfileModal } = this.props.profileWallet;
     return (
       <PageContainer>
-        <Row justify="space-between">
+        <Row justify="space-between" gutter={20}>
           <Col span={15} offset={1}>
             <Row>
               <WalletHeaderComponent {...this.props} />
@@ -204,7 +254,7 @@ class WalletScreen extends React.Component<WalletProps> {
               </Col>
             </Row>
           </Col>
-          <Col span={7}>
+          <Col span={8}>
             <div
               style={{
                 width: 100,
@@ -224,38 +274,114 @@ class WalletScreen extends React.Component<WalletProps> {
                 }}
               />
             </div>
-            <Space direction="vertical" wrap>
-              {/* <Descriptions
-                title="User Info"
-                layout="vertical"
-                bordered
-                className={styles.descriptionStyle}
-                contentStyle={styles.contentProfileStyle}
-              >
-                <Descriptions.Item label="UserName">
-                  {currentUser && currentUser.name}
-                </Descriptions.Item>
-                <Descriptions.Item label="Telephone">1810000000</Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  {currentUser && currentUser.email}
-                </Descriptions.Item>
-                <Descriptions.Item label="Your Balance">
-                  {currentUser &&
-                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
-                  VND
-                </Descriptions.Item>
-              </Descriptions> */}
+            <Space
+              direction="vertical"
+              wrap
+              style={{
+                width: '100%',
+              }}
+            >
               <Form layout="horizontal">
+                <Divider />
                 <Form.Item label="Username">{currentUser && currentUser.name}</Form.Item>
+                <Divider />
                 <Form.Item label="Email">{currentUser && currentUser.email}</Form.Item>
+                <Divider />
                 <Form.Item label="Your Balance">
                   {currentUser &&
                     currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
                 </Form.Item>
+                <Divider />
               </Form>
+              <Button
+                type="primary"
+                block
+                onClick={() => {
+                  this.setUpdateProfileModal({
+                    visible: true,
+                  });
+                }}
+              >
+                <EditTwoTone /> Update Profile
+              </Button>
+              <Button
+                type="primary"
+                block
+                onClick={() => {
+                  this.setChangePasswordModal({
+                    visible: true,
+                  });
+                }}
+              >
+                <LockFilled /> Change Password
+              </Button>
             </Space>
           </Col>
         </Row>
+
+        {/* Update Profile Modal */}
+        <Modal
+          title="Update Profile"
+          visible={updateProfileModal?.visible}
+          closable={false}
+          width={'40%'}
+          destroyOnClose={true}
+          centered
+          confirmLoading={updateProfileModal?.isLoading}
+          onOk={() => {
+            this.updateProfileModalRef.current?.handleUpdateProfile();
+          }}
+          afterClose={() => {
+            this.setUpdateProfileParam({
+              file: undefined,
+              name: undefined,
+            });
+          }}
+          onCancel={() => {
+            this.setUpdateProfileModal({
+              visible: false,
+            });
+
+            this.setUpdateProfileParam({
+              file: undefined,
+              name: undefined,
+            });
+          }}
+        >
+          {updateProfileModal?.visible && (
+            <UpdateProfileModal ref={this.updateProfileModalRef} {...this.props} />
+          )}
+        </Modal>
+        {/* End Update Profile Modal */}
+
+        {/* Change Password Modal */}
+        <Modal
+          title="Change Password"
+          visible={changePasswordModal?.visible}
+          confirmLoading={changePasswordModal?.isLoading}
+          destroyOnClose={true}
+          closable={false}
+          footer={false}
+          centered
+          width={'40%'}
+          onOk={() => {
+            this.changePasswordModalRef.current?.handleChangePassword().then(() => {
+              this.setChangePasswordModal({
+                visible: false,
+                isLoading: false,
+              });
+            });
+          }}
+          onCancel={() => {
+            this.setChangePasswordModal({
+              visible: false,
+            });
+          }}
+        >
+          {changePasswordModal?.visible && (
+            <ChangePasswordModal ref={this.changePasswordModalRef} {...this.props} />
+          )}
+        </Modal>
       </PageContainer>
     );
   }

@@ -6,6 +6,7 @@ import { stringify } from 'querystring';
 // import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
 import type { ConnectState } from '@/models/connect';
+import { openNotification } from '@/utils/utils';
 
 type SecurityLayoutProps = {
   dispatch: Dispatch;
@@ -28,7 +29,12 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
     });
 
     this.setState({});
-    await this.readJWT();
+    this.readJWT().catch((err) => {
+      console.log('====================================');
+      console.log(err);
+      console.log('====================================');
+      openNotification('error', 'Fail to read JWT');
+    });
 
     // await dispatch({
     //   type: 'user/getCurrentUser',
