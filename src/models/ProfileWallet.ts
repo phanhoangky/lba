@@ -115,7 +115,6 @@ const WalletModel: WalletStoreType = {
     *setListTransactions({ payload }, { call, put }) {
       
       const result = yield call(GetListTransactions, payload);
-      console.log("Profile Wallet >>>>", result, result.data);
       
       yield put({
         type: "setListTransactionsReducer",

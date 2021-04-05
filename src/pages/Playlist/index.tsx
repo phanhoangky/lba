@@ -246,7 +246,6 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
         <Row gutter={20}>
           <Col span={10}>
             <Table
-              bordered
               dataSource={listPlaylist}
               loading={tableLoading}
               pagination={{

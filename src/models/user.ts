@@ -187,9 +187,6 @@ const UserModel: UserModelType = {
     *googleLogin(_, { call, put }) {
       const firebaseResponse = yield call(GoogleLogin);
       const { credential } = firebaseResponse;
-      console.log('====================================');
-      console.log("Firebase Reponse >>>>", firebaseResponse);
-      console.log('====================================');
       const ether = yield EtherService.build();
       const tokenFirebase = yield firebase.auth().currentUser?.getIdToken(); // Mac ke
       
@@ -209,8 +206,15 @@ const UserModel: UserModelType = {
         // console.log(param);
         
         const newToken = yield call(PostAuthentication, param);
-        yield localStorage.setItem("JWT", newToken.data.result);
-        decoded = yield jwt_decode(newToken.data.result);
+        if (newToken && newToken.data) {
+          yield localStorage.setItem("JWT", newToken.data.result);
+          decoded = yield jwt_decode(newToken.data.result);
+        } else {
+          history.replace("/account");
+          // throw new Error("Network Error");
+        }
+        
+        
       } else {
         const param: AuthenticationRequest = {
           firebaseToken: tokenFirebase,
@@ -219,42 +223,48 @@ const UserModel: UserModelType = {
           newUser: firebaseResponse.additionalUserInfo.isNewUser
         }
         const newToken = yield call(PostAuthentication, param); 
-        
-        decoded = yield jwt_decode(newToken.data.result);
-        yield ether.readKeyStoreJson(decoded.claims.WalletKeyStore, firebaseResponse.user.uid);
-        yield localStorage.setItem("JWT", newToken.data.result);
-      }
-      yield ether.initContracts();
-      //
-      const balance = yield ether.getBalance();
-      // const newId = yield firebase.auth().currentUser?.reauthenticateWithCredential(credential);
-      yield firebase.auth().currentUser?.reauthenticateWithCredential(credential);
-      const newToken = yield firebase.auth().currentUser?.getIdToken();
-      yield localStorage.setItem("JWT", newToken);
-
-      if (newToken) {
-        decoded = yield jwt_decode(newToken);
-      }
-      console.log('====================================');
-      console.log("Final Decode >>>" ,decoded);
-      console.log('====================================');
-
-      // const {data} = yield call(GetAccountById);
-      yield put({
-        type: "saveCurrentUser",
-        payload: {
-          ...firebaseResponse.user,
-          id: decoded.Id,
-          email: decoded.email,
-          name: decoded.name,
-          avatar: decoded.picture,
-          uid: decoded.user_id,
-          userid: decoded.user_id,
-          balance,
-          ether,
-          // ...data.result
+        if (newToken && newToken.data) {
+          decoded = yield jwt_decode(newToken.data.result);
+          yield ether.readKeyStoreJson(decoded.claims.WalletKeyStore, firebaseResponse.user.uid);
+          yield localStorage.setItem("JWT", newToken.data.result);
+        } else {
+          history.replace("/account");
+          // throw new Error("Network Error");
         }
-      });
+        
+      }
+      if (decoded) {
+        yield ether.initContracts();
+        const balance = yield ether.getBalance();
+         //
+      
+        // const newId = yield firebase.auth().currentUser?.reauthenticateWithCredential(credential);
+        yield firebase.auth().currentUser?.reauthenticateWithCredential(credential);
+        const newToken = yield firebase.auth().currentUser?.getIdToken();
+        yield localStorage.setItem("JWT", newToken);
+
+        if (newToken) {
+          decoded = yield jwt_decode(newToken);
+        }
+
+        // const {data} = yield call(GetAccountById);
+        yield put({
+          type: "saveCurrentUser",
+          payload: {
+            ...firebaseResponse.user,
+            id: decoded.Id,
+            email: decoded.email,
+            name: decoded.name,
+            avatar: decoded.picture,
+            uid: decoded.user_id,
+            userid: decoded.user_id,
+            balance,
+            ether,
+            // ...data.result
+          }
+        });
+      }
+     
     },
 
     *emailLogin({ payload }, { put }) {
@@ -263,9 +273,6 @@ const UserModel: UserModelType = {
       // const data: firebase.User = yield call(EmailLogin, payload.email, payload.password);
       // const { credential }: {credential: firebase.auth.AuthCredential} = payload;
       const { user }: {user: firebase.User} = payload;
-      console.log('====================================');
-      console.log("Store >>>>", payload);
-      console.log('====================================');
       if (payload && user) {
 
         const tokenFirebase = yield user.getIdToken();
@@ -281,9 +288,6 @@ const UserModel: UserModelType = {
         const decoded = yield jwt_decode(tokenFirebase);
         yield ether.readKeyStoreJson(decoded.WalletKeyStore, user.uid);
         yield ether.initContracts();
-        console.log('====================================');
-        console.log("Refresh Token >>>>", decoded, tokenFirebase);
-        console.log('====================================');
         // yield ether.readKeyStoreJson(decoded.claims.WalletKeyStore, data.uid);
 
         yield localStorage.setItem("JWT", tokenFirebase);
@@ -309,9 +313,6 @@ const UserModel: UserModelType = {
 
     *registerEmail({ payload }, { call }) {
       // const data: firebase.User = yield call(CreateUserWithEmailAndPasswordHandler, payload.email, payload.password);
-      console.log('====================================');
-      console.log("Register User>>>", payload);
-      console.log('====================================');
       // const { credential }: {credential: firebase.auth.AuthCredential} = payload;
       const { user }: { user: firebase.User } = payload;
       if (payload && user) {
@@ -319,10 +320,6 @@ const UserModel: UserModelType = {
         const res = yield call(CreateFolder, { name: user.uid });
         const ether = yield EtherService.build();
         const tokenFirebase = yield user.getIdToken(true);
-        
-        console.log('====================================');
-        console.log('====================================', tokenFirebase);
-        console.log('====================================');
         yield ether.createAccount();
         const walletKeyStore: any = yield ether.createKeyStoreJson(user.uid);
         const param: AuthenticationRequest = {
@@ -372,9 +369,6 @@ const UserModel: UserModelType = {
     *updateProfile({ payload }, { call }) {
       const { currentUser }: { currentUser: firebase.User } = yield firebase.auth();
 
-      console.log('====================================');
-      console.log(payload);
-      console.log('====================================');
       if (payload.file) {
         const file = yield call(CreateMedia, {
           file: payload.file
@@ -389,24 +383,6 @@ const UserModel: UserModelType = {
           displayName: payload.name,
         })
       }
-      
-      firebase.auth().onAuthStateChanged((user) => {
-        console.log('====================================');
-        console.log("OnAuthStateChange" ,user);
-        console.log('====================================');
-        return user;
-        // put({
-        //   type: "saveCurrentUser",
-        //   payload: {
-        //     name: user?.displayName,
-        //     avatar: user?.photoURL,
-        //     email: user?.email,
-        //     userid: user?.uid,
-        //   }
-        // })
-      }, (error) => {
-        throw new Error(error.message);
-      })
     },
 
     *sendResetPassword({ payload }, { call }) {
@@ -423,9 +399,6 @@ const UserModel: UserModelType = {
 
   reducers: {
     saveCurrentUser(state, action) {
-      console.log('====================================');
-      console.log("Action >>>", action);
-      console.log('====================================');
       return {
         ...state,
         currentUser: {

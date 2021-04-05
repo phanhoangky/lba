@@ -1,9 +1,10 @@
+import { openNotification } from '@/utils/utils';
 import {
   PlusSquareTwoTone,
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
-import { Button, Col, Dropdown, Input, Menu, Row, Select } from 'antd';
+import { Button, Col, Dropdown, Input, Menu, Row, Select, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, LocationModelState } from 'umi';
 import { connect } from 'umi';
@@ -106,90 +107,92 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
     const { getListLocationParam } = this.props.location;
     return (
       <Row>
-        <Col span={12}>
-          <Input.Search
-            width={'40%'}
-            // value={getListLocationParam?.searchValue}
-            enterButton
-            onSearch={(e) => {
-              this.setLocationsTableLoading(true)
-                .then(() => {
-                  this.callGetListLocations({
-                    searchValue: e,
-                    pageNumber: 0,
-                  }).then(() => {
+        <Col span={24}>
+          <Space>
+            <Input.Search
+              // width={'30%'}
+              // value={getListLocationParam?.searchValue}
+              enterButton
+              onSearch={(e) => {
+                this.setLocationsTableLoading(true)
+                  .then(() => {
+                    this.callGetListLocations({
+                      searchValue: e,
+                      pageNumber: 0,
+                    })
+                      .then(() => {
+                        this.setLocationsTableLoading(false);
+                      })
+                      .catch((error) => {
+                        console.log('====================================');
+                        console.log(error);
+                        console.log('====================================');
+                        openNotification('error', 'Fail to get list location');
+                      });
+                  })
+                  .catch(() => {
                     this.setLocationsTableLoading(false);
                   });
-                })
-                .catch(() => {
-                  this.setLocationsTableLoading(false);
-                });
-            }}
-          />
+              }}
+            />
 
-          <Dropdown
-            overlay={
-              <Menu
-                onClick={(e) => {
-                  this.setLocationsTableLoading(true)
-                    .then(() => {
-                      this.callGetListLocations({
-                        isDescending: e.key === 'desc',
-                        isSort: true,
-                      }).then(() => {
+            <Dropdown
+              overlay={
+                <Menu
+                  onClick={(e) => {
+                    this.setLocationsTableLoading(true)
+                      .then(() => {
+                        this.callGetListLocations({
+                          isDescending: e.key === 'desc',
+                          isSort: true,
+                        }).then(() => {
+                          this.setLocationsTableLoading(false);
+                        });
+                      })
+                      .catch(() => {
                         this.setLocationsTableLoading(false);
                       });
-                    })
-                    .catch(() => {
+                  }}
+                >
+                  <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
+                    Ascending
+                  </Menu.Item>
+                  <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
+                    Descending
+                  </Menu.Item>
+                </Menu>
+              }
+            >
+              <Button>
+                {getListLocationParam?.isDescending && <SortDescendingOutlined />}
+                {!getListLocationParam?.isDescending && <SortAscendingOutlined />}
+              </Button>
+            </Dropdown>
+            <Select
+              style={{
+                width: '150px',
+              }}
+              defaultValue="CreateTime"
+              value={getListLocationParam?.orderBy}
+              onChange={(e) => {
+                this.setLocationsTableLoading(true)
+                  .then(() => {
+                    this.callGetListLocations({
+                      orderBy: e !== '' ? e : undefined,
+                      isSort: e !== '',
+                    }).then(() => {
                       this.setLocationsTableLoading(false);
                     });
-                }}
-              >
-                <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
-                  Ascending
-                </Menu.Item>
-                <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
-                  Descending
-                </Menu.Item>
-              </Menu>
-            }
-          >
-            <Button>
-              {getListLocationParam?.isDescending && <SortDescendingOutlined />}
-              {!getListLocationParam?.isDescending && <SortAscendingOutlined />}
-            </Button>
-          </Dropdown>
-          <Select
-            style={{
-              width: '100px',
-            }}
-            defaultValue=""
-            value={getListLocationParam?.orderBy}
-            onChange={(e) => {
-              this.setLocationsTableLoading(true)
-                .then(() => {
-                  this.callGetListLocations({
-                    orderBy: e !== '' ? e : undefined,
-                    isSort: e !== '',
-                  }).then(() => {
+                  })
+                  .catch(() => {
                     this.setLocationsTableLoading(false);
                   });
-                })
-                .catch(() => {
-                  this.setLocationsTableLoading(false);
-                });
-            }}
-          >
-            <Select.Option value="CreateTime">Create Time</Select.Option>
-            <Select.Option value="Name">Name</Select.Option>
-          </Select>
-        </Col>
-        <Col span={12}>
-          <div
-            style={{
-              textAlign: 'right',
-            }}
-          >
+              }}
+            >
+              <Select.Option value="CreateTime">Create Time</Select.Option>
+              <Select.Option value="Name">Name</Select.Option>
+            </Select>
+
             <Button
               onClick={async () => {
                 this.clearCreateLocationParam().then(() => {
@@ -206,8 +209,9 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
             >
               Add New Location
             </Button>
-          </div>
+          </Space>
         </Col>
+        {/* <Col span={12}></Col> */}
       </Row>
     );
   }

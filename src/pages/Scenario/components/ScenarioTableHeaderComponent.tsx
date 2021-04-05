@@ -97,13 +97,14 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
           </Button>
         </Dropdown>
         <Select
-          defaultValue=""
-          value={getListScenarioParam?.orderBy}
+          style={{ width: '100px' }}
+          defaultValue="createTime"
           onChange={(e) => {
             this.setTableLoading(true)
               .then(() => {
                 this.callGetListScenario({
                   orderBy: e,
+                  isSort: true,
                 }).then(() => {
                   this.setTableLoading(false);
                 });
@@ -113,8 +114,8 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
               });
           }}
         >
-          <Select.Option value="">Default</Select.Option>
-          <Select.Option value="createDate">Create Date</Select.Option>
+          <Select.Option value="createTime">Create Time</Select.Option>
+          <Select.Option value="title">Title</Select.Option>
         </Select>
         <Button
           onClick={() => {

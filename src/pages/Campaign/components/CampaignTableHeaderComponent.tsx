@@ -111,13 +111,15 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
           </Button>
         </Dropdown>
         <Select
-          defaultValue=""
-          value={getListCampaignParam.orderBy}
+          style={{
+            width: '150px',
+          }}
+          defaultValue="createTime"
           onChange={(e) => {
             this.setCampaignTableLoading(true)
               .then(() => {
                 this.callGetListCampaigns({
-                  orderBy: e === '' ? undefined : e,
+                  orderBy: e,
                   isSort: true,
                 }).then(() => {
                   this.setCampaignTableLoading(false);
@@ -128,8 +130,8 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
               });
           }}
         >
-          <Select.Option value="">Default</Select.Option>
-          <Select.Option value="createDate">Create Date</Select.Option>
+          <Select.Option value="createTime">Create Time</Select.Option>
+          <Select.Option value="name">Name</Select.Option>
         </Select>
         <Button
           onClick={async () => {

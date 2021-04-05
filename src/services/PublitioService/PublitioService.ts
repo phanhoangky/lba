@@ -10,6 +10,7 @@ export type GetFilesParam = {
   filter_type?: string;
   order?: string;
   id?: string;
+  isDescending?: boolean;
 }
 
 export type GetFoldersParam = {

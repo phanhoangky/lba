@@ -13,6 +13,16 @@
     visibility: visible;
   }
 }
+.customTable {
+  :global {
+    .ant-table-tbody>tr:hover {
+      transition: all 0.3s ease;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
+    }
+  }
+  
+}
 
 .selectedRow {
   background-color: rgba(49, 49, 49, 0.7);

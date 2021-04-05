@@ -38,6 +38,7 @@ import SelectPlaylistDrawer from '../SelectPlaylistDrawer';
 import ReactPlayer from 'react-player';
 import Column from 'antd/lib/table/Column';
 import { SCENARIO_STORE } from '../..';
+import styles from '../../index.less';
 
 export type EditScenarioFormDrawerProps = {
   dispatch: Dispatch;
@@ -556,14 +557,15 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
             <Skeleton active loading={editScenarioDrawer?.isLoading}>
               <div
                 id="areaWrapper"
-                style={{
-                  margin: `0 auto`,
-                  display: 'flex',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
+                // style={{
+                //   margin: `0 auto`,
+                //   display: 'flex',
+                //   width: '100%',
+                //   boxSizing: 'border-box',
+                //   justifyContent: 'center',
+                //   alignItems: 'center',
+                // }}
+                className={styles.areaWrapper}
               >
                 {selectedSenario &&
                   selectedSenario.layout.areas &&
@@ -572,6 +574,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                     return (
                       <div
                         key={area.id}
+                        className={selectedArea?.id === area.id ? 'selected-area' : 'custom-area'}
                         style={{
                           flex: `${area.width * 100}%`,
                           position: 'relative',
@@ -581,8 +584,6 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                           alignItems: 'center',
                           height: `${area.height * 100}%`,
                           textAlign: 'center',
-                          border:
-                            selectedArea?.id === area.id ? `5px ridge red` : `2px solid black`,
                           transition: 'ease',
                           transitionDuration: '1s',
                         }}
@@ -597,18 +598,21 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                           });
                         }}
                       >
+                        <div className="area-overlap"></div>
+
                         {scenarioItem ? (
                           <>
                             <div
-                              style={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '80%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column',
-                              }}
+                              // style={{
+                              //   position: 'relative',
+                              //   width: '100%',
+                              //   height: '80%',
+                              //   display: 'flex',
+                              //   alignItems: 'center',
+                              //   justifyContent: 'center',
+                              //   flexDirection: 'column',
+                              // }}
+                              className="media-wrapper"
                             >
                               <div
                                 className="remove-btn"
@@ -617,17 +621,17 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                                   e.stopPropagation();
                                 }}
                               >
-                                <CloseSquareOutlined />
+                                <DeleteTwoTone twoToneColor="#f93e3e" />
                               </div>
-                              <div className="media-wrapper">
+                              <div className="media-container">
                                 <div>{scenarioItem?.playlist?.title}</div>
                                 <div
                                   style={{
-                                    position: 'absolute',
+                                    // position: 'absolute',
                                     width: '100%',
-                                    height: '100%',
-                                    left: 0,
-                                    top: 0,
+                                    height: '80%',
+                                    // left: 0,
+                                    // top: 0,
                                   }}
                                 >
                                   {area &&
@@ -692,9 +696,6 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                         onRow={(record) => {
                           return {
                             onClick: () => {
-                              console.log('====================================');
-                              console.log(record);
-                              console.log('====================================');
                               this.setUrlAreasOfScenario(
                                 selectedArea,
                                 record.mediaSrc.urlPreview,

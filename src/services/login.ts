@@ -47,8 +47,8 @@ export async function GoogleLogin() {
 }
 
 export async function PostAuthentication(params: AuthenticationRequest) {
-  const res = await  ApiHelper.post("accounts/authenticate", { ...params });
-  return res
+  const res = await ApiHelper.post("accounts/authenticate", { ...params })
+  return res;
 }
 
 export async function EmailLogin(email: string, password: string) {

@@ -1,17 +1,7 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
-import {
-  Col,
-  DatePicker,
-  Divider,
-  Form,
-  Input,
-  InputNumber,
-  Row,
-  Select,
-  Space,
-} from 'antd';
+import { Col, DatePicker, Divider, Form, Input, InputNumber, Row, Select, Space } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import L from 'leaflet';
 import moment from 'moment';
@@ -151,7 +141,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
         .then(async (values) => {
           if (
             (createCampaignParam && !createCampaignParam.address) ||
-            createCampaignParam.address === ''
+            createCampaignParam?.address === ''
           ) {
             return;
           }
@@ -160,7 +150,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
           })
             .then(async () => {
               const campaignId = uuidv4();
-              if (currentUser) {
+              if (currentUser && addNewCampaignModal) {
                 const hash = await currentUser.ether?.createCampaign(
                   campaignId,
                   addNewCampaignModal.fees.totalFee,
@@ -276,25 +266,24 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   };
 
   hanldeOnChangeBudget = async (e: any) => {
-    const { addNewCampaignModal } = this.props.campaign;
-    if (addNewCampaignModal.fees) {
-      const totalFee = e * addNewCampaignModal.fees.Advertiser + e;
-      const remainFee = e - e * addNewCampaignModal.fees.Supplier;
-      const cancelFee = e * addNewCampaignModal.fees.CancelCampagin;
+    const { addNewCampaignModal, fees } = this.props.campaign;
+    if (fees) {
+      const totalFee = e * fees.Advertiser + e;
+      const remainFee = e - e * fees.Supplier;
+      const cancelFee = e * fees.CancelCampagin;
+
       const newFes = {
         remainFee,
         totalFee,
         cancelFee,
       };
-      this.setAddNewCampaignModal({
+
+      await this.setAddNewCampaignModal({
         fees: {
-          ...addNewCampaignModal.fees,
+          ...fees,
           ...newFes,
         },
       });
-      // console.log('====================================');
-      // console.log(addNewCampaignModal.fees, newFes);
-      // console.log('====================================');
     }
   };
 
@@ -361,7 +350,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
 
     return (
       <>
-        {addNewCampaignModal.visible && (
+        {addNewCampaignModal?.visible && (
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
             <Row gutter={20}>
               {/* Start Column */}

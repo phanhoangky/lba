@@ -22,9 +22,28 @@ body,
   .lba-btn {
     background-image: linear-gradient(135deg, #02aab0, #00cdac);
     color: #fff;
-    &:hover {
+  }
 
+  // .selected-row {
+  //   background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  //   color: aliceblue;
+  // }
+  .ant-table-tbody>.ant-table-row-level-0>td {
+    background: unset;
+  }
+  :global {
+    .ant-table-tbody {
+      transition: all 0.3s ease;
     }
+    .ant-table-row, .ant-table-row-level-0 {
+      transition: all 0.3s ease;  
+    }
+  }
+  .ant-table-tbody>.ant-table-row-level-0:hover {
+    transition: all 0.3s ease;
+    background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    color: aliceblue;
+    font-weight: bold;
   }
 }
 

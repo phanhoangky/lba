@@ -28,31 +28,34 @@ export type Campaign = {
   isLoading?: boolean;
   percentMoneyUsed?: number;
   percentWin?: number;
+  campaignDeviceTypes?: any[],
 };
 
 export type CampaignModelState = {
-  listCampaign: Campaign[];
-  campaignsTableLoading: boolean;
-  totalCampaigns: number; 
-  selectedCampaign: Campaign;
+  listCampaign?: Campaign[];
+  campaignsTableLoading?: boolean;
+  totalCampaigns?: number; 
+  selectedCampaign?: Campaign;
   
-  getListCampaignParam: BaseGetRequest & {mail: string, id?: string};
+  getListCampaignParam?: BaseGetRequest & {mail: string, id?: string};
 
-  createCampaignParam: CreateCampaignParam;
+  createCampaignParam?: CreateCampaignParam;
 
-  addNewCampaignModal: {
+  addNewCampaignModal?: {
     visible: boolean;
     isLoading: boolean;
     address: string;
     currentStep: number;
-    fees?: any;
     previewScenarioModal?: {
       visible: boolean;
       isLoading: boolean;
-    }
+    },
+    fees?: any;
   };
+  
+  fees?: any;
 
-  editCampaignDrawer: {
+  editCampaignDrawer?: {
     visible: boolean;
     isLoading: boolean;
   },
@@ -92,6 +95,8 @@ export type CampaignModelStore = {
     setEditCampaignReducer: Reducer<CampaignModelState>;
 
     setViewCampaignDetailComponentReducer: Reducer<CampaignModelState>;
+
+    setFeesReducer: Reducer<CampaignModelState>;
   }
 };
 
@@ -182,17 +187,12 @@ const CampaignStore: CampaignModelStore = {
         const { data } = yield call(getListCampaigns, payload);
         list = data.result.data;
       }
-      console.log('====================================');
-      console.log("List Campaign >>>>", list);
-      console.log('====================================');
       yield put({
         type: "setListCampaignReducer",
         payload: list.map((c: any) => {
           return {
             key: c.id,
             ...c,
-            maxBid: c.maxBid.toFixed(2),
-            budget: c.budget.toFixed(2),
           }
         })
       })
@@ -216,9 +216,15 @@ const CampaignStore: CampaignModelStore = {
       yield call(deleteCampaign, payload);
     },
 
-    *getListFee({ payload }, { call }) {
+    *getListFee({ payload }, { call, put }) {
       const res = yield call(GetFees, payload);
-      
+      console.log('====================================');
+      console.log(res);
+      console.log('====================================');
+      yield put({
+        type: "setFeesReducer",
+        payload: res.result
+      })
       return res;
     },
 
@@ -321,6 +327,13 @@ const CampaignStore: CampaignModelStore = {
       return {
         ...state,
         viewCampaignDetailComponent: payload
+      }
+    },
+
+    setFeesReducer(state, { payload }) {
+      return {
+        ...state,
+        fees: payload
       }
     }
    }

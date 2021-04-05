@@ -99,13 +99,13 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
           </Button>
         </Dropdown>
         <Select
-          defaultValue=""
+          defaultValue="createTime"
           value={getPlaylistParam?.orderBy}
           onChange={(e) => {
             this.setTableLoading(true)
               .then(() => {
                 this.callGetListPlaylist({
-                  orderBy: e === '' ? 'CreateTime' : e,
+                  orderBy: e,
                   isSort: true,
                 }).then(() => {
                   this.setTableLoading(false);
@@ -116,8 +116,8 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
               });
           }}
         >
-          <Select.Option value="">Default</Select.Option>
-          <Select.Option value="Title">Title</Select.Option>
+          <Select.Option value="createTime">Create Time</Select.Option>
+          <Select.Option value="title">Title</Select.Option>
         </Select>
         <Button
           onClick={async () => {

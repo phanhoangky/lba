@@ -392,9 +392,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
 
   render() {
     const {
-      totalDuration,
-      maxDuration,
-      minDuration,
       // listMediaNotBelongToPlaylist,
       // selectedPlaylistItems,
       selectedPlaylist,
@@ -404,8 +401,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
     // const listMedia = listMediaNotBelongToPlaylist.filter((media) =>
     //   selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
     // );
-
-    const availableDuration = maxDuration - totalDuration;
 
     return (
       <>
@@ -425,7 +420,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
             <Col span={12}>
               {/* PlaylistItems Table */}
               <Table
-                bordered
                 rowKey="index"
                 loading={viewPlaylistDetailComponent?.isLoading}
                 key={uuidv4()}
@@ -435,6 +429,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                     row: this.DraggableBodyRow,
                   },
                 }}
+                className={styles.customTable}
                 dataSource={selectedPlaylist?.playlistItems}
                 pagination={false}
               >

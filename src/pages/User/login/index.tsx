@@ -74,8 +74,10 @@ const Login: React.FC<LoginProps> = (props) => {
     googleLogin()
       .then(() => {
         redirectToHomePage();
+        setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error');
         setIsLoading(false);
       });
 

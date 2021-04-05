@@ -1,5 +1,11 @@
-import { PlusSquareTwoTone } from '@ant-design/icons';
-import { Button, Col, Input, Row, Select, Space } from 'antd';
+import { openNotification } from '@/utils/utils';
+import {
+  ControlTwoTone,
+  PlusSquareTwoTone,
+  SortAscendingOutlined,
+  SortDescendingOutlined,
+} from '@ant-design/icons';
+import { Button, Col, Dropdown, Input, Menu, Row, Select, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState } from 'umi';
 import { connect } from 'umi';
@@ -61,7 +67,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
   };
 
   render() {
-    const { breadScrumb } = this.props.media;
+    const { breadScrumb, getListFileParam } = this.props.media;
     return (
       <>
         <Row>
@@ -103,6 +109,58 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                   }
                 }}
               />
+              <ControlTwoTone style={{ fontSize: `2em` }} />
+              <Dropdown
+                overlay={
+                  <Menu
+                    onClick={(e) => {
+                      const { searchListMediaParam } = this.props.media;
+                      this.setListLoading(true)
+                        .then(() => {
+                          if (searchListMediaParam?.title && searchListMediaParam.title !== '') {
+                            this.callSearchListMedia({
+                              isSort: true,
+                              isDescending: e.key === 'desc',
+                            }).then(() => {
+                              this.setListLoading(false);
+                            });
+                          } else {
+                            this.callGetListMedia({
+                              isDescending: e.key === 'desc',
+                            })
+                              .then(() => {
+                                this.setListLoading(false);
+                                openNotification('success', 'List Medias are loaded');
+                              })
+                              .catch((error) => {
+                                console.log('====================================');
+                                console.log(error);
+                                console.log('====================================');
+                                openNotification('error', 'Fail to load list medias');
+                              });
+                          }
+                        })
+                        .catch(() => {
+                          this.setListLoading(false);
+                          openNotification('error', 'Fail to load list medias');
+                        });
+                    }}
+                  >
+                    <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
+                      Ascending
+                    </Menu.Item>
+                    <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
+                      Descending
+                    </Menu.Item>
+                  </Menu>
+                }
+              >
+                <Button>
+                  {getListFileParam?.order && <SortDescendingOutlined />}
+                  {!getListFileParam?.order && <SortAscendingOutlined />}
+                </Button>
+              </Dropdown>
+
               <Select
                 style={{ width: '100px' }}
                 defaultValue={-1}
@@ -132,6 +190,53 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                 </Select.Option>
                 <Select.Option key={'Approved'} value={2}>
                   Approved
+                </Select.Option>
+              </Select>
+              <Select
+                style={{
+                  width: '150px',
+                }}
+                showSearch
+                defaultValue="createTime"
+                onChange={(e) => {
+                  const { searchListMediaParam } = this.props.media;
+                  this.setListLoading(true).then(() => {
+                    if (searchListMediaParam?.title && searchListMediaParam.title !== '') {
+                      this.callSearchListMedia({
+                        orderBy: e === 'name' ? 'title' : e,
+                        isSort: true,
+                      })
+                        .then(() => {
+                          this.setListLoading(false);
+                        })
+                        .catch((error) => {
+                          console.log('====================================');
+                          console.log(error);
+                          console.log('====================================');
+                          this.setListLoading(false);
+                        });
+                    } else {
+                      this.callGetListMedia({
+                        order: e === 'createTime' ? 'date' : e,
+                      })
+                        .then(() => {
+                          this.setListLoading(false);
+                        })
+                        .catch((error) => {
+                          console.log('====================================');
+                          console.log(error);
+                          console.log('====================================');
+                          this.setListLoading(false);
+                        });
+                    }
+                  });
+                }}
+              >
+                <Select.Option key="createTime" value={'createTime'}>
+                  Create Time
+                </Select.Option>
+                <Select.Option key="name" value={'name'}>
+                  Name
                 </Select.Option>
               </Select>
             </Space>

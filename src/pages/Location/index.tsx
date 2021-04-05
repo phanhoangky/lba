@@ -110,28 +110,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
     await this.setListLocations(newList);
   };
 
-  setLocationAddressInMap = async (item: any) => {
-    if (item.longitude !== '' && item.latitude !== '') {
-      const { mapComponent } = this.props.location;
-      const { data } = await this.reverseGeocoding(item.latitude, item.longitude);
-
-      this.setSelectedLocation({
-        address: data.display_name,
-      }).then(() => {
-        if (mapComponent) {
-          if (mapComponent.map) {
-            if (mapComponent.marker) {
-              mapComponent.marker.setLatLng([item.latitude, item.longitude]);
-              // this.setMapComponent({
-              //   marker: undefined,
-              // });
-            }
-          }
-        }
-      });
-    }
-  };
-
   clearCreateLocationParam = async () => {
     await this.props.dispatch({
       type: `${LOCATION_DISPATCHER}/clearCreateLocationParamReducer`,
@@ -377,7 +355,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       <Button
                         type="primary"
                         onClick={async (e) => {
-                          // await this.resetMap();
                           this.setViewLocationDetailComponent({
                             visible: false,
                           }).then(async () => {
@@ -395,10 +372,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                                   visible: true,
                                 });
                               });
-
-                              // this.resetMap().then(() => {
-
-                              // });
                             });
                           });
                           e.stopPropagation();
@@ -456,15 +429,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               });
             });
             this.clearCreateLocationParam();
-            // this.setAddNewLocationModal({
-            //   visible: false,
-            // }).then(() => {
-            //   this.resetMap().then(() => {
-            //     this.setViewLocationDetailComponent({
-            //       visible: true,
-            //     });
-            //   });
-            // });
           }}
         >
           {addNewLocationModal?.visible && (
@@ -491,9 +455,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
               if (old) {
                 const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
-                console.log('====================================');
-                console.log(old, data);
-                console.log('====================================');
                 this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
                   this.setViewLocationDetailComponent({
                     visible: true,

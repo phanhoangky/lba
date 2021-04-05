@@ -628,7 +628,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
             <Col span={12}>
               {/* PlaylistItems Table */}
               <Table
-                bordered
                 rowKey="index"
                 loading={editPlaylistDrawer?.isLoading}
                 key={uuidv4()}
@@ -638,6 +637,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                     row: this.DraggableBodyRow,
                   },
                 }}
+                className={styles.customTable}
                 dataSource={selectedPlaylist?.playlistItems}
                 pagination={false}
               >

@@ -60,9 +60,10 @@ ApiHelper.interceptors.response.use(
       
       
     } else {
-      openNotification("error", error.response.status, error.response.status)
-      history.replace('/exception/500');
-      
+      openNotification("error", "Cannot connect to server");
+      // history.replace('/account/login');
+      // Promise.reject(error)
+      // throw error;
     }
     // Promise.reject(new Error(error)).catch(e => {
       

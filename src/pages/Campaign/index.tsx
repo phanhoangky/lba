@@ -12,7 +12,7 @@ import {
   EyeFilled,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Modal, Space, Switch, Table } from 'antd';
+import { Button, Modal, Space, Switch, Table, Tag } from 'antd';
 import Column from 'antd/lib/table/Column';
 import { isObject } from 'lodash';
 import moment from 'moment';
@@ -89,6 +89,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       type: `${CAMPAIGN}/getListFee`,
       payload: {},
     });
+
     await this.setAddNewCampaignModal({
       fees: res.result,
     });
@@ -307,7 +308,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
 
   setLoadingCampaignRecord = async (item: any, isLoading: boolean) => {
     const { listCampaign } = this.props.campaign;
-    const newList = listCampaign.map((campaign) => {
+    const newList = listCampaign?.map((campaign) => {
       if (campaign.id === item.id) {
         return {
           ...campaign,
@@ -345,6 +346,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       getListCampaignParam,
       totalCampaigns,
       addNewCampaignModal,
+      viewCampaignDetailComponent,
     } = this.props.campaign;
     return (
       <>
@@ -358,7 +360,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             loading={campaignsTableLoading}
             pagination={{
               current: getListCampaignParam?.pageNumber ? getListCampaignParam.pageNumber + 1 : 1,
-              pageSize: getListCampaignParam.pageLimitItem,
+              pageSize: getListCampaignParam?.pageLimitItem
+                ? getListCampaignParam?.pageLimitItem
+                : 5,
               total: totalCampaigns,
               onChange: async (e) => {
                 this.setCampaignTableLoading(true)
@@ -391,10 +395,16 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                 );
               }}
             ></Column>
-            <Column key="budget" dataIndex="budget" title="Budget"></Column>
+            <Column
+              key="budget"
+              title="Budget"
+              render={(record: Campaign) => {
+                return <>{record.budget.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}</>;
+              }}
+            ></Column>
             <Column
               key="activity"
-              title="activity"
+              title="Activity"
               render={(record: Campaign) => {
                 const now = moment();
                 const diffStart = now.diff(record.startDate);
@@ -402,9 +412,21 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
 
                 return (
                   <>
-                    {diffStart > 0 && diffEnd < 0 && 'Running'}
-                    {diffEnd > 0 && 'Ended'}
-                    {diffStart < 0 && 'To be considered'}
+                    {diffStart > 0 && diffEnd < 0 && (
+                      <Tag color={'cyan'} key={'running'}>
+                        RUNNING
+                      </Tag>
+                    )}
+                    {diffEnd > 0 && (
+                      <Tag color={'red'} key={'ended'}>
+                        ENDED
+                      </Tag>
+                    )}
+                    {diffStart < 0 && (
+                      <Tag color={'gold'} key={'notstart'}>
+                        NOT START
+                      </Tag>
+                    )}
                   </>
                 );
               }}
@@ -473,10 +495,10 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           <Modal
             width="65%"
             title="Add New Campaign"
-            visible={addNewCampaignModal.visible}
+            visible={addNewCampaignModal?.visible}
             centered
             destroyOnClose={true}
-            confirmLoading={addNewCampaignModal.isLoading}
+            confirmLoading={addNewCampaignModal?.isLoading}
             closable={false}
             afterClose={() => {}}
             onOk={() => {
@@ -491,7 +513,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               });
             }}
           >
-            {addNewCampaignModal.visible && (
+            {addNewCampaignModal?.visible && (
               <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
             )}
           </Modal>

@@ -8,6 +8,7 @@ import type { Area, Dispatch, PlayListModelState, ScenarioItem, ScenarioModelSta
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
+import styles from '../index.less';
 
 export type ViewScenarioDetailProps = {
   dispatch: Dispatch;
@@ -372,13 +373,18 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
           <Row gutter={20}>
             <Col span={12}>
               <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
-                <div id="areaWrapper" className="area-wrapper">
+                <div id="areaWrapper" className={styles.areaWrapper}>
                   {selectedSenario &&
                     selectedSenario.layout.areas &&
                     sortArea(selectedSenario.layout.areas).map((area) => {
                       const scenarioItem = this.checkAreaIsUsed(area);
                       return (
                         <div
+                          className={
+                            selectedArea?.id === area.id
+                              ? 'selected-area custom-area'
+                              : 'custom-area'
+                          }
                           key={area.id}
                           style={{
                             flex: `${area.width * 100}%`,
@@ -389,8 +395,6 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                             alignItems: 'center',
                             height: `${area.height * 100}%`,
                             textAlign: 'center',
-                            border:
-                              selectedArea?.id === area.id ? `5px ridge red` : `2px solid black`,
                             transition: 'ease',
                             transitionDuration: '1s',
                           }}
@@ -399,6 +403,7 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                             this.setSelectedArea(area);
                           }}
                         >
+                          <div className="area-overlap"></div>
                           {scenarioItem ? (
                             <>
                               <div className="media-wrapper">

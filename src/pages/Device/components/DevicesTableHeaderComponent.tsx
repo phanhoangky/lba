@@ -1,6 +1,11 @@
 import { openNotification } from '@/utils/utils';
-import { ControlTwoTone, FilterTwoTone } from '@ant-design/icons';
-import { Button, Input, Select, Space } from 'antd';
+import {
+  ControlTwoTone,
+  FilterTwoTone,
+  SortAscendingOutlined,
+  SortDescendingOutlined,
+} from '@ant-design/icons';
+import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
 import { connect } from 'umi';
@@ -54,7 +59,7 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
   };
 
   render() {
-    const { selectedDevices } = this.props.deviceStore;
+    const { selectedDevices, getDevicesParam } = this.props.deviceStore;
     return (
       <Space>
         <Input.Search
@@ -64,6 +69,7 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
               .then(() => {
                 this.callGetListDevices({
                   name: value.trim(),
+                  pageNumber: 0,
                 }).then(() => {
                   this.setDevicesTableLoading(false);
                 });
@@ -73,21 +79,45 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
                 Promise.reject(error);
                 this.setDevicesTableLoading(false);
               });
-
-            // this.props.dispatch({
-            //   type: 'deviceStore/getDevices',
-            //   payload: {
-            //     ...getDevicesParam,
-
-            //   },
-            // });
           }}
           enterButton
         />
         <ControlTwoTone style={{ fontSize: `2em` }} />
+        <Dropdown
+          overlay={
+            <Menu
+              onClick={(e) => {
+                this.setDevicesTableLoading(true)
+                  .then(() => {
+                    this.callGetListDevices({
+                      isSort: true,
+                      isDescending: e.key === 'desc',
+                    }).then(() => {
+                      this.setDevicesTableLoading(false);
+                    });
+                  })
+                  .catch(() => {
+                    this.setDevicesTableLoading(false);
+                  });
+              }}
+            >
+              <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
+                Ascending
+              </Menu.Item>
+              <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
+                Descending
+              </Menu.Item>
+            </Menu>
+          }
+        >
+          <Button>
+            {getDevicesParam?.isDescending && <SortDescendingOutlined />}
+            {!getDevicesParam?.isDescending && <SortAscendingOutlined />}
+          </Button>
+        </Dropdown>
         <Select
           style={{ width: 120 }}
-          // defaultValue="CreateTime"
+          defaultValue="CreateTime"
           onChange={async (value) => {
             this.setDevicesTableLoading(true)
               .then(() => {
@@ -103,7 +133,7 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
               });
           }}
         >
-          <Select.Option value="CreateTime">Newest</Select.Option>
+          <Select.Option value="CreateTime">Create Time</Select.Option>
           <Select.Option value="Name">Name</Select.Option>
         </Select>
         <FilterTwoTone style={{ fontSize: `2em` }} />

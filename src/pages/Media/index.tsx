@@ -410,9 +410,6 @@ class Media extends React.Component<MediaSourceProps> {
   // handleRemoveFolder = async (id: string) => {};
 
   handleFolderContextMenuClick = async (menu: any, item: any) => {
-    console.log('====================================');
-    console.log(menu, item);
-    console.log('====================================');
     if (menu.key === 'open') {
       this.toNextFolder(item);
     }

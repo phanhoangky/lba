@@ -89,18 +89,18 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
   setPreviewScenarioModal = async (param?: any) => {
     await this.setAddNewCampaignModal({
       previewScenarioModal: {
-        ...this.props.campaign.addNewCampaignModal.previewScenarioModal,
+        ...this.props.campaign.addNewCampaignModal?.previewScenarioModal,
         ...param,
       },
     });
   };
 
   handlePreviewScenario = async (item: any) => {
-    await this.setPreviewScenarioModal({
-      visible: true,
+    this.setSelectedScenario(item).then(() => {
+      this.setPreviewScenarioModal({
+        visible: true,
+      });
     });
-
-    await this.setSelectedScenario(item);
   };
 
   render() {
@@ -164,7 +164,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
             ></List>
           </Col>
           <Modal
-            visible={addNewCampaignModal.previewScenarioModal?.visible}
+            visible={addNewCampaignModal?.previewScenarioModal?.visible}
             closable={false}
             destroyOnClose={true}
             onCancel={() => {
@@ -173,7 +173,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
               });
             }}
           >
-            {addNewCampaignModal.previewScenarioModal?.visible && (
+            {addNewCampaignModal?.previewScenarioModal?.visible && (
               <ViewScenarioDetailComponent {...this.props} />
             )}
           </Modal>

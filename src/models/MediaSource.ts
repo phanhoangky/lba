@@ -180,7 +180,8 @@ const MediaSourceStore: MediaSourceModel = {
       offset: 0,
       folder: "/",
       pageNumber: 0,
-      order: "date"
+      order: "date",
+      isDescending: false
     },
 
     searchListMediaParam: {
@@ -270,7 +271,10 @@ const MediaSourceStore: MediaSourceModel = {
           })
         }
       } else {
-        const listFile = yield call(GetFiles, payload);
+        const listFile = yield call(GetFiles, {
+          ...payload,
+          order: `${payload.order}:${payload.isDescending ? 'desc' : 'asc'}`
+        });
         const listId = listFile.files.map((file: any) => {
           return file.id
         })

@@ -2,7 +2,7 @@ import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import { Gauge, Liquid } from '@ant-design/charts';
-import { Button, Col, DatePicker, Divider, Drawer, Input, Row, Space } from 'antd';
+import { Button, Col, DatePicker, Divider, Drawer, Input, Row, Space, Tag } from 'antd';
 import L from 'leaflet';
 import moment from 'moment';
 import * as React from 'react';
@@ -25,7 +25,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
 
     if (mapComponent && mapComponent.map) {
       const { selectedCampaign } = this.props.campaign;
-      if (selectedCampaign.location.split('-').length === 2) {
+      if (selectedCampaign && selectedCampaign.location.split('-').length === 2) {
         const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
         const lng = Number.parseFloat(selectedCampaign.location.split('-')[1]);
         mapComponent.map.setView([lat, lng]);
@@ -56,39 +56,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
     }
   }
 
-  componentDidUpdate = () => {
-    // const { mapComponent } = this.props.location;
-    // if (mapComponent && mapComponent.map) {
-    //   const { selectedCampaign } = this.props.campaign;
-    //   if (selectedCampaign.location.split('-').length === 2) {
-    //     const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
-    //     const lng = Number.parseFloat(selectedCampaign.location.split('-')[1]);
-    //     mapComponent.map.setView([lat, lng]);
-    //     if (!mapComponent.marker) {
-    //       if (lat && lng) {
-    //         const marker = L.marker([lat, lng]);
-    //         marker.addTo(mapComponent.map);
-    //         this.setMapComponent({
-    //           marker,
-    //         });
-    //       }
-    //     } else {
-    //       mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
-    //     }
-    //     if (mapComponent.circle) {
-    //       mapComponent.circle.setLatLng([lat, lng]);
-    //       mapComponent.circle.setRadius(selectedCampaign.radius * 1000);
-    //       // mapComponent.circle.redraw();
-    //     } else {
-    //       const circle = L.circle([lat, lng]).setRadius(selectedCampaign.radius * 1000);
-    //       circle.addTo(mapComponent.map);
-    //       this.setMapComponent({
-    //         circle,
-    //       });
-    //     }
-    //   }
-    // }
-  };
+  componentDidUpdate = () => {};
 
   setMapComponent = async (payload: any) => {
     await this.props.dispatch({
@@ -118,8 +86,16 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
     });
   };
   render() {
-    const { selectedCampaign, editCampaignDrawer } = this.props.campaign;
+    const { selectedCampaign, editCampaignDrawer, fees } = this.props.campaign;
     const { mapComponent } = this.props.location;
+    const campaignBudget = selectedCampaign ? selectedCampaign.budget : 0;
+    const listType = selectedCampaign?.campaignDeviceTypes?.map((type) => {
+      return (
+        <Tag color={'green'} key={type.deviceType.id}>
+          {type.deviceType.typeName}
+        </Tag>
+      );
+    });
     return (
       <>
         <Drawer
@@ -137,9 +113,6 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                     });
                   }
                   if (mapComponent.circle) {
-                    console.log('====================================');
-                    console.log('Remove Circle >>>>', mapComponent.circle);
-                    console.log('====================================');
                     mapComponent.circle.remove();
                     this.setMapComponent({
                       circle: undefined,
@@ -154,7 +127,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
               visible: false,
             });
           }}
-          visible={editCampaignDrawer.visible}
+          visible={editCampaignDrawer?.visible}
           destroyOnClose={true}
           forceRender={true}
           getContainer={false}
@@ -164,23 +137,50 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
               <Row>
                 <Col span={4}>Name</Col>
                 <Col span={20}>
-                  <Input readOnly value={selectedCampaign.name} />
+                  <Input readOnly value={selectedCampaign?.name} />
                 </Col>
               </Row>
               <Divider></Divider>
               <Row>
                 <Col span={4}>Budget</Col>
                 <Col span={20}>
-                  <Input readOnly value={selectedCampaign.budget} />
+                  <Input
+                    readOnly
+                    value={selectedCampaign?.budget
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                  />
+                </Col>
+              </Row>
+              <br />
+              <Row>
+                <Col span={4}>Calculate Fees</Col>
+                <Col span={20}>
+                  <Row>
+                    <Col span={8}>Total Fee</Col>
+                    <Col span={16}>
+                      {fees && campaignBudget && campaignBudget * fees.Advertiser + campaignBudget}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col span={8}>Remain Fee</Col>
+                    <Col span={16}>
+                      {fees && campaignBudget && campaignBudget - campaignBudget * fees.Supplier}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col span={8}>Cancel Fee</Col>
+                    <Col span={16}>
+                      {fees && campaignBudget && campaignBudget * fees.CancelCampagin}
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
               <Divider></Divider>
               <Row>
                 <Col span={4}>Types</Col>
                 <Col span={20}>
-                  {selectedCampaign.types.map((type) => {
-                    return type.name;
-                  })}
+                  <Space wrap>{listType}</Space>
                 </Col>
               </Row>
               <Divider></Divider>
@@ -190,8 +190,8 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                   <DatePicker.RangePicker
                     disabled={true}
                     value={[
-                      moment(moment(selectedCampaign.startDate).format('YYYY-MM-DD')),
-                      moment(moment(selectedCampaign.endDate).format('YYYY-MM-DD')),
+                      moment(moment(selectedCampaign?.startDate).format('YYYY-MM-DD')),
+                      moment(moment(selectedCampaign?.endDate).format('YYYY-MM-DD')),
                     ]}
                     inputReadOnly={true}
                   />
@@ -202,7 +202,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                 <Col span={4}>Time Filter</Col>
                 <Col span={20}>
                   <Space wrap={true}>
-                    {selectedCampaign.timeFilter.split('').map((time, index) => {
+                    {selectedCampaign?.timeFilter.split('').map((time, index) => {
                       const start = index;
                       const end = index + 1 === 24 ? 0 : index + 1;
                       if (time === '1') {
@@ -223,7 +223,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                 <Col span={4}>Date Filter</Col>
                 <Col span={20}>
                   <Space wrap={true}>
-                    {selectedCampaign.dateFilter.split('').map((date, index) => {
+                    {selectedCampaign?.dateFilter.split('').map((date, index) => {
                       return (
                         <Button key={uuidv4()} type={date === '1' ? 'primary' : 'default'}>
                           {index === 0 && 'Monday'}
@@ -242,8 +242,9 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
               <Divider></Divider>
               <Row>
                 <Col span={4}>Address</Col>
-                <Col span={20}>{selectedCampaign.address}</Col>
+                <Col span={20}>{selectedCampaign?.address}</Col>
               </Row>
+              <Divider></Divider>
               <Row>
                 <Col span={24}>
                   <LeafletMapComponent {...this.props} />
@@ -253,13 +254,13 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
             <Col span={12}>
               <Divider orientation="left"></Divider>
               <Gauge
-                percent={selectedCampaign.percentMoneyUsed ? selectedCampaign.percentMoneyUsed : 0}
+                percent={selectedCampaign?.percentMoneyUsed ? selectedCampaign.percentMoneyUsed : 0}
                 range={{ color: 'l(0) 0:#bde8ff 1:#9ec9ff' }}
                 startAngle={Math.PI}
                 endAngle={2 * Math.PI}
                 statistic={{
                   title: {
-                    offsetY: -36,
+                    offsetY: 36,
                     style: {
                       fontSize: '36px',
                       color: '#4B535E',
@@ -282,7 +283,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
               />
               <Divider orientation="left"></Divider>
               <Liquid
-                percent={selectedCampaign.percentWin ? selectedCampaign.percentWin : 0}
+                percent={selectedCampaign?.percentWin ? selectedCampaign.percentWin : 0}
                 outline={{ border: 4, distance: 8 }}
                 wave={{ length: 128 }}
                 statistic={{

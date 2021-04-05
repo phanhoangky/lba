@@ -1,7 +1,166 @@
 .selectedLayout {
   color: aliceblue;
   background-color: rgba(123, 125, 128, 0.418);
-  transition: 1s ease all;
+  transition: all 0.3s ease;
+}
+
+.areaWrapper {
+  :global {
+    margin: 0 auto;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+
+    .custom-area {
+      position: relative;
+      z-index: 0;
+      transition: all 0.3s ease;
+      border: 1px solid black;
+      // &:hover {
+      //   transform: scale(1.05);
+      //   z-index: 2;
+      // }
+
+      // &:hover .area-overlap {
+      //   width: 100%;
+      // }
+    }
+
+    .selected-area {
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+      border: 2px solid #00cdac;
+      // transform: scale(1.05);
+      color: aliceblue;
+      // &:hover {
+      //   transform: scale(1.05);
+      //   z-index: 2;
+      // }
+
+      // &:hover .area-overlap {
+      //   width: 100%;
+      // }
+      .area-overlap {
+        width: 100%;
+      }
+    }
+
+    .area-overlap {
+      transition: all 0.3s ease;
+      width: 0;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
+      z-index: 1;
+    }
+
+    .media-wrapper {
+      position: relative;
+      width: 100%;
+      height: 80%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 2;
+    }
+    .media-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 2;
+    }
+    .audio-checkbox {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 10%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .remove-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 25px;
+      width: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 3;
+
+      &:hover {
+        cursor: pointer;
+        background-color: rgb(209, 69, 69);
+        color: aliceblue;
+      }
+
+      :hover {
+        cursor: pointer;
+        background-color: rgb(209, 69, 69);
+        color: aliceblue;
+      }
+    }
+
+    .remove-btn:hover {
+      cursor: pointer;
+      background-color: rgb(209, 69, 69);
+      color: aliceblue;
+    }
+
+    .selected-playlist {
+      color: aliceblue;
+      background-color: rgba(84, 125, 187, 0.712);
+      transition: all 0.3s ease;
+
+      &.ant-table-row &.ant-table-row-level-0 {
+        &:hover {
+          color: rgb(15, 15, 15);
+          background-image: linear-gradient(135deg, #02aab0, #00cdac);
+          transition: all 0.3s ease;
+        }
+      }
+
+      &:hover {
+        color: rgb(15, 15, 15);
+        background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        transition: all 0.3s ease;
+      }
+    }
+
+    .selected-media {
+      color: aliceblue;
+      background-color: rgba(84, 125, 187, 0.712);
+      transition: all 0.3s ease;
+
+      &.ant-table-row &.ant-table-row-level-0 {
+        &:hover {
+          color: rgb(15, 15, 15);
+          background-image: linear-gradient(135deg, #02aab0, #00cdac);
+          transition: all 0.3s ease;
+        }
+      }
+
+      &:hover {
+        color: rgb(15, 15, 15);
+        background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        transition: all 0.3s ease;
+      }
+    }
+  }
 }
 
 :global {
@@ -15,102 +174,102 @@
     transition: 1s ease all;
   }
 
-  .area-wrapper {
-    margin: 0 auto;
-    display: flex;
-    width: 100%;
-    box-sizing: border-box;
-    justify-content: center;
-    align-items: center;
-  }
+  // .area-wrapper {
+  //   margin: 0 auto;
+  //   display: flex;
+  //   width: 100%;
+  //   box-sizing: border-box;
+  //   justify-content: center;
+  //   align-items: center;
+  // }
 
-  .audio-checkbox {
-    position: relative;
-    width: 100%;
-    height: 20%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  // .audio-checkbox {
+  //   position: relative;
+  //   width: 100%;
+  //   height: 20%;
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+  // }
 
-  .media-wrapper {
-    position: relative;
-    width: 100%;
-    height: 80%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
+  // .media-wrapper {
+  //   position: relative;
+  //   width: 100%;
+  //   height: 80%;
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+  //   flex-direction: column;
+  // }
 
-  .remove-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 25px;
-    width: 25px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    z-index: 2;
-    &:hover {
-        cursor: pointer;
-        background-color: rgb(209, 69, 69);
-        color: aliceblue;
-    }
-     :hover {
-      cursor: pointer;
-      background-color: rgb(209, 69, 69);
-      color: aliceblue;
-    }
-  }
+  // .remove-btn {
+  //   position: absolute;
+  //   top: 0;
+  //   right: 0;
+  //   height: 25px;
+  //   width: 25px;
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+  //   flex-direction: column;
+  //   z-index: 2;
+  //   &:hover {
+  //       cursor: pointer;
+  //       background-color: rgb(209, 69, 69);
+  //       color: aliceblue;
+  //   }
+  //    :hover {
+  //     cursor: pointer;
+  //     background-color: rgb(209, 69, 69);
+  //     color: aliceblue;
+  //   }
+  // }
 
-  .remove-btn:hover {
-    cursor: pointer;
-    background-color: rgb(209, 69, 69);
-    color: aliceblue;
-  }
+  // .remove-btn:hover {
+  //   cursor: pointer;
+  //   background-color: rgb(209, 69, 69);
+  //   color: aliceblue;
+  // }
 
-  .selected-playlist {
-    color: aliceblue;
-    background-color: rgba(84, 125, 187, 0.712);
-    transition: 1s ease all;
+  // .selected-playlist {
+  //   color: aliceblue;
+  //   background-color: rgba(84, 125, 187, 0.712);
+  //   transition: 1s ease all;
 
-    &.ant-table-row &.ant-table-row-level-0 {
-      &:hover {
-        color: rgb(15, 15, 15);
-        background-image: linear-gradient(135deg, #02aab0, #00cdac);
-        transition: 1s ease all;
-      }
-    }
+  //   &.ant-table-row &.ant-table-row-level-0 {
+  //     &:hover {
+  //       color: rgb(15, 15, 15);
+  //       background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  //       transition: 1s ease all;
+  //     }
+  //   }
 
-    &:hover {
-      color: rgb(15, 15, 15);
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
-      transition: 1s ease all;
-    }
-  }
+  //   &:hover {
+  //     color: rgb(15, 15, 15);
+  //     background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  //     transition: 1s ease all;
+  //   }
+  // }
 
-  .selected-media {
-    color: aliceblue;
-    background-color: rgba(84, 125, 187, 0.712);
-    transition: 1s ease all;
+  // .selected-media {
+  //   color: aliceblue;
+  //   background-color: rgba(84, 125, 187, 0.712);
+  //   transition: 1s ease all;
 
-    &.ant-table-row &.ant-table-row-level-0 {
-      &:hover {
-        color: rgb(15, 15, 15);
-        background-image: linear-gradient(135deg, #02aab0, #00cdac);
-        transition: 1s ease all;
-      }
-    }
+  //   &.ant-table-row &.ant-table-row-level-0 {
+  //     &:hover {
+  //       color: rgb(15, 15, 15);
+  //       background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  //       transition: 1s ease all;
+  //     }
+  //   }
 
-    &:hover {
-      color: rgb(15, 15, 15);
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
-      transition: 1s ease all;
-    }
-  }
+  //   &:hover {
+  //     color: rgb(15, 15, 15);
+  //     background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  //     transition: 1s ease all;
+  //   }
+  // }
   // .areaStyles {
   //   &#areaWrapper {
   //     --x: 50%;
