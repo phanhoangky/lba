@@ -237,11 +237,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               // }}
             ></Input>
           </Form.Item>
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[{ required: true, message: 'Please input description' }]}
-          >
+          <Form.Item name="description" label="Description">
             <Input
               type="text"
               // value={createFileParam.description}

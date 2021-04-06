@@ -1,10 +1,5 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
-import {
-  CloseSquareOutlined,
-  DeleteTwoTone,
-  SettingFilled,
-  UploadOutlined,
-} from '@ant-design/icons';
+import { DeleteTwoTone, SettingFilled, UploadOutlined } from '@ant-design/icons';
 import {
   Button,
   Drawer,

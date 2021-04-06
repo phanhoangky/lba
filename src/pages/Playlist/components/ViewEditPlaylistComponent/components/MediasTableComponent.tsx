@@ -41,22 +41,24 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
       // currentNewItemDuration,
     } = this.props.playlists;
 
-    const newList = cloneDeep(selectedPlaylist.playlistItems);
+    const newList = cloneDeep(selectedPlaylist?.playlistItems);
 
-    newList.push({
-      id: uuidv4(),
-      index: selectedPlaylist.playlistItems.length,
-      displayOrder: selectedPlaylist.playlistItems.length,
-      duration: 10,
-      isActive: true,
-      key: `${uuidv4()}`,
-      mediaSrcId: media.id,
-      mediaSrc: media,
-      playlistId: selectedPlaylist.id,
-      title: media.title,
-      typeName: media.type.name,
-      url: media.urlPreview,
-    });
+    if (newList && selectedPlaylist) {
+      newList.push({
+        id: uuidv4(),
+        index: selectedPlaylist?.playlistItems.length,
+        displayOrder: selectedPlaylist?.playlistItems.length,
+        duration: 10,
+        isActive: true,
+        key: `${uuidv4()}`,
+        mediaSrcId: media.id,
+        mediaSrc: media,
+        playlistId: selectedPlaylist?.id,
+        title: media.title,
+        typeName: media.type.name,
+        url: media.urlPreview,
+      });
+    }
     await this.setSelectedPlaylist({
       playlistItems: newList,
     });
@@ -82,7 +84,7 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
     const { selectedPlaylist } = this.props.playlists;
 
     let total: number = 0;
-    selectedPlaylist.playlistItems.forEach((item) => {
+    selectedPlaylist?.playlistItems.forEach((item) => {
       total += item.duration;
     });
     console.log('====================================');
@@ -107,7 +109,7 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
 
   removeMediaFromListMedia = async (param?: any) => {
     const { listMediaNotBelongToPlaylist } = this.props.playlists;
-    const newList = listMediaNotBelongToPlaylist.filter((media: any) => media.id !== param.id);
+    const newList = listMediaNotBelongToPlaylist?.filter((media: any) => media.id !== param.id);
     await this.setListMediaNotBelongToPlaylist(newList);
   };
 
@@ -139,22 +141,22 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
       selectedPlaylist,
     } = this.props.playlists;
 
-    const listMedia = listMediaNotBelongToPlaylist.filter((media) =>
-      selectedPlaylist.playlistItems.every((p) => p.mediaSrcId !== media.id),
+    const listMedia = listMediaNotBelongToPlaylist?.filter((media) =>
+      selectedPlaylist?.playlistItems.every((p) => p.mediaSrcId !== media.id),
     );
 
     const availableDuration = maxDuration - totalDuration;
     return (
       <>
         <Table
-          dataSource={listMedia.map((item) => {
+          dataSource={listMedia?.map((item) => {
             return {
               ...item,
               key: item.id,
             };
           })}
           pagination={false}
-          loading={editPlaylistDrawer.isLoading}
+          loading={editPlaylistDrawer?.isLoading}
           scroll={{
             x: 400,
             y: 300,

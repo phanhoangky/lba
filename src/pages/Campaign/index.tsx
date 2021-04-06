@@ -174,9 +174,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
 
             if (currentUser) {
               const result = await currentUser.ether?.cancelCampaign(item.id);
-              console.log('====================================');
-              console.log('Hash >>>>', result);
-              console.log('====================================');
               if (isObject(result)) {
                 const deleteParam: DeleteCampaignParam = {
                   id: item.id,
@@ -346,7 +343,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       getListCampaignParam,
       totalCampaigns,
       addNewCampaignModal,
-      viewCampaignDetailComponent,
     } = this.props.campaign;
     return (
       <>

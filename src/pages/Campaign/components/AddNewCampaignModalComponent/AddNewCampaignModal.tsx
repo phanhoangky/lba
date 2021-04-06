@@ -132,6 +132,8 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     });
   };
 
+  finalConfirmModal = async () => {};
+
   okConfirm = async () => {
     const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
     const { currentUser } = this.props.user;
@@ -266,7 +268,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   };
 
   hanldeOnChangeBudget = async (e: any) => {
-    const { addNewCampaignModal, fees } = this.props.campaign;
+    const { fees } = this.props.campaign;
     if (fees) {
       const totalFee = e * fees.Advertiser + e;
       const remainFee = e - e * fees.Supplier;
@@ -341,9 +343,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     const { listDeviceTypes } = this.props.deviceStore;
     const { currentUser } = this.props.user;
     const maxBudget = currentUser?.balance ? Number.parseFloat(currentUser.balance.toString()) : 0;
-    console.log('====================================');
-    console.log(maxBudget);
-    console.log('====================================');
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
 
     // const { mapComponent } = this.props.location;
