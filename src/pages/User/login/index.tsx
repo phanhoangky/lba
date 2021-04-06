@@ -293,8 +293,7 @@ const Login: React.FC<LoginProps> = (props) => {
             <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}>
               <div className="welcome-text-wrapper">
                 <h1>
-                  Hi, my name is <span className="text-color-main">Your Name</span> <br /> I'm the
-                  Unknown Developer.
+                  Hi, We are <span className="text-color-main">Location Based Advertising</span> <br />
                 </h1>
               </div>
             </Animated>
