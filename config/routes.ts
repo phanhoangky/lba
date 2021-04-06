@@ -17,7 +17,7 @@
             name: 'register-result',
             icon: 'smile',
             path: '/account/register-result',
-            component: './user/register-result',
+            component: './User/register-result',
           },
           {
             name: 'register',
