@@ -474,7 +474,7 @@ class Media extends React.Component<MediaSourceProps> {
       }
 
       if (status === 1) {
-        return 'Waiting for server';
+        return 'Waiting';
       }
       return 'Approved';
     };

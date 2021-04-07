@@ -1,12 +1,16 @@
-import { Button, Col, Divider, Input, InputNumber, Row } from 'antd';
+import { Form, Input, InputNumber } from 'antd';
+import type { FormInstance } from 'antd';
 import * as React from 'react';
-import type { Dispatch, ProfileWalletModelState, UserModelState } from 'umi';
+import type { Dispatch, ProfileWalletModelState, TransactionModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
+import { openNotification } from '@/utils/utils';
+import { CreateTransactionParam } from '@/services/TransactionService';
 
 export type SendModalProps = {
   dispatch: Dispatch;
   user: UserModelState;
   profileWallet: ProfileWalletModelState;
+  transaction: TransactionModelState;
 };
 
 export class SendModal extends React.Component<SendModalProps> {
@@ -19,41 +23,74 @@ export class SendModal extends React.Component<SendModalProps> {
       },
     });
   };
+
+  createTransaction = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'transaction/createTransaction',
+      payload: param,
+    });
+  };
+
+  handleSendMoney = async () => {
+    this.formRef.current
+      ?.validateFields()
+      .then(async (res) => {
+        const { currentUser } = this.props.user;
+        console.log('====================================');
+        console.log(res);
+        console.log('====================================');
+        if (currentUser && currentUser.ether) {
+          const hash = await currentUser.ether.transfer(res.destinationAddress, res.transferAmount);
+          if (hash.includes('Fail')) {
+            openNotification('error', 'Fail to send money', hash);
+          } else {
+            const createTransParam: CreateTransactionParam = {
+              receiverAddress: res.destinationAddress,
+              txHash: hash,
+              type: 0,
+              value: res.transferAmount,
+            };
+            this.createTransaction(createTransParam).then(() => {
+              openNotification('success', 'Money transfer successfully');
+              this.setSendModal({
+                visible: false,
+              });
+            });
+            console.log('====================================');
+            console.log();
+            console.log('====================================');
+          }
+        }
+      })
+      .catch((err) => {
+        this.setSendModal({
+          visible: false,
+        });
+      });
+  };
+
+  formRef = React.createRef<FormInstance>();
   render() {
     const { currentUser } = this.props.user;
     return (
       <>
-        <Row>
-          <Col span={12}>Total Balance</Col>
-          <Col>{currentUser && currentUser.balance?.toString()}</Col>
-        </Row>
-        <Divider></Divider>
-        <Row>
-          <Col span={12}>Amount</Col>
-          <Col></Col>
-        </Row>
-        <Row>
-          <Col>
-            <Input width={'100%'} />
-          </Col>
-        </Row>
-        <Divider></Divider>
-        <Row>
-          <Col>
-            <InputNumber min={1000} width={'100%'} />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <Button
-              onClick={() => {
-                currentUser?.ether?.tranfer('0x62968E23DAc1a041405534d321dCd1AbC3D3e547', 100000);
+        <Form name="send_money_form" layout="vertical" ref={this.formRef}>
+          <Form.Item name="balance" label="Your Balance">
+            {currentUser && currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
+            VND
+          </Form.Item>
+          <Form.Item name="destinationAddress" label="Wallet Address Destination">
+            <Input />
+          </Form.Item>
+          <Form.Item name="transferAmount" label="Trasnfer Amount">
+            <InputNumber
+              min={1000}
+              style={{
+                width: '100%',
               }}
-            >
-              Transfer
-            </Button>
-          </Col>
-        </Row>
+            />
+          </Form.Item>
+        </Form>
       </>
     );
   }

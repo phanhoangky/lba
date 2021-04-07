@@ -31,6 +31,8 @@
       font-size: 16px;
     }
 
+
+
     .form-title {
       display: flex;
       width: 100%;
@@ -43,8 +45,6 @@
       padding: 12px;
       margin-bottom: 1em;
     }
-
-    
   }
 
   
@@ -145,6 +145,34 @@
 
 @import '~antd/lib/style/themes/default.less';
 
+.carousel {
+  // &.carousel-dot {
+  //   color: red;
+  // }
+  :global {
+    width: 100%;
+    .background-image {
+      // position: absolute;
+      // top: 0;
+      // left: 0;
+      width: 100%;
+      // background: transparent;
+      background-color: transparent;
+      // z-index: 1;
+    }
+    .slick-list {
+      padding: 0px;
+    }
+    .slick-dots .slick-dots-bottom .carousel-dot > li {
+      background: #00cdac;
+    }
+    // .carousel-dot {
+    //   color: red;
+    // }
+    
+  }
+}
+
 .pre {
   margin: 12px 0;
   padding: 12px 20px;
@@ -179,14 +207,7 @@
     // background-repeat: no-repeat;
     // background-size: contain;
 
-    .background-image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-    }
+    
     .welcome-text-wrapper {
       width: 80%;
       height: 100%;

@@ -25,6 +25,7 @@ import WalletSVG from '@/assets/wallet.svg';
 import { message } from 'antd';
 import QRCode from 'qrcode';
 import { openNotification } from '@/utils/utils';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 const success = () => {
   message.success('Copied', 3);
@@ -149,6 +150,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
       });
   };
   depositModalRef = React.createRef<DepositModal>();
+  sendMoneyModalRef = React.createRef<SendModal>();
   render() {
     const { currentUser } = this.props.user;
     const { QRModal, depositModal, sendModal, refreshBalanceLoading } = this.props.profileWallet;
@@ -216,16 +218,22 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                           }}
                         />
                       </button>
-                      <button className="copy-button" onClick={success}>
-                        <img
-                          alt=""
-                          src={Copy}
-                          style={{
-                            height: '25px',
-                            verticalAlign: 'middle',
-                          }}
-                        />
-                      </button>
+
+                      <CopyToClipboard
+                        text={currentUser?.ether?.wallet.address}
+                        onCopy={() => success}
+                      >
+                        <button className="copy-button" onClick={success}>
+                          <img
+                            alt=""
+                            src={Copy}
+                            style={{
+                              height: '25px',
+                              verticalAlign: 'middle',
+                            }}
+                          />
+                        </button>
+                      </CopyToClipboard>
                     </div>
                   </div>
                 </Col>
@@ -352,25 +360,28 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
           onOk={() => {
             // this.depositMoney();
             this.setDepositModal({
-              isLoading: true
+              isLoading: true,
             }).then(() => {
-              this.depositModalRef.current?.handleDepositMoney().then(() => {
-                openNotification(
-                  'success',
-                  'Generate QR code successfil',
-                  'Please Scan QR Code By Momo Wallet to Deposit money',
-                );
-                this.setDepositModal({
-                  isLoading: false
-              })
-              }).catch((error) => {
-                Promise.reject(error);
-                openNotification("error", "Fail to perform deposit action", error);
-                this.setDepositModal({
-                isLoading: false
-              })
+              this.depositModalRef.current
+                ?.handleDepositMoney()
+                .then(() => {
+                  openNotification(
+                    'success',
+                    'Generate QR code successfil',
+                    'Please Scan QR Code By Momo Wallet to Deposit money',
+                  );
+                  this.setDepositModal({
+                    isLoading: false,
+                  });
+                })
+                .catch((error) => {
+                  Promise.reject(error);
+                  openNotification('error', 'Fail to perform deposit action', error);
+                  this.setDepositModal({
+                    isLoading: false,
+                  });
+                });
             });
-            })
           }}
         >
           {depositModal?.visible && <DepositModal ref={this.depositModalRef} {...this.props} />}
@@ -390,8 +401,11 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
               visible: false,
             });
           }}
+          onOk={() => {
+            this.sendMoneyModalRef.current?.handleSendMoney();
+          }}
         >
-          {sendModal?.visible && <SendModal {...this.props} />}
+          {sendModal?.visible && <SendModal ref={this.sendMoneyModalRef} {...this.props} />}
         </Modal>
       </>
     );

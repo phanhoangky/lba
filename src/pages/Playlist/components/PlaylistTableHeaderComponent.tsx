@@ -99,8 +99,10 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
           </Button>
         </Dropdown>
         <Select
+          style={{
+            width: '100px',
+          }}
           defaultValue="createTime"
-          value={getPlaylistParam?.orderBy}
           onChange={(e) => {
             this.setTableLoading(true)
               .then(() => {

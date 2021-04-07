@@ -1,4 +1,4 @@
-import { Col, Divider, InputNumber, Row, Skeleton } from 'antd';
+import { Col, Divider, Form, InputNumber, Row, Skeleton } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MomoModelState, ProfileWalletModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
@@ -89,43 +89,32 @@ export class DepositModal extends React.Component<DepositModalProps> {
       <>
         <Row gutter={20}>
           <Col span={12}>
-            <Row>
-              <Col span={12}>Total Balance</Col>
-              <Col
-                span={12}
-                style={{
-                  textAlign: 'right',
-                }}
-              >
-                {currentUser && currentUser.balance?.toString()}
-              </Col>
-            </Row>
+            {/* <Row>
+              <Col span={6}>Total Balance</Col>
+              <Col span={18}></Col>
+            </Row> */}
             <Divider></Divider>
-            <Row>
-              <Col>
+            <Form name="deposit_modal_form" layout="horizontal">
+              <Form.Item name="amount" label="Total Balance">
+                {currentUser &&
+                  currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+              </Form.Item>
+              <Form.Item
+                name="amount"
+                label="Deposit Amount (VND)"
+                rules={[{ required: true, message: 'Please enter amount to deposit' }]}
+              >
                 <InputNumber
-                  width={200}
                   min={100000}
-                  onChange={(e) => {
-                    this.setLinkDepositParam({
-                      amount: e,
-                    });
+                  style={{
+                    width: '100%',
                   }}
                 />
-              </Col>
-            </Row>
-            <Divider></Divider>
-            <Row>
-              <Col span={12}>Equivalent Balance</Col>
-              <Col
-                span={12}
-                style={{
-                  textAlign: 'left',
-                }}
-              >
+              </Form.Item>
+              <Form.Item name="amount" label="Equivalent Balance">
                 {equivalent}
-              </Col>
-            </Row>
+              </Form.Item>
+            </Form>
             <Divider></Divider>
           </Col>
           <Col span={12} className={styles.QRConstainer}>

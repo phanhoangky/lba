@@ -1,5 +1,5 @@
 import { GoogleCircleFilled, LockTwoTone, MailFilled, UserOutlined } from '@ant-design/icons';
-import { Button, Space, Divider, Row, Col } from 'antd';
+import { Button, Space, Divider, Row, Col, Carousel } from 'antd';
 import React, { useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 import { connect, FormattedMessage, history } from 'umi';
@@ -8,10 +8,10 @@ import type { Dispatch } from 'umi';
 import type { StateType } from '@/models/login';
 // import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';
-import background from '@/assets/lba-background.jpg';
-
+import carousel1 from '@/assets/carousel1-removebg-preview.png';
+import carousel2 from '@/assets/carousel2-removebg-preview.png';
+import carousel4 from '@/assets/carousel4.png';
 import styles from './index.less';
-import { Animated } from 'react-animated-css';
 import { openNotification } from '@/utils/utils';
 import { EmailLogin } from '@/services/login';
 
@@ -293,20 +293,67 @@ const Login: React.FC<LoginProps> = (props) => {
         </div>
       </Col>
       <Col span={16}>
-        <>
-          <div className={styles.welcomeWrapper}>
-            <div className="welcome-text-wrapper">
-              <img src={background} className="background-image" />
-              {/* <h1>
-                Hi, We are <span className="text-color-main">Location Based Advertising</span>{' '}
-                <br />
-              </h1> */}
-            </div>
-            {/* <div className="welcome-background"></div> */}
-            <Divider></Divider>
-            <br />
+        {/* <div className={styles.welcomeWrapper}></div> */}
+        {/* <img src={background} className="background-image" /> */}
+        <Carousel
+          // autoplay
+          // autoplaySpeed={2000}
+          dotPosition="bottom"
+          dots={{
+            className: 'carousel-dot',
+          }}
+          centerPadding="0px"
+          className={styles.carousel}
+          centerMode
+          adaptiveHeight
+        >
+          <div>
+            <img
+              src={carousel1}
+              className="background-image"
+              style={{
+                height: '600px',
+                color: '#fff',
+                lineHeight: '160px',
+                textAlign: 'center',
+              }}
+            />
           </div>
-        </>
+          <div>
+            <img
+              className="background-image"
+              src={carousel2}
+              style={{
+                height: '600px',
+                color: '#fff',
+                lineHeight: '160px',
+                textAlign: 'center',
+              }}
+            />
+          </div>
+
+          <div>
+            <img
+              className="background-image"
+              src={carousel4}
+              style={{
+                height: '600px',
+                color: '#fff',
+                lineHeight: '160px',
+                textAlign: 'center',
+              }}
+            />
+          </div>
+          {/* <div>
+              <img src={background} className="background-image" />
+            </div>
+            <div>
+              <img src={background} className="background-image" />
+            </div> */}
+        </Carousel>
+        {/* <div className="welcome-background"></div> */}
+        <Divider></Divider>
+        <br />
       </Col>
     </Row>
   );

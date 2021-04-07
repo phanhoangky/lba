@@ -9,6 +9,7 @@ import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import { openNotification } from '@/utils/utils';
 import { LIST_SUPPORTED_FILES } from '@/services/constantUrls';
+import styles from '../../index.less';
 
 export type AddNewFileFormModalProps = {
   dispatch: Dispatch;
@@ -151,6 +152,7 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     const { listLoading, addNewFileModal, listMediaType, breadScrumb } = this.props.media;
     return (
       <Modal
+        className={styles.addNewFileModal}
         centered
         title={
           <>
@@ -180,6 +182,9 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
             <Upload
               name="avatar"
               listType="picture-card"
+              style={{
+                width: '100%',
+              }}
               className="avatar-uploader"
               // fileList={addNewFileModal.fileList}
               showUploadList={true}

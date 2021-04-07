@@ -1,5 +1,5 @@
 import { openNotification } from '@/utils/utils';
-import { Card, Input, Modal, Skeleton, Form } from 'antd';
+import { Input, Modal, Skeleton, Form } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
@@ -94,6 +94,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
     const { addNewFolderModal } = this.props.media;
     return (
       <Modal
+        centered
         title={<>Create New Folder</>}
         visible={addNewFolderModal?.visible}
         confirmLoading={addNewFolderModal?.isLoading}
@@ -127,30 +128,28 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
           });
         }}
       >
-        <Card title={'Enter new folder name'}>
-          <Form ref={this.formRef} layout="vertical" name="Create_Folder">
-            <Skeleton active loading={addNewFolderModal?.isLoading}>
-              <Form.Item
-                label="Folder Name"
-                name="name"
-                rules={[
-                  { required: true, message: 'Please input name' },
-                  { max: 50, message: 'Name cannot exceed 50 characters' },
-                ]}
-              >
-                <Input
-                  type="text"
-                  // value={createFolderParam.name}
-                  onChange={() => {
-                    // this.setAddNewFolderParam({
-                    //   name: e.target.value,
-                    // });
-                  }}
-                />
-              </Form.Item>
-            </Skeleton>
-          </Form>
-        </Card>
+        <Form ref={this.formRef} layout="vertical" name="Create_Folder">
+          <Skeleton active loading={addNewFolderModal?.isLoading}>
+            <Form.Item
+              label="Folder Name"
+              name="name"
+              rules={[
+                { required: true, message: 'Please input name' },
+                { max: 50, message: 'Name cannot exceed 50 characters' },
+              ]}
+            >
+              <Input
+                type="text"
+                // value={createFolderParam.name}
+                onChange={() => {
+                  // this.setAddNewFolderParam({
+                  //   name: e.target.value,
+                  // });
+                }}
+              />
+            </Form.Item>
+          </Skeleton>
+        </Form>
       </Modal>
     );
   }

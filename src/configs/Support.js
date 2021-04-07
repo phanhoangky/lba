@@ -73,19 +73,26 @@ export default class EtherService {
     this.contract.provider.polling = false;
   }
 
-  async tranfer(addressReceiver, amount) {
+  async isAddress(checkValue) {
+    return ethers.utils.isAddress(checkValue);
+  }
+
+  async transfer(addressReceiver, amount) {
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
     };
-    try {
+    const isAddress = this.isAddress(addressReceiver);
+    if (isAddress) {
       const callPromise = this.contract.transfer(addressReceiver, ethers.BigNumber.from(amount.toString()), overrides);
-      callPromise.then(function (result) {
-        console.log(result);
-      });
-    } catch (err) {
-      console.log(err);
+      const receipt = await callPromise.wait();
+      if (receipt.status !== 1) {
+        return "Fail On Server Blockchain";
+      }
+
+      return receipt.transactionHash;
     }
+    return "Fail - Not valid address!!";
   }
 
   // Add document to smart contract for identify it with wallet
