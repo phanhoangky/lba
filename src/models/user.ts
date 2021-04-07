@@ -274,7 +274,9 @@ const UserModel: UserModelType = {
       // const { credential }: {credential: firebase.auth.AuthCredential} = payload;
       const { user }: {user: firebase.User} = payload;
       if (payload && user) {
-
+        console.log('====================================');
+        console.log(user, payload);
+        console.log('====================================');
         const tokenFirebase = yield user.getIdToken();
         // const param: AuthenticationRequest = {
         //   firebaseToken: tokenFirebase,
@@ -305,6 +307,7 @@ const UserModel: UserModelType = {
             userid: decoded.user_id,
             balance,
             ether,
+            password: payload.password
             // ...data.result
           }
         });

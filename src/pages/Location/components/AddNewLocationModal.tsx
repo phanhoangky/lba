@@ -1,5 +1,5 @@
 import { geocoding } from '@/services/MapService/RapidAPI';
-import { Col, Input, Modal, Row, Select, Form, notification } from 'antd';
+import { Col, Input, Row, Select, Form, notification } from 'antd';
 import * as React from 'react';
 import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState } from 'umi';
 import { connect } from 'umi';
@@ -11,7 +11,7 @@ import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import type { FormInstance } from 'antd/lib/form';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 import { openNotification } from '@/utils/utils';
-import { ViewLocationDetailComponent } from './ViewLocationDetailComponent';
+import type { ViewLocationDetailComponent } from './ViewLocationDetailComponent';
 
 export type AddNewLocationModalProps = {
   dispatch: Dispatch;
@@ -285,58 +285,28 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
 
   viewLocationDetailComponentRef = React.createRef<ViewLocationDetailComponent>();
   render() {
-    const { addNewLocationModal, createLocationParam } = this.props.location;
+    const { createLocationParam } = this.props.location;
 
     const { listDeviceTypes } = this.props.deviceStore;
 
     return (
       <>
-        {/* <Modal
-          title="Add New Location"
-          visible={addNewLocationModal?.visible}
-          centered
-          confirmLoading={addNewLocationModal?.isLoading}
-          width={'50%'}
-          afterClose={() => {}}
-          destroyOnClose={true}
-          closable={false}
-          onOk={() => {
-            if (this.formRef.current) {
-              this.formRef.current
-                .validateFields()
-                .then((values) => {
-                  if (!createLocationParam || createLocationParam?.address === '') {
-                    return;
-                  }
-                  this.onCreateNewLocation(values).then(() => {
-                    this.formRef.current?.resetFields();
-                  });
-                })
-                .catch(() => {});
-            }
-          }}
-          onCancel={() => {
-            this.clearCreateLocationParam();
-            this.setAddNewLocationModal({
-              visible: false,
-            }).then(() => {
-              this.resetMap().then(() => {
-                this.setViewLocationDetailComponent({
-                  visible: true,
-                });
-              });
-            });
-          }}
-        > */}
         <Form ref={this.formRef} layout="vertical" name="add_location_modal_form">
           <Form.Item
             name="name"
             label="Name"
-            rules={[{ required: true, message: 'Please input the name of location!' }]}
+            rules={[
+              { required: true, message: 'Please input the name of location!' },
+              { max: 50, message: 'Name cannot exceed 50 characters!' },
+            ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+          >
             <Input.TextArea rows={4} autoSize />
           </Form.Item>
 

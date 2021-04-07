@@ -48,7 +48,7 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
         }
       });
     } else if (changePasswordModal?.currentStep === 1) {
-      this.newPasswordForm.current?.validateFields().then((values) => {
+      this.newPasswordForm.current?.validateFields().then(() => {
         const nextStep = changePasswordModal ? changePasswordModal.currentStep + 1 : 1;
         this.setChangePasswordModal({
           currentStep: nextStep,
@@ -85,6 +85,7 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
       })
         .then(() => {
           this.changePassword(values.newPassword).then(() => {
+            openNotification('success', 'Change password successfully');
             history.replace('/account/login');
           });
         })
@@ -142,7 +143,9 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
                   name="newPassword"
                   label="Enter your new password"
                   rules={[{ required: true, message: 'Please enter your new password' }]}
-                ></Form.Item>
+                >
+                  <Input.Password />
+                </Form.Item>
               </Form>
             </>
           )}

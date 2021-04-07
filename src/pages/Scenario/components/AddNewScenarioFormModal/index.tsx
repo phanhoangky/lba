@@ -11,7 +11,6 @@ import type {
 import { connect } from 'umi';
 import styles from '../../index.less';
 import TitleStep from './TitleStep';
-import { Animated } from 'react-animated-css';
 import { openNotification } from '@/utils/utils';
 
 export type AddNewScenarioFormModalProps = {
@@ -179,15 +178,10 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           />
           <Steps.Step title="Waiting" description="This is a description." />
         </Steps> */}
-        <Animated
-          animationIn="zoomIn"
-          animationOut="fadeOut"
-          isVisible={addNewScenarioModal?.currentStep === 0}
-        >
-          <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
-            <TitleStep {...this.props} />
-          </Form>
-        </Animated>
+
+        <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
+          <TitleStep {...this.props} />
+        </Form>
 
         {/* <Animated
           animationIn="zoomIn"

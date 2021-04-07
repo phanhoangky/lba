@@ -47,14 +47,14 @@
             routes: [
               {
                 path: '/',
-                redirect: '/location',
+                redirect: '/welcome',
               },
-              // {
-              //   path: '/welcome',
-              //   name: 'welcome',
-              //   icon: 'smile',
-              //   component: './Welcome',
-              // },
+              {
+                path: '/welcome',
+                name: 'welcome',
+                icon: 'smile',
+                component: './Welcome',
+              },
               // {
               //   name: 'list.brand-list',
               //   icon: 'TagsFilled',

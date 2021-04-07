@@ -128,11 +128,18 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
           <Form.Item
             label="Title"
             name="title"
-            rules={[{ required: true, message: 'Please input title' }]}
+            rules={[
+              { required: true, message: 'Please input title' },
+              { max: 50, message: 'Title cannot exceed 50 characters' },
+            ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item label="Description" name="description">
+          <Form.Item
+            label="Description"
+            name="description"
+            rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+          >
             <Input />
           </Form.Item>
         </Form>

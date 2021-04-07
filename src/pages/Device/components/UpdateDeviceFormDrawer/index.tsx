@@ -1,12 +1,4 @@
-import { openNotification } from '@/utils/utils';
-import {
-  CheckOutlined,
-  ClockCircleTwoTone,
-  CloseOutlined,
-  CloseSquareTwoTone,
-  EditOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
+import { CheckOutlined, ClockCircleTwoTone, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Button,
   Col,
@@ -487,7 +479,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
           <Form.Item
             name="description"
             label="Description"
-            rules={[{ required: true, message: 'Please input address' }]}
+            rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
           >
             {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
             <Input />

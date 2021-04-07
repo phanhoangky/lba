@@ -225,7 +225,10 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
           <Form.Item
             name="title"
             label="Title"
-            rules={[{ required: true, message: 'Please input title' }]}
+            rules={[
+              { required: true, message: 'Please input title' },
+              { max: 50, message: 'Title cannot exceed 50 characters' },
+            ]}
           >
             <Input
               type="text"
@@ -237,7 +240,11 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               // }}
             ></Input>
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+          >
             <Input
               type="text"
               // value={createFileParam.description}
@@ -248,51 +255,6 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               // }}
             ></Input>
           </Form.Item>
-          {/* <Form.Item
-            name="isSign"
-            label="Sign Media"
-            rules={[{ required: true, message: 'select sign media or later' }]}
-          >
-            <Switch
-              defaultChecked={false}
-              onChange={(e) => {
-                this.setCreateFileParam({
-                  isSigned: e ? 1 : 0,
-                });
-              }}
-            />
-          </Form.Item> */}
-          {/* <Form.Item
-            name="typeId"
-            label="Type"
-            rules={[{ required: true, message: 'Please select type' }]}
-          >
-            <Select
-              showSearch
-              style={{ width: 200 }}
-              placeholder="Select a type"
-              // defaultValue={listMediaType[0].name}
-              // optionFilterProp="children"
-              // onChange={(value) => {
-              //   const type = listMediaType.filter((t) => t.id === value)[0];
-              //   if (createFileParam) {
-              //     this.setCreateFileParam({
-              //       typeId: type.id,
-              //       typeName: type.name,
-              //     });
-              //   }
-              // }}
-              // value={createFileParam.typeName}
-            >
-              {listMediaType?.map((type) => {
-                return (
-                  <Select.Option key={type.id} value={type.id}>
-                    {type.name}
-                  </Select.Option>
-                );
-              })}
-            </Select>
-          </Form.Item> */}
         </Form>
       </Modal>
     );

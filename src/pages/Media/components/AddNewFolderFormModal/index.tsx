@@ -133,7 +133,10 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
               <Form.Item
                 label="Folder Name"
                 name="name"
-                rules={[{ required: true, message: 'Please input name' }]}
+                rules={[
+                  { required: true, message: 'Please input name' },
+                  { max: 50, message: 'Name cannot exceed 50 characters' },
+                ]}
               >
                 <Input
                   type="text"

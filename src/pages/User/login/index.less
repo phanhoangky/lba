@@ -1,4 +1,15 @@
 @import '~antd/es/style/themes/default.less';
+:global {
+  .welcome-background {
+    width: 100%;
+    height: 100%;
+    
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+}
 
 .main {
   width: 80%;
@@ -32,10 +43,11 @@
       padding: 12px;
       margin-bottom: 1em;
     }
-    
 
+    
   }
 
+  
   .icon {
     margin-left: 16px;
     color: rgba(0, 0, 0, 0.2);
@@ -141,20 +153,45 @@
 }
 
 .welcomeWrapper {
+  
+
+  h1 {
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: rgb(0, 0, 0);
+    color: #f4f5f5;
+  }
+  width: 100%;
+  height: 100%;
+  display: flex;
+  position: relative;
+  z-index: 2;
+  // align-items: center;
+  margin: 0 auto;
+  justify-content: center;
+  font-size: 2em;
+  transition: all 0.3s ease;
+  flex-direction: column;
+
+  
   :global {
-    width: 80%;
-    height: 100%;
-    display: flex;
-    // align-items: center;
-    margin: 0 auto;
-    justify-content: center;
-    font-size: 2em;
-    transition: all 0.3s ease;
-    flex-direction: column;
+    // background-image: url("../../../assets/lba-background.jpg");
+    // background-position: center;
+    // background-repeat: no-repeat;
+    // background-size: contain;
 
-    .welcome-wrapper {}
-
-    .welcome-text-wrapper {}
+    .background-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .welcome-text-wrapper {
+      width: 80%;
+      height: 100%;
+      margin: 0 auto;
+    }
 
     .signin-btn {
       width: 200px;

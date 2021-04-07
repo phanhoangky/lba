@@ -534,14 +534,21 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
             <Form.Item
               name="title"
               label="Title"
-              rules={[{ required: true, message: 'Please input title' }]}
+              rules={[
+                { required: true, message: 'Please input title' },
+                { max: 50, message: 'Title cannot exceed 50 characters' },
+              ]}
             >
               <Input />
             </Form.Item>
           </Skeleton>
 
           <Skeleton active loading={editScenarioDrawer?.isLoading}>
-            <Form.Item name="description" label="Description">
+            <Form.Item
+              name="description"
+              label="Description"
+              rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+            >
               <Input.TextArea rows={4} />
             </Form.Item>
           </Skeleton>

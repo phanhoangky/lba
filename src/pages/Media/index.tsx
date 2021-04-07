@@ -12,6 +12,8 @@ import {
   Alert,
   Dropdown,
   Menu,
+  Row,
+  Col,
 } from 'antd';
 import * as React from 'react';
 import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
@@ -37,6 +39,7 @@ import { EditMediaFormDrawer } from './components/EditMediaFormDrawer';
 import { ListMediasHeaderComponent } from './components/ListMediasHeaderComponent';
 import { EditDrawerFooter } from './components/EditMediaFormDrawer/EditDrawerFooter';
 import { RenameFolderModal } from './components/RenameFolderModal';
+import styles from './index.less';
 
 export type MediaSourceProps = {
   dispatch: Dispatch;
@@ -480,12 +483,12 @@ class Media extends React.Component<MediaSourceProps> {
       <>
         <PageContainer>
           <Skeleton active loading={listLoading}>
-            <Breadcrumb>
-              <Breadcrumb.Item></Breadcrumb.Item>
+            <Breadcrumb className={styles.breadscrumb}>
               {breadScrumb &&
                 breadScrumb.map((item: FolderType, index: number) => {
                   return (
                     <Breadcrumb.Item
+                      className="breadcrumb-item"
                       key={item.id}
                       onClick={() => {
                         this.breadScrumbNavigate(index);
@@ -509,10 +512,6 @@ class Media extends React.Component<MediaSourceProps> {
           <List
             grid={{
               gutter: 20,
-              md: 2,
-              lg: 2,
-              xl: 3,
-              xxl: 6,
             }}
             dataSource={listFolder}
             loading={listLoading}
@@ -577,119 +576,127 @@ class Media extends React.Component<MediaSourceProps> {
 
           {/** List Media */}
 
-          <List
-            grid={{
-              gutter: 10,
-              md: 2,
-              lg: 2,
-              xl: 3,
-              xxl: 4,
-            }}
-            split
-            style={{ alignItems: 'center', alignContent: 'center' }}
-            dataSource={listMedia}
-            loading={listLoading}
-            pagination={{
-              current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
-              total: totalItem,
-              pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
-              onChange: async (e) => {
-                if (searchListMediaParam?.title === '') {
-                  if (getListFileParam?.limit) {
-                    this.setListLoading(true).then(() => {});
-
-                    this.callGetListMedia({
-                      offset: (e - 1) * getListFileParam.limit,
-                      pageNumber: e - 1,
-                    })
-                      .then(() => {
-                        this.setListLoading(false);
-                      })
-                      .catch(() => {
-                        this.setListLoading(false);
-                      });
-                  }
-                } else {
-                  await this.setListLoading(true);
-
-                  this.callSearchListMedia({
-                    pageNumber: e - 1,
-                  })
-                    .then(() => {
-                      this.setListLoading(false);
-                    })
-                    .catch(() => {
-                      this.setListLoading(false);
-                    });
-                }
-              },
-            }}
-            header={<>{/* <Skeleton active loading={listLoading}></Skeleton> */}</>}
-            renderItem={(item) => {
-              return (
-                <>
-                  {listMedia && listMedia.length > 0 && (
-                    <Skeleton active avatar loading={listLoading}>
-                      <List.Item>
-                        <Card
-                          bordered
-                          hoverable
-                          onClick={() => {
-                            this.setSelectedFile(item);
-                          }}
-                          style={{ width: '100%', height: '100%' }}
-                          cover={
-                            item.type.name.toLowerCase().includes('image') ? (
-                              <Image
-                                src={item.urlPreview}
-                                alt="image"
-                                height={200}
-                                preview={false}
-                              />
-                            ) : (
-                              <HoverVideoPlayer
-                                style={{ height: 200 }}
-                                videoSrc={item.urlPreview}
-                                restartOnPaused
-                              />
-                            )
-                          }
-                          // title={item.title}
-                          actions={[
-                            <Alert
-                              style={{ height: '40px' }}
-                              type={signatureOfMedia(item.isSigned)}
-                              message={messageOfSignature(item.isSigned)}
-                              icon={<FormOutlined />}
-                              showIcon={true}
+          <Row gutter={20}>
+            <Col span={16}>
+              <List
+                grid={{
+                  gutter: 20,
+                  md: 2,
+                  lg: 2,
+                  xl: 3,
+                  xxl: 3,
+                }}
+                style={{ alignItems: 'center', alignContent: 'center' }}
+                dataSource={listMedia}
+                loading={listLoading}
+                pagination={{
+                  current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
+                  total: totalItem,
+                  pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
+                  onChange: async (e) => {
+                    if (searchListMediaParam?.title === '') {
+                      if (getListFileParam && getListFileParam.limit) {
+                        this.setListLoading(true)
+                          .then(() => {
+                            this.callGetListMedia({
+                              offset: getListFileParam.limit ? (e - 1) * getListFileParam.limit : 0,
+                              pageNumber: e - 1,
+                            }).then(() => {
+                              this.setListLoading(false);
+                            });
+                          })
+                          .catch(() => {
+                            this.setListLoading(false);
+                          });
+                      }
+                    } else {
+                      this.setListLoading(true)
+                        .then(() => {
+                          this.callSearchListMedia({
+                            pageNumber: e - 1,
+                          }).then(() => {
+                            this.setListLoading(false);
+                          });
+                        })
+                        .catch(() => {
+                          this.setListLoading(false);
+                        });
+                    }
+                  },
+                }}
+                header={false}
+                renderItem={(item) => {
+                  return (
+                    <>
+                      {listMedia && listMedia.length > 0 && (
+                        <Skeleton active avatar loading={listLoading}>
+                          <List.Item>
+                            <Card
+                              bordered
+                              hoverable
                               onClick={() => {
-                                if (item.isSigned === 0) {
-                                  this.signMedia(item);
-                                }
+                                this.setSelectedFile(item);
                               }}
-                            ></Alert>,
+                              style={{ width: '100%', height: '100%' }}
+                              cover={
+                                item.type.name.toLowerCase().includes('image') ? (
+                                  <Image
+                                    src={item.urlPreview}
+                                    alt="image"
+                                    height={200}
+                                    preview={false}
+                                  />
+                                ) : (
+                                  <HoverVideoPlayer
+                                    style={{ height: 200 }}
+                                    videoSrc={item.urlPreview}
+                                    restartOnPaused
+                                  />
+                                )
+                              }
+                              // title={item.title}
+                              actions={[
+                                <Alert
+                                  style={{ height: '40px' }}
+                                  type={signatureOfMedia(item.isSigned)}
+                                  message={messageOfSignature(item.isSigned)}
+                                  icon={<FormOutlined />}
+                                  showIcon={true}
+                                  onClick={() => {
+                                    if (item.isSigned === 0) {
+                                      this.signMedia(item);
+                                    }
+                                  }}
+                                ></Alert>,
 
-                            <SettingTwoTone
-                              style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
-                              onClick={async () => {
-                                this.setSelectedFile(item).then(() => {
-                                  this.setEditFileDrawer({
-                                    visible: true,
-                                  });
-                                });
-                              }}
-                            />,
-                          ]}
-                        >
-                          <Card.Meta title={item.title} />
-                        </Card>
-                      </List.Item>
-                    </Skeleton>
-                  )}
-                </>
-              );
-            }}
-          ></List>
+                                <SettingTwoTone
+                                  style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
+                                  onClick={async () => {
+                                    this.setSelectedFile(item).then(() => {
+                                      this.setEditFileDrawer({
+                                        visible: true,
+                                      });
+                                    });
+                                  }}
+                                />,
+                              ]}
+                            >
+                              <Card.Meta title={item.title} />
+                            </Card>
+                          </List.Item>
+                        </Skeleton>
+                      )}
+                    </>
+                  );
+                }}
+              ></List>
+            </Col>
+            <Col span={8}>
+              <Row>
+                <Image width={'100%'} src={selectedFile?.urlPreview} />
+              </Row>
+            </Col>
+          </Row>
           {/* ========================================================================================================================== */}
 
           {/* ========================================================================================================================== */}

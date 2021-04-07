@@ -15,3 +15,34 @@
   vertical-align: 'middle';
   align-items: 'center';
 }
+
+.breadscrumb {
+
+  :global {
+    .breadcrumb-item {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      // &:active {
+      //   text-decoration: underline;
+      // }
+    }
+
+    .ant-breadcrumb {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      >span:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
+    
+  }
+
+
+}

@@ -390,6 +390,7 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
               style={{
                 width: '100%',
               }}
+              rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
             >
               <Input.TextArea
                 rows={4}

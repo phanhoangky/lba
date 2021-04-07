@@ -1,80 +1,81 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Card, Alert, Typography, Divider, Button, Row } from 'antd';
-import { useIntl, FormattedMessage } from 'umi';
+import { Row, Col } from 'antd';
 import styles from './Welcome.less';
 import { Animated } from 'react-animated-css';
+import illustrations from '@/assets/welcome-illustration.svg';
 
-const CodePreview: React.FC = ({ children }) => (
-  <pre className={styles.pre}>
-    <code>
-      <Typography.Text copyable>{children}</Typography.Text>
-    </code>
-  </pre>
-);
+// const CodePreview: React.FC = ({ children }) => (
+//   <pre className={styles.pre}>
+//     <code>
+//       <Typography.Text copyable>{children}</Typography.Text>
+//     </code>
+//   </pre>
+// );
 
 export default (): React.ReactNode => {
-  const intl = useIntl();
   return (
-    <PageContainer>
-      {/* <Card>
-        <Alert
-          message={intl.formatMessage({
-            id: 'pages.welcome.alertMessage',
-            defaultMessage: '更快更强的重型组件，已经发布。',
-          })}
-          type="success"
-          showIcon
-          banner
-          style={{
-            margin: -12,
-            marginBottom: 24,
-          }}
-        />
-        <Typography.Text strong>
-          <FormattedMessage id="pages.welcome.advancedComponent" defaultMessage="高级表格" />{' '}
-          <a
-            href="https://procomponents.ant.design/components/table"
-            rel="noopener noreferrer"
-            target="__blank"
-          >
-            <FormattedMessage id="pages.welcome.link" defaultMessage="欢迎使用" />
-          </a>
-        </Typography.Text>
-        <CodePreview>yarn add @ant-design/pro-table</CodePreview>
-        <Typography.Text
-          strong
-          style={{
-            marginBottom: 12,
-          }}
-        >
-          <FormattedMessage id="pages.welcome.advancedLayout" defaultMessage="高级布局" />{' '}
-          <a
-            href="https://procomponents.ant.design/components/layout"
-            rel="noopener noreferrer"
-            target="__blank"
-          >
-            <FormattedMessage id="pages.welcome.link" defaultMessage="欢迎使用" />
-          </a>
-        </Typography.Text>
-        <CodePreview>yarn add @ant-design/pro-layout</CodePreview>  
-      </Card> */}
-
+    <PageContainer
+      title={false}
+      header={{
+        ghost: false,
+        style: {
+          padding: 0,
+        },
+      }}
+    >
       <div className={styles.welcomeWrapper}>
-        <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}>
-          <div className="welcome-text-wrapper">
+        <div className="col text-section">
+          {/* <div className="welcome-text-wrapper">
+            <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}></Animated>
             <h1>
               Hi, my name is <span className="text-color-main">Your Name</span> <br /> I'm the
               Unknown Developer.
             </h1>
           </div>
-        </Animated>
-
-        <br />
-        <Button className="signin-btn">
-          <div className="sign-in-btn-overlap"></div>
-          <div className="sign-in-btn-text">SIGN IN</div>
-        </Button>
+          <div className="welcome-text-wrapper">
+            <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}></Animated>
+            <h1>
+              Hi, my name is <span className="text-color-main">Your Name</span> <br /> I'm the
+              Unknown Developer.
+            </h1>
+          </div> */}
+          <h1>
+            Hello, we are <span className="text-color-main">Location Based Advertising</span> <br />
+          </h1>
+          <Row>
+            <h1>
+              Where do you want <span className="text-color-main">to show to day</span> <br />
+            </h1>
+          </Row>
+          {/* <Row>
+            <h1>
+              Hi, my name is <span className="text-color-main">Your Name</span> <br /> I'm the
+              Unknown Developer.
+            </h1>
+          </Row> */}
+        </div>
+        <div className="col">
+          <img
+            src={illustrations}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </div>
+        {/* <Row>
+          <Col span={10}></Col>
+          <Col span={14}>
+            <img
+              src={illustrations}
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
+            />
+          </Col>
+        </Row> */}
       </div>
     </PageContainer>
   );

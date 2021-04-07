@@ -80,7 +80,13 @@ export class RenameFolderModal extends React.Component<RenameFolderModalProps> {
           <Form.Item
             name="name"
             label="Folder Name"
-            rules={[{ required: true, message: 'Please enter new folder name' }]}
+            rules={[
+              { required: true, message: 'Please enter new folder name' },
+              {
+                max: 50,
+                message: 'Name cannot exceed 50 characters',
+              },
+            ]}
           >
             <Input />
           </Form.Item>

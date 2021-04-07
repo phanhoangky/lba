@@ -8,7 +8,7 @@ import type { Dispatch } from 'umi';
 import type { StateType } from '@/models/login';
 // import type { LoginParamsType } from '@/services/login';
 import type { ConnectState } from '@/models/connect';
-// import lba from '@/assets/lba.png';
+import background from '@/assets/lba-background.jpg';
 
 import styles from './index.less';
 import { Animated } from 'react-animated-css';
@@ -55,7 +55,7 @@ const Login: React.FC<LoginProps> = (props) => {
     });
   };
 
-  const emailLogin = async (user: firebase.default.auth.UserCredential) => {
+  const emailLogin = async (user: any) => {
     const { dispatch } = props;
     await dispatch({
       type: 'user/emailLogin',
@@ -77,6 +77,9 @@ const Login: React.FC<LoginProps> = (props) => {
         setIsLoading(false);
       })
       .catch((error) => {
+        console.log('====================================');
+        console.log(error);
+        console.log('====================================');
         openNotification('error', 'Error');
         setIsLoading(false);
       });
@@ -104,9 +107,14 @@ const Login: React.FC<LoginProps> = (props) => {
             openNotification('error', 'Fail to login', 'Your email is not verified');
             setIsLoading(false);
           } else {
-            emailLogin(res)
+            emailLogin({
+              ...res,
+              password,
+            })
               .then(() => {
-                setIsLoading(false);
+                redirectToHomePage().then(() => {
+                  setIsLoading(false);
+                });
               })
               .catch(() => {
                 setIsLoading(false);
@@ -132,7 +140,7 @@ const Login: React.FC<LoginProps> = (props) => {
               autoLogin: true,
             }}
             submitter={{
-              render: (propses, dom) => {
+              render: (propses) => {
                 return (
                   <div className={styles.loginEmailButton}>
                     <Button
@@ -188,9 +196,6 @@ const Login: React.FC<LoginProps> = (props) => {
             }}
             onFinish={(values) => {
               setIsLoading(true);
-              console.log('====================================');
-              console.log(values);
-              console.log('====================================');
               handleEmailSubmit(values.userName, values.password).catch((error) => {
                 setIsLoading(false);
                 console.log('====================================');
@@ -290,20 +295,14 @@ const Login: React.FC<LoginProps> = (props) => {
       <Col span={16}>
         <>
           <div className={styles.welcomeWrapper}>
-            <Animated animationIn="rollIn" animationOut="fadeOut" isVisible={true}>
-              <div className="welcome-text-wrapper">
-                <h1>
-                  Hi, We are <span className="text-color-main">Location Based Advertising</span> <br />
-                </h1>
-              </div>
-            </Animated>
-            <div
-              style={{
-                width: '80%',
-                height: 'auto',
-                margin: '0 auto',
-              }}
-            ></div>
+            <div className="welcome-text-wrapper">
+              <img src={background} className="background-image" />
+              {/* <h1>
+                Hi, We are <span className="text-color-main">Location Based Advertising</span>{' '}
+                <br />
+              </h1> */}
+            </div>
+            {/* <div className="welcome-background"></div> */}
             <Divider></Divider>
             <br />
           </div>

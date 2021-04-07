@@ -359,23 +359,15 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   label="Name"
                   rules={[
                     { required: true, message: 'Please input the name of campaign!' },
-                    // { min: 100000, message: 'Budeget must larger than 100.000' },
+                    { max: 50, message: 'Name cannot exceed 50 characters' },
                   ]}
                 >
-                  <Input
-                  // onChange={(e) => {
-                  //   this.hanldeOnChangeBudget(e);
-                  // }}
-                  />
+                  <Input />
                 </Form.Item>
                 <Form.Item
                   name="budget"
                   label="Budget"
-                  rules={[
-                    { required: true, message: 'Please input the name of collection!' },
-                    // { min: 100000, message: 'Budeget must larger than 100.000' },
-                    // { max: maxBudget, message: 'Budeget must smaller than your balance' },
-                  ]}
+                  rules={[{ required: true, message: 'Please input the name of collection!' }]}
                 >
                   <InputNumber
                     style={{ width: '100%' }}
@@ -389,7 +381,11 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 {/* <Row>Total Fee {addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
             <Row>Remain Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee}</Row>
             <Row>Cancel Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row> */}
-                <Form.Item name="description" label="Description">
+                <Form.Item
+                  name="description"
+                  label="Description"
+                  rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+                >
                   <Input.TextArea rows={4} />
                 </Form.Item>
 
@@ -454,7 +450,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 <Form.Item
                   name="radius"
                   label="Radius"
-                  rules={[{ required: true, message: 'Please input address' }]}
+                  rules={[{ required: true, message: 'Please input radius' }]}
                 >
                   <InputNumber
                     min={0}

@@ -5,18 +5,7 @@ import {
   PlusOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Col,
-  Divider,
-  Input,
-  Row,
-  DatePicker,
-  TimePicker,
-  Switch,
-  Space,
-  Select,
-} from 'antd';
+import { Button, Col, Divider, Input, Row, DatePicker, TimePicker, Switch, Space } from 'antd';
 import moment from 'moment';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch } from 'umi';
@@ -105,12 +94,7 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
   // Render function
   render() {
     const { inputVisible } = this.state;
-    const {
-      isUpdateMultiple,
-      selectedDevice,
-      updateDevicesState,
-      listDeviceTypes,
-    } = this.props.deviceStore;
+    const { isUpdateMultiple, selectedDevice, updateDevicesState } = this.props.deviceStore;
 
     const timeFilter = isUpdateMultiple
       ? updateDevicesState?.timeFilter
@@ -143,7 +127,6 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
     });
 
     const { RangePicker } = DatePicker;
-    const { Option } = Select;
 
     return (
       <>

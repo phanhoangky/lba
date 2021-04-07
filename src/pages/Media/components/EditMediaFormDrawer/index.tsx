@@ -217,12 +217,19 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
         <Form.Item
           label="Title"
           name="title"
-          rules={[{ required: true, message: 'Please Input Title' }]}
+          rules={[
+            { required: true, message: 'Please Input Title' },
+            { max: 50, message: 'Title cannot exceed 50 characters' },
+          ]}
         >
           <Input />
         </Form.Item>
 
-        <Form.Item label="Description" name="description">
+        <Form.Item
+          label="Description"
+          name="description"
+          rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+        >
           <Input />
         </Form.Item>
         <Row>
