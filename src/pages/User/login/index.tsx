@@ -296,8 +296,8 @@ const Login: React.FC<LoginProps> = (props) => {
         {/* <div className={styles.welcomeWrapper}></div> */}
         {/* <img src={background} className="background-image" /> */}
         <Carousel
-          // autoplay
-          // autoplaySpeed={2000}
+          autoplay
+          autoplaySpeed={2000}
           dotPosition="bottom"
           dots={{
             className: 'carousel-dot',
