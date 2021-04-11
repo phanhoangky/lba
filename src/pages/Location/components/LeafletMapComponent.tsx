@@ -67,19 +67,19 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
             console.log('NewMarker >>>', marker);
             console.log('====================================');
           }
-          if (mapComponent.circle) {
-            mapComponent.circle.setLatLng(e.latlng);
-            // mapComponent.circle.remove();
-            // mapComponent.circle.removeFrom(mymap);
-            // const circle = L.circle(e.latlng);
-            // console.log('====================================');
-            // console.log('Remove circle', circle);
-            // console.log('====================================');
-            // circle.addTo(mymap);
-            // this.setMapComponent({
-            //   circle,
-            // });
-          }
+          // if (mapComponent.circle) {
+          //   // mapComponent.circle.setLatLng(e.latlng);
+          //   mapComponent.circle.remove();
+          //   mapComponent.circle.removeFrom(mymap);
+          //   const circle = L.circle(e.latlng);
+          //   console.log('====================================');
+          //   console.log('Remove circle', circle);
+          //   console.log('====================================');
+          //   circle.addTo(mymap);
+          //   this.setMapComponent({
+          //     circle,
+          //   });
+          // }
           const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
 
           if (addNewLocationModal?.visible) {
@@ -100,6 +100,9 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
 
           if (addNewCampaignModal?.visible) {
             const { createCampaignParam } = this.props.campaign;
+            console.log('====================================');
+            console.log('Create C Param >>>>', createCampaignParam);
+            console.log('====================================');
             if (createCampaignParam && createCampaignParam.radius > 0) {
               if (mapComponent.map) {
                 if (!mapComponent.circle && createCampaignParam.radius !== 0) {
@@ -111,15 +114,18 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
                     circle,
                   });
                 } else if (mapComponent.circle) {
-                  mapComponent.circle.setLatLng(e.latlng).setRadius(createCampaignParam.radius);
-                  // mapComponent.circle?.remove();
-                  // const circle = L.circle(e.latlng, {
-                  //   radius: createCampaignParam.radius,
-                  // });
-                  // circle.addTo(mapComponent.map);
-                  // await this.setMapComponent({
-                  //   circle,
-                  // });
+                  mapComponent.circle
+                    .redraw()
+                    .setLatLng(e.latlng)
+                    .setRadius(createCampaignParam.radius);
+                  mapComponent.circle?.remove();
+                  const circle = L.circle(e.latlng, {
+                    radius: createCampaignParam.radius,
+                  });
+                  circle.addTo(mapComponent.map);
+                  await this.setMapComponent({
+                    circle,
+                  });
                 }
               }
             }

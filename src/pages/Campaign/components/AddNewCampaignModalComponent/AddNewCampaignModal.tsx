@@ -284,7 +284,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
       if (mapComponent.map) {
         if (mapComponent.circle) {
           // mapComponent.circle.remove();
-          mapComponent.circle.setRadius(radius).redraw();
+          mapComponent.circle.setRadius(radius);
         } else if (mapComponent.marker) {
           const { marker } = mapComponent;
           const circle = L.circle(marker.getLatLng(), { radius }).addTo(mapComponent.map);
@@ -301,28 +301,23 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     }
   };
 
-  resetMap = () => {
+  resetMap = async () => {
     const { mapComponent } = this.props.location;
     if (mapComponent) {
       if (mapComponent.map) {
         mapComponent.map.remove();
-        this.setMapComponent({
-          map: undefined,
-        });
       }
       if (mapComponent.marker) {
         mapComponent.marker.remove();
-        this.setMapComponent({
-          marker: undefined,
-        });
       }
-
       if (mapComponent.circle) {
         mapComponent.circle.remove();
-        this.setMapComponent({
-          circle: undefined,
-        });
       }
+      await this.setMapComponent({
+        map: undefined,
+        marker: undefined,
+        circle: undefined,
+      });
     }
   };
 
@@ -419,7 +414,10 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     const maxBudget = currentUser?.balance ? Number.parseFloat(currentUser.balance.toString()) : 0;
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
 
-    // const { mapComponent } = this.props.location;
+    const { mapComponent } = this.props.location;
+    console.log('====================================');
+    console.log(mapComponent);
+    console.log('====================================');
     return (
       <>
         {addNewCampaignModal?.visible && (
