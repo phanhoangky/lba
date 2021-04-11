@@ -1,5 +1,5 @@
 import { MenuOutlined, PlaySquareTwoTone } from '@ant-design/icons';
-import { Col, Form, Input, Row, Table, Image, Space, Button, Divider, Modal } from 'antd';
+import { Col, Form, Input, Row, Table, Image, Space, Button, Divider, Modal, Empty } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
@@ -50,17 +50,20 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
       isLoading: true,
     })
       .then(() => {
-        this.getMediaNotBelongToPlaylist({ isPaging: false, isSigned: 2 }).then(() => {
-          this.calculateTotalDuration().then(() => {
-            // this.setListMediaNotBelongToPlaylist(
-            //   listMediaNotBelongToPlaylist.filter((media) =>
-            //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
-            //   ),
-            // )
-            this.setViewPlaylistDetailComponent({
-              isLoading: false,
-            });
-          });
+        // this.getMediaNotBelongToPlaylist({ isPaging: false, isSigned: 2 }).then(() => {
+        //   this.calculateTotalDuration().then(() => {
+        //     // this.setListMediaNotBelongToPlaylist(
+        //     //   listMediaNotBelongToPlaylist.filter((media) =>
+        //     //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
+        //     //   ),
+        //     // )
+        //     this.setViewPlaylistDetailComponent({
+        //       isLoading: false,
+        //     });
+        //   });
+        // });
+        this.setViewPlaylistDetailComponent({
+          isLoading: false,
         });
       })
       .catch(() => {
@@ -308,7 +311,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
         );
       }
     }
-    return null;
+    return <Empty description={<>Preview Media</>} />;
   };
 
   updatePlaylist = async (param: any) => {

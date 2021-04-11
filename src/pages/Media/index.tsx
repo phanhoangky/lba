@@ -302,7 +302,7 @@ class Media extends React.Component<MediaSourceProps> {
           .then(async () => {
             const { currentUser } = this.props.user;
 
-            const signature = await currentUser?.ether?.signDocument(item.securityHash);
+            const signature = await currentUser?.ether?.addDocument(item.securityHash);
             this.updateFile({
               isSigned: 1,
               hash: signature,

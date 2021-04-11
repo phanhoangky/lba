@@ -16,7 +16,7 @@ import { connect } from 'umi';
 import { EditPlaylistFormDrawer } from './components/EditPlaylistFormDrawer';
 import { PlaylistTableHeaderComponent } from './components/PlaylistTableHeaderComponent';
 import { ViewEditPlaylistComponent } from './components/ViewEditPlaylistComponent';
-import { DeleteTwoTone } from '@ant-design/icons';
+import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import { openNotification } from '@/utils/utils';
 import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 
@@ -307,6 +307,28 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                 render={(record) => {
                   return (
                     <Space>
+                      <Button
+                        onClick={(e) => {
+                          this.setViewPlaylistDetailComponent({
+                            visible: false,
+                          }).then(() => {
+                            this.setSelectedPlaylist(record);
+                            this.setGetItemsByPlaylistIdParam({
+                              id: record.id,
+                            });
+                            this.callGetItemsByPlaylistId();
+                            this.setEditPlaylistDrawer({
+                              visible: true,
+                            }).then(() => {
+                              this.editPlaylistModalRef.current?.componentDidMount();
+                            });
+                          });
+                          e.stopPropagation();
+                        }}
+                        type="primary"
+                      >
+                        <EditFilled />
+                      </Button>
                       <Button
                         onClick={(e) => {
                           this.setTableLoading(true)

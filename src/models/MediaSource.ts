@@ -279,7 +279,7 @@ const MediaSourceStore: MediaSourceModel = {
         const listId = listFile.files.map((file: any) => {
           return file.id
         })
-        data = yield call(GetListMediaFromFiledId, listId);
+        data = yield call(GetListMediaFromFiledId, listId, payload.isSigned);
         
         yield put({
           type: "setTotalItemReducer",
@@ -288,7 +288,12 @@ const MediaSourceStore: MediaSourceModel = {
 
         yield put({
           type: "setListMediaReducer",
-          payload: data.data.result.data
+          payload: data.data.result.data.map((item: any) => {
+            return {
+              ...item,
+              isSelected: false
+            }
+          })
         })
       }
       

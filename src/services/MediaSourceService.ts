@@ -48,14 +48,15 @@ export async function GetMediaSourceById(id: string) {
   return data;
 }
 
-export async function GetListMediaFromFiledId(listId: any) {
+export async function GetListMediaFromFiledId(listId: any, isSigned?: number) {
   console.log('====================================');
   console.log(listId);
   console.log('====================================');
 
   const res = ApiHelper.get(`${CONSTANTS_LBA.MEDIA_SRC_URL}/list`, {
     params: {
-      listFileId: listId
+      listFileId: listId,
+      isSigned
     },
     paramsSerializer: params => {
       return qs.stringify(params);

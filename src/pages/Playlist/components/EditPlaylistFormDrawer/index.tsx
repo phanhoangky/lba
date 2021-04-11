@@ -8,7 +8,20 @@ import {
   PlaySquareTwoTone,
   SettingTwoTone,
 } from '@ant-design/icons';
-import { Button, Space, Form, Input, Table, Row, Col, Image, Slider, Modal } from 'antd';
+import {
+  Button,
+  Space,
+  Form,
+  Input,
+  Table,
+  Row,
+  Col,
+  Image,
+  Slider,
+  Modal,
+  Drawer,
+  Empty,
+} from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
@@ -26,7 +39,8 @@ import type {
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import styles from '../../index.less';
-import { MediasTableComponent } from './components/MediasTableComponent';
+// import { MediasTableComponent } from './components/MediasTableComponent';
+import { SelectMediaModal } from './components/SelectMediaModal';
 // import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
 
 export type EditPlaylistFormDrawerProps = {
@@ -55,17 +69,20 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       isLoading: true,
     })
       .then(() => {
-        this.getMediaNotBelongToPlaylist({ isPaging: false, isSigned: 2 }).then(() => {
-          this.calculateTotalDuration().then(() => {
-            // this.setListMediaNotBelongToPlaylist(
-            //   listMediaNotBelongToPlaylist.filter((media) =>
-            //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
-            //   ),
-            // )
-            this.setEditPlaylistDrawer({
-              isLoading: false,
-            });
-          });
+        // this.getMediaNotBelongToPlaylist({ isPaging: false, isSigned: 2 }).then(() => {
+        //   this.calculateTotalDuration().then(() => {
+        //     // this.setListMediaNotBelongToPlaylist(
+        //     //   listMediaNotBelongToPlaylist.filter((media) =>
+        //     //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
+        //     //   ),
+        //     // )
+        //     this.setEditPlaylistDrawer({
+        //       isLoading: false,
+        //     });
+        //   });
+        // });
+        this.setEditPlaylistDrawer({
+          isLoading: false,
         });
       })
       .catch(() => {
@@ -74,8 +91,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         });
       });
   };
-
-  componentDidUpdate() {}
 
   getMediaNotBelongToPlaylist = async (param?: any) => {
     const { getListMediaParam } = this.props.playlists;
@@ -86,12 +101,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         ...param,
       },
     });
-
-    // await this.setListMediaNotBelongToPlaylist(
-    //   listMediaNotBelongToPlaylist.filter((media) =>
-    //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
-    //   ),
-    // );
   };
 
   callGetListPlaylist = async () => {
@@ -146,8 +155,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       type: 'playlists/removePlaylist',
       payload: this.props.playlists.selectedPlaylist?.id,
     });
-
-    await this.callGetListPlaylist();
   };
 
   setViewPlaylistDetailComponent = async (param?: any) => {
@@ -217,21 +224,11 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         updatePlaylistItems: selectedPlaylist.playlistItems,
         ...param,
       };
-
-      console.log('====================================');
-      console.log(updateParam);
-      console.log('====================================');
       await this.props.dispatch({
         type: 'playlists/updatePlaylist',
         payload: updateParam,
       });
     }
-  };
-
-  clearSearchListMediaParam = async () => {
-    await this.props.dispatch({
-      type: 'media/clearSearchListMediaParamReducer',
-    });
   };
 
   addNewItemToSelectedItems = async (media?: any) => {
@@ -264,26 +261,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     //   type: 'playlists/setSelectedPlaylistItemsReducer',
     //   payload: newList,
     // });
-  };
-
-  addNewPlaylistItem = async (media?: any) => {
-    await this.addNewItemToSelectedItems(media)
-      .then(() => {
-        this.removeMediaFromListMedia(media).then(() => {
-          this.calculateTotalDuration().then(() => {
-            this.clearDuration().then(() => {
-              // this.setAddNewPlaylistItemsDrawer({
-              //   visible: false,
-              // });
-            });
-          });
-        });
-      })
-      .catch(() => {
-        this.setAddNewPlaylistItemsDrawer({
-          visible: false,
-        });
-      });
   };
 
   clearDuration = async () => {
@@ -450,7 +427,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         );
       }
     }
-    return null;
+    return <Empty description={<>Preview Media</>} />;
   };
 
   setSelectedPlaylistItemsDuration = async (record?: any, duration?: number) => {
@@ -504,6 +481,16 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     this.addMediaToListMedia(medias?.mediaSrc);
   };
 
+  setSelectMediaModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'playlists/selectMediaModalReducer',
+      payload: {
+        ...this.props.playlists.selectMediaModal,
+        ...param,
+      },
+    });
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -512,15 +499,13 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       totalDuration,
       maxDuration,
       minDuration,
-      // listMediaNotBelongToPlaylist,
       selectedPlaylist,
+      selectMediaModal,
     } = this.props.playlists;
-
-    // const listMedia = listMediaNotBelongToPlaylist?.filter((media) =>
-    //   selectedPlaylistItems?.every((p) => p.mediaSrcId !== media.id),
-    // );
-
-    const availableDuration = maxDuration - totalDuration;
+    const maxD = maxDuration || 240;
+    const minD = minDuration || 10;
+    const totalD = totalDuration || 0;
+    const availableDuration = maxD - totalD;
     return (
       <Modal
         getContainer={false}
@@ -533,7 +518,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
           this.clearSelectedPlaylist();
         }}
         title="Edit Playlist"
-        width={'50%'}
+        width={'55%'}
         onCancel={async () => {
           this.setEditPlaylistDrawer({
             visible: false,
@@ -630,7 +615,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
             <Input.TextArea rows={4} />
           </Form.Item>
 
-          <Row>
+          <Row gutter={20}>
             <Col span={12}>{this.renderPreviewMedia()}</Col>
             <Col span={12}>
               {/* PlaylistItems Table */}
@@ -673,10 +658,10 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                         <Slider
                           min={minDuration}
                           max={maxDuration}
-                          disabled={availableDuration < minDuration}
+                          disabled={availableDuration < minD}
                           value={record.duration}
                           onChange={(e: any) => {
-                            if (totalDuration + e < maxDuration) {
+                            if (totalDuration + e < maxD) {
                               this.setSelectedPlaylistItemsDuration(record, e);
                               this.calculateTotalDuration();
                             }
@@ -723,12 +708,35 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                   }}
                 ></Column>
               </Table>
+              <Button
+                type="primary"
+                block
+                onClick={() => {
+                  this.setSelectMediaModal({
+                    visible: true,
+                  });
+                }}
+              >
+                Add New Media
+              </Button>
             </Col>
           </Row>
-          <Row>
-            <MediasTableComponent {...this.props} />
-          </Row>
+          {/* <Row><MediasTableComponent {...this.props} /></Row> */}
         </Form>
+        <Drawer
+          closable={false}
+          destroyOnClose={true}
+          visible={selectMediaModal?.visible}
+          title="Select Media"
+          width={'50%'}
+          onClose={() => {
+            this.setSelectMediaModal({
+              visible: false,
+            });
+          }}
+        >
+          {selectMediaModal?.visible && <SelectMediaModal {...this.props} />}
+        </Drawer>
       </Modal>
     );
   }

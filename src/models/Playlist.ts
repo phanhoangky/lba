@@ -90,6 +90,10 @@ export type PlayListModelState = {
 
   newPlaylistItemParam?: AddNewPlaylistItemParam,
 
+  selectMediaModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  }
 }
 
 export type PlaylistModel = {
@@ -131,6 +135,8 @@ export type PlaylistModel = {
     setCurrentDurationReducer: Reducer<PlayListModelState>;
 
     setViewPlaylistDetailComponentReducer: Reducer<PlayListModelState>;
+    
+    selectMediaModalReducer: Reducer<PlayListModelState>;
   }
 }
 
@@ -542,6 +548,13 @@ const PlaylistStore: PlaylistModel = {
       return {
         ...state,
         viewPlaylistDetailComponent: payload
+      }
+    },
+
+    selectMediaModalReducer(state, { payload }) {
+      return {
+        ...state,
+        selectMediaModal: payload
       }
     }
   }

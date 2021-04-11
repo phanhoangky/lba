@@ -29,7 +29,7 @@ export class MediasTableComponent extends React.Component<MediasTableComponentPr
         // this.setAddNewPlaylistItemsDrawer({
         //   visible: false,
         // });
-        openNotification('error', 'Fail', error);
+        openNotification('error', 'Fail to  add new playlist items');
       });
   };
 

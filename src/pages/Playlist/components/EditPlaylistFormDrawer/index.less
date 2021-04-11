@@ -1,0 +1,74 @@
+.rowClassName {
+  margin: 2em 0;
+  border-radius: 50px;
+  border: 1px solid black;
+}
+
+.addNewFileModal {
+  :global {
+    .ant-upload.ant-upload-select-picture-card {
+      width: 100%;
+    }
+  }
+}
+.listMedias {
+  :global {
+    .ant-card-bordered {
+      border-radius: 5px;
+      border-image-slice: 1;
+      border-width: 5px;
+      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+    }
+    .ant-card .ant-card-bordered .ant-card-hoverable .media-record {
+      border-radius: 5px;
+      border-image-slice: 1;
+      border-width: 5px;
+      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+    }
+    .media-record {
+
+    }
+
+    .selected-media {
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    }
+  }
+}
+.antCardBody {
+  padding: 0;
+  height: 50;
+  align-content: 'center';
+  vertical-align: 'middle';
+  align-items: 'center';
+}
+
+.breadscrumb {
+
+  :global {
+    .breadcrumb-item {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      // &:active {
+      //   text-decoration: underline;
+      // }
+    }
+
+    .ant-breadcrumb {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      >span:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
+
+  }
+
+
+}
