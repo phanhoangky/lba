@@ -1,3 +1,28 @@
+
+.listScenarios {
+  :global {
+    .ant-list-item-meta-content,
+    .ant-list-item-meta-title,
+    .ant-list-item-meta-description {
+      color: #00cdac;
+    }
+
+    .selected-scenario {
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      transition: 0.5s ease;
+      .ant-list-item-meta-content,
+      .ant-list-item-meta-title,
+      .ant-list-item-meta-description {
+        color: aliceblue;
+      }
+    }
+    .scenario-record {
+      transition: 0.5s ease;
+    }
+  }
+  
+}
+
 :global {
   .area-wrapper {
     margin: 0 auto;

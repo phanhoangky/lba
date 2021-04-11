@@ -24,18 +24,16 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
   };
 
   componentDidMount = async () => {
+    await this.readJWT().catch((error) => {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+      openNotification('error', 'Error when read JWT');
+    });
+
     this.setState({
       isReady: true,
     });
-
-    this.setState({});
-    this.readJWT().catch((err) => {
-      console.log('====================================');
-      console.log(err);
-      console.log('====================================');
-      openNotification('error', 'Fail to read JWT');
-    });
-
     // await dispatch({
     //   type: 'user/getCurrentUser',
     // });
@@ -73,5 +71,5 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
 
 export default connect(({ user, loading }: ConnectState) => ({
   currentUser: user.currentUser,
-  loading: loading.global,
+  loading: loading.models.user,
 }))(SecurityLayout);

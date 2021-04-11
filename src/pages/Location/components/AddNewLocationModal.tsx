@@ -313,7 +313,7 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
           <Form.Item
             name="typeId"
             label="Type"
-            rules={[{ required: true, message: 'Please input address' }]}
+            rules={[{ required: true, message: 'Please input type of location' }]}
           >
             <Select
               style={{ width: '100%' }}

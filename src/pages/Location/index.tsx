@@ -278,7 +278,15 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       addNewLocationModal,
     } = this.props.location;
     return (
-      <PageContainer>
+      <PageContainer
+        title={false}
+        header={{
+          ghost: false,
+          style: {
+            padding: 0,
+          },
+        }}
+      >
         <Row gutter={20}>
           <Col span={12}>
             <Table
@@ -395,7 +403,9 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           </Col>
           <Col span={12}>
             {viewLocationDetailComponent?.visible && (
-              <Typography.Title level={4}>Location Detail</Typography.Title>
+              <Typography.Title level={4} className="lba-text">
+                Location Detail
+              </Typography.Title>
             )}
             {viewLocationDetailComponent?.visible && (
               <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />

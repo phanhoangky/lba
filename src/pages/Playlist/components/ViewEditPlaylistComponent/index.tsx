@@ -405,11 +405,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
     return (
       <>
         <Form name="view_playlists_form_drawer" layout="vertical" ref={this.formRef}>
-          <Form.Item
-            name="title"
-            label="Title"
-            rules={[{ required: true, message: 'Please input title' }]}
-          >
+          <Form.Item name="title" label="Title">
             <Input readOnly />
           </Form.Item>
           <Form.Item name="description" label="Description">

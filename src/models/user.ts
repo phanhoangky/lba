@@ -105,16 +105,17 @@ const UserModel: UserModelType = {
     *readJWT(_, { put }) {
       // const token = yield localStorage.getItem("JWT");
       // const res = yield call(CreateFolder, { name: token.user_id });
-      const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
-      if (tokenFirebase) {
+      // const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
+      const tokenFirebase = yield localStorage.getItem("JWT");;
+      if (tokenFirebase && tokenFirebase !== "undefined") {
         const decode = yield jwt_decode(tokenFirebase);
         // console.log('====================================');
         // console.log(decode, Date.now() >= decode.exp * 1000);
         // console.log('====================================');
         if (decode.claims) {
-          // if (Date.now() >= decode.exp * 1000) {
-          //   history.replace("/account/login");
-          // }
+          if (Date.now() >= decode.exp * 1000) {
+            history.replace("/account/login");
+          }
           const ether = yield EtherService.build();
           yield ether.readKeyStoreJson(decode.claims.WalletKeyStore, decode.claims.user_id)
           yield ether.initContracts();
@@ -132,9 +133,9 @@ const UserModel: UserModelType = {
             }
           })
         } else {
-          // if (Date.now() >= decode.exp * 1000) {
-          //   history.replace("/account/login");
-          // }
+          if (Date.now() >= decode.exp * 1000) {
+            history.replace("/account/login");
+          }
           const ether = yield EtherService.build();
           if (decode.WalletKeyStore) {
             yield ether.readKeyStoreJson(decode.WalletKeyStore, decode.user_id)

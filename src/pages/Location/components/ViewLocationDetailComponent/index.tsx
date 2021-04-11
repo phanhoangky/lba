@@ -316,25 +316,13 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
               }}
             >
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                <Form.Item
-                  label="Name"
-                  name="name"
-                  rules={[
-                    { required: true, message: 'Please enter location name' },
-                    { max: 50, message: 'Name have maximum 50 characters' },
-                  ]}
-                >
+                <Form.Item label="Name" name="name">
                   <Input readOnly placeholder="input placeholder" />
                 </Form.Item>
               </Skeleton>
 
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                <Form.Item
-                  label="Type"
-                  name="typeId"
-                  style={{ width: '50%' }}
-                  rules={[{ required: true, message: 'Please select location type' }]}
-                >
+                <Form.Item label="Type" name="typeId" style={{ width: '50%' }}>
                   <Select
                     disabled
                     style={{ width: '100%' }}

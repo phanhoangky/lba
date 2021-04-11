@@ -5,6 +5,7 @@ import type { CampaignModelState, Dispatch, LocationModelState, ScenarioModelSta
 import { connect } from 'umi';
 import { CAMPAIGN } from '../..';
 import { ViewScenarioDetailComponent } from './ViewScenarioDetailComponent';
+import styles from '../../index.less';
 
 export type SelectScenarioPartProps = {
   dispatch: Dispatch;
@@ -117,6 +118,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
               bordered
               loading={tableLoading}
               dataSource={listScenario}
+              className={styles.listScenarios}
               pagination={{
                 current: getListScenarioParam?.pageNumber ? getListScenarioParam.pageNumber + 1 : 1,
                 pageSize: getListScenarioParam?.pageLimitItem
@@ -131,11 +133,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
               }}
               renderItem={(item) => (
                 <List.Item
-                  style={
-                    item.isSelected
-                      ? { backgroundColor: '#b3def5', transition: '0.5s ease' }
-                      : { transition: '0.5s ease' }
-                  }
+                  className={item.isSelected ? 'selected-scenario' : 'scenario-record'}
                   onClick={async () => {
                     this.setCreateNewCampaignParam({
                       scenarioId: item.id,

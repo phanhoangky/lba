@@ -40,6 +40,7 @@ import { ListMediasHeaderComponent } from './components/ListMediasHeaderComponen
 import { EditDrawerFooter } from './components/EditMediaFormDrawer/EditDrawerFooter';
 import { RenameFolderModal } from './components/RenameFolderModal';
 import styles from './index.less';
+import { openNotification } from '@/utils/utils';
 
 export type MediaSourceProps = {
   dispatch: Dispatch;
@@ -82,19 +83,16 @@ class Media extends React.Component<MediaSourceProps> {
   };
   addBreadscrumbHome = async () => {
     const { user } = this.props;
-    await this.props.dispatch({
-      type: 'media/setBreadScrumbReducer',
-      payload: [
-        {
-          id: user.currentUser?.rootFolderId,
-          name: 'Home',
-          path: '',
-          parent_id: '',
-          created_at: '',
-          updated_at: '',
-        },
-      ],
-    });
+    await this.setBreadScrumb([
+      {
+        id: user.currentUser?.rootFolderId,
+        name: 'Home',
+        path: '',
+        parent_id: '',
+        created_at: '',
+        updated_at: '',
+      },
+    ]);
   };
 
   setListLoading = async (loading: boolean) => {
@@ -211,29 +209,35 @@ class Media extends React.Component<MediaSourceProps> {
 
   toNextFolder = async (item: any) => {
     const { getListFolderParam, getListFileParam, breadScrumb } = this.props.media;
-    this.callGetListFolders({
-      ...getListFolderParam,
-      parent_id: item.id,
-    }).then(() => {
-      this.callGetListMedia({
-        ...getListFileParam,
-        folder: item.id,
-      }).then(() => {
-        const newItem: FolderType = {
-          id: item.id,
-          name: item.name,
-          created_at: '',
-          updated_at: '',
-          parent_id: '',
-          path: '',
-        };
-        const newList = cloneDeep(breadScrumb);
-        newList?.push(newItem);
-        this.props.dispatch({
-          type: 'media/setBreadScrumbReducer',
-          payload: newList,
+    this.setListLoading(true).then(() => {
+      Promise.all([
+        this.callGetListFolders({
+          ...getListFolderParam,
+          parent_id: item.id,
+        }),
+        this.callGetListMedia({
+          ...getListFileParam,
+          folder: item.id,
+        }),
+      ])
+        .then(() => {
+          const newItem: FolderType = {
+            id: item.id,
+            name: item.name,
+            created_at: '',
+            updated_at: '',
+            parent_id: '',
+            path: '',
+          };
+          const newList = cloneDeep(breadScrumb);
+          newList?.push(newItem);
+          this.setBreadScrumb(newList).then(() => {
+            this.setListLoading(false);
+          });
+        })
+        .catch(() => {
+          this.setListLoading(false);
         });
-      });
     });
   };
 
@@ -371,22 +375,23 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  breadScrumbNavigate = async (index: number) => {
+  breadScrumbNavigate = (index: number) => {
     const { breadScrumb, getListFileParam } = this.props.media;
     if (breadScrumb) {
       const newBreadScrumb = breadScrumb.slice(0, index + 1);
 
-      await this.setListLoading(true);
-      this.setBreadScrumb(newBreadScrumb)
+      this.setListLoading(true)
         .then(() => {
-          this.callGetListFolders({
-            parent_id: breadScrumb[index].id,
-          }).then(() => {
-            this.callGetListMedia({
-              ...getListFileParam,
-              folder: breadScrumb[index].id,
+          this.setBreadScrumb(newBreadScrumb).then(() => {
+            this.callGetListFolders({
+              parent_id: breadScrumb[index].id,
             }).then(() => {
-              this.setListLoading(false);
+              this.callGetListMedia({
+                ...getListFileParam,
+                folder: breadScrumb[index].id,
+              }).then(() => {
+                this.setListLoading(false);
+              });
             });
           });
         })
@@ -403,14 +408,62 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  removeFolder = async (id: string) => {
-    await this.props.dispatch({
+  removeFolder = async (id: string, path: string) => {
+    const res = await this.props.dispatch({
       type: `media/removeFolder`,
-      payload: id,
+      payload: {
+        id,
+        path,
+      },
     });
+    return res;
   };
 
-  // handleRemoveFolder = async (id: string) => {};
+  checkFolderHaveAnySubfolders = async (parent_id: string) => {
+    const res = await this.props.dispatch({
+      type: `media/checkFolderHaveAnySubfolders`,
+      payload: {
+        parent_id,
+      },
+    });
+    return res;
+  };
+
+  handleRemoveFolder = async (item: any) => {
+    Modal.confirm({
+      centered: true,
+      closable: false,
+      title: `Do you want to remove ${item.name} ?`,
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <>
+          If you remove this folder, every files inside will be removes aslo{'\n'}
+          <span>No undo option is possible</span>
+        </>
+      ),
+      onOk: () => {
+        this.setListLoading(true).then(() => {
+          this.removeFolder(item.id, item.path)
+            .then(() => {
+              this.callGetListFolders().then(() => {
+                openNotification('success', 'Remove folder successfully');
+                this.setListLoading(false);
+              });
+            })
+            .catch((error) => {
+              console.log('====================================');
+              console.log(error);
+              console.log('====================================');
+              openNotification('error', 'Fail to remove folders');
+              this.setListLoading(false);
+            });
+        });
+      },
+      onCancel: () => {
+        this.setListLoading(false);
+      },
+    });
+  };
 
   handleFolderContextMenuClick = async (menu: any, item: any) => {
     if (menu.key === 'open') {
@@ -418,7 +471,40 @@ class Media extends React.Component<MediaSourceProps> {
     }
 
     if (menu.key === 'remove') {
-      this.removeFolder(item.id);
+      this.handleRemoveFolder(item);
+      // this.setListLoading(true)
+      //   .then(async () => {
+      //     const response = await this.checkFolderHaveAnySubfolders(item.id);
+      //     // .then((response) => {
+      //     if (response) {
+      //       .then(() => {
+      //         this.setListLoading(false);
+      //       });
+      //     } else {
+      //       this.setListLoading(false);
+      //       openNotification(
+      //         'error',
+      //         'There are sub folders in this folder, please remove them before remove this folder',
+      //       );
+      //     }
+      //     // })
+      //     // .catch((err) => {
+      //     //   this.setListLoading(false);
+      //     //   console.log('====================================');
+      //     //   console.log('ERROR', err);
+      //     //   console.log('====================================');
+      //     //   openNotification('error', 'Fail to remove folders');
+      //     // });
+      //   })
+      //   .catch((err) => {
+      //     this.setListLoading(false);
+      //     console.log('====================================');
+      //     console.log('ERROR', err);
+      //     console.log('====================================');
+      //     openNotification('error', 'Fail to remove folders');
+      //   });
+
+      // this.removeFolder(item.id);
     }
 
     if (menu.key === 'rename') {
@@ -481,7 +567,15 @@ class Media extends React.Component<MediaSourceProps> {
 
     return (
       <>
-        <PageContainer>
+        <PageContainer
+          title={false}
+          header={{
+            ghost: false,
+            style: {
+              padding: 0,
+            },
+          }}
+        >
           <Skeleton active loading={listLoading}>
             <Breadcrumb className={styles.breadscrumb}>
               {breadScrumb &&

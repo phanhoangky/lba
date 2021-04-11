@@ -47,9 +47,8 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
           console.log('====================================');
           if (mapComponent.marker !== undefined) {
             // mapComponent.marker.setLatLng(e.latlng);
-
             mapComponent.marker.remove();
-            // mapComponent.marker.removeFrom(mymap);
+            mapComponent.marker.removeFrom(mymap);
             const marker = L.marker(e.latlng);
             console.log('====================================');
             console.log('Remove Marker', marker);
@@ -69,12 +68,17 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
             console.log('====================================');
           }
           if (mapComponent.circle) {
-            mapComponent.circle.remove();
-            const circle = L.circle([e.latlng.lat, e.latlng.lng]);
-            circle.addTo(mymap);
-            this.setMapComponent({
-              circle,
-            });
+            mapComponent.circle.setLatLng(e.latlng);
+            // mapComponent.circle.remove();
+            // mapComponent.circle.removeFrom(mymap);
+            // const circle = L.circle(e.latlng);
+            // console.log('====================================');
+            // console.log('Remove circle', circle);
+            // console.log('====================================');
+            // circle.addTo(mymap);
+            // this.setMapComponent({
+            //   circle,
+            // });
           }
           const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
 
@@ -94,27 +98,28 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
             });
           }
 
-          if (addNewCampaignModal.visible) {
+          if (addNewCampaignModal?.visible) {
             const { createCampaignParam } = this.props.campaign;
-            if (createCampaignParam.radius > 0) {
+            if (createCampaignParam && createCampaignParam.radius > 0) {
               if (mapComponent.map) {
                 if (!mapComponent.circle && createCampaignParam.radius !== 0) {
                   const circle = L.circle(e.latlng, {
-                    radius: createCampaignParam.radius * 1000,
+                    radius: createCampaignParam.radius,
                   });
                   circle.addTo(mapComponent.map);
                   await this.setMapComponent({
                     circle,
                   });
-                } else {
-                  mapComponent.circle?.remove();
-                  const circle = L.circle(e.latlng, {
-                    radius: createCampaignParam.radius * 1000,
-                  });
-                  circle.addTo(mapComponent.map);
-                  await this.setMapComponent({
-                    circle,
-                  });
+                } else if (mapComponent.circle) {
+                  mapComponent.circle.setLatLng(e.latlng).setRadius(createCampaignParam.radius);
+                  // mapComponent.circle?.remove();
+                  // const circle = L.circle(e.latlng, {
+                  //   radius: createCampaignParam.radius,
+                  // });
+                  // circle.addTo(mapComponent.map);
+                  // await this.setMapComponent({
+                  //   circle,
+                  // });
                 }
               }
             }

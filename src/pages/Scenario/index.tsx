@@ -42,7 +42,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
     });
     this.setTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        // this.readJWT();
         Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(() => {
           const { listScenario } = this.props.scenarios;
           const first = listScenario && listScenario.length > 0 ? listScenario[0] : null;
@@ -295,7 +295,15 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
     } = this.props.scenarios;
 
     return (
-      <PageContainer>
+      <PageContainer
+        title={false}
+        header={{
+          ghost: false,
+          style: {
+            padding: 0,
+          },
+        }}
+      >
         <Row gutter={20}>
           <Col span={10}>
             <Table
@@ -413,7 +421,9 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
           </Col>
           <Col span={14}>
             {viewScenarioDetailComponent?.visible && (
-              <Typography.Title level={4}>Scenario Detail</Typography.Title>
+              <Typography.Title level={4} className="lba-text">
+                Scenario Detail
+              </Typography.Title>
             )}
             {viewScenarioDetailComponent?.visible && (
               <ViewScenarioDetailComponent

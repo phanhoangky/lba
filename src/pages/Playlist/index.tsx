@@ -14,11 +14,11 @@ import { connect } from 'umi';
 // import AddNewPlaylistModal from './components/AddNewPlaylistModal';
 // import EditPlaylistDrawer from './components/EditPlaylistDrawer';
 import { EditPlaylistFormDrawer } from './components/EditPlaylistFormDrawer';
-import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 import { PlaylistTableHeaderComponent } from './components/PlaylistTableHeaderComponent';
 import { ViewEditPlaylistComponent } from './components/ViewEditPlaylistComponent';
-import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { DeleteTwoTone } from '@ant-design/icons';
 import { openNotification } from '@/utils/utils';
+import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 
 type PlaylistProps = {
   dispatch: Dispatch;
@@ -35,9 +35,9 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
       isLoading: true,
     });
     this.setTableLoading(true)
-      .then(() => {
+      .then(async () => {
+        this.readJWT();
         Promise.all([this.callGetListPlaylist()]).then(async () => {
-          this.readJWT();
           const { listPlaylist } = this.props.playlists;
           const first = listPlaylist && listPlaylist.length > 0 ? listPlaylist[0] : null;
           if (first) {
@@ -242,7 +242,15 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
     } = this.props.playlists;
 
     return (
-      <PageContainer>
+      <PageContainer
+        title={false}
+        header={{
+          ghost: false,
+          style: {
+            padding: 0,
+          },
+        }}
+      >
         <Row gutter={20}>
           <Col span={10}>
             <Table
@@ -301,28 +309,6 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                     <Space>
                       <Button
                         onClick={(e) => {
-                          this.setViewPlaylistDetailComponent({
-                            visible: false,
-                          }).then(() => {
-                            this.setSelectedPlaylist(record);
-                            this.setGetItemsByPlaylistIdParam({
-                              id: record.id,
-                            });
-                            this.callGetItemsByPlaylistId();
-                            this.setEditPlaylistDrawer({
-                              visible: true,
-                            }).then(() => {
-                              this.editPlaylistModalRef.current?.componentDidMount();
-                            });
-                          });
-                          e.stopPropagation();
-                        }}
-                        type="primary"
-                      >
-                        <EditFilled />
-                      </Button>
-                      <Button
-                        onClick={(e) => {
                           this.setTableLoading(true)
                             .then(() => {
                               this.handleRemovePlaylist(record).then(() => {
@@ -347,7 +333,9 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
           </Col>
           <Col span={14}>
             {viewPlaylistDetailComponent?.visible && (
-              <Typography.Title level={4}>Playlist Detail</Typography.Title>
+              <Typography.Title level={4} className="lba-text">
+                Playlist Detail
+              </Typography.Title>
             )}
             {viewPlaylistDetailComponent?.visible && (
               <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />

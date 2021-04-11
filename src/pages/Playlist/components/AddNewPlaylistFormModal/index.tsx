@@ -104,6 +104,7 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
         title="Add New Playlist"
         visible={addNewPlaylistModal?.visible}
         destroyOnClose={true}
+        centered
         confirmLoading={addNewPlaylistModal?.isLoading}
         onCancel={async () => {
           await this.setAddNewPlaylistModal({
@@ -124,7 +125,7 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
         }}
       >
         {/* <AddNewPlaylistModal {...this.props} /> */}
-        <Form ref={this.formRef} name={'add_new_playlist_form'}>
+        <Form ref={this.formRef} layout="vertical" name={'add_new_playlist_form'}>
           <Form.Item
             label="Title"
             name="title"

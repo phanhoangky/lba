@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Button, Col, Divider, Form, Modal, Row, Space, Table } from 'antd';
+import { Avatar, Button, Col, Divider, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -173,7 +173,15 @@ class WalletScreen extends React.Component<WalletProps> {
 
     const { updateProfileModal } = this.props.profileWallet;
     return (
-      <PageContainer>
+      <PageContainer
+        title={false}
+        header={{
+          ghost: false,
+          style: {
+            padding: 0,
+          },
+        }}
+      >
         <Row justify="space-between" gutter={20}>
           <Col span={15} offset={1}>
             <Row>
@@ -281,7 +289,7 @@ class WalletScreen extends React.Component<WalletProps> {
                 width: '100%',
               }}
             >
-              <Form layout="horizontal">
+              {/* <Form layout="horizontal">
                 <Divider />
                 <Form.Item label="Username">{currentUser && currentUser.name}</Form.Item>
                 <Divider />
@@ -292,7 +300,27 @@ class WalletScreen extends React.Component<WalletProps> {
                     currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
                 </Form.Item>
                 <Divider />
-              </Form>
+              </Form> */}
+              <Divider></Divider>
+              <Divider orientation="left">Username</Divider>
+              <Row>
+                <Col span={8}>Username</Col>
+                <Col span={16}>{currentUser && currentUser.name}</Col>
+              </Row>
+              <Divider orientation="left">Email</Divider>
+              <Row>
+                <Col span={8}>Email</Col>
+                <Col span={16}>{currentUser && currentUser.email}</Col>
+              </Row>
+              <Divider orientation="left">Balance</Divider>
+              <Row>
+                <Col span={8}>Balance</Col>
+                <Col span={16}>
+                  {currentUser &&
+                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                </Col>
+              </Row>
+              <Divider orientation="center">Setting</Divider>
               <Button
                 type="primary"
                 block

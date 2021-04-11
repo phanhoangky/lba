@@ -24,10 +24,6 @@ export default class EtherService {
     let balance = 0;
 
     if (this.wallet !== undefined) {
-      console.log('====================================');
-      console.log("Wallet >>>>", this.wallet, this.wallet.address);
-      console.log("Wallet >>>>", this.contract);
-      console.log('====================================');
       balance = await this.contract.balanceOf(this.wallet.address);
     }
     return ethers.BigNumber.from(balance);
@@ -97,42 +93,60 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id) {
-    const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
-    console.log("listSignature>>>>>>>", listSignature);
-    if (listSignature.length !== 0) {
-      return "Fail - File is existed on server";
+    const signature = await this.getOwnerDocument(`0x${hash_id}`);
+    console.log("signature>>>>>>>", signature);
+    if (signature != null && signature === this.wallet.address) {
+      return "Fail -- Already signed this";
+    }
+    if (signature != null && signature !== ethers.constants.AddressZero && signature !== this.wallet.address) {
+      return "Fail -- This media is belong to another user";
     }
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
-
     };
     const callPromise = await this.contract.addDocument(`0x${hash_id}`, overrides);
     const receipt = await callPromise.wait();
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
-    await this.signDocument(hash_id);
     return receipt.transactionHash;
   }
 
-  async signDocument(hash_id) {
+  async approveDocument(hash_id) {
+    const signature = await this.getOwnerDocument(`0x${hash_id}`);
+    console.log("signature>>>>>>>", signature);
+    if (signature == null) {
+      return "Fail -- User is not sign this";
+    }
+
     const overrides = {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
     };
-    const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
-    console.log("listSignature>>>>>>>", listSignature);
-    if (listSignature.length !== 0) {
-      listSignature.forEach(e => {
-        if (e === this.wallet.address) {
-          return "Fail - You have already signed";
-        }
-      });
+
+    const approveDocumentFunction = await this.contract.approveDocument(`0x${hash_id}`, overrides);
+    const receipt = await approveDocumentFunction.wait();
+    if (receipt.status !== 1) {
+      return "Fail On Server Blockchain";
+    }
+    return receipt.transactionHash;
+  }
+
+  async rejectDocument(hash_id) {
+    const signature = await this.getOwnerDocument(`0x${hash_id}`);
+    console.log("signature>>>>>>>", signature);
+    if (signature == null) {
+      return "Fail -- User is not sign this";
     }
 
-    const signDocumentFunction = await this.contract.signDocument(`0x${hash_id}`, overrides);
-    const receipt = await signDocumentFunction.wait();
+    const overrides = {
+      gasLimit: ethers.BigNumber.from("2000000"),
+      gasPrice: ethers.BigNumber.from("10000000000000"),
+    };
+
+    const rejectDocumenttFunction = await this.contract.rejectDocument(`0x${hash_id}`, overrides);
+    const receipt = await rejectDocumenttFunction.wait();
     if (receipt.status !== 1) {
       return "Fail On Server Blockchain";
     }
@@ -144,8 +158,11 @@ export default class EtherService {
       gasLimit: ethers.BigNumber.from("2000000"),
       gasPrice: ethers.BigNumber.from("10000000000000"),
     };
-    const listSignature = await this.getSignatureDocument(`0x${hash_id}`);
-    if (listSignature.length === 0) return "Fail - File is not on server";
+    const signature = await this.getOwnerDocument(`0x${hash_id}`);
+    console.log("signature>>>>>>>", signature);
+    if (signature == null) {
+      return "Fail - File is not on server";
+    }
     const deleteDocumentFunction = await this.contract.deleteDocument(`0x${hash_id}`, overrides);
     const receipt = await deleteDocumentFunction.wait();
     if (receipt.status !== 1) {
@@ -157,8 +174,8 @@ export default class EtherService {
     return receipt.transactionHash;
   }
 
-  async getSignatureDocument(id) {
-    const callPromise = await this.contract.getSignatures(id);
+  async getOwnerDocument(id) {
+    const callPromise = await this.contract.getOwnerDocument(id);
     return callPromise;
   }
 

@@ -1,8 +1,7 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Row, Col } from 'antd';
+import { Row } from 'antd';
 import styles from './Welcome.less';
-import { Animated } from 'react-animated-css';
 import illustrations from '@/assets/welcome-illustration.svg';
 
 // const CodePreview: React.FC = ({ children }) => (

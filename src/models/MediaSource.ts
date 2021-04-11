@@ -1,6 +1,6 @@
-import {  AddNewMediaSource, EditMediaSource, GetListMediaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, GetMediaSourceById, RemoveMediaSource } from '@/services/MediaSourceService';
+import {  AddNewMediaSource, EditMediaSource, GetListMediaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, GetMediaSourceById, RemoveAllMediaInFolder, RemoveMediaSource } from '@/services/MediaSourceService';
 import type {AddNewMediaParam, EditMediaParam, GetMediaSourcesParam} from '@/services/MediaSourceService'
-import { CreateFolder, CreateMedia, GetFiles, GetFolders, RemoveFolder, UpdateFile, UpdateFolder } from '@/services/PublitioService/PublitioService';
+import { CreateFolder, CreateMedia, DeleteFile, GetFiles, GetFolders, RemoveFolder, UpdateFolder } from '@/services/PublitioService/PublitioService';
 import type { UpdateFileParam } from '@/services/PublitioService/PublitioService';
 import type { CreateFileParam, CreateFolderParam, GetFilesParam, GetFoldersParam } from '@/services/PublitioService/PublitioService';
 import type { Effect, Reducer } from 'umi';
@@ -116,6 +116,7 @@ export type MediaSourceModel = {
     removeMedia: Effect;
     removeFolder: Effect;
     updateFolder: Effect;
+    checkFolderHaveAnySubfolders: Effect;
   },
 
   reducers: {
@@ -388,19 +389,34 @@ const MediaSourceStore: MediaSourceModel = {
         title: payload.title,
         description: payload.description,
         privacy: 0,
-        txHash: payload.hash,
+        // txHash: payload.hash,
         docId: payload.id
       }
-      yield call(UpdateFile, updateParam);
+      // yield call(UpdateFile, updateParam);
+      yield call(DeleteFile, payload.fileId);
       yield call(RemoveMediaSource, updateParam);
     },
 
     *removeFolder({ payload }, { call }) {
-      yield call(RemoveFolder, payload);
+      // const listFiles = yield call(GetFiles, { folder: payload.id });
+
+      yield call(RemoveAllMediaInFolder, payload.path);
+      yield call(RemoveFolder, payload.id);
     },
 
     *updateFolder({ payload }, { call }) {
       yield call(UpdateFolder, payload);
+    },
+
+    *checkFolderHaveAnySubfolders({ payload }, { call }) {
+      const res = yield call(GetFolders, payload);
+      console.log('====================================');
+      console.log("SubFolder >>>>>", res);
+      console.log('====================================');
+      if (res.folders_count > 0) {
+        return false;
+      }
+      return true;
     }
   },
 

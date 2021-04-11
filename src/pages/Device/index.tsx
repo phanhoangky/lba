@@ -1,7 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
-import { Button, Modal, Space, Table } from 'antd';
+import { Button, Modal, Space, Table, Tooltip } from 'antd';
 import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
@@ -221,7 +221,15 @@ class Device extends React.Component<DeviceProps> {
 
     return (
       <>
-        <PageContainer>
+        <PageContainer
+          title={false}
+          header={{
+            ghost: false,
+            style: {
+              padding: 0,
+            },
+          }}
+        >
           <Table
             dataSource={listDevices}
             style={{}}
@@ -244,7 +252,6 @@ class Device extends React.Component<DeviceProps> {
                 },
               };
             }}
-            bordered
             rowSelection={rowSelection}
             pagination={{
               total: this.props.deviceStore.totalItem,
@@ -303,8 +310,17 @@ class Device extends React.Component<DeviceProps> {
             <Column
               key="location"
               title="Location"
-              dataIndex={['location', 'name']}
+              // dataIndex={['location', 'name']}
               width="100"
+              render={(record) => {
+                return (
+                  <>
+                    <Tooltip placement="topLeft" title={record.location.name}>
+                      {record.location.name}
+                    </Tooltip>
+                  </>
+                );
+              }}
             ></Column>
             <Column
               key="action"
@@ -341,6 +357,7 @@ class Device extends React.Component<DeviceProps> {
                 return (
                   <Space>
                     <Button
+                      type="primary"
                       onClick={async () => {
                         this.setSelectedDevice(record).then(() => {
                           this.setViewScreenshotModal({

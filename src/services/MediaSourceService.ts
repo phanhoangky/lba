@@ -85,14 +85,11 @@ export async function RemoveMediaSource(param: UpdateFileParam) {
   console.log('====================================');
   console.log("Param >>>", param);
   console.log('====================================');
-  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`, { params: { txHash: param.txHash }});
+  // await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`, { params: { txHash: param.txHash }});
+  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`);
 }
 
-export async function RemoveFolder(listFileIds: string[]) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}`, { params: {
-      listFileId: listFileIds
-    },
-    paramsSerializer: params => {
-      return qs.stringify(params);
-    }})
+export async function RemoveAllMediaInFolder(path: string) {
+  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/folder`, { params: { path }});
+    
 }

@@ -1,9 +1,10 @@
-import { Col, Divider, Form, InputNumber, Row, Skeleton } from 'antd';
+import { Col, Divider, Form, FormInstance, InputNumber, Row, Skeleton } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MomoModelState, ProfileWalletModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import QRCode from 'qrcode';
 import styles from './index.less';
+import { openNotification } from '@/utils/utils';
 
 export type DepositModalProps = {
   dispatch: Dispatch;
@@ -34,27 +35,23 @@ export class DepositModal extends React.Component<DepositModalProps> {
   };
 
   generateQR = async (text: any) => {
-    try {
-      const result = await QRCode.toDataURL(text);
-      console.log('====================================');
-      console.log('QR >>>', result);
-      console.log('====================================');
+    const result = await QRCode.toDataURL(text);
+    console.log('====================================');
+    console.log('QR >>>', result);
+    console.log('====================================');
 
-      QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
-        if (err) {
-          throw err;
-        }
+    QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
+      if (err) {
+        throw err;
+      }
 
-        const container = document.getElementById('qr-container');
-        if (container) {
-          const qr = canvas;
-          qr.style.width = '100%';
-          container.appendChild(qr);
-        }
-      });
-    } catch (err) {
-      console.error(err);
-    }
+      const container = document.getElementById('qr-container');
+      if (container) {
+        const qr = canvas;
+        qr.style.width = '100%';
+        container.appendChild(qr);
+      }
+    });
   };
 
   depositMoney = async (param?: any) => {
@@ -69,12 +66,42 @@ export class DepositModal extends React.Component<DepositModalProps> {
     }
   };
 
-  handleDepositMoney = async (param?: any) => {
-    this.depositMoney(param).then(() => {
-      const { linkDepositMoney } = this.props.momo;
-      this.generateQR(linkDepositMoney);
-    });
+  handleDepositMoney = async () => {
+    this.formRef.current
+      ?.validateFields()
+      .then((values) => {
+        console.log('====================================');
+        console.log(values);
+        console.log('====================================');
+        this.depositMoney({
+          amount: values.amount,
+        })
+          .then(() => {
+            const { linkDepositMoney } = this.props.momo;
+            this.generateQR(linkDepositMoney).then(() => {
+              openNotification(
+                'success',
+                'Generate QR code successfil',
+                'Please Scan QR Code By Momo Wallet to Deposit money',
+              );
+            });
+          })
+          .catch((err) => {
+            console.log('====================================');
+            console.log(err);
+            console.log('====================================');
+            openNotification('error', 'fail to deposit money');
+          });
+      })
+      .catch((err) => {
+        console.log('====================================');
+        console.log(err);
+        console.log('====================================');
+        openNotification('error', 'fail to deposit money');
+      });
   };
+
+  formRef = React.createRef<FormInstance<any>>();
 
   render() {
     const { currentUser } = this.props.user;
@@ -94,24 +121,26 @@ export class DepositModal extends React.Component<DepositModalProps> {
               <Col span={18}></Col>
             </Row> */}
             <Divider></Divider>
-            <Form name="deposit_modal_form" layout="horizontal">
-              <Form.Item name="amount" label="Total Balance">
+            <Form name="deposit_modal_form" layout="horizontal" ref={this.formRef}>
+              <Form.Item name="balance" label="Total Balance">
                 {currentUser &&
                   currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
               </Form.Item>
               <Form.Item
                 name="amount"
                 label="Deposit Amount (VND)"
-                rules={[{ required: true, message: 'Please enter amount to deposit' }]}
+                rules={[
+                  { required: true, message: 'Please enter amount to deposit' },
+                  { type: 'number', min: 100000, message: 'At least 100.000 VND to deposit' },
+                ]}
               >
                 <InputNumber
-                  min={100000}
                   style={{
                     width: '100%',
                   }}
                 />
               </Form.Item>
-              <Form.Item name="amount" label="Equivalent Balance">
+              <Form.Item name="equivalent" label="Equivalent Balance">
                 {equivalent}
               </Form.Item>
             </Form>

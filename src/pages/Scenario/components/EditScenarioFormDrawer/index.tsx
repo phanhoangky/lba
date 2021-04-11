@@ -625,16 +625,17 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                               >
                                 <DeleteTwoTone twoToneColor="#f93e3e" />
                               </div>
-                              <div className="media-container">
+                              <div className="media-bound">
                                 <div>{scenarioItem?.playlist?.title}</div>
                                 <div
-                                  style={{
-                                    // position: 'absolute',
-                                    width: '100%',
-                                    height: '80%',
-                                    // left: 0,
-                                    // top: 0,
-                                  }}
+                                  className="media-container"
+                                  // style={{
+                                  //   // position: 'absolute',
+                                  //   width: '100%',
+                                  //   height: '80%',
+                                  //   // left: 0,
+                                  //   // top: 0,
+                                  // }}
                                 >
                                   {area &&
                                     area.typeMediaName &&

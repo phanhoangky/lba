@@ -1,6 +1,6 @@
 import {GetListMediaNotBelongToPlaylist, GetPlaylistItemByPlaylistId, UpdatePlaylistItemsByPlaylistId } from "@/services/PlaylistPageService/PlaylistItemService"
 import type {AddNewPlaylistItemParam, GetPlaylistItemByPlaylistIdParam} from "@/services/PlaylistPageService/PlaylistItemService"
-import { AddNewPlaylist, GetListPlaylist, RemovePlaylist } from "@/services/PlaylistPageService/PlaylistService";
+import { AddNewPlaylist, GetListPlaylist, RemovePlaylist, UpdatePlaylist } from "@/services/PlaylistPageService/PlaylistService";
 import type {AddNewPlaylistParam, GetListPlaylistParam} from "@/services/PlaylistPageService/PlaylistService";
 import type { Effect, FileType, Reducer } from "umi"
 import type { GetMediaSourcesParam } from "@/services/MediaSourceService";
@@ -33,6 +33,7 @@ export type Playlist = {
   accountId: string;
   isSelected?: boolean;
   playlistItems: PlaylistItem[],
+  isLoading?: boolean;
 }
 
 export type PlayListModelState = {
@@ -69,9 +70,9 @@ export type PlayListModelState = {
     playingUrl?: string;
     playlingMediaType?: string;
   }
-  minDuration: number,
-  maxDuration: number,
-  totalDuration: number,
+  minDuration?: number,
+  maxDuration?: number,
+  totalDuration?: number,
   currentNewItemDuration?: number,
 
   addNewPlaylistItemsDrawer?: {
@@ -103,6 +104,7 @@ export type PlaylistModel = {
     getMediaNotBelongToPlaylist: Effect;
     updatePlaylist: Effect;
     removePlaylist: Effect;
+    UpdatePlaylistStatus: Effect;
   },
 
   reducers: {
@@ -352,6 +354,10 @@ const PlaylistStore: PlaylistModel = {
 
     *updatePlaylist({ payload }, { call }) {
       yield call(UpdatePlaylistItemsByPlaylistId, payload);
+    },
+
+    *UpdatePlaylistStatus({ payload }, { call }) {
+      yield call(UpdatePlaylist, payload);
     },
 
     *removePlaylist({ payload }, { call }) {

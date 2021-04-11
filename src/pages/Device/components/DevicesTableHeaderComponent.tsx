@@ -1,10 +1,5 @@
 import { openNotification } from '@/utils/utils';
-import {
-  ControlTwoTone,
-  FilterTwoTone,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-} from '@ant-design/icons';
+import { FilterTwoTone, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
@@ -82,7 +77,6 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
           }}
           enterButton
         />
-        <ControlTwoTone style={{ fontSize: `2em` }} />
         <Dropdown
           overlay={
             <Menu
@@ -115,6 +109,7 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
             {!getDevicesParam?.isDescending && <SortAscendingOutlined />}
           </Button>
         </Dropdown>
+        <FilterTwoTone style={{ fontSize: `2em` }} />
         <Select
           style={{ width: 120 }}
           defaultValue="CreateTime"
@@ -136,7 +131,6 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
           <Select.Option value="CreateTime">Create Time</Select.Option>
           <Select.Option value="Name">Name</Select.Option>
         </Select>
-        <FilterTwoTone style={{ fontSize: `2em` }} />
         <Button
           disabled={selectedDevices && !(selectedDevices?.length > 0)}
           onClick={async () => {

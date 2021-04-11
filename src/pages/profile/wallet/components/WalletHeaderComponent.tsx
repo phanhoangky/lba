@@ -365,11 +365,6 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
               this.depositModalRef.current
                 ?.handleDepositMoney()
                 .then(() => {
-                  openNotification(
-                    'success',
-                    'Generate QR code successfil',
-                    'Please Scan QR Code By Momo Wallet to Deposit money',
-                  );
                   this.setDepositModal({
                     isLoading: false,
                   });

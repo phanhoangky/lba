@@ -1,7 +1,19 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
-import { Col, DatePicker, Divider, Form, Input, InputNumber, Row, Select, Space } from 'antd';
+import {
+  Col,
+  DatePicker,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Typography,
+} from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import L from 'leaflet';
 import moment from 'moment';
@@ -23,6 +35,7 @@ import TimeFilterComponent from '../TimeFilterComponent';
 import { v4 as uuidv4 } from 'uuid';
 import { openNotification } from '@/utils/utils';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 export type AddNewCampaignModalProps = {
   dispatch: Dispatch;
@@ -132,7 +145,44 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     });
   };
 
-  finalConfirmModal = async () => {};
+  finalConfirmModal = async () => {
+    const { addNewCampaignModal } = this.props.campaign;
+    Modal.confirm({
+      centered: true,
+      closable: false,
+      icon: <ExclamationCircleOutlined />,
+      title: 'Confirm to create a new campaign ?',
+      content: (
+        <>
+          <Typography.Title level={4}>Detail transaction</Typography.Title>
+          <Divider orientation="left">Total Fee</Divider>
+          <Input
+            readOnly
+            value={
+              addNewCampaignModal && addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee
+            }
+          />
+          <Divider orientation="left">Remain Fee</Divider>
+          <Input
+            readOnly
+            value={
+              addNewCampaignModal && addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee
+            }
+          />
+          <Divider orientation="left">Cancel Fee</Divider>
+          <Input
+            readOnly
+            value={
+              addNewCampaignModal && addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee
+            }
+          />
+        </>
+      ),
+      onOk: () => {
+        this.okConfirm();
+      },
+    });
+  };
 
   okConfirm = async () => {
     const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
@@ -193,7 +243,10 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   });
               }
             })
-            .catch(() => {
+            .catch((error) => {
+              console.log('====================================');
+              console.log(error);
+              console.log('====================================');
               openNotification(
                 'error',
                 'Fail to create new campaign',
@@ -226,7 +279,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
 
   setRadiusOfLocation = (radius: number) => {
     const { mapComponent } = this.props.location;
-
+    this.setCreateNewCampaignParam({ radius });
     if (mapComponent) {
       if (mapComponent.map) {
         if (mapComponent.circle) {
@@ -238,31 +291,37 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
           this.setMapComponent({
             circle,
           });
+        } else if (!mapComponent.marker) {
+          const circle = L.circle(mapComponent.map.getCenter(), { radius });
+          this.setMapComponent({
+            circle,
+          });
         }
       }
     }
   };
 
-  resetMap = async () => {
+  resetMap = () => {
     const { mapComponent } = this.props.location;
     if (mapComponent) {
       if (mapComponent.map) {
+        mapComponent.map.remove();
         this.setMapComponent({
           map: undefined,
         });
-        if (mapComponent.marker) {
-          mapComponent.marker.remove();
-          this.setMapComponent({
-            marker: undefined,
-          });
-        }
+      }
+      if (mapComponent.marker) {
+        mapComponent.marker.remove();
+        this.setMapComponent({
+          marker: undefined,
+        });
+      }
 
-        if (mapComponent.circle) {
-          mapComponent.circle.remove();
-          this.setMapComponent({
-            circle: undefined,
-          });
-        }
+      if (mapComponent.circle) {
+        mapComponent.circle.remove();
+        this.setMapComponent({
+          circle: undefined,
+        });
       }
     }
   };
@@ -292,6 +351,9 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   handleAfterClose = async () => {
     this.clearCreateNewCampaignParam().then(() => {
       this.selectScenario(undefined).then(() => {
+        console.log('====================================');
+        console.log('Reset map >>');
+        console.log('====================================');
         this.resetMap();
       });
     });
@@ -326,6 +388,18 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 marker,
               });
             }
+            console.log('====================================');
+            console.log('AutoComplete Select >>>', mapComponent);
+            console.log('====================================');
+            if (mapComponent.circle) {
+              mapComponent.circle.remove();
+              const circle = L.circle([lat, lon], {
+                radius: mapComponent.circle.getRadius(),
+              }).addTo(mapComponent.map);
+              this.setMapComponent({
+                circle,
+              });
+            }
           }
         }
 
@@ -346,7 +420,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
 
     // const { mapComponent } = this.props.location;
-
     return (
       <>
         {addNewCampaignModal?.visible && (
@@ -367,12 +440,21 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 <Form.Item
                   name="budget"
                   label="Budget"
-                  rules={[{ required: true, message: 'Please input the name of collection!' }]}
+                  rules={[
+                    { required: true, message: 'Please input budget of this campaign' },
+                    { type: 'number', max: maxBudget, min: 100000 },
+                  ]}
                 >
-                  <InputNumber
+                  {/* <InputNumber
                     style={{ width: '100%' }}
                     min={100000}
                     max={maxBudget}
+                    onChange={(e) => {
+                      this.hanldeOnChangeBudget(e);
+                    }}
+                  /> */}
+                  <InputNumber
+                    style={{ width: '100%' }}
                     onChange={(e) => {
                       this.hanldeOnChangeBudget(e);
                     }}
@@ -508,7 +590,11 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
               {/* Start Column */}
               <Col span={12}>
                 <Row>
-                  <Col span={10}>Time Filter</Col>
+                  <Col span={10}>
+                    <Typography.Title level={4} className="lba-text">
+                      Time Filter
+                    </Typography.Title>
+                  </Col>
                 </Row>
                 <Row>
                   <Col span={24}>
@@ -517,15 +603,22 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 </Row>
                 <Divider></Divider>
                 <Row>
-                  <Col span={10}>Date Filter</Col>
-                  <Col span={14}></Col>
+                  <Col span={10}>
+                    <Typography.Title level={4} className="lba-text">
+                      Date Filter
+                    </Typography.Title>
+                  </Col>
                 </Row>
                 <Space>
                   <FilterDate {...this.props} />
                 </Space>
                 <Divider></Divider>
                 <Row style={{ textAlign: 'center' }}>
-                  <Col span={24}>Choose Scenario</Col>
+                  <Col span={24}>
+                    <Typography.Title level={4} className="lba-text">
+                      Choose Scenario
+                    </Typography.Title>
+                  </Col>
                 </Row>
 
                 <SelectScenarioPart {...this.props} />

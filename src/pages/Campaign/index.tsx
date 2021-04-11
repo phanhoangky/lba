@@ -163,7 +163,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
 
   deleteCampaignConfirm = async (item: Campaign) => {
     Modal.confirm({
-      title: `Do you want to delete this Campaign ?`,
+      title: `Do you want to delete ${item.name} ?`,
       icon: <ExclamationCircleOutlined />,
       closable: false,
       centered: true,
@@ -346,7 +346,15 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     } = this.props.campaign;
     return (
       <>
-        <PageContainer>
+        <PageContainer
+          title={false}
+          header={{
+            ghost: false,
+            style: {
+              padding: 0,
+            },
+          }}
+        >
           <Table
             dataSource={listCampaign}
             scroll={{
@@ -496,17 +504,18 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             destroyOnClose={true}
             confirmLoading={addNewCampaignModal?.isLoading}
             closable={false}
-            afterClose={() => {}}
+            afterClose={() => {
+              this.addNewModalRef.current?.handleAfterClose();
+            }}
             onOk={() => {
               // this.okConfirm();
-              this.addNewModalRef.current?.okConfirm();
+              this.addNewModalRef.current?.finalConfirmModal();
             }}
             onCancel={() => {
               this.setAddNewCampaignModal({
                 visible: false,
-              }).then(() => {
-                this.addNewModalRef.current?.handleAfterClose();
               });
+              this.addNewModalRef.current?.handleAfterClose();
             }}
           >
             {addNewCampaignModal?.visible && (

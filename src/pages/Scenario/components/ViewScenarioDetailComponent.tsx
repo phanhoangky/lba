@@ -19,9 +19,6 @@ export type ViewScenarioDetailProps = {
 export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDetailProps> {
   componentDidMount() {
     const { selectedSenario } = this.props.scenarios;
-    console.log('====================================');
-    console.log(selectedSenario, this.formRef.current);
-    console.log('====================================');
     if (this.formRef.current) {
       this.formRef.current.setFieldsValue({
         title: selectedSenario?.title,
@@ -29,31 +26,9 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
       });
     }
     this.ratioCalculation();
-
-    // const areaMagic = document.getElementById('areaWrapper');
-    // if (areaMagic) {
-    //   areaMagic.addEventListener('mousemove', (e) => {
-    //     if (e && e.target) {
-    //       const x = e.pageX - e.offsetX;
-    //       const y = e.pageY - e.offsetY;
-    //       areaMagic.style.setProperty('--x', `${x}px`);
-    //       areaMagic.style.setProperty('--y', `${y}px`);
-    //       console.log('====================================');
-    //       console.log(areaMagic);
-    //       console.log('====================================');
-    //     }
-    //   });
-    // }
   }
 
   componentDidUpdate() {
-    // const { selectedSenario } = this.props.scenarios;
-    // if (this.formRef.current) {
-    //   this.formRef.current.setFieldsValue({
-    //     title: selectedSenario?.title,
-    //     description: selectedSenario?.description,
-    //   });
-    // }
     this.ratioCalculation();
   }
 
@@ -354,11 +329,7 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
         <>
           <Form name="view_scenario_detail" layout="vertical" ref={this.formRef}>
             <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
-              <Form.Item
-                name="title"
-                label="Title"
-                rules={[{ required: true, message: 'Please input title' }]}
-              >
+              <Form.Item name="title" label="Title">
                 <Input readOnly />
               </Form.Item>
             </Skeleton>
@@ -409,13 +380,14 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                               <div className="media-wrapper">
                                 <div>{scenarioItem?.playlist?.title}</div>
                                 <div
-                                  style={{
-                                    position: 'absolute',
-                                    width: '100%',
-                                    height: '100%',
-                                    left: 0,
-                                    top: 0,
-                                  }}
+                                  className="media-container"
+                                  // style={{
+                                  //   position: 'absolute',
+                                  //   width: '100%',
+                                  //   height: '100%',
+                                  //   left: 0,
+                                  //   top: 0,
+                                  // }}
                                 >
                                   {area &&
                                     area.typeMediaName &&
@@ -458,12 +430,16 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
               </Skeleton>
             </Col>
             <Col span={12}>
+              <Divider orientation="left" className="lba-text">
+                List Media
+              </Divider>
               <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
                 <Row gutter={20}>
                   <Col span={24}>
                     {selectedScenarioItem?.playlist ? (
                       <>
                         <Table
+                          pagination={false}
                           dataSource={selectedScenarioItem?.playlist?.playlistItems.map((item) => {
                             return {
                               ...item,

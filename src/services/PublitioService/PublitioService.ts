@@ -67,6 +67,11 @@ export async function GetFiles(param: GetFilesParam) {
   return data;
 }
 
+export async function DeleteFile(id: string) {
+  const res = await publitio.call(`${CONSTANTS_PUBLITIO.DELETE_FILE_URL}/${id}`, "DELETE");
+  return res;
+}
+
 export async function GetFolders(param: GetFoldersParam) {
   const data = await publitio.call(`${CONSTANTS_PUBLITIO.GET_FOLDERS_URL}`, "GET", param);
   return data;
@@ -84,7 +89,7 @@ export async function UpdateFile(param: UpdateFileParam) {
 }
 
 export async function RemoveFolder(id: string) {
-  await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`);
+  await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`, "DELETE");
 }
 
 export async function UpdateFolder(param: UpdateFolderParam) {

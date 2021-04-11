@@ -99,6 +99,13 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
     });
   };
 
+  setListScenarioLayouts = async (list: any) => {
+    await this.props.dispatch({
+      type: 'layouts/setListLayoutsReducer',
+      payload: list,
+    });
+  };
+
   chooseLayout = async (layout: any) => {
     this.setCreateScenarioParam({
       layoutId: layout.id,
@@ -129,10 +136,11 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
 
     return (
       <Modal
+        title="Create New Scenario Layout"
         visible={addNewScenarioModal?.visible}
         confirmLoading={addNewScenarioModal?.isLoading}
         closable={false}
-        width={'70%'}
+        width={'50%'}
         destroyOnClose={true}
         onCancel={() => {
           this.setAddNewScenarioModal({
@@ -215,19 +223,20 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
             md: 2,
             lg: 2,
             xl: 3,
-            xxl: 4,
+            xxl: 3,
           }}
           split
+          className={styles.listScenarios}
           style={{ alignItems: 'center', alignContent: 'center' }}
           renderItem={(item) => {
             return (
               <List.Item>
                 <Card
-                  style={{ width: '100%', borderRadius: 20, borderColor: 'red', padding: 5 }}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: 5 }}
                   hoverable
                   title={item.title}
                   cover={<Image src={item.layoutUrl} height={150} />}
-                  className={item.isSelected ? styles.selectedLayout : ''}
+                  className={item.isSelected ? styles.selectedLayout : 'card-lba'}
                   onClick={() => {
                     this.chooseLayout(item);
                   }}
