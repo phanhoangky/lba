@@ -83,8 +83,11 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
             });
           })
           .catch((error) => {
-            Promise.reject(error);
-            openNotification('error', 'Fail to create Playlist', `Fail to create ${values.title}`);
+            openNotification('error', 'Fail to create Playlist', error.message);
+            this.setAddNewPlaylistModal({
+              visible: false,
+              isLoading: false,
+            });
           });
       })
       .catch(() => {

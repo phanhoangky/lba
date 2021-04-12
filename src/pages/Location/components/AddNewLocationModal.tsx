@@ -61,13 +61,20 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
   };
 
   createNewLocation = async (param: any) => {
-    await this.props.dispatch({
-      type: `${LOCATION_DISPATCHER}/createLocation`,
-      payload: {
-        ...this.props.location.createLocationParam,
-        ...param,
-      },
-    });
+    const res = await this.props
+      .dispatch({
+        type: `${LOCATION_DISPATCHER}/createLocation`,
+        payload: {
+          ...this.props.location.createLocationParam,
+          ...param,
+        },
+      })
+      .catch((err: any) => {
+        console.log('====================================');
+        console.log(err);
+        console.log('====================================');
+        return Promise.reject(err);
+      });
   };
 
   onCreateNewLocation = async (values: any) => {
@@ -92,7 +99,13 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
             });
           })
           .catch((error) => {
-            Promise.reject(error);
+            this.setAddNewLocationModal({
+              isLoading: false,
+              visible: false,
+            });
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
             openNotification('error', 'Error', error);
           });
       })
@@ -261,22 +274,18 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
     const { mapComponent } = this.props.location;
     if (mapComponent) {
       if (mapComponent.map) {
-        await this.setMapComponent({
-          map: undefined,
-        });
         if (mapComponent.marker) {
           mapComponent.marker.remove();
-          await this.setMapComponent({
-            marker: undefined,
-          });
         }
 
         if (mapComponent.circle) {
           mapComponent.circle.remove();
-          await this.setMapComponent({
-            circle: undefined,
-          });
         }
+        await this.setMapComponent({
+          circle: undefined,
+          map: undefined,
+          marker: undefined,
+        });
       }
     }
   };

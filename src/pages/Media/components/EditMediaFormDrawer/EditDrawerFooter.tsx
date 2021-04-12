@@ -103,7 +103,9 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
               title={`Remove ${selectedFile?.title}`}
               visible={this.state.removeConfirmVisible}
               onConfirm={async () => {
-                this.setListLoading(true)
+                this.setEditFileDrawer({
+                  isLoading: true,
+                })
                   .then(async () => {
                     // const signature: string = await currentUser?.ether?.deleteDocument(
                     //   selectedFile?.securityHash,
@@ -113,16 +115,15 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                     // console.log('====================================');
                     this.removeMedia(selectedFile)
                       .then(() => {
-                        openNotification(
-                          'success',
-                          'remove media sucessfully',
-                          `${selectedFile?.title} is removed`,
-                        );
                         this.callGetListMedia().then(() => {
-                          this.setListLoading(false).then(() => {
-                            this.setEditFileDrawer({
-                              visible: false,
-                            });
+                          openNotification(
+                            'success',
+                            'remove media sucessfully',
+                            `${selectedFile?.title} is removed`,
+                          );
+                          this.setEditFileDrawer({
+                            isLoading: false,
+                          }).then(() => {
                             this.setState({
                               removeConfirmVisible: false,
                             });
@@ -133,8 +134,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                         console.log('====================================');
                         console.log(error);
                         console.log('====================================');
-                        openNotification('error', 'fail to remove media');
-                        Promise.reject(error);
+                        openNotification('error', 'fail to remove media', error.message);
                       });
                     // if (signature && !signature.toLowerCase().includes('fail')) {
 
@@ -145,15 +145,16 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                   })
                   .catch((error) => {
                     openNotification('error', 'fail to remove media', error);
-                    Promise.reject(error);
-                    this.setListLoading(false).then(() => {
+                    this.setEditFileDrawer({
+                      isLoading: false,
+                    }).then(() => {
                       this.setState({
                         removeConfirmVisible: false,
                       });
                     });
                   });
               }}
-              okButtonProps={{ loading: this.props.media.listLoading }}
+              okButtonProps={{ loading: this.props.media.editFileDrawer?.isLoading }}
               onCancel={() => {
                 this.setState({
                   removeConfirmVisible: false,
@@ -177,32 +178,36 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                 // await this.setEditFileDrawer({
                 //   visible: false,
                 // });
-                this.setListLoading(true)
+                this.setEditFileDrawer({
+                  isLoading: true,
+                })
                   .then(() => {
                     this.props
                       .handleUpdate()
                       .then(() => {
-                        openNotification(
-                          'success',
-                          'update media sucessfully',
-                          `${selectedFile?.title} is updated`,
-                        );
                         this.callGetListMedia().then(() => {
-                          this.setListLoading(false);
+                          openNotification(
+                            'success',
+                            'update media sucessfully',
+                            `${selectedFile?.title} is updated`,
+                          );
+                          this.setEditFileDrawer({
+                            isLoading: false,
+                          });
                         });
                       })
                       .catch((error: any) => {
-                        Promise.reject(error);
-                        openNotification(
-                          'error',
-                          'Fail to update media ',
-                          `${selectedFile?.title} is fail to update`,
-                        );
-                        this.setListLoading(false);
+                        openNotification('error', 'Fail to update media ', error.message);
+                        this.setEditFileDrawer({
+                          isLoading: false,
+                        });
                       });
                   })
-                  .catch(() => {
-                    this.setListLoading(false);
+                  .catch((error) => {
+                    openNotification('error', 'Fail to update media ', error.message);
+                    this.setEditFileDrawer({
+                      isLoading: false,
+                    });
                   });
               }}
             >

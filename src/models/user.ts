@@ -1,5 +1,5 @@
 import  jwt_decode from 'jwt-decode';
-import type { Effect, Reducer } from 'umi';
+import { Effect, Reducer } from 'umi';
 import { history } from 'umi';
 import { GetAccountById } from '@/services/AccountService/Account';
 import EtherService from '@/configs/Support';
@@ -105,13 +105,13 @@ const UserModel: UserModelType = {
     *readJWT(_, { put }) {
       // const token = yield localStorage.getItem("JWT");
       // const res = yield call(CreateFolder, { name: token.user_id });
-      // const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
-      const tokenFirebase = yield localStorage.getItem("JWT");;
+      const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
+      // const tokenFirebase = yield localStorage.getItem("JWT");;
       if (tokenFirebase && tokenFirebase !== "undefined") {
         const decode = yield jwt_decode(tokenFirebase);
-        // console.log('====================================');
-        // console.log(decode, Date.now() >= decode.exp * 1000);
-        // console.log('====================================');
+        console.log('====================================');
+        console.log(decode, Date.now() >= decode.exp * 1000);
+        console.log('====================================');
         if (decode.claims) {
           if (Date.now() >= decode.exp * 1000) {
             history.replace("/account/login");
@@ -123,6 +123,7 @@ const UserModel: UserModelType = {
           yield put({
             type: "saveCurrentUser",
             payload: {
+              ...decode,
               id: decode.claims.Id,
               name: decode.claims.name,
               avatar: decode.claims.picture,
@@ -144,6 +145,7 @@ const UserModel: UserModelType = {
             yield put({
               type: "saveCurrentUser",
               payload: {
+                ...decode,
                 id: decode.Id,
                 name: decode.name,
                 avatar: decode.picture,
@@ -371,6 +373,9 @@ const UserModel: UserModelType = {
     },
 
     *updateProfile({ payload }, { call }) {
+      console.log('====================================');
+      console.log(payload);
+      console.log('====================================');
       const { currentUser }: { currentUser: firebase.User } = yield firebase.auth();
 
       if (payload.file) {

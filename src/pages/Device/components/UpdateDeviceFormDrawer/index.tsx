@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import { CheckOutlined, ClockCircleTwoTone, CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Button,
@@ -67,10 +68,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
     inputVisible: false,
   };
 
-  onUpdateMultipleDevices = async (values: any) => {
-    console.log('====================================');
-    console.log(values);
-    console.log('====================================');
+  updateMultitpleDevices = async (values: any) => {
     await this.props.dispatch({
       type: 'deviceStore/updateListDevice',
       payload: {
@@ -87,6 +85,31 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
     });
   };
 
+  onUpdateMultipleDevices = async (values: any) => {
+    console.log('====================================');
+    console.log(values);
+    console.log('====================================');
+    this.setEditMultipleDevicesDrawer({
+      isLoading: true,
+    }).then(() => {
+      this.updateMultitpleDevices(values)
+        .then(() => {
+          this.callGetListDevices().then(() => {
+            this.setEditMultipleDevicesDrawer({
+              isLoading: false,
+            });
+            openNotification('success', 'Update Multiple Devices Success');
+          });
+        })
+        .catch((err) => {
+          this.setEditMultipleDevicesDrawer({
+            isLoading: false,
+          });
+          openNotification('error', 'Fail to update devices', err.message);
+        });
+    });
+  };
+
   callGetListDevices = async (param?: any) => {
     await this.props.dispatch({
       type: 'deviceStore/getDevices',
@@ -97,10 +120,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
     });
   };
 
-  onUpdateDevice = async (values: any) => {
-    console.log('====================================');
-    console.log(values);
-    console.log('====================================');
+  updateDevice = async (values: any) => {
     await this.props.dispatch({
       type: 'deviceStore/updateDevice',
       payload: {
@@ -110,13 +130,31 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
         endDate: values.startEnd[1],
       },
     });
-    await this.callGetListDevices();
-    // await this.props.dispatch({
-    //   type: 'deviceStore/getDevices',
-    //   payload: {
-    //     ...this.props.deviceStore.getDevicesParam,
-    //   },
-    // });
+  };
+
+  onUpdateDevice = async (values: any) => {
+    console.log('====================================');
+    console.log(values);
+    console.log('====================================');
+    this.setEditMultipleDevicesDrawer({
+      isLoading: true,
+    }).then(() => {
+      this.updateDevice(values)
+        .then(() => {
+          this.callGetListDevices().then(() => {
+            this.setEditMultipleDevicesDrawer({
+              isLoading: false,
+            });
+            openNotification('success', 'Update Device Success');
+          });
+        })
+        .catch((error) => {
+          this.setEditMultipleDevicesDrawer({
+            isLoading: false,
+          });
+          openNotification('error', 'Fail to update device', error.message);
+        });
+    });
   };
 
   handleRemoveDateFilter = (index: any) => {

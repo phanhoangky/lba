@@ -49,13 +49,23 @@ export async function getCampaignById(id: string) {
 }
 
 export async function createCampaign(param: CreateCampaignParam) {
-  await ApiHelper.post(`${CONSTANTS_LBA.CAMPAIGN_URL}`, param);
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.CAMPAIGN_URL}`, param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+
+  return data;
 }
 
 export async function deleteCampaign(param: DeleteCampaignParam) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.CAMPAIGN_URL}/${param.id}`, { params: { ...param }});
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.CAMPAIGN_URL}/${param.id}`, { params: { ...param } }).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+  return data;
 }
 
 export async function updateCampaign(param: UpdateCampaignParam) {
-  await ApiHelper.put(`${CONSTANTS_LBA.CAMPAIGN_URL}/${param.id}`, param);
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.CAMPAIGN_URL}/${param.id}`, param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+  return data;
 }

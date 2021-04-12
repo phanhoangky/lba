@@ -74,11 +74,18 @@ export async function AddNewMediaSource(param: AddNewMediaParam) {
   console.log('====================================');
   console.log("AddNewMediaSource>>>>", param);
   console.log('====================================');
-  await ApiHelper.post(CONSTANTS_LBA.MEDIA_SRC_URL, param)
+  const { data } = await ApiHelper.post(CONSTANTS_LBA.MEDIA_SRC_URL, param).catch((error) => {
+    return Promise.reject(error);
+  });
+
+  return data;
 }
 
 export async function EditMediaSource(param: EditMediaParam) {
-  await ApiHelper.put(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.id}`, param);
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.id}`, param).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 
@@ -87,10 +94,17 @@ export async function RemoveMediaSource(param: UpdateFileParam) {
   console.log("Param >>>", param);
   console.log('====================================');
   // await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`, { params: { txHash: param.txHash }});
-  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`);
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`).catch((error) => {
+    return Promise.reject(error);
+  });
+
+  return data;
 }
 
 export async function RemoveAllMediaInFolder(path: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/folder`, { params: { path }});
-    
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/folder`, { params: { path } }).catch((error) => {
+    return Promise.reject(error);
+  });
+  
+  return data;
 }

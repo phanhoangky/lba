@@ -57,7 +57,7 @@ export async function EmailLogin(email: string, password: string) {
     // Signed in
     const {user} = userCredential;
     console.log('====================================');
-    console.log("Login >>>", user);
+    console.log("Login >>>", user, userCredential);
     console.log('====================================');
     return userCredential;
     // ...

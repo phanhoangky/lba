@@ -171,8 +171,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                 });
               })
               .catch((error: any) => {
-                Promise.reject(error);
-                openNotification('error', `Delete ${location.name} error`, error);
+                openNotification('error', `Delete ${location.name} error`, error.message);
                 this.setLocationsTableLoading(false);
                 this.setEditLocationModal({
                   isLoading: false,
@@ -180,8 +179,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               });
           })
           .catch((error: any) => {
-            Promise.reject(error);
-            openNotification('error', `Delete ${location.name} error`, error);
+            openNotification('error', `Delete ${location.name} error`, error.message);
             this.setLocationsTableLoading(false);
             this.setEditLocationModal({
               isLoading: false,
@@ -241,23 +239,19 @@ class LocationScreen extends React.Component<LocationScreenProps> {
     if (mapComponent) {
       if (mapComponent.map) {
         mapComponent.map.remove();
-        await this.setMapComponent({
-          map: undefined,
-        });
       }
       if (mapComponent.marker) {
         mapComponent.marker.remove();
-        await this.setMapComponent({
-          marker: undefined,
-        });
       }
 
       if (mapComponent.circle) {
         mapComponent.circle.remove();
-        await this.setMapComponent({
-          circle: undefined,
-        });
       }
+      await this.setMapComponent({
+        map: undefined,
+        circle: undefined,
+        marker: undefined,
+      });
     }
   };
 
@@ -421,23 +415,32 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           centered
           confirmLoading={addNewLocationModal?.isLoading}
           width={'50%'}
-          afterClose={() => {}}
+          afterClose={() => {
+            this.resetMap().then(async () => {
+              const { selectedLocation } = this.props.location;
+              const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
+              if (old) {
+                const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
+                this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
+                  this.setViewLocationDetailComponent({
+                    visible: true,
+                  }).then(() => {
+                    this.viewLocationRef.current?.componentDidMount();
+                  });
+                });
+              }
+            });
+          }}
           destroyOnClose={true}
           closable={false}
           onOk={() => {
             this.addNewLocationModalRef.current?.handleCreateNewLocation();
           }}
-          onCancel={() => {
+          onCancel={async () => {
             this.setAddNewLocationModal({
               visible: false,
             });
-            this.resetMap().then(() => {
-              this.setViewLocationDetailComponent({
-                visible: true,
-              }).then(() => {
-                this.viewLocationRef.current?.componentDidMount();
-              });
-            });
+
             this.clearCreateLocationParam();
           }}
         >

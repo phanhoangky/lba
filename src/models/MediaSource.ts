@@ -3,7 +3,7 @@ import type {AddNewMediaParam, EditMediaParam, GetMediaSourcesParam} from '@/ser
 import { CreateFolder, CreateMedia, DeleteFile, GetFiles, GetFolders, RemoveFolder, UpdateFolder } from '@/services/PublitioService/PublitioService';
 import type { UpdateFileParam } from '@/services/PublitioService/PublitioService';
 import type { CreateFileParam, CreateFolderParam, GetFilesParam, GetFoldersParam } from '@/services/PublitioService/PublitioService';
-import type { Effect, Reducer } from 'umi';
+import  { Effect, Reducer } from 'umi';
 
 
 
@@ -373,44 +373,65 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     *createFolder({ payload }, { call, put }) {
-      const res = yield call(CreateFolder, payload);
+      try {
+        const res = yield call(CreateFolder, payload);
 
-      yield put({
-        type: "clearCreateNewFolderParamReducer"
-      })
-
-      return res
+        yield put({
+          type: "clearCreateNewFolderParamReducer"
+        })
+      
+        return res;
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *updateFile({ payload }, { call }) {
-
       // const res = yield call(UpdateFile, payload);
-      yield call(EditMediaSource, payload);
+      try {
+        return yield call(EditMediaSource, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *removeMedia({ payload }, { call }) {
-      const updateParam: UpdateFileParam = {
-        id: payload.fileId,
-        title: payload.title,
-        description: payload.description,
-        privacy: 0,
-        // txHash: payload.hash,
-        docId: payload.id
+      try {
+          const updateParam: UpdateFileParam = {
+            id: payload.fileId,
+            title: payload.title,
+            description: payload.description,
+            privacy: 0,
+            // txHash: payload.hash,
+            docId: payload.id
+          }
+          // yield call(UpdateFile, updateParam);
+          yield call(DeleteFile, payload.fileId);
+        yield call(RemoveMediaSource, updateParam);
+        return true;
+      } catch (error) {
+        return Promise.reject(error);  
       }
-      // yield call(UpdateFile, updateParam);
-      yield call(DeleteFile, payload.fileId);
-      yield call(RemoveMediaSource, updateParam);
     },
 
     *removeFolder({ payload }, { call }) {
       // const listFiles = yield call(GetFiles, { folder: payload.id });
 
-      yield call(RemoveAllMediaInFolder, payload.path);
-      yield call(RemoveFolder, payload.id);
+      try {
+        yield call(RemoveAllMediaInFolder, payload.path);
+        yield call(RemoveFolder, payload.id);
+        return true;
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *updateFolder({ payload }, { call }) {
-      yield call(UpdateFolder, payload);
+      try {
+        return yield call(UpdateFolder, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *checkFolderHaveAnySubfolders({ payload }, { call }) {

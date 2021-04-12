@@ -88,4 +88,9 @@ request.interceptors.request.use((url: string, options: RequestOptionsInit) => {
     options: { ...options, interceptors: true },
   };
 });
+
+request.interceptors.response.use((res, option) => {
+}, (err) => {
+  
+} )
 export default request;

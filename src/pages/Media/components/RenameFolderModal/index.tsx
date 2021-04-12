@@ -3,6 +3,7 @@ import type { FormInstance } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState } from 'umi';
 import { connect } from 'umi';
+import { openNotification } from '@/utils/utils';
 // import { openNotification } from '@/utils/utils';
 
 export type RenameFolderModalProps = {
@@ -41,6 +42,7 @@ export class RenameFolderModal extends React.Component<RenameFolderModalProps> {
         this.updateFolder({ id: selectedFolder.id, name: values.name })
           .then(() => {
             this.callGetListFolders().then(() => {
+              openNotification('success', 'Remove folder successfully');
               this.setRenameFolderModal({
                 isLoading: false,
                 visible: false,
@@ -51,7 +53,7 @@ export class RenameFolderModal extends React.Component<RenameFolderModalProps> {
             console.log('====================================');
             console.log(error);
             console.log('====================================');
-            // openNotification('error', 'Fail to rename folder', error.values);
+            openNotification('error', 'Fail to rename folder', error.message);
             this.setRenameFolderModal({
               isLoading: false,
               visible: false,

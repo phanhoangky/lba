@@ -405,8 +405,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                                   this.setTableLoading(false);
                                 });
                             })
-                            .catch((error) => {
-                              Promise.reject(error);
+                            .catch(() => {
                               this.setTableLoading(false);
                             });
                         }}

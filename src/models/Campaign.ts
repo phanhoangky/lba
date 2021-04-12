@@ -2,7 +2,7 @@ import type { BaseGetRequest } from "@/services/BaseRequest";
 import { createCampaign, deleteCampaign, getCampaignById, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
 import type { CreateCampaignParam } from '@/services/CampaignService/CampaignService';
 import moment from "moment";
-import type { Effect, Reducer } from "umi";
+import { Effect, Reducer } from "umi";
 import { GetFees } from "@/services/FeeService";
 
 export type Campaign = {
@@ -209,11 +209,19 @@ const CampaignStore: CampaignModelStore = {
     },
 
     *createCampaign({ payload }, { call }) {
-      yield call(createCampaign, payload);
+      try {
+        return yield call(createCampaign, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *deleteCampaign({ payload }, { call }) {
-      yield call(deleteCampaign, payload);
+      try {
+        return yield call(deleteCampaign, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *getListFee({ payload }, { call, put }) {
@@ -229,7 +237,11 @@ const CampaignStore: CampaignModelStore = {
     },
 
     *updateCampaign({ payload }, { call }) {
-      yield call(updateCampaign, payload);
+      try {
+        return yield call(updateCampaign, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
   },
 

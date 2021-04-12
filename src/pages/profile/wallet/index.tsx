@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Button, Col, Divider, Modal, Row, Space, Table } from 'antd';
+import { Avatar, Button, Col, Divider, Modal, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -302,19 +302,43 @@ class WalletScreen extends React.Component<WalletProps> {
                 <Divider />
               </Form> */}
               <Divider></Divider>
-              <Divider orientation="left">Username</Divider>
               <Row>
-                <Col span={8}>Username</Col>
+                <Col
+                  span={8}
+                  className="lba-text"
+                  style={{
+                    fontSize: '1.2em',
+                    fontWeight: 'bolder',
+                  }}
+                >
+                  Username
+                </Col>
                 <Col span={16}>{currentUser && currentUser.name}</Col>
               </Row>
-              <Divider orientation="left">Email</Divider>
               <Row>
-                <Col span={8}>Email</Col>
+                <Col
+                  span={8}
+                  className="lba-text"
+                  style={{
+                    fontSize: '1.2em',
+                    fontWeight: 'bolder',
+                  }}
+                >
+                  Email
+                </Col>
                 <Col span={16}>{currentUser && currentUser.email}</Col>
               </Row>
-              <Divider orientation="left">Balance</Divider>
               <Row>
-                <Col span={8}>Balance</Col>
+                <Col
+                  span={8}
+                  className="lba-text"
+                  style={{
+                    fontSize: '1.2em',
+                    fontWeight: 'bolder',
+                  }}
+                >
+                  Balance
+                </Col>
                 <Col span={16}>
                   {currentUser &&
                     currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}

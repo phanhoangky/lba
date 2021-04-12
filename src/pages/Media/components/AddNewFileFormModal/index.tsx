@@ -71,6 +71,15 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     }
   };
 
+  createFile = async (param: any) => {
+    await this.props.dispatch({
+      type: 'media/createFile',
+      payload: {
+        ...param,
+      },
+    });
+  };
+
   addNewFile = async (values: any) => {
     const { createFileParam } = this.props.media;
     const { currentUser } = this.props.user;
@@ -97,26 +106,24 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
       console.log('====================================');
       console.log('Param >>>', signature, param);
       console.log('====================================');
-      await this.props.dispatch({
-        type: 'media/createFile',
-        payload: {
-          ...param,
-        },
+      this.createFile(param).then(() => {
+        openNotification('success', 'Create File Successfully', `Create ${values.title}`);
+        Promise.all([this.callGetListMedia(), this.clearCreateFileParam(), this.clearFilelist()]);
       });
-      openNotification('success', 'Create File Successfully', `Create ${values.title}`);
-      this.setListLoading(true)
-        .then(() => {
-          this.callGetListMedia().then(() => {
-            this.clearCreateFileParam().then(() => {
-              this.clearFilelist().then(() => {
-                this.setListLoading(false);
-              });
-            });
-          });
-        })
-        .catch(() => {
-          this.setListLoading(false);
-        });
+
+      // this.setListLoading(true)
+      //   .then(() => {
+      //     this.callGetListMedia().then(() => {
+      //       this.clearCreateFileParam().then(() => {
+      //         this.clearFilelist().then(() => {
+      //           this.setListLoading(false);
+      //         });
+      //       });
+      //     });
+      //   })
+      //   .catch(() => {
+      //     this.setListLoading(false);
+      //   });
     } else {
       openNotification('error', 'Create File fail', signature);
     }

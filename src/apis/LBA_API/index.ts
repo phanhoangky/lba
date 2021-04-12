@@ -31,7 +31,13 @@ ApiHelper.interceptors.request.use(config => {
 })
 
 ApiHelper.interceptors.response.use(
-  response => response,
+  response => {
+    const { data } = response;
+    if (data.code === 401) {
+      return Promise.reject(new Error(data.message));
+    }
+    return response;
+  },
   error => {
     console.log('====================================');
     console.error(error.response);
@@ -55,18 +61,16 @@ ApiHelper.interceptors.response.use(
           history.replace('/exception/500')
         }
       } else {
-        history.replace('/exception/500')
+        
+        history.replace('/exception/500');
       }
-      
-      
     } else {
       openNotification("error", "Cannot connect to server");
       // history.replace('/account/login');
-      // Promise.reject(error)
       // throw error;
     }
     // Promise.reject(new Error(error)).catch(e => {
-      
+    return Promise.reject(error)
     // });
     // throw new Error(error);
   }

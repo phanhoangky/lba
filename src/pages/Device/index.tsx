@@ -339,7 +339,6 @@ class Device extends React.Component<DeviceProps> {
                             });
                           });
                         });
-
                         // this.setEditModalVisible(true);
                       }}
                     >

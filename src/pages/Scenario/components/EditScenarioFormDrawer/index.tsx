@@ -126,12 +126,12 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           .then(() => {
             this.removeScenario(record.id)
               .then(async () => {
-                openNotification(
-                  'success',
-                  'Remove Scenario Successfully',
-                  `${record.title} was removed`,
-                );
                 this.callGetListScenario().then(() => {
+                  openNotification(
+                    'success',
+                    'Remove Scenario Successfully',
+                    `${record.title} was removed`,
+                  );
                   this.setEditScenariosDrawer({
                     isLoading: false,
                     visible: false,
@@ -139,13 +139,15 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                 });
               })
               .catch((error) => {
-                Promise.reject(error);
-                openNotification('error', 'Fail to remove scenario ', error);
+                this.setEditScenariosDrawer({
+                  isLoading: false,
+                  visible: false,
+                });
+                openNotification('error', 'Fail to remove scenario ', error.message);
               });
           })
           .catch((error) => {
-            Promise.reject(error);
-            openNotification('error', 'Fail to remove scenario ', error);
+            openNotification('error', 'Fail to remove scenario ', error.message);
             this.setEditScenariosDrawer({
               isLoading: false,
               visible: false,
@@ -170,12 +172,12 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
       .then(() => {
         this.updateScenario(updateScenarioParam)
           .then(() => {
-            openNotification(
-              'success',
-              'Edit Scenario Successfully',
-              `Edit campaign ${updateScenarioParam.title} successfully`,
-            );
             this.callGetListScenario().then(async () => {
+              openNotification(
+                'success',
+                'Edit Scenario Successfully',
+                `Edit campaign ${updateScenarioParam.title} successfully`,
+              );
               this.setEditScenariosDrawer({
                 isLoading: false,
               });
@@ -183,12 +185,11 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
             });
           })
           .catch((error) => {
-            Promise.reject(error);
-            openNotification(
-              'error',
-              'Fail to edit scenario',
-              `Fail to edit scenario ${updateScenarioParam.title}`,
-            );
+            this.setEditScenariosDrawer({
+              isLoading: false,
+            });
+            this.setTableLoading(false);
+            openNotification('error', 'Fail to edit scenario', error.message);
           });
       })
       .catch(() => {

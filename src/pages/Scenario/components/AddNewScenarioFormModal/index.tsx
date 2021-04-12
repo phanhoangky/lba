@@ -56,16 +56,30 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           isLoading: true,
         })
           .then(() => {
-            this.createNewScenario(values).then(() => {
-              this.callGetListScenario().then(() => {
+            this.createNewScenario(values)
+              .then(() => {
+                this.callGetListScenario().then(() => {
+                  openNotification(
+                    'success',
+                    'Create Scenario Successfully',
+                    `Create campaign ${values.title} successfully`,
+                  );
+                  this.setAddNewScenarioModal({
+                    visible: false,
+                    isLoading: false,
+                  }).then(() => {
+                    this.setTableLoading(false);
+                  });
+                });
+              })
+              .catch((error) => {
+                openNotification('error', 'Fail to Create Scenario', error.message);
                 this.setAddNewScenarioModal({
                   visible: false,
                   isLoading: false,
-                }).then(() => {
-                  this.setTableLoading(false);
                 });
+                this.setTableLoading(false);
               });
-            });
           })
           .catch(() => {
             this.setAddNewScenarioModal({
@@ -153,22 +167,9 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
         onOk={async () => {
           if (addNewScenarioModal?.currentStep === 0) {
             this.formRef.current?.validateFields().then((values) => {
-              this.onCreateScenarios(values)
-                .then(() => {
-                  openNotification(
-                    'success',
-                    'Create Scenario Successfully',
-                    `Create campaign ${values.title} successfully`,
-                  );
-                })
-                .catch((error) => {
-                  Promise.reject(error);
-                  openNotification(
-                    'error',
-                    'Fail to Create Scenario',
-                    `Fail to Create campaign ${values.title}`,
-                  );
-                });
+              this.onCreateScenarios(values).catch((error) => {
+                openNotification('error', 'Fail to Create Scenario', error.message);
+              });
               // this.setAddNewScenarioModal({
               //   currentStep: 1,
               // });

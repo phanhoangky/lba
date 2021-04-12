@@ -87,6 +87,32 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
           ...values,
         };
         this.updateMedia(param);
+        // this.setEditFileDrawer({
+        //   isLoading: true,
+        // }).then(() => {
+        //   const param: EditMediaParam = {
+        //     id: selectedFile?.id,
+        //     description: selectedFile?.description,
+        //     title: selectedFile?.title,
+        //     typeId: selectedFile?.type.id,
+        //     isSigned: selectedFile?.isSigned,
+        //     ...modal,
+        //     ...values,
+        //   };
+        //   this.updateMedia(param)
+        //     .then(() => {
+        //       openNotification('success', 'Update File Success');
+        //       this.setEditFileDrawer({
+        //         isLoading: false,
+        //       });
+        //     })
+        //     .catch((error) => {
+        //       openNotification('error', 'Fail to update file', error.message);
+        //       this.setEditFileDrawer({
+        //         isLoading: false,
+        //       });
+        //     });
+        // });
       });
     }
   };

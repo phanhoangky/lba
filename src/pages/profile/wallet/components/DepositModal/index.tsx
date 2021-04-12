@@ -81,7 +81,7 @@ export class DepositModal extends React.Component<DepositModalProps> {
             this.generateQR(linkDepositMoney).then(() => {
               openNotification(
                 'success',
-                'Generate QR code successfil',
+                'Generate QR code successful',
                 'Please Scan QR Code By Momo Wallet to Deposit money',
               );
             });

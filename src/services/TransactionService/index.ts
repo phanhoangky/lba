@@ -17,5 +17,9 @@ export async function GetListTransactions(param: GetListTransactionParam) {
 }
 
 export async function CreateTransaction(param: CreateTransactionParam) {
-  await ApiHelper.post(`${CONSTANTS_LBA.TRANSACTION_URL}`, param);
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.TRANSACTION_URL}`, param).catch((error) => {
+    return Promise.reject(error);
+  });
+
+  return data;
 }

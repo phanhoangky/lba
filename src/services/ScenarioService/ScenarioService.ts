@@ -1,7 +1,6 @@
 import type { BaseGetRequest } from './../BaseRequest';
 import { CONSTANTS_LBA } from './../constantUrls';
 import ApiHelper from '@/apis/LBA_API';
-import { ScenarioItem } from 'umi';
 
 export type GetListScenariosParam = BaseGetRequest;
 
@@ -38,7 +37,10 @@ export async function GetListScenarios(param: GetListScenariosParam) {
 }
 
 export async function CreateNewScenario(param: PostScenarioParam) {
-  await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param);
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+  return data;
 }
 
 
@@ -47,9 +49,15 @@ export async function UpdateScenario(param: UpdateScenarioParam) {
   console.log('====================================');
   console.log("Update Param >>>>", param);
   console.log('====================================');
-  await ApiHelper.put(`${CONSTANTS_LBA.SCENARIO_URL}/${param.id}`, param);
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.SCENARIO_URL}/${param.id}`, param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+  return data;
 }
 
 export async function RemoveScenario(id: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.SCENARIO_URL}/${id}`);
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.SCENARIO_URL}/${id}`).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+  return data;
 }

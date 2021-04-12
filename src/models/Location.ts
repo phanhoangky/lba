@@ -1,6 +1,6 @@
 import { CreateLocation, DeleteLocation, GetLocations, UpdateLocation } from "@/services/LocationService/LocationService";
-import type {CreateLocationParam ,GetLocationParam} from '@/services/LocationService/LocationService'
-import type { Effect, Reducer } from "umi";
+import type { CreateLocationParam, GetLocationParam } from '@/services/LocationService/LocationService';
+import { Effect, Reducer } from "umi";
 
 export type Location = {
   key: string;
@@ -199,15 +199,32 @@ const LocationStore: LocationStoreModel = {
     },
 
     *createLocation({ payload }, { call }) {
-      yield call(CreateLocation, payload);
+      try {
+        return yield call(CreateLocation, payload);
+
+      } catch (error) {
+        // console.log('====================================');
+        // console.log(error, error.message);
+        // console.log('====================================');
+        return Promise.reject(error.message);
+      }
     },
 
     *updateLocation({ payload }, { call }) {
-      yield call(UpdateLocation, payload);
+      try {
+        return yield call(UpdateLocation, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *deleteLocation({ payload }, { call }) {
-      yield call(DeleteLocation, payload);
+      try {
+        return yield call(DeleteLocation, payload);
+        
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
   },
 

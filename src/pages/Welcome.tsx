@@ -40,11 +40,12 @@ export default (): React.ReactNode => {
             </h1>
           </div> */}
           <h1>
-            Hello, we are <span className="text-color-main">Location Based Advertising</span> <br />
+            Hello, we are <span className="text-color-main">Location Based Advertising.</span>{' '}
+            <br />
           </h1>
           <Row>
             <h1>
-              Where do you want <span className="text-color-main">to show to day</span> <br />
+              Where do you want <span className="text-color-main">to show today?</span> <br />
             </h1>
           </Row>
           {/* <Row>

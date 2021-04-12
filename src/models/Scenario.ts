@@ -240,11 +240,18 @@ const ScenarioStore: ScenarioStoreModel = {
     },
 
     *createScenario({ payload }, { call, put }) {
-      yield call(CreateNewScenario, payload);
+      try {
 
-      yield put({
-        type: 'clearCreateScenarioParamReducer',
-      });
+        const data=  yield call(CreateNewScenario, payload);
+        yield put({
+          type: 'clearCreateScenarioParamReducer',
+        });
+        return data;
+      } catch (error) {
+        return Promise.reject(error);
+      }
+
+      
     },
 
     *getListPlaylist({ payload }, { call, put }) {
@@ -274,11 +281,19 @@ const ScenarioStore: ScenarioStoreModel = {
     },
 
     *updateScenario({ payload }, { call }) {
-      yield call(UpdateScenario, payload);
+      try {
+        return yield call(UpdateScenario, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *removeScenario({ payload }, { call }) {
-      yield call(RemoveScenario, payload); 
+      try {
+        return yield call(RemoveScenario, payload); 
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
   },
 

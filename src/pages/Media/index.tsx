@@ -352,7 +352,7 @@ class Media extends React.Component<MediaSourceProps> {
       ...modal,
     };
 
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'media/updateFile',
       payload: param,
     });
@@ -454,7 +454,7 @@ class Media extends React.Component<MediaSourceProps> {
               console.log('====================================');
               console.log(error);
               console.log('====================================');
-              openNotification('error', 'Fail to remove folders');
+              openNotification('error', 'Fail to remove folders', error.message);
               this.setListLoading(false);
             });
         });
@@ -756,11 +756,11 @@ class Media extends React.Component<MediaSourceProps> {
                                   message={messageOfSignature(item.isSigned)}
                                   icon={<FormOutlined />}
                                   showIcon={true}
-                                  onClick={() => {
-                                    if (item.isSigned === 0) {
-                                      this.signMedia(item);
-                                    }
-                                  }}
+                                  // onClick={() => {
+                                  //   if (item.isSigned === 0) {
+                                  //     this.signMedia(item);
+                                  //   }
+                                  // }}
                                 ></Alert>,
 
                                 <SettingTwoTone

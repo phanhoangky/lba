@@ -35,6 +35,13 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
     });
   };
 
+  deleteDevice = async () => {
+    const { selectedDevice } = this.props.deviceStore;
+    await this.props.dispatch({
+      type: 'deviceStore/deleteDevice',
+      payload: selectedDevice?.id,
+    });
+  };
   render() {
     const { isUpdateMultiple, selectedDevice } = this.props.deviceStore;
     return (
@@ -66,23 +73,22 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
                   isLoading: true,
                 })
                   .then(() => {
-                    this.props
-                      .dispatch({
-                        type: 'deviceStore/deleteDevice',
-                        payload: selectedDevice?.id,
-                      })
+                    this.deleteDevice()
                       .then(() => {
-                        openNotification(
-                          'success',
-                          'Devices delete successfuly',
-                          `${selectedDevice?.name} was deleted`,
-                        );
                         this.callGetListDevices().then(() => {
+                          openNotification(
+                            'success',
+                            'Devices delete successfuly',
+                            `${selectedDevice?.name} was deleted`,
+                          );
                           this.setEditMultipleDevicesDrawer({
                             isLoading: false,
                             visible: false,
                           });
                         });
+                      })
+                      .catch((error) => {
+                        openNotification('error', 'Fail to delete device', error.message);
                       });
                   })
                   .catch(() => {

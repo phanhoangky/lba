@@ -1,6 +1,6 @@
 import { CreateTransaction, GetListTransactions } from "@/services/TransactionService";
 import type { GetListTransactionParam } from "@/services/TransactionService";
-import type { Effect, Reducer } from "umi";
+import  { Effect, Reducer } from "umi";
 import moment from "moment";
 import { diffTwoDate } from "@/utils/utils";
 

@@ -175,6 +175,9 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                           height: '100%',
                           left: 0,
                           top: 0,
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
                         }}
                       >
                         {area &&

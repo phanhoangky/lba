@@ -51,8 +51,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
           this.setTableLoading(false);
         });
       })
-      .catch((error) => {
-        Promise.reject(error);
+      .catch(() => {
         this.setViewPlaylistDetailComponent({
           isLoading: false,
         });
@@ -192,8 +191,6 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
       type: 'playlists/removePlaylist',
       payload: record.id,
     });
-
-    await this.callGetListPlaylist();
   };
 
   handleRemovePlaylist = async (record: Playlist) => {
@@ -217,8 +214,8 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                 });
               })
               .catch((error) => {
-                Promise.reject(error);
-                openNotification('error', 'Fail to remove playlist', error);
+                openNotification('error', 'Fail to remove playlist', error.message);
+                this.setTableLoading(false);
               });
           })
           .catch(() => {
@@ -337,9 +334,8 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                                 this.setTableLoading(false);
                               });
                             })
-                            .catch((error) => {
+                            .catch(() => {
                               this.setTableLoading(false);
-                              Promise.reject(error);
                             });
                           e.stopPropagation();
                         }}

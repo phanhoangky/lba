@@ -35,7 +35,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
   };
 
   handleCreateFolder = async (values: any) => {
-    await this.createFolder(values)
+    this.createFolder(values)
       .then(() => {
         openNotification('success', 'Create Folder Successfully', `${values.name} was created`);
         this.setListLoading(true).then(() => {
@@ -44,8 +44,8 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
           });
         });
       })
-      .catch(() => {
-        openNotification('error', 'Create Folder fail', `Fail to create ${values.name}`);
+      .catch((error) => {
+        openNotification('error', 'Create Folder fail', error.message);
         this.setListLoading(false);
       });
   };

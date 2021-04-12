@@ -196,6 +196,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                     openNotification('error', 'Fail to delete campaign', error);
                     this.setCampaignTableLoading(false);
                   });
+              } else {
+                openNotification('error', 'Fail to delete campaign', result);
+                this.setCampaignTableLoading(false);
               }
             }
           })
@@ -343,7 +346,10 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       getListCampaignParam,
       totalCampaigns,
       addNewCampaignModal,
+      createCampaignParam,
     } = this.props.campaign;
+
+    const disabledOkButton = createCampaignParam?.scenarioId === '';
     return (
       <>
         <PageContainer
@@ -506,6 +512,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             closable={false}
             afterClose={() => {
               this.addNewModalRef.current?.handleAfterClose();
+            }}
+            okButtonProps={{
+              disabled: disabledOkButton,
             }}
             onOk={() => {
               // this.okConfirm();

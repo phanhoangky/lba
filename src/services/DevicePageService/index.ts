@@ -55,14 +55,19 @@ export async function GetDevices(param: GetDeviceParams) {
 export async function UpdateDevice(param: UpdateDeviceParams, id: string) {
   console.log("Param: >>>>", param, id);
   
-  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.DEVICES_URL}/${id}`, { ...param })
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.DEVICES_URL}/${id}`, { ...param }).catch((error) => {
+    return Promise.reject(error);
+  })
   return data
 }
 
 export async function UpdateListDevices(param: UpdateListDevicesParam) {
   console.log("Update List Devices Param >>>", param);
   
-  await ApiHelper.put(CONSTANTS_LBA.DEVICES_URL, { ...param });
+  const { data } = await ApiHelper.put(CONSTANTS_LBA.DEVICES_URL, { ...param }).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 export async function GetListTypes() {
@@ -77,8 +82,10 @@ export async function GetDevicesByTypeId(param: GetDeviceParams, id: string) {
 }
 
 export async function DeleteDevice(id: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.DEVICES_URL}/${id}`);
-
+  const {data } = await ApiHelper.delete(`${CONSTANTS_LBA.DEVICES_URL}/${id}`).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 

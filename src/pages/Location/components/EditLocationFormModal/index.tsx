@@ -279,8 +279,7 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
                 });
               })
               .catch(async (error: any) => {
-                Promise.reject(error);
-                this.openNotification('error', `Delete ${location.name} error`);
+                this.openNotification('error', `Delete ${location.name} error`, error.message);
                 this.setLocationsTableLoading(false);
                 this.setEditLocationModal({
                   isLoading: false,
@@ -288,8 +287,7 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
               });
           })
           .catch(async (error: any) => {
-            Promise.reject(error);
-            this.openNotification('error', `Delete ${location.name} error`);
+            this.openNotification('error', `Delete ${location.name} error`, error.message);
             this.setLocationsTableLoading(false);
             this.setEditLocationModal({
               isLoading: false,
@@ -444,32 +442,6 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
           <Divider></Divider>
         </Form>
         <LeafletMapComponent {...this.props} />
-
-        <Divider></Divider>
-        {/* <Row>
-              <Col>
-                <Space>
-                  <Button
-                    disabled={!(selectedLocation && selectedLocation.id !== '')}
-                    danger
-                    onClick={() => {
-                      this.deleteConfirm(selectedLocation);
-                    }}
-                  >
-                    <DeleteTwoTone twoToneColor="#f93e3e" />
-                    Remove
-                  </Button>
-                  <Button
-                    disabled={!selectedLocation || selectedLocation.id === ''}
-                    type="primary"
-                    onClick={() => {}}
-                  >
-                    <EditFilled />
-                    Update
-                  </Button>
-                </Space>
-              </Col>
-            </Row> */}
       </>
     );
   }

@@ -2,7 +2,7 @@ import {GetListMediaNotBelongToPlaylist, GetPlaylistItemByPlaylistId, UpdatePlay
 import type {AddNewPlaylistItemParam, GetPlaylistItemByPlaylistIdParam} from "@/services/PlaylistPageService/PlaylistItemService"
 import { AddNewPlaylist, GetListPlaylist, RemovePlaylist, UpdatePlaylist } from "@/services/PlaylistPageService/PlaylistService";
 import type {AddNewPlaylistParam, GetListPlaylistParam} from "@/services/PlaylistPageService/PlaylistService";
-import type { Effect, FileType, Reducer } from "umi"
+import { Effect, FileType, Reducer } from "umi";
 import type { GetMediaSourcesParam } from "@/services/MediaSourceService";
 
 export type PlaylistItem = {
@@ -304,7 +304,11 @@ const PlaylistStore: PlaylistModel = {
 
 
     *addNewPlaylist({ payload }, { call }) {
-      yield call(AddNewPlaylist, payload)
+      try {
+        return yield call(AddNewPlaylist, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
 
@@ -359,15 +363,27 @@ const PlaylistStore: PlaylistModel = {
     },
 
     *updatePlaylist({ payload }, { call }) {
-      yield call(UpdatePlaylistItemsByPlaylistId, payload);
+      try {
+        return yield call(UpdatePlaylistItemsByPlaylistId, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *UpdatePlaylistStatus({ payload }, { call }) {
-      yield call(UpdatePlaylist, payload);
+      try {
+        return yield call(UpdatePlaylist, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *removePlaylist({ payload }, { call }) {
-      yield call(RemovePlaylist, payload);
+      try {
+        return yield call(RemovePlaylist, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
   },
 

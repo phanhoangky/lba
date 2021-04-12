@@ -58,7 +58,9 @@ export type UpdateFolderParam = {
 
 export async function CreateMedia(param: any) {
 
-  const res = await publitio.uploadFile(param.file, "file", param);
+  const res = await publitio.uploadFile(param.file, "file", param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
   return res;
 }
 
@@ -68,7 +70,9 @@ export async function GetFiles(param: GetFilesParam) {
 }
 
 export async function DeleteFile(id: string) {
-  const res = await publitio.call(`${CONSTANTS_PUBLITIO.DELETE_FILE_URL}/${id}`, "DELETE");
+  const res = await publitio.call(`${CONSTANTS_PUBLITIO.DELETE_FILE_URL}/${id}`, "DELETE").catch((error) => {
+    return Promise.reject(new Error(error));
+  });
   return res;
 }
 
@@ -78,20 +82,31 @@ export async function GetFolders(param: GetFoldersParam) {
 }
 
 export async function CreateFolder(param: CreateFolderParam) {
-  const data = await publitio.call(`${CONSTANTS_PUBLITIO.CREATE_FOLDER_URL}`, "POST", param);
+  const data = await publitio.call(`${CONSTANTS_PUBLITIO.CREATE_FOLDER_URL}`, "POST", param).catch((error) => {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    return Promise.reject(new Error(error));
+  });
   return data;
 }
 
 export async function UpdateFile(param: UpdateFileParam) {
 
-  const res = await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FILE_URL}/${param.id}`, "PUT", param);
+  const res = await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FILE_URL}/${param.id}`, "PUT", param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
   return res;
 }
 
 export async function RemoveFolder(id: string) {
-  await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`, "DELETE");
+  await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`, "DELETE").catch((error) => {
+    return Promise.reject(new Error(error));
+  });
 }
 
 export async function UpdateFolder(param: UpdateFolderParam) {
-  await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FOLDER_URL}/${param.id}`, "PUT", param);
+  await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FOLDER_URL}/${param.id}`, "PUT", param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
 }

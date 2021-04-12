@@ -192,8 +192,10 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 });
               })
               .catch((error) => {
-                Promise.reject(error);
-                openNotification('error', 'Fail to remove playlist', error);
+                openNotification('error', 'Fail to remove playlist', error.message);
+                this.setEditPlaylistDrawer({
+                  isLoading: false,
+                });
               });
           })
           .catch(() => {
@@ -560,24 +562,20 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                         });
                         this.updatePlaylist(values)
                           .then(() => {
-                            openNotification(
-                              'success',
-                              'update playlist successfully',
-                              `Playlist ${selectedPlaylist?.title} was updated`,
-                            );
                             this.callGetListPlaylist().then(() => {
+                              openNotification(
+                                'success',
+                                'update playlist successfully',
+                                `Playlist ${selectedPlaylist?.title} was updated`,
+                              );
                               this.setEditPlaylistDrawer({
                                 isLoading: false,
                                 visible: false,
                               });
                             });
                           })
-                          .catch(() => {
-                            openNotification(
-                              'error',
-                              'Fail tp update playlist',
-                              `Fail to update playlist ${selectedPlaylist?.title}`,
-                            );
+                          .catch((error) => {
+                            openNotification('error', 'Fail tp update playlist', error.message);
                             this.setEditPlaylistDrawer({
                               isLoading: false,
                               visible: false,

@@ -75,7 +75,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     await this.props.dispatch({
       type: `${CAMPAIGN}/clearCreateCampaignParamReducer`,
     });
-
+    await this.clearSelectScenario();
     this.formRef.current?.resetFields();
   };
 
@@ -100,6 +100,18 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
           };
         }
 
+        return {
+          ...scenario,
+          isSelected: false,
+        };
+      }),
+    });
+  };
+
+  clearSelectScenario = async () => {
+    await this.props.dispatch({
+      type: `scenarios/setListScenarioReducer`,
+      payload: this.props.scenarios.listScenario?.map((scenario) => {
         return {
           ...scenario,
           isSelected: false,
@@ -146,107 +158,98 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   };
 
   finalConfirmModal = async () => {
-    const { addNewCampaignModal } = this.props.campaign;
-    Modal.confirm({
-      centered: true,
-      closable: false,
-      icon: <ExclamationCircleOutlined />,
-      title: 'Confirm to create a new campaign ?',
-      content: (
-        <>
-          <Typography.Title level={4}>Detail transaction</Typography.Title>
-          <Divider orientation="left">Total Fee</Divider>
-          <Input
-            readOnly
-            value={
-              addNewCampaignModal && addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee
-            }
-          />
-          <Divider orientation="left">Remain Fee</Divider>
-          <Input
-            readOnly
-            value={
-              addNewCampaignModal && addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee
-            }
-          />
-          <Divider orientation="left">Cancel Fee</Divider>
-          <Input
-            readOnly
-            value={
-              addNewCampaignModal && addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee
-            }
-          />
-        </>
-      ),
-      onOk: () => {
-        this.okConfirm();
-      },
-    });
+    const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        if (
+          (createCampaignParam && !createCampaignParam.address) ||
+          createCampaignParam?.address === ''
+        ) {
+          return;
+        }
+        Modal.confirm({
+          centered: true,
+          closable: false,
+          icon: <ExclamationCircleOutlined />,
+          title: 'Confirm to create a new campaign ?',
+          content: (
+            <>
+              <Typography.Title level={4}>Detail transaction</Typography.Title>
+              <Divider orientation="left">Total Fee</Divider>
+              <Input
+                readOnly
+                value={
+                  addNewCampaignModal &&
+                  addNewCampaignModal.fees &&
+                  addNewCampaignModal.fees.totalFee
+                }
+              />
+              {/* <Divider orientation="left">Remain Fee</Divider>
+              <Input
+                readOnly
+                value={
+                  addNewCampaignModal &&
+                  addNewCampaignModal.fees &&
+                  addNewCampaignModal.fees.remainFee
+                }
+              /> */}
+              <Divider orientation="left">Cancel Fee</Divider>
+              <Input
+                readOnly
+                value={
+                  addNewCampaignModal &&
+                  addNewCampaignModal.fees &&
+                  addNewCampaignModal.fees.cancelFee
+                }
+              />
+            </>
+          ),
+          onOk: () => {
+            this.okConfirm(values);
+          },
+        });
+      });
+    }
   };
 
-  okConfirm = async () => {
-    const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
+  okConfirm = async (values: any) => {
+    const { addNewCampaignModal } = this.props.campaign;
     const { currentUser } = this.props.user;
-    if (this.formRef.current) {
-      this.formRef.current
-        .validateFields()
-        .then(async (values) => {
-          if (
-            (createCampaignParam && !createCampaignParam.address) ||
-            createCampaignParam?.address === ''
-          ) {
-            return;
-          }
-          this.setAddNewCampaignModal({
-            isLoading: true,
+
+    this.setAddNewCampaignModal({
+      isLoading: true,
+    })
+      .then(async () => {
+        const campaignId = uuidv4();
+        if (currentUser && addNewCampaignModal) {
+          const hash = await currentUser.ether?.createCampaign(
+            campaignId,
+            addNewCampaignModal.fees.totalFee,
+            values.budget,
+            addNewCampaignModal.fees.remainFee,
+            addNewCampaignModal.fees.cancelFee,
+          );
+          // throw new Error('sdsd');
+          this.createNewCampaign({
+            campaignId,
+            hash,
+            ...values,
           })
-            .then(async () => {
-              const campaignId = uuidv4();
-              if (currentUser && addNewCampaignModal) {
-                const hash = await currentUser.ether?.createCampaign(
-                  campaignId,
-                  addNewCampaignModal.fees.totalFee,
-                  values.budget,
-                  addNewCampaignModal.fees.remainFee,
-                  addNewCampaignModal.fees.cancelFee,
-                );
-                // throw new Error('sdsd');
-                this.createNewCampaign({
-                  campaignId,
-                  hash,
-                  ...values,
-                })
-                  .then(() => {
-                    openNotification(
-                      'success',
-                      'Create New Campaign Successfully',
-                      `Created ${values.name} campaign`,
-                    );
-                    this.callGetListCampaigns().then(() => {
-                      this.setAddNewCampaignModal({
-                        visible: false,
-                        isLoading: false,
-                      });
-                    });
-                  })
-                  .catch((error) => {
-                    Promise.reject(new Error(error));
-                    openNotification(
-                      'error',
-                      'Fail to create new campaign',
-                      `Fail to created ${values.title} campaign`,
-                    );
-                    this.setAddNewCampaignModal({
-                      visible: false,
-                      isLoading: false,
-                    });
-                  });
-              }
+            .then(() => {
+              openNotification(
+                'success',
+                'Create New Campaign Successfully',
+                `Created ${values.name} campaign`,
+              );
+              this.callGetListCampaigns().then(() => {
+                this.clearCreateNewCampaignParam();
+                this.setAddNewCampaignModal({
+                  visible: false,
+                  isLoading: false,
+                });
+              });
             })
             .catch((error) => {
-              console.log('====================================');
-              console.log(error);
-              console.log('====================================');
               openNotification(
                 'error',
                 'Fail to create new campaign',
@@ -256,15 +259,34 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 visible: false,
                 isLoading: false,
               });
+              return Promise.reject(error);
             });
-        })
-        .catch((error) => {
-          console.log('====================================');
-          console.error(error);
-          console.log('====================================');
-          openNotification('error', 'Fail to create new campaign', 'fail');
+        }
+      })
+      .catch((error) => {
+        console.log('====================================');
+        console.log(error);
+        console.log('====================================');
+        openNotification('error', 'Fail to create new campaign', `${error.message}`);
+        this.clearCreateNewCampaignParam();
+        this.setAddNewCampaignModal({
+          visible: false,
+          isLoading: false,
         });
-    }
+      });
+    // if (this.formRef.current) {
+    //   this.formRef.current
+    //     .validateFields()
+    //     .then(async (values) => {
+
+    //     })
+    //     .catch((error) => {
+    //       console.log('====================================');
+    //       console.error(error);
+    //       console.log('====================================');
+    //       openNotification('error', 'Fail to create new campaign', 'fail');
+    //     });
+    // }
   };
 
   callGetListLocations = async (param?: any) => {
@@ -383,9 +405,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 marker,
               });
             }
-            console.log('====================================');
-            console.log('AutoComplete Select >>>', mapComponent);
-            console.log('====================================');
             if (mapComponent.circle) {
               mapComponent.circle.remove();
               const circle = L.circle([lat, lon], {
@@ -413,11 +432,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     const { currentUser } = this.props.user;
     const maxBudget = currentUser?.balance ? Number.parseFloat(currentUser.balance.toString()) : 0;
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
-
-    const { mapComponent } = this.props.location;
-    console.log('====================================');
-    console.log(mapComponent);
-    console.log('====================================');
     return (
       <>
         {addNewCampaignModal?.visible && (
@@ -440,7 +454,17 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   label="Budget"
                   rules={[
                     { required: true, message: 'Please input budget of this campaign' },
-                    { type: 'number', max: maxBudget, min: 100000 },
+                    {
+                      type: 'number',
+                      min: 100000,
+                      validator: (rule, value, error) => {
+                        if (value > maxBudget) {
+                          return Promise.reject(new Error('Budget is over your balance'));
+                        }
+
+                        return Promise.resolve();
+                      },
+                    },
                   ]}
                 >
                   {/* <InputNumber
@@ -474,7 +498,11 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                   name="startEnd"
                   label="Start-End"
                   rules={[
-                    { type: 'array' as const, required: true, message: 'Please select time!' },
+                    {
+                      type: 'array' as const,
+                      required: true,
+                      message: 'Please select start date and end date!',
+                    },
                   ]}
                 >
                   <DatePicker.RangePicker
@@ -529,7 +557,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                 </Form.Item>
                 <Form.Item
                   name="radius"
-                  label="Radius"
+                  label="Radius (km)"
                   rules={[{ required: true, message: 'Please input radius' }]}
                 >
                   <InputNumber
