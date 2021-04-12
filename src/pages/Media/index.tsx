@@ -630,7 +630,11 @@ class Media extends React.Component<MediaSourceProps> {
                               this.setSelectedFolder(item);
                             }}
                             onDoubleClick={() => {
-                              this.toNextFolder(item);
+                              this.toNextFolder(item).then(() => {
+                                this.setViewMediaDetailComponent({
+                                  visible: false,
+                                });
+                              });
                             }}
                           >
                             {item.name}
