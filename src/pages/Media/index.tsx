@@ -15,6 +15,7 @@ import {
   Row,
   Col,
   Typography,
+  Empty,
 } from 'antd';
 import * as React from 'react';
 import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
@@ -61,8 +62,8 @@ class Media extends React.Component<MediaSourceProps> {
         this.getCurrentUser().then(async () => {
           this.readJWT();
           this.setViewMediaDetailComponent({
-            visible: false
-          })
+            visible: false,
+          });
           Promise.all([
             this.callGetListFolders(),
             this.callGetListMedia(),
@@ -460,11 +461,19 @@ class Media extends React.Component<MediaSourceProps> {
 
   handleFolderContextMenuClick = async (menu: any, item: any) => {
     if (menu.key === 'open') {
-      this.toNextFolder(item);
+      this.toNextFolder(item).then(() => {
+        this.setViewMediaDetailComponent({
+          visible: false,
+        });
+      });
     }
 
     if (menu.key === 'remove') {
-      this.handleRemoveFolder(item);
+      this.handleRemoveFolder(item).then(() => {
+        this.setViewMediaDetailComponent({
+          visible: false,
+        });
+      });
     }
 
     if (menu.key === 'rename') {
@@ -764,6 +773,7 @@ class Media extends React.Component<MediaSourceProps> {
                 </Typography.Title>
               )}
               {viewMediaDetailComponent?.visible && <ViewMediaDetailComponent {...this.props} />}
+              {!viewMediaDetailComponent?.visible && <Empty description={<>Preview Media</>} />}
             </Col>
           </Row>
           {/* ========================================================================================================================== */}
