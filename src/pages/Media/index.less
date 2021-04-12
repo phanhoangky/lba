@@ -22,6 +22,44 @@
   align-items: 'center';
 }
 
+.listFolderStyles {
+  :global {
+    .selected-folder {
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
+    }
+
+    
+  }
+}
+
+.listMediasStyles {
+  :global {
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    .selected-media {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
+      border-radius: 5px;
+      border-image-slice: 1;
+      border-width: 5px;
+      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      .ant-card, .ant-card-bordered, .ant-card-hoverable {
+        border-radius: 5px;
+        border-image-slice: 1;
+        border-width: 5px;
+        border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      }
+    }
+
+    .normal-media {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+  }
+}
 .breadscrumb {
 
   :global {

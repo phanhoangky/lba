@@ -61,20 +61,13 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
   };
 
   createNewLocation = async (param: any) => {
-    const res = await this.props
-      .dispatch({
-        type: `${LOCATION_DISPATCHER}/createLocation`,
-        payload: {
-          ...this.props.location.createLocationParam,
-          ...param,
-        },
-      })
-      .catch((err: any) => {
-        console.log('====================================');
-        console.log(err);
-        console.log('====================================');
-        return Promise.reject(err);
-      });
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/createLocation`,
+      payload: {
+        ...this.props.location.createLocationParam,
+        ...param,
+      },
+    });
   };
 
   onCreateNewLocation = async (values: any) => {
@@ -106,7 +99,7 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
             console.log('====================================');
             console.log(error);
             console.log('====================================');
-            openNotification('error', 'Error', error);
+            openNotification('error', 'Error', error.message);
           });
       })
       .catch(() => {
@@ -316,7 +309,7 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
             label="Description"
             rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
           >
-            <Input.TextArea rows={4} autoSize />
+            <Input.TextArea rows={4} />
           </Form.Item>
 
           <Form.Item

@@ -8,7 +8,7 @@ import Column from 'antd/lib/table/Column';
 // import DrawerUpdateMultipleDevice from './components/DrawerUpdateMultipleDevice';
 import { UpdateDeviceFormDrawer } from './components/UpdateDeviceFormDrawer';
 import { DevicesTableHeaderComponent } from './components/DevicesTableHeaderComponent';
-import { EyeTwoTone } from '@ant-design/icons';
+import { EditFilled } from '@ant-design/icons';
 import { ViewScreenShotModal } from './components/ViewScreenShotModal';
 
 type DeviceProps = {
@@ -342,7 +342,7 @@ class Device extends React.Component<DeviceProps> {
                         // this.setEditModalVisible(true);
                       }}
                     >
-                      <EyeTwoTone />
+                      <EditFilled />
                     </Button>
                   </Space>
                 );

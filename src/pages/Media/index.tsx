@@ -14,6 +14,7 @@ import {
   Menu,
   Row,
   Col,
+  Typography,
 } from 'antd';
 import * as React from 'react';
 import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
@@ -41,6 +42,7 @@ import { EditDrawerFooter } from './components/EditMediaFormDrawer/EditDrawerFoo
 import { RenameFolderModal } from './components/RenameFolderModal';
 import styles from './index.less';
 import { openNotification } from '@/utils/utils';
+import { ViewMediaDetailComponent } from './components/ViewMediaDetailComponent';
 
 export type MediaSourceProps = {
   dispatch: Dispatch;
@@ -58,6 +60,9 @@ class Media extends React.Component<MediaSourceProps> {
       .then(() => {
         this.getCurrentUser().then(async () => {
           this.readJWT();
+          this.setViewMediaDetailComponent({
+            visible: false
+          })
           Promise.all([
             this.callGetListFolders(),
             this.callGetListMedia(),
@@ -81,6 +86,7 @@ class Media extends React.Component<MediaSourceProps> {
       type: 'user/readJWT',
     });
   };
+
   addBreadscrumbHome = async () => {
     const { user } = this.props;
     await this.setBreadScrumb([
@@ -95,6 +101,12 @@ class Media extends React.Component<MediaSourceProps> {
     ]);
   };
 
+  setListMedias = async (list: any) => {
+    await this.props.dispatch({
+      type: 'media/setListMediaReducer',
+      payload: list,
+    });
+  };
   setListLoading = async (loading: boolean) => {
     await this.props.dispatch({
       type: 'media/setListLoadingReducer',
@@ -105,7 +117,6 @@ class Media extends React.Component<MediaSourceProps> {
   getCurrentUser = async () => {
     const res = await this.props.dispatch({
       type: 'user/getCurrentUser',
-      payload: '',
     });
     Promise.all([
       this.setCreateFileParam({
@@ -198,7 +209,6 @@ class Media extends React.Component<MediaSourceProps> {
             isSelected: true,
           };
         }
-
         return {
           ...f,
           isSelected: false,
@@ -224,8 +234,6 @@ class Media extends React.Component<MediaSourceProps> {
           const newItem: FolderType = {
             id: item.id,
             name: item.name,
-            created_at: '',
-            updated_at: '',
             parent_id: '',
             path: '',
           };
@@ -288,38 +296,6 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  signMedia = async (item: any) => {
-    Modal.confirm({
-      centered: true,
-      title: 'Do you want to sign this media?',
-      icon: <ExclamationCircleOutlined />,
-      onOk: async () => {
-        // const { createFileParam } = this.props.media;
-        // await this.setCreateFileParam({
-        //   isSigned: 1,
-        // });
-        this.setListLoading(true)
-          .then(async () => {
-            const { currentUser } = this.props.user;
-
-            const signature = await currentUser?.ether?.addDocument(item.securityHash);
-            this.updateFile({
-              isSigned: 1,
-              hash: signature,
-            }).then(() => {
-              this.callGetListMedia().then(() => {
-                this.setListLoading(false);
-              });
-            });
-          })
-          .catch(() => {
-            this.setListLoading(false);
-          });
-      },
-      onCancel: async () => {},
-    });
-  };
-
   setEditFileDrawer = async (modal: any) => {
     await this.props.dispatch({
       type: 'media/setEditFileDrawerReducer',
@@ -331,13 +307,30 @@ class Media extends React.Component<MediaSourceProps> {
   };
 
   setSelectedFile = async (item: any) => {
-    this.props.dispatch({
+    const { listMedia } = this.props.media;
+    await this.props.dispatch({
       type: 'media/setSelectedFileReducer',
-      payload: {
-        ...this.props.media.selectedFile,
-        ...item,
-      },
+      // payload: {
+      //   ...this.props.media.selectedFile,
+      //   ...item,
+      // },
+      payload: item,
     });
+
+    const newList = listMedia?.map((m) => {
+      if (m.id === item.id) {
+        return {
+          ...m,
+          isSelected: true,
+        };
+      }
+      return {
+        ...m,
+        isSelected: false,
+      };
+    });
+
+    await this.setListMedias(newList);
   };
 
   updateFile = async (modal?: any) => {
@@ -472,39 +465,6 @@ class Media extends React.Component<MediaSourceProps> {
 
     if (menu.key === 'remove') {
       this.handleRemoveFolder(item);
-      // this.setListLoading(true)
-      //   .then(async () => {
-      //     const response = await this.checkFolderHaveAnySubfolders(item.id);
-      //     // .then((response) => {
-      //     if (response) {
-      //       .then(() => {
-      //         this.setListLoading(false);
-      //       });
-      //     } else {
-      //       this.setListLoading(false);
-      //       openNotification(
-      //         'error',
-      //         'There are sub folders in this folder, please remove them before remove this folder',
-      //       );
-      //     }
-      //     // })
-      //     // .catch((err) => {
-      //     //   this.setListLoading(false);
-      //     //   console.log('====================================');
-      //     //   console.log('ERROR', err);
-      //     //   console.log('====================================');
-      //     //   openNotification('error', 'Fail to remove folders');
-      //     // });
-      //   })
-      //   .catch((err) => {
-      //     this.setListLoading(false);
-      //     console.log('====================================');
-      //     console.log('ERROR', err);
-      //     console.log('====================================');
-      //     openNotification('error', 'Fail to remove folders');
-      //   });
-
-      // this.removeFolder(item.id);
     }
 
     if (menu.key === 'rename') {
@@ -526,6 +486,15 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
+  setViewMediaDetailComponent = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'media/setViewMediaDetailComponentReducer',
+      payload: {
+        ...this.props.media.viewMediaDetailComponent,
+        ...param,
+      },
+    });
+  };
   editMediaFormRef = React.createRef<EditMediaFormDrawer>();
   editMediaFooterRef = React.createRef<EditDrawerFooter>();
   renameFolderModalRef = React.createRef<RenameFolderModal>();
@@ -541,6 +510,7 @@ class Media extends React.Component<MediaSourceProps> {
       searchListMediaParam,
       selectedFile,
       renameFolderModal,
+      viewMediaDetailComponent,
     } = this.props.media;
 
     const signatureOfMedia = (status: number) => {
@@ -555,8 +525,8 @@ class Media extends React.Component<MediaSourceProps> {
     };
 
     const messageOfSignature = (status: number) => {
-      if (status === 0) {
-        return 'Not Verify';
+      if (status === 3) {
+        return 'Rejected';
       }
 
       if (status === 1) {
@@ -607,6 +577,7 @@ class Media extends React.Component<MediaSourceProps> {
             grid={{
               gutter: 20,
             }}
+            className={styles.listFolderStyles}
             dataSource={listFolder}
             loading={listLoading}
             renderItem={(item) => {
@@ -637,7 +608,8 @@ class Media extends React.Component<MediaSourceProps> {
                         >
                           <Button
                             size="large"
-                            type={item.isSelected ? 'primary' : 'default'}
+                            // type={item.isSelected ? 'primary' : 'default'}
+                            className={item.isSelected ? 'selected-folder' : ''}
                             style={{
                               width: 200,
                               height: 50,
@@ -673,6 +645,7 @@ class Media extends React.Component<MediaSourceProps> {
           <Row gutter={20}>
             <Col span={16}>
               <List
+                className={styles.listMediasStyles}
                 grid={{
                   gutter: 20,
                   md: 2,
@@ -726,10 +699,15 @@ class Media extends React.Component<MediaSourceProps> {
                         <Skeleton active avatar loading={listLoading}>
                           <List.Item>
                             <Card
+                              className={item.isSelected ? 'selected-media' : 'normal-media'}
                               bordered
                               hoverable
                               onClick={() => {
-                                this.setSelectedFile(item);
+                                this.setSelectedFile(item).then(() => {
+                                  this.setViewMediaDetailComponent({
+                                    visible: true,
+                                  });
+                                });
                               }}
                               style={{ width: '100%', height: '100%' }}
                               cover={
@@ -756,13 +734,7 @@ class Media extends React.Component<MediaSourceProps> {
                                   message={messageOfSignature(item.isSigned)}
                                   icon={<FormOutlined />}
                                   showIcon={true}
-                                  // onClick={() => {
-                                  //   if (item.isSigned === 0) {
-                                  //     this.signMedia(item);
-                                  //   }
-                                  // }}
                                 ></Alert>,
-
                                 <SettingTwoTone
                                   style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
                                   onClick={async () => {
@@ -786,9 +758,12 @@ class Media extends React.Component<MediaSourceProps> {
               ></List>
             </Col>
             <Col span={8}>
-              <Row>
-                <Image width={'100%'} src={selectedFile?.urlPreview} />
-              </Row>
+              {viewMediaDetailComponent?.visible && (
+                <Typography.Title level={4} className="lba-text">
+                  Media Detail
+                </Typography.Title>
+              )}
+              {viewMediaDetailComponent?.visible && <ViewMediaDetailComponent {...this.props} />}
             </Col>
           </Row>
           {/* ========================================================================================================================== */}

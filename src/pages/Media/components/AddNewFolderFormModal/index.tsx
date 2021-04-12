@@ -34,20 +34,36 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
     });
   };
 
-  handleCreateFolder = async (values: any) => {
-    this.createFolder(values)
-      .then(() => {
-        openNotification('success', 'Create Folder Successfully', `${values.name} was created`);
-        this.setListLoading(true).then(() => {
-          this.callGetListFolders().then(() => {
-            this.setListLoading(false);
-          });
+  handleCreateFolder = async () => {
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        this.setAddNewFolderModal({
+          isLoading: true,
+        }).then(() => {
+          this.createFolder(values)
+            .then(() => {
+              this.callGetListFolders().then(() => {
+                openNotification(
+                  'success',
+                  'Create Folder Successfully',
+                  `${values.name} was created`,
+                );
+                this.setAddNewFolderModal({
+                  isLoading: false,
+                  visible: false,
+                });
+              });
+            })
+            .catch((error) => {
+              openNotification('error', 'Create Folder fail', error.message);
+              this.setAddNewFolderModal({
+                isLoading: false,
+                visible: false,
+              });
+            });
         });
-      })
-      .catch((error) => {
-        openNotification('error', 'Create Folder fail', error.message);
-        this.setListLoading(false);
       });
+    }
   };
 
   callGetListFolders = async (payload?: any) => {
@@ -101,26 +117,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
         closable={false}
         destroyOnClose={true}
         onOk={() => {
-          if (this.formRef.current) {
-            this.formRef.current.validateFields().then((values) => {
-              this.setAddNewFolderModal({
-                isLoading: true,
-              });
-              this.handleCreateFolder(values)
-                .then(() => {
-                  this.setAddNewFolderModal({
-                    isLoading: false,
-                    visible: false,
-                  });
-                })
-                .catch(() => {
-                  this.setAddNewFolderModal({
-                    isLoading: false,
-                    visible: false,
-                  });
-                });
-            });
-          }
+          this.handleCreateFolder();
         }}
         onCancel={() => {
           this.setAddNewFolderModal({

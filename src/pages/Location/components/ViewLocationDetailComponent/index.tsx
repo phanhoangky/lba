@@ -1,5 +1,5 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
-import { Divider, Form, Input, Modal, notification, Select, Skeleton } from 'antd';
+import { Col, Divider, Form, Input, Modal, notification, Row, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -21,17 +21,17 @@ export type ViewLocationDetailComponentProps = {
 export class ViewLocationDetailComponent extends React.Component<ViewLocationDetailComponentProps> {
   componentDidMount = () => {
     this.initialMap();
-    if (this.formRef.current) {
-      const { selectedLocation } = this.props.location;
-      if (selectedLocation) {
-        this.formRef.current.setFieldsValue({
-          name: selectedLocation.name,
-          description: selectedLocation.description,
-          typeId: selectedLocation.typeId,
-          address: selectedLocation.address,
-        });
-      }
-    }
+    // if (this.formRef.current) {
+    //   const { selectedLocation } = this.props.location;
+    //   if (selectedLocation) {
+    //     this.formRef.current.setFieldsValue({
+    //       name: selectedLocation.name,
+    //       description: selectedLocation.description,
+    //       typeId: selectedLocation.typeId,
+    //       address: selectedLocation.address,
+    //     });
+    //   }
+    // }
   };
 
   initialMap = async () => {
@@ -248,19 +248,26 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
             this.setViewLocationDetailComponent({
               isLoading: true,
             });
-            this.deleteLocation(location.id).then(() => {
-              this.openNotification('success', `Delete ${location.name} successfully`);
-              this.callGetListLocations().then(async () => {
+            this.deleteLocation(location.id)
+              .then(() => {
+                this.callGetListLocations().then(async () => {
+                  this.openNotification('success', `Delete ${location.name} successfully`);
+                  this.setLocationsTableLoading(false);
+                  this.setViewLocationDetailComponent({
+                    isLoading: false,
+                  });
+                });
+              })
+              .catch((error) => {
+                this.openNotification('error', `Delete ${location.name} error`, error.message);
                 this.setLocationsTableLoading(false);
                 this.setViewLocationDetailComponent({
                   isLoading: false,
                 });
               });
-            });
           })
           .catch(async (error: any) => {
-            Promise.reject(error);
-            this.openNotification('error', `Delete ${location.name} error`);
+            this.openNotification('error', `Delete ${location.name} error`, error.message);
             this.setLocationsTableLoading(false);
             this.setViewLocationDetailComponent({
               isLoading: false,
@@ -310,40 +317,49 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
           <>
             <Form
               ref={this.formRef}
-              layout="inline"
+              layout="vertical"
               style={{
                 boxSizing: 'border-box',
               }}
             >
-              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                <Form.Item label="Name" name="name">
-                  <Input readOnly placeholder="input placeholder" />
-                </Form.Item>
-              </Skeleton>
+              <Row gutter={20}>
+                <Col span={12}>
+                  <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
+                    <Form.Item label="Name">
+                      <Input
+                        value={selectedLocation.name}
+                        readOnly
+                        placeholder="input placeholder"
+                      />
+                    </Form.Item>
+                  </Skeleton>
+                </Col>
+                <Col span={12}>
+                  <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
+                    <Form.Item label="Type">
+                      <Select
+                        disabled
+                        style={{ width: '100%' }}
+                        value={selectedLocation.typeId}
+                        onChange={() => {
+                          // this.setCreateLocationParam({
+                          //   typeId: e,
+                          // });
+                        }}
+                      >
+                        {listDeviceTypes?.map((type: any) => {
+                          return (
+                            <Select.Option key={type.id} value={type.id}>
+                              {type.typeName}
+                            </Select.Option>
+                          );
+                        })}
+                      </Select>
+                    </Form.Item>
+                  </Skeleton>
+                </Col>
+              </Row>
 
-              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                <Form.Item label="Type" name="typeId" style={{ width: '50%' }}>
-                  <Select
-                    disabled
-                    style={{ width: '100%' }}
-                    onChange={() => {
-                      // this.setCreateLocationParam({
-                      //   typeId: e,
-                      // });
-                    }}
-                  >
-                    {listDeviceTypes?.map((type: any) => {
-                      return (
-                        <Select.Option key={type.id} value={type.id}>
-                          {type.typeName}
-                        </Select.Option>
-                      );
-                    })}
-                  </Select>
-                </Form.Item>
-              </Skeleton>
-
-              <Divider></Divider>
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
                   name="description"
@@ -354,6 +370,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 >
                   <Input.TextArea
                     readOnly
+                    value={selectedLocation.description}
                     rows={4}
                     style={{
                       width: '100%',
@@ -362,28 +379,16 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                   />
                 </Form.Item>
               </Skeleton>
-              <Divider></Divider>
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
                   label="Address"
-                  name="address"
                   style={{
                     width: '100%',
                   }}
                 >
-                  <Input readOnly />
+                  <Input.TextArea readOnly value={selectedLocation.address} />
                 </Form.Item>
               </Skeleton>
-              {selectedLocation.address === '' && (
-                <p
-                  style={{
-                    color: 'red',
-                    transition: 'ease 0.5s',
-                  }}
-                >
-                  Please enter location address
-                </p>
-              )}
               <Divider></Divider>
             </Form>
             <LeafletMapComponent disabled={true} {...this.props} />

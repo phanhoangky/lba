@@ -12,8 +12,8 @@ export type FolderType = {
   name: string;
   path: string;
   parent_id: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type FileType = {
@@ -96,6 +96,11 @@ export type MediaSourceModelState = {
   renameFolderModal?: {
     visible: boolean;
     isLoading: boolean;
+  },
+
+  viewMediaDetailComponent?: {
+    isLoading: boolean;
+    visible: boolean;
   }
 }
 
@@ -141,6 +146,7 @@ export type MediaSourceModel = {
     clearCreateFileParamReducer: Reducer<MediaSourceModelState>;
     clearSearchListMediaParamReducer: Reducer<MediaSourceModelState>;
     setRenameFolderModalReducer: Reducer<MediaSourceModelState>;
+    setViewMediaDetailComponentReducer: Reducer<MediaSourceModelState>;
   }
 }
 
@@ -545,10 +551,7 @@ const MediaSourceStore: MediaSourceModel = {
     setAddNewFolderModalReducer(state, { payload }) {
       return {
         ...state,
-        addNewFolderModal: {
-          ...state?.addNewFolderModal,
-          ...payload
-        }
+        addNewFolderModal: payload
       }
     },
 
@@ -653,6 +656,13 @@ const MediaSourceStore: MediaSourceModel = {
       return {
         ...state,
         renameFolderModal: payload
+      }
+    },
+
+    setViewMediaDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewMediaDetailComponent: payload
       }
     }
   }

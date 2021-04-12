@@ -1,5 +1,5 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
-import { Divider, Form, Input, Modal, notification, Select, Skeleton } from 'antd';
+import { Col, Divider, Form, Input, Modal, notification, Row, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -336,51 +336,53 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
       <>
         <Form
           ref={this.formRef}
-          layout="inline"
+          layout="vertical"
           style={{
             boxSizing: 'border-box',
           }}
         >
-          <Skeleton active loading={editLocationModal?.isLoading}>
-            <Form.Item
-              label="Name"
-              name="name"
-              rules={[
-                { required: true, message: 'Please enter location name' },
-                { max: 50, message: 'Name have maximum 50 characters' },
-              ]}
-            >
-              <Input placeholder="input placeholder" />
-            </Form.Item>
-          </Skeleton>
-
-          <Skeleton active loading={editLocationModal?.isLoading}>
-            <Form.Item
-              label="Type"
-              name="typeId"
-              style={{ width: '50%' }}
-              rules={[{ required: true, message: 'Please select location type' }]}
-            >
-              <Select
-                style={{ width: '100%' }}
-                onChange={() => {
-                  // this.setCreateLocationParam({
-                  //   typeId: e,
-                  // });
-                }}
-              >
-                {listDeviceTypes?.map((type: any) => {
-                  return (
-                    <Select.Option key={type.id} value={type.id}>
-                      {type.typeName}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-          </Skeleton>
-
-          <Divider></Divider>
+          <Row gutter={20}>
+            <Col span={12}>
+              <Skeleton active loading={editLocationModal?.isLoading}>
+                <Form.Item
+                  label="Name"
+                  name="name"
+                  rules={[
+                    { required: true, message: 'Please enter location name' },
+                    { max: 50, message: 'Name have maximum 50 characters' },
+                  ]}
+                >
+                  <Input placeholder="input placeholder" />
+                </Form.Item>
+              </Skeleton>
+            </Col>
+            <Col span={12}>
+              <Skeleton active loading={editLocationModal?.isLoading}>
+                <Form.Item
+                  label="Type"
+                  name="typeId"
+                  rules={[{ required: true, message: 'Please select location type' }]}
+                >
+                  <Select
+                    style={{ width: '100%' }}
+                    onChange={() => {
+                      // this.setCreateLocationParam({
+                      //   typeId: e,
+                      // });
+                    }}
+                  >
+                    {listDeviceTypes?.map((type: any) => {
+                      return (
+                        <Select.Option key={type.id} value={type.id}>
+                          {type.typeName}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+              </Skeleton>
+            </Col>
+          </Row>
           <Skeleton active loading={editLocationModal?.isLoading}>
             <Form.Item
               name="description"
@@ -399,7 +401,6 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
               />
             </Form.Item>
           </Skeleton>
-          <Divider></Divider>
           <Skeleton active loading={editLocationModal?.isLoading}>
             <Form.Item
               label="Address"
