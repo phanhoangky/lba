@@ -188,6 +188,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 this.callGetListPlaylist().then(() => {
                   this.setEditPlaylistDrawer({
                     isLoading: false,
+                    visible: false,
                   });
                 });
               })
@@ -195,12 +196,14 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 openNotification('error', 'Fail to remove playlist', error.message);
                 this.setEditPlaylistDrawer({
                   isLoading: false,
+                  visible: false,
                 });
               });
           })
           .catch(() => {
             this.setEditPlaylistDrawer({
               isLoading: false,
+              visible: false,
             });
           });
       },

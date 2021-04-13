@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Button, Col, Divider, Modal, Row, Space, Table, Typography } from 'antd';
+import { Avatar, Button, Col, Divider, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -19,9 +19,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
 import type { TransactionType } from '@/models/transaction';
 import { CAMPAIGN } from '@/pages/Campaign';
-import { EditTwoTone, LockFilled } from '@ant-design/icons';
+import { EditFilled, LockFilled } from '@ant-design/icons';
 import { UpdateProfileModal } from './components/UpdateProfileModal';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
+import styles from './index.less';
 
 type WalletProps = {
   dispatch: Dispatch;
@@ -303,70 +304,92 @@ class WalletScreen extends React.Component<WalletProps> {
               </Form> */}
               <Divider></Divider>
               <Row>
-                <Col
-                  span={8}
-                  className="lba-text"
-                  style={{
-                    fontSize: '1.2em',
-                    fontWeight: 'bolder',
-                  }}
-                >
+                <Col span={6} className="lba-text">
                   Username
                 </Col>
-                <Col span={16}>{currentUser && currentUser.name}</Col>
+                <Col span={18}>{currentUser && currentUser.name}</Col>
               </Row>
               <Row>
-                <Col
-                  span={8}
-                  className="lba-text"
-                  style={{
-                    fontSize: '1.2em',
-                    fontWeight: 'bolder',
-                  }}
-                >
+                <Col span={6} className="lba-text">
                   Email
                 </Col>
-                <Col span={16}>{currentUser && currentUser.email}</Col>
+                <Col span={18}>{currentUser && currentUser.email}</Col>
               </Row>
               <Row>
-                <Col
-                  span={8}
-                  className="lba-text"
-                  style={{
-                    fontSize: '1.2em',
-                    fontWeight: 'bolder',
-                  }}
-                >
+                <Col span={6} className="lba-text">
                   Balance
                 </Col>
-                <Col span={16}>
+                <Col span={18}>
                   {currentUser &&
                     currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
                 </Col>
               </Row>
-              <Divider orientation="center">Setting</Divider>
+              <Divider orientation="center" className="lba-text">
+                Setting
+              </Divider>
               <Button
-                type="primary"
+                className="add-new-media-btn"
                 block
+                size="large"
                 onClick={() => {
                   this.setUpdateProfileModal({
                     visible: true,
                   });
                 }}
               >
-                <EditTwoTone /> Update Profile
+                <div className="add-media-overlap"></div>
+                <div className="add-media-text">
+                  <Space>
+                    <EditFilled className="lba-icon" />
+                    Update Proflile
+                  </Space>
+                </div>
               </Button>
               <Button
-                type="primary"
+                className="add-new-media-btn"
                 block
+                size="large"
                 onClick={() => {
                   this.setChangePasswordModal({
                     visible: true,
                   });
                 }}
               >
-                <LockFilled /> Change Password
+                <div className="add-media-overlap"></div>
+                <div className="add-media-text">
+                  <Space>
+                    <LockFilled className="lba-icon" /> Change Password
+                  </Space>
+                </div>
               </Button>
+              {/* <div>
+                <Button
+                  className={styles.lbaButtonStyle}
+                  block
+                  size="large"
+                  onClick={() => {
+                    this.setUpdateProfileModal({
+                      visible: true,
+                    });
+                  }}
+                >
+                  <div className="lba-btn-overlay"></div>
+                  <div className="lba-btn-text">
+                    <EditFilled /> Update Profile
+                  </div>
+                </Button>
+                <Button
+                  block
+                  size="large"
+                  onClick={() => {
+                    this.setChangePasswordModal({
+                      visible: true,
+                    });
+                  }}
+                >
+                  <LockFilled /> Change Password
+                </Button>
+              </div> */}
             </Space>
           </Col>
         </Row>

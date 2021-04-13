@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Row, Space, Table, Typography } from 'antd';
+import { Button, Col, Empty, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -429,6 +429,10 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                 ref={this.viewScenarioDetailComponentRef}
                 {...this.props}
               />
+            )}
+
+            {!viewScenarioDetailComponent?.visible && (
+              <Empty description={<>Preview Scenario Detail</>} />
             )}
           </Col>
         </Row>

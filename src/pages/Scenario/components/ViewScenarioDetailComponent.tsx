@@ -1,6 +1,6 @@
 import { openNotification, sortArea } from '@/utils/utils';
 import { UploadOutlined } from '@ant-design/icons';
-import { Col, Form, Input, Row, Image, Divider, Table, Modal, Skeleton } from 'antd';
+import { Col, Form, Input, Row, Image, Divider, Table, Modal, Skeleton, Empty } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
@@ -467,11 +467,11 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                             dataIndex={['mediaSrc', 'title']}
                             title="Title"
                           ></Column>
-                          <Column key="title" dataIndex="duration" title="Duration"></Column>
+                          <Column key="title" dataIndex="duration" title="Duration (s)"></Column>
                         </Table>
                       </>
                     ) : (
-                      ''
+                      <Empty description={<>Preview Media</>} />
                     )}
                   </Col>
                 </Row>

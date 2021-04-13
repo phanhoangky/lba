@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Modal, Row, Space, Table, Typography } from 'antd';
+import { Button, Col, Empty, Modal, Row, Space, Table, Typography } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
 import type {
@@ -357,6 +357,10 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
             )}
             {viewPlaylistDetailComponent?.visible && (
               <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />
+            )}
+
+            {!viewPlaylistDetailComponent?.visible && (
+              <Empty description="Preview Playlist Detail" />
             )}
           </Col>
         </Row>
