@@ -4,6 +4,7 @@ import { AddNewPlaylist, GetListPlaylist, RemovePlaylist, UpdatePlaylist } from 
 import type {AddNewPlaylistParam, GetListPlaylistParam} from "@/services/PlaylistPageService/PlaylistService";
 import { Effect, FileType, Reducer } from "umi";
 import type { GetMediaSourcesParam } from "@/services/MediaSourceService";
+import moment from "moment";
 
 export type PlaylistItem = {
   key: string;
@@ -279,6 +280,8 @@ const PlaylistStore: PlaylistModel = {
           return {
             ...playlist,
             key: playlist.id,
+            createTime: moment(playlist.createTime).format("YYYY-MM-DD"),
+            modifyTime: moment(playlist.modify).format("YYYY-MM-DD"),
             playlistItems: playlist.playlistItems.map((playlistItem: any, index: any) => {
               return {
                 ...playlistItem,

@@ -38,7 +38,7 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
-import styles from '../../index.less';
+import styles from './index.less';
 // import { MediasTableComponent } from './components/MediasTableComponent';
 import { SelectMediaModal } from './components/SelectMediaModal';
 // import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
@@ -513,6 +513,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         getContainer={false}
         closable={false}
         destroyOnClose={true}
+        className={styles.editPlaylistModal}
         visible={editPlaylistDrawer?.visible}
         afterClose={() => {
           this.setSelectedPlaylistItems([]);
@@ -707,7 +708,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 ></Column>
               </Table>
               <Button
-                type="primary"
+                className="add-new-media-btn"
                 block
                 onClick={() => {
                   this.setSelectMediaModal({
@@ -715,7 +716,8 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                   });
                 }}
               >
-                Add New Media
+                <div className="add-media-overlap"></div>
+                <div className="add-media-text">Add New Media</div>
               </Button>
             </Col>
           </Row>

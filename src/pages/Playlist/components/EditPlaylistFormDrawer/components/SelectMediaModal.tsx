@@ -342,6 +342,13 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       searchListMediaParam,
     } = this.props.media;
 
+    const { totalDuration, maxDuration, minDuration } = this.props.playlists;
+
+    const maxD = maxDuration || 240;
+    const minD = minDuration || 10;
+    const totalD = totalDuration || 0;
+    const availableDuration = maxD - totalD;
+    const disalbedCondition = availableDuration < minD;
     console.log('====================================');
     console.log(listMedia);
     console.log('====================================');
@@ -487,7 +494,11 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                               this.setSelectedRecord(item);
                             }}
                             onDoubleClick={() => {
-                              this.addNewPlaylistItem(item);
+                              if (disalbedCondition) {
+                                openNotification('error', 'One playlist have maximum 240s');
+                              } else {
+                                this.addNewPlaylistItem(item);
+                              }
                             }}
                             style={{ width: '100%', height: '100%' }}
                             cover={
