@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Avatar, Descriptions } from 'antd';
 import * as React from 'react';
@@ -12,7 +13,9 @@ export type ProfileInformationProps = {
 
 class ProfileInformation extends React.Component<ProfileInformationProps> {
   componentDidMount() {
-    this.readJWT();
+    this.readJWT().catch((error) => {
+      openNotification('error', 'Error occured', error);
+    });
   }
   readJWT = async () => {
     await this.props.dispatch({

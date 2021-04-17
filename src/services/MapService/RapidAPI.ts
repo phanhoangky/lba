@@ -1,6 +1,5 @@
-import { CONSTANTS_RAPID } from './../constantUrls';
+import { CONSTANTS_RAPID } from '../constantUrls';
 import RapidAPIHelper from "@/apis/RAPID_API";
-import axios from 'axios';
 
 // const options = {
 //   method: 'GET',

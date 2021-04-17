@@ -46,7 +46,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
   addNewTimeFilter = async (startTime: number, endTime: number) => {
     const { createCampaignParam } = this.props.campaign;
 
-    const newList = createCampaignParam.timeFilter.split('').map((time, index) => {
+    const newList = createCampaignParam?.timeFilter.split('').map((time, index) => {
       if (index >= startTime && index <= endTime) {
         return '1';
       }
@@ -54,7 +54,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
       return '0';
     });
     await this.setCreateNewCampaignParam({
-      timeFilter: newList.toString().replaceAll(',', ''),
+      timeFilter: newList?.toString().replaceAll(',', ''),
     });
 
     if (this.timePickerRef.current) {
@@ -65,7 +65,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
   handleRemoveTimeFilter = async (index: number) => {
     const { createCampaignParam } = this.props.campaign;
 
-    const newList = createCampaignParam.timeFilter.split('').map((time, i) => {
+    const newList = createCampaignParam?.timeFilter.split('').map((time, i) => {
       if (index === i) {
         return '0';
       }
@@ -73,7 +73,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
       return time;
     });
     await this.setCreateNewCampaignParam({
-      timeFilter: newList.toString().replaceAll(',', ''),
+      timeFilter: newList?.toString().replaceAll(',', ''),
     });
   };
 
@@ -84,11 +84,11 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
 
     const { inputTimeFilterVisible } = this.state;
 
-    const timeArray = createCampaignParam.timeFilter.split('');
+    const timeArray = createCampaignParam?.timeFilter.split('');
     return (
       <>
         <Space wrap={true} direction="horizontal">
-          {timeArray.map((time, index) => {
+          {timeArray?.map((time, index) => {
             const startTime = index;
             const endTime = index + 1 === timeArray.length ? 0 : index + 1;
             return (

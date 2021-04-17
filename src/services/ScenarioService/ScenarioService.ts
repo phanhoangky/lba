@@ -1,5 +1,5 @@
 import type { BaseGetRequest } from './../BaseRequest';
-import { CONSTANTS_LBA } from './../constantUrls';
+import { CONSTANTS_LBA } from '../constantUrls';
 import ApiHelper from '@/apis/LBA_API';
 
 export type GetListScenariosParam = BaseGetRequest;

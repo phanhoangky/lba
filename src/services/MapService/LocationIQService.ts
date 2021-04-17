@@ -1,4 +1,4 @@
-import { CONSTANTS_LOCATIONIQ } from './../constantUrls';
+import { CONSTANTS_LOCATIONIQ } from '../constantUrls';
 import LocationIQ_ApiHelper from "@/apis/LOCATIONIQ_API";
 
 

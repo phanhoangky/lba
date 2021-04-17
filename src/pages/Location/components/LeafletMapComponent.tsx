@@ -17,7 +17,7 @@ export type LeafletMapComponentProps = {
 export class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
   componentDidMount = async () => {
     const mymap = L.map('mapid').setView([10.8414846, 106.8100464], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const layer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       // attribution:
       //   'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
       maxZoom: 18,
@@ -26,33 +26,31 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
       zoomOffset: -1,
     }).addTo(mymap);
 
+    // setTimeout(() => {
+    //   mymap.invalidateSize(true);
+    // }, 500);
+
     console.log('====================================');
     console.log('My map >>>', mymap);
     console.log('====================================');
     await this.setMapComponent({
       map: mymap,
+      layer,
     });
 
     mymap.on('click', async (e: any) => {
       if (this.props.disabled !== true) {
         const { mapComponent, addNewLocationModal, editLocationModal } = this.props.location;
         const { addNewCampaignModal } = this.props.campaign;
-        console.log('====================================');
-        console.log(e.latlng, mapComponent);
-        console.log('====================================');
+
         mymap.setView([e.latlng.lat, e.latlng.lng]);
         if (mapComponent && mapComponent.map) {
-          console.log('====================================');
-          console.log(mapComponent.marker);
-          console.log('====================================');
           if (mapComponent.marker !== undefined) {
             // mapComponent.marker.setLatLng(e.latlng);
             mapComponent.marker.remove();
             mapComponent.marker.removeFrom(mymap);
             const marker = L.marker(e.latlng);
-            console.log('====================================');
-            console.log('Remove Marker', marker);
-            console.log('====================================');
+
             marker.addTo(mymap);
             this.setMapComponent({
               marker,
@@ -63,9 +61,6 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
             this.setMapComponent({
               marker,
             });
-            console.log('====================================');
-            console.log('NewMarker >>>', marker);
-            console.log('====================================');
           }
           // if (mapComponent.circle) {
           //   // mapComponent.circle.setLatLng(e.latlng);
@@ -100,9 +95,7 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
 
           if (addNewCampaignModal?.visible) {
             const { createCampaignParam } = this.props.campaign;
-            console.log('====================================');
-            console.log('Create C Param >>>>', createCampaignParam);
-            console.log('====================================');
+
             if (createCampaignParam && createCampaignParam.radius > 0) {
               if (mapComponent.map) {
                 if (!mapComponent.circle && createCampaignParam.radius !== 0) {

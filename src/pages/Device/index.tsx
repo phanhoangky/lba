@@ -10,6 +10,7 @@ import { UpdateDeviceFormDrawer } from './components/UpdateDeviceFormDrawer';
 import { DevicesTableHeaderComponent } from './components/DevicesTableHeaderComponent';
 import { EditFilled } from '@ant-design/icons';
 import { ViewScreenShotModal } from './components/ViewScreenShotModal';
+import { openNotification } from '@/utils/utils';
 
 type DeviceProps = {
   dispatch: Dispatch;
@@ -50,7 +51,8 @@ class Device extends React.Component<DeviceProps> {
           this.setDevicesTableLoading(false);
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error occurred', error);
         this.setDevicesTableLoading(false);
       });
   };

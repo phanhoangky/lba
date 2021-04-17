@@ -1,10 +1,10 @@
-import { MenuOutlined, PlaySquareTwoTone } from '@ant-design/icons';
-import { Col, Form, Input, Row, Table, Image, Space, Button, Divider, Modal, Empty } from 'antd';
+import { PlaySquareTwoTone } from '@ant-design/icons';
+import { Col, Form, Input, Row, Table, Image, Space, Button, Empty } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
 import * as React from 'react';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+// import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import type {
   Dispatch,
   MediaSourceModelState,
@@ -18,7 +18,7 @@ import ReactPlayer from 'react-player';
 import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash';
 import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPageService/PlaylistItemService';
-import { openNotification } from '@/utils/utils';
+// import { openNotification } from '@/utils/utils';
 
 export type ViewEditPlaylistComponentProps = {
   dispatch: Dispatch;
@@ -27,11 +27,11 @@ export type ViewEditPlaylistComponentProps = {
   media: MediaSourceModelState;
 };
 
-const DragHandle = SortableHandle(() => (
-  <MenuOutlined style={{ cursor: 'pointer', color: '#999' }} />
-));
-const SortableItemComponent = SortableElement((props: any) => <tr {...props} />);
-const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
+// const DragHandle = SortableHandle(() => (
+//   <MenuOutlined style={{ cursor: 'pointer', color: '#999' }} />
+// ));
+// const SortableItemComponent = SortableElement((props: any) => <tr {...props} />);
+// const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
 
 export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistComponentProps> {
   componentDidMount() {
@@ -73,30 +73,30 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
       });
   }
 
-  setPlaylistTableLoading = async (loading: boolean) => {
-    await this.props.dispatch({
-      type: 'playlists/setTableLoadingReducer',
-      payload: loading,
-    });
-  };
+  // setPlaylistTableLoading = async (loading: boolean) => {
+  //   await this.props.dispatch({
+  //     type: 'playlists/setTableLoadingReducer',
+  //     payload: loading,
+  //   });
+  // };
 
-  callGetListPlaylist = async () => {
-    const { getPlaylistParam } = this.props.playlists;
-    this.setPlaylistTableLoading(true)
-      .then(() => {
-        this.props
-          .dispatch({
-            type: 'playlists/getListPlaylist',
-            payload: getPlaylistParam,
-          })
-          .then(() => {
-            this.setPlaylistTableLoading(false);
-          });
-      })
-      .catch(() => {
-        this.setPlaylistTableLoading(false);
-      });
-  };
+  // callGetListPlaylist = async () => {
+  //   const { getPlaylistParam } = this.props.playlists;
+  //   this.setPlaylistTableLoading(true)
+  //     .then(() => {
+  //       this.props
+  //         .dispatch({
+  //           type: 'playlists/getListPlaylist',
+  //           payload: getPlaylistParam,
+  //         })
+  //         .then(() => {
+  //           this.setPlaylistTableLoading(false);
+  //         });
+  //     })
+  //     .catch(() => {
+  //       this.setPlaylistTableLoading(false);
+  //     });
+  // };
 
   getMediaNotBelongToPlaylist = async (param?: any) => {
     const { getListMediaParam } = this.props.playlists;
@@ -143,27 +143,27 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
     }
   };
 
-  DraggableContainer = (props: any) => {
-    return (
-      <SortableContainerComponent
-        key={Math.random() + 100}
-        useDragHandle
-        disableAutoscroll
-        helperClass={styles.drag}
-        onSortEnd={this.onSortEnd}
-        {...props}
-      />
-    );
-  };
+  // DraggableContainer = (props: any) => {
+  //   return (
+  //     <SortableContainerComponent
+  //       key={Math.random() + 100}
+  //       useDragHandle
+  //       disableAutoscroll
+  //       helperClass={styles.drag}
+  //       onSortEnd={this.onSortEnd}
+  //       {...props}
+  //     />
+  //   );
+  // };
 
-  DraggableBodyRow = ({ className, style, ...restProps }: any) => {
-    const { selectedPlaylist } = this.props.playlists;
-    // function findIndex base on Table rowKey props and should always be a right array index
-    const index = selectedPlaylist?.playlistItems.findIndex(
-      (x) => x.index === restProps['data-row-key'],
-    );
-    return <SortableItemComponent key={Math.random() + 100} index={index} {...restProps} />;
-  };
+  // DraggableBodyRow = ({ className, style, ...restProps }: any) => {
+  //   const { selectedPlaylist } = this.props.playlists;
+  //   // function findIndex base on Table rowKey props and should always be a right array index
+  //   const index = selectedPlaylist?.playlistItems.findIndex(
+  //     (x) => x.index === restProps['data-row-key'],
+  //   );
+  //   return <SortableItemComponent key={Math.random() + 100} index={index} {...restProps} />;
+  // };
 
   setSelectedPlaylist = async (modal: any) => {
     const { selectedPlaylist } = this.props.playlists;
@@ -343,43 +343,43 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
     });
   };
 
-  handleRemovePlaylist = async () => {
-    const { selectedPlaylist } = this.props.playlists;
-    Modal.confirm({
-      title: `Are you sure you want to remove ${selectedPlaylist?.title}`,
-      centered: true,
-      closable: false,
-      onOk: () => {
-        this.setViewPlaylistDetailComponent({
-          isLoading: true,
-        })
-          .then(() => {
-            this.removePlaylist()
-              .then(() => {
-                openNotification(
-                  'success',
-                  'Remove playlist successfully',
-                  `Playlist ${selectedPlaylist?.title} was removed`,
-                );
-                this.callGetListPlaylist().then(() => {
-                  this.setViewPlaylistDetailComponent({
-                    isLoading: false,
-                  });
-                });
-              })
-              .catch((error) => {
-                Promise.reject(error);
-                openNotification('error', 'Fail to remove playlist', error);
-              });
-          })
-          .catch(() => {
-            this.setViewPlaylistDetailComponent({
-              isLoading: false,
-            });
-          });
-      },
-    });
-  };
+  // handleRemovePlaylist = async () => {
+  //   const { selectedPlaylist } = this.props.playlists;
+  //   Modal.confirm({
+  //     title: `Are you sure you want to remove ${selectedPlaylist?.title}`,
+  //     centered: true,
+  //     closable: false,
+  //     onOk: () => {
+  //       this.setViewPlaylistDetailComponent({
+  //         isLoading: true,
+  //       })
+  //         .then(() => {
+  //           this.removePlaylist()
+  //             .then(() => {
+  //               openNotification(
+  //                 'success',
+  //                 'Remove playlist successfully',
+  //                 `Playlist ${selectedPlaylist?.title} was removed`,
+  //               );
+  //               this.callGetListPlaylist().then(() => {
+  //                 this.setViewPlaylistDetailComponent({
+  //                   isLoading: false,
+  //                 });
+  //               });
+  //             })
+  //             .catch((error) => {
+  //               Promise.reject(error);
+  //               openNotification('error', 'Fail to remove playlist', error);
+  //             });
+  //         })
+  //         .catch(() => {
+  //           this.setViewPlaylistDetailComponent({
+  //             isLoading: false,
+  //           });
+  //         });
+  //     },
+  //   });
+  // };
 
   setViewPlaylistDetailComponent = async (param?: any) => {
     await this.props.dispatch({
@@ -422,23 +422,17 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                 rowKey="index"
                 loading={viewPlaylistDetailComponent?.isLoading}
                 key={uuidv4()}
-                components={{
-                  body: {
-                    wrapper: this.DraggableContainer,
-                    row: this.DraggableBodyRow,
-                  },
-                }}
                 className={styles.customTable}
                 dataSource={selectedPlaylist?.playlistItems}
                 pagination={false}
               >
-                <Column
+                {/* <Column
                   key="drag"
                   dataIndex="sort"
                   width={30}
                   className="drag-visible"
                   render={() => <DragHandle />}
-                ></Column>
+                ></Column> */}
                 <Column key="index" title="No" dataIndex="index"></Column>
                 <Column
                   key="title"
@@ -486,66 +480,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
               </Table>
             </Col>
           </Row>
-          <Divider></Divider>
-          {/* <Row>
-            <MediasTableComponent {...this.props} />
-          </Row> */}
-          <Divider></Divider>
-          {/* <Row>
-            <Col>
-              <Space>
-                <Button
-                  disabled={!(selectedPlaylist && selectedPlaylist.id !== '')}
-                  danger
-                  onClick={() => {
-                    this.handleRemovePlaylist();
-                  }}
-                >
-                  <DeleteTwoTone twoToneColor="#f93e3e" /> Remove
-                </Button>
-                <Button
-                  disabled={!(selectedPlaylist && selectedPlaylist.id !== '')}
-                  onClick={() => {
-                    if (this.formRef.current) {
-                      this.formRef.current.validateFields().then((values) => {
-                        this.setViewPlaylistDetailComponent({
-                          isLoading: true,
-                        });
-                        this.updatePlaylist(values)
-                          .then(() => {
-                            openNotification(
-                              'success',
-                              'update playlist successfully',
-                              `Playlist ${selectedPlaylist?.title} was updated`,
-                            );
-                            this.callGetListPlaylist().then(() => {
-                              this.setViewPlaylistDetailComponent({
-                                isLoading: false,
-                                // visible: false,
-                              });
-                            });
-                          })
-                          .catch(() => {
-                            openNotification(
-                              'error',
-                              'Fail tp update playlist',
-                              `Fail to update playlist ${selectedPlaylist?.title}`,
-                            );
-                            this.setViewPlaylistDetailComponent({
-                              isLoading: false,
-                              // visible: false,
-                            });
-                          });
-                      });
-                    }
-                  }}
-                  type="primary"
-                >
-                  <EditTwoTone /> Save Change
-                </Button>
-              </Space>
-            </Col>
-          </Row> */}
         </Form>
       </>
     );

@@ -58,7 +58,7 @@ export interface UserRegisterParams {
   prefix: string;
 }
 
-const Register: FC<RegisterProps> = ({ submitting, dispatch, userAndregister }) => {
+const Register: FC<RegisterProps> = ({ dispatch, userAndregister }) => {
   // const [count, setcount]: [number, any] = useState(0);
   const [visible, setvisible]: [boolean, any] = useState(false);
   const [isLoading, setIsLoading]: [boolean, any] = useState(false);

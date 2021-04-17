@@ -1,5 +1,5 @@
 export default {
-  'menu.welcome': 'Welcome',
+  'menu.welcome': 'Dashboard',
   'menu.more-blocks': 'More Blocks',
   'menu.home': 'Home',
   'menu.admin': 'Admin',
@@ -26,6 +26,8 @@ export default {
   'menu.list.table-list': 'Search Table',
   'menu.list.brand-list': "Brand",
   'menu.list.location-list': "Location",
+  'menu.list.earned-screen': "Earned",
+  'menu.list.transaction-screen': "Transaction",
   'menu.list.campaign-list': "Campaign",
   'menu.list.device-list': 'Devices ',
   'menu.list.media-list': "Media",

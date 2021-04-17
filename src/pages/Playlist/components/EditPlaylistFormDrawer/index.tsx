@@ -19,8 +19,8 @@ import {
   Image,
   Slider,
   Modal,
-  Drawer,
   Empty,
+  Divider,
 } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import Column from 'antd/lib/table/Column';
@@ -57,8 +57,11 @@ const SortableItemComponent = SortableElement((props: any) => <tr {...props} />)
 const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
 
 export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDrawerProps> {
-  componentDidMount = async () => {
+  componentDidMount = () => {
     const { selectedPlaylist } = this.props.playlists;
+    console.log('====================================');
+    console.log(selectedPlaylist, this.formRef, this.formRef.current);
+    console.log('====================================');
     if (this.formRef.current && selectedPlaylist) {
       this.formRef.current.setFieldsValue({
         title: selectedPlaylist.title,
@@ -92,16 +95,16 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       });
   };
 
-  getMediaNotBelongToPlaylist = async (param?: any) => {
-    const { getListMediaParam } = this.props.playlists;
-    await this.props.dispatch({
-      type: 'playlists/getMediaNotBelongToPlaylist',
-      payload: {
-        ...getListMediaParam,
-        ...param,
-      },
-    });
-  };
+  // getMediaNotBelongToPlaylist = async (param?: any) => {
+  //   const { getListMediaParam } = this.props.playlists;
+  //   await this.props.dispatch({
+  //     type: 'playlists/getMediaNotBelongToPlaylist',
+  //     payload: {
+  //       ...getListMediaParam,
+  //       ...param,
+  //     },
+  //   });
+  // };
 
   callGetListPlaylist = async () => {
     const { getPlaylistParam } = this.props.playlists;
@@ -180,12 +183,12 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
           .then(() => {
             this.removePlaylist()
               .then(() => {
-                openNotification(
-                  'success',
-                  'Remove playlist successfully',
-                  `Playlist ${selectedPlaylist?.title} was removed`,
-                );
                 this.callGetListPlaylist().then(() => {
+                  openNotification(
+                    'success',
+                    'Remove playlist successfully',
+                    `Playlist ${selectedPlaylist?.title} was removed`,
+                  );
                   this.setEditPlaylistDrawer({
                     isLoading: false,
                     visible: false,
@@ -211,9 +214,9 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         this.setEditPlaylistDrawer({
           visible: false,
         }).then(() => {
-          this.setViewPlaylistDetailComponent({
-            visible: true,
-          });
+          // this.setViewPlaylistDetailComponent({
+          //   visible: true,
+          // });
         });
       },
     });
@@ -238,18 +241,18 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
 
   addNewItemToSelectedItems = async (media?: any) => {
     const {
-      selectedPlaylistItems,
+      // selectedPlaylistItems,
       selectedPlaylist,
       // currentNewItemDuration,
     } = this.props.playlists;
 
-    if (selectedPlaylist && selectedPlaylistItems) {
-      const newList = cloneDeep(selectedPlaylistItems);
+    if (selectedPlaylist) {
+      const newList = cloneDeep(selectedPlaylist.playlistItems);
 
       newList.push({
         id: uuidv4(),
-        index: selectedPlaylistItems.length,
-        displayOrder: selectedPlaylistItems.length,
+        index: selectedPlaylist.playlistItems.length,
+        displayOrder: selectedPlaylist.playlistItems.length,
         duration: 10,
         isActive: true,
         key: `${uuidv4()}`,
@@ -356,10 +359,10 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   DraggableContainer = (props: any) => {
     return (
       <SortableContainerComponent
-        key={Math.random() + 100}
+        key={uuidv4()}
         useDragHandle
         disableAutoscroll
-        helperClass={styles.drag}
+        helperClass="row-dragging"
         onSortEnd={this.onSortEnd}
         {...props}
       />
@@ -367,41 +370,24 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   };
 
   DraggableBodyRow = ({ className, style, ...restProps }: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     // function findIndex base on Table rowKey props and should always be a right array index
-    const index = selectedPlaylistItems?.findIndex((x) => x.index === restProps['data-row-key']);
-    return <SortableItemComponent key={Math.random() + 100} index={index} {...restProps} />;
+    const index = selectedPlaylist?.playlistItems.findIndex(
+      (x) => x.index === restProps['data-row-key'],
+    );
+    return <SortableItemComponent key={uuidv4()} index={index} {...restProps} />;
   };
 
-  selectPlaylistItem = async (record: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
-    if (selectedPlaylistItems?.some((playlist) => playlist.id === record.id)) {
-      const newList = selectedPlaylistItems?.map((item) => {
-        if (item.id === record.id) {
-          return {
-            ...item,
-            isSelected: true,
-          };
-        }
-        return {
-          ...item,
-          isSelected: false,
-        };
-      });
-      await this.setSelectedPlaylistItems(newList);
-    }
-  };
+  // addMediaToListMedia = async (media: any) => {
+  //   const { listMediaNotBelongToPlaylist } = this.props.playlists;
 
-  addMediaToListMedia = async (media: any) => {
-    const { listMediaNotBelongToPlaylist } = this.props.playlists;
+  //   const newList = cloneDeep(listMediaNotBelongToPlaylist);
 
-    const newList = cloneDeep(listMediaNotBelongToPlaylist);
-
-    if (newList && newList.every((s) => s.id !== media.id)) {
-      newList.push({ ...media });
-      this.setListMediaNotBelongToPlaylist(newList);
-    }
-  };
+  //   if (newList && newList.every((s) => s.id !== media.id)) {
+  //     newList.push({ ...media });
+  //     this.setListMediaNotBelongToPlaylist(newList);
+  //   }
+  // };
 
   renderPreviewMedia = () => {
     const { editPlaylistDrawer } = this.props.playlists;
@@ -481,9 +467,9 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         }),
     });
 
-    const medias = selectedPlaylist?.playlistItems.filter((item) => item.id === record.id)[0];
+    // const medias = selectedPlaylist?.playlistItems.filter((item) => item.id === record.id)[0];
 
-    this.addMediaToListMedia(medias?.mediaSrc);
+    // this.addMediaToListMedia(medias?.mediaSrc);
   };
 
   setSelectMediaModal = async (param?: any) => {
@@ -505,7 +491,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       maxDuration,
       minDuration,
       selectedPlaylist,
-      selectMediaModal,
     } = this.props.playlists;
     const maxD = maxDuration || 240;
     const minD = minDuration || 10;
@@ -513,25 +498,24 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     const availableDuration = maxD - totalD;
     return (
       <Modal
-        getContainer={false}
         closable={false}
         destroyOnClose={true}
         className={styles.editPlaylistModal}
         visible={editPlaylistDrawer?.visible}
         afterClose={() => {
           this.setSelectedPlaylistItems([]);
-
           this.clearSelectedPlaylist();
         }}
+        zIndex={2}
         title="Edit Playlist"
         width={'55%'}
         onCancel={async () => {
           this.setEditPlaylistDrawer({
             visible: false,
           }).then(() => {
-            this.setViewPlaylistDetailComponent({
-              visible: true,
-            });
+            // this.setViewPlaylistDetailComponent({
+            //   visible: true,
+            // });
           });
         }}
         footer={
@@ -588,7 +572,8 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                       });
                     }
                   }}
-                  icon={<SettingTwoTone />}
+                  className="lba-btn"
+                  icon={<SettingTwoTone twoToneColor="#00cdac" />}
                 >
                   Save Change
                 </Button>
@@ -713,6 +698,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
               <Button
                 className="add-new-media-btn"
                 block
+                size="large"
                 onClick={() => {
                   this.setSelectMediaModal({
                     visible: true,
@@ -724,9 +710,14 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
               </Button>
             </Col>
           </Row>
-          {/* <Row><MediasTableComponent {...this.props} /></Row> */}
+          <Divider orientation="center" className="lba-text">
+            Select Media Area
+          </Divider>
+          <Row>
+            <SelectMediaModal {...this.props} />
+          </Row>
         </Form>
-        <Drawer
+        {/* <Drawer
           closable={false}
           destroyOnClose={true}
           visible={selectMediaModal?.visible}
@@ -739,7 +730,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
           }}
         >
           {selectMediaModal?.visible && <SelectMediaModal {...this.props} />}
-        </Drawer>
+        </Drawer> */}
       </Modal>
     );
   }

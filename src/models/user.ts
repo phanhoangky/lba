@@ -75,6 +75,7 @@ export type UserModelType = {
 
     setChangePasswordModalReducer: Reducer<UserModelState>;
     
+    saveCredentialReducer: Reducer<UserModelState>;
   };
 };
 
@@ -103,49 +104,54 @@ const UserModel: UserModelType = {
     },
 
     *readJWT(_, { put }) {
-      // const token = yield localStorage.getItem("JWT");
-      // const res = yield call(CreateFolder, { name: token.user_id });
-      const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
-      // const tokenFirebase = yield localStorage.getItem("JWT");;
+      // const tokenFirebase = yield firebase.auth().currentUser?.getIdToken();
+      // yield firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      const tokenFirebase = yield localStorage.getItem("JWT");;
+      console.log('====================================');
+      console.log(tokenFirebase);
+      console.log('====================================');
       if (tokenFirebase && tokenFirebase !== "undefined") {
         const decode = yield jwt_decode(tokenFirebase);
         console.log('====================================');
         console.log(decode, Date.now() >= decode.exp * 1000);
         console.log('====================================');
-        if (decode.claims) {
-          if (Date.now() >= decode.exp * 1000) {
-            history.replace("/account/login");
-          }
-          const ether = yield EtherService.build();
-          yield ether.readKeyStoreJson(decode.claims.WalletKeyStore, decode.claims.user_id)
-          yield ether.initContracts();
-          const balance = yield ether.getBalance();
-          yield put({
-            type: "saveCurrentUser",
-            payload: {
-              ...decode,
-              id: decode.claims.Id,
-              name: decode.claims.name,
-              avatar: decode.claims.picture,
-              email: decode.claims.email,
-              userid: decode.claims.user_id,
-              balance,
-              ether,
-            }
-          })
-        } else {
-          if (Date.now() >= decode.exp * 1000) {
-            history.replace("/account/login");
-          }
+        // if (decode.claims) {
+        //   if (Date.now() >= decode.exp * 1000) {
+        //     history.replace("/account/login");
+        //   }
+        //   const ether = yield EtherService.build();
+        //   yield ether.readKeyStoreJson(decode.claims.WalletKeyStore, decode.claims.user_id)
+        //   yield ether.initContracts();
+        //   const balance = yield ether.getBalance();
+        //   const user = {
+        //     ...decode,
+        //       id: decode.claims.Id,
+        //       name: decode.claims.name,
+        //       avatar: decode.claims.picture,
+        //       email: decode.claims.email,
+        //       userid: decode.claims.user_id,
+        //       balance,
+        //       ether,
+        //   }
+        //   yield put({
+        //     type: "saveCurrentUser",
+        //     payload: user
+        //   })
+
+        //   return user;
+        // }
+
+        if (Date.now() >= decode.exp * 1000) {
+          history.replace("/account/login");
+          return Promise.reject(new Error("Your session is expired"));
+        }
           const ether = yield EtherService.build();
           if (decode.WalletKeyStore) {
             yield ether.readKeyStoreJson(decode.WalletKeyStore, decode.user_id)
             yield ether.initContracts();
             const balance = yield ether.getBalance();
-            yield put({
-              type: "saveCurrentUser",
-              payload: {
-                ...decode,
+            const user = {
+              ...decode,
                 id: decode.Id,
                 name: decode.name,
                 avatar: decode.picture,
@@ -153,17 +159,19 @@ const UserModel: UserModelType = {
                 userid: decode.user_id,
                 balance,
                 ether
-              }
+            }
+            yield put({
+              type: "saveCurrentUser",
+              payload: user
             })
-          } else {
-            history.replace("account/login");
-            throw new Error("Doesn't have wallet");
+            return user;
           }
-          
-        }
-      } else {
+          history.replace("account/login");
+          return Promise.reject(new Error("Doesn't have wallet"));
+      }  
         history.replace("account/login");
-      }
+        return Promise.reject(new Error("Fail to read token"));
+      
     },
 
     redirectToHomePage() {
@@ -192,7 +200,7 @@ const UserModel: UserModelType = {
       const { credential } = firebaseResponse;
       const ether = yield EtherService.build();
       const tokenFirebase = yield firebase.auth().currentUser?.getIdToken(); // Mac ke
-      
+      yield firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
       let decoded: any = null;
       if (firebaseResponse.additionalUserInfo.isNewUser) {
         const res = yield call(CreateFolder, { name: firebaseResponse.user.uid });
@@ -252,6 +260,10 @@ const UserModel: UserModelType = {
 
         // const {data} = yield call(GetAccountById);
         yield put({
+          type: "saveCredentialReducer",
+          payload: credential
+        })
+        yield put({
           type: "saveCurrentUser",
           payload: {
             ...firebaseResponse.user,
@@ -275,12 +287,14 @@ const UserModel: UserModelType = {
       const ether = yield EtherService.build();
       // const data: firebase.User = yield call(EmailLogin, payload.email, payload.password);
       // const { credential }: {credential: firebase.auth.AuthCredential} = payload;
-      const { user }: {user: firebase.User} = payload;
+      const { user }: { user: firebase.User } = payload;
       if (payload && user) {
         console.log('====================================');
         console.log(user, payload);
         console.log('====================================');
         const tokenFirebase = yield user.getIdToken();
+        yield firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+
         // const param: AuthenticationRequest = {
         //   firebaseToken: tokenFirebase,
         //   uid: user.uid,
@@ -338,36 +352,6 @@ const UserModel: UserModelType = {
         // console.log(param);
 
         yield call(PostAuthentication, param);
-
-        // yield user.reauthenticateWithCredential(credential);
-
-        // const newToken = yield user.getIdToken(true);
-
-        // console.log('====================================');
-        // // console.log(credential);
-        // console.log('====================================');
-        // yield ether.initContracts();
-        // yield localStorage.setItem("JWT", newToken);
-        // const decoded = yield jwt_decode(newToken);
-        // console.log('====================================');
-        // console.log("Refresh Totken>>>", newToken, decoded);
-        // console.log('====================================');
-        // const balance = yield ether.getBalance();
-        // yield put({
-        //   type: "saveCurrentUser",
-        //   payload: {
-        //     ...user,
-        //     id: decoded.Id,
-        //     email: decoded.email,
-        //     name: decoded.name,
-        //     avatar: decoded.picture,
-        //     uid: decoded.user_id,
-        //     userid: decoded.user_id,
-        //     balance,
-        //     ether,
-        //     // ...data.result
-        //   }
-        // });
       }
       history.push('/account/register-result')
     },
@@ -394,11 +378,11 @@ const UserModel: UserModelType = {
       }
     },
 
-    *sendResetPassword({ payload }, { call }) {
+    *sendResetPassword({ payload }) {
       yield firebase.auth().sendPasswordResetEmail(payload);
     },
 
-    *changePassword({ payload }, { put }) {
+    *changePassword({ payload }) {
       const user: firebase.User = yield firebase.auth().currentUser;
       
       yield user.updatePassword(payload);
@@ -455,10 +439,17 @@ const UserModel: UserModelType = {
       }
     },
 
-      setChangePasswordModalReducer(state, { payload }) {
+    setChangePasswordModalReducer(state, { payload }) {
       return {
         ...state,
         changePasswordModal: payload
+      }
+    },
+
+    saveCredentialReducer(state, { payload }) {
+      return {
+        ...state,
+        credential: payload,
       }
     }
   },

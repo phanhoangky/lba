@@ -220,12 +220,13 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
           </Col>
           <Col span={12}>
             <Row wrap gutter={20}>
-              <Divider orientation="left">Select Playlist</Divider>
+              <Divider orientation="left" className="lba-text">Select Playlist</Divider>
               <Table
                 scroll={{
                   y: 400,
                 }}
                 style={{ width: '100%' }}
+                className={styles.selectPlaylistTable}
                 dataSource={playlistsDrawer?.listPlaylists}
                 pagination={false}
                 rowClassName={(record) => {
@@ -273,7 +274,7 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
               </Table>
             </Row>
 
-            <Divider orientation="left">Preview Media Detail</Divider>
+            <Divider orientation="left" className="lba-text">Preview Media Detail</Divider>
 
             <Row>
               <Skeleton active loading={playlistsDrawer?.isLoading}>

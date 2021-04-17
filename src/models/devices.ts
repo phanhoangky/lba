@@ -95,7 +95,7 @@ export type DeviceModelType = {
     setSelectedDevices: Reducer<DeviceModelState>;
     setEditMultipleDevicesDrawerVisible: Reducer<DeviceModelState>;
     setUpdateDevicesState: Reducer<DeviceModelState>;
-    setListDeviceTypes: Reducer<DeviceModelState>;
+    // setListDeviceTypes: Reducer<DeviceModelState>;
     clearUpdateDevicesDrawer: Reducer<DeviceModelState>;
     setMultipleUpdateMode: Reducer<DeviceModelState>;
     setGetDevicesParamReducer: Reducer<DeviceModelState>;
@@ -187,7 +187,6 @@ const DeviceModel: DeviceModelType = {
         '0',
         '0',
       ],
-      currentType: '',
     },
 
     //--------------
@@ -240,23 +239,34 @@ const DeviceModel: DeviceModelType = {
 
       let res = null;
       res = yield call(GetDevices, param);
-      yield put({
-        type: 'setTotalItemReducer',
-        payload: res.result.totalItem,
-      });
-      res = res.result.data.map((d: any) => {
-        return {
-          key: d.id,
-          ...d,
-          dateFilter: d.dateFilter?.split(''),
-          timeFilter: d.timeFilter?.split(''),
-          createTime: moment(d.createTime).format('YYYY-MM-DD'),
-        };
-      });
-      yield put({
-        type: 'setDevices',
-        payload: res,
-      });
+      if (res.result) {
+        yield put({
+          type: 'setTotalItemReducer',
+          payload: res.result.totalItem,
+        });
+        res = res.result.data.map((d: any) => {
+          return {
+            key: d.id,
+            ...d,
+            dateFilter: d.dateFilter?.split(''),
+            timeFilter: d.timeFilter?.split(''),
+            createTime: moment(d.createTime).format('YYYY-MM-DD'),
+          };
+        });
+        yield put({
+          type: 'setDevices',
+          payload: res,
+        });
+      } else {
+        yield put({
+          type: 'setTotalItemReducer',
+          payload: 0,
+        });
+        yield put({
+          type: 'setDevices',
+          payload: [],
+        });
+      }
     },
 
     *updateDevice({ payload }, { call }) {
@@ -282,7 +292,7 @@ const DeviceModel: DeviceModelType = {
         endDate: payload.updateDevicesState.endDate,
         idList: payload.listId,
         minBid: payload.updateDevicesState.minBid,
-        isPublished: payload.updateDevicesState.isPublish,
+        isPublished: payload.updateDevicesState.isPublished,
         defaultScenarioId: payload.updateDevicesState.scenarioId
       };
       yield call(UpdateListDevices, param);
@@ -408,16 +418,16 @@ const DeviceModel: DeviceModelType = {
       };
     },
 
-    setListDeviceTypes(state, { payload }) {
-      return {
-        ...state,
-        listDeviceTypes: payload,
-        updateDevicesState: {
-          ...state?.updateDevicesState,
-          currentType: payload[0].typeName,
-        },
-      };
-    },
+    // setListDeviceTypes(state, { payload }) {
+    //   return {
+    //     ...state,
+    //     listDeviceTypes: payload,
+    //     updateDevicesState: {
+    //       ...state?.updateDevicesState,
+    //       currentType: payload[0].typeName,
+    //     },
+    //   };
+    // },
 
     clearUpdateDevicesDrawer(state) {
       return {

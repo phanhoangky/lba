@@ -14,8 +14,6 @@ import {
   Menu,
   Row,
   Col,
-  Typography,
-  Empty,
 } from 'antd';
 import * as React from 'react';
 import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
@@ -61,9 +59,6 @@ class Media extends React.Component<MediaSourceProps> {
       .then(() => {
         this.getCurrentUser().then(async () => {
           this.readJWT();
-          this.setViewMediaDetailComponent({
-            visible: false,
-          });
           Promise.all([
             this.callGetListFolders(),
             this.callGetListMedia(),
@@ -77,7 +72,8 @@ class Media extends React.Component<MediaSourceProps> {
           });
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error occured', error);
         this.setListLoading(false);
       });
   };
@@ -96,8 +92,6 @@ class Media extends React.Component<MediaSourceProps> {
         name: 'Home',
         path: '',
         parent_id: '',
-        created_at: '',
-        updated_at: '',
       },
     ]);
   };
@@ -108,6 +102,7 @@ class Media extends React.Component<MediaSourceProps> {
       payload: list,
     });
   };
+
   setListLoading = async (loading: boolean) => {
     await this.props.dispatch({
       type: 'media/setListLoadingReducer',
@@ -462,17 +457,17 @@ class Media extends React.Component<MediaSourceProps> {
   handleFolderContextMenuClick = async (menu: any, item: any) => {
     if (menu.key === 'open') {
       this.toNextFolder(item).then(() => {
-        this.setViewMediaDetailComponent({
-          visible: false,
-        });
+        // this.setViewMediaDetailComponent({
+        //   visible: false,
+        // });
       });
     }
 
     if (menu.key === 'remove') {
       this.handleRemoveFolder(item).then(() => {
-        this.setViewMediaDetailComponent({
-          visible: false,
-        });
+        // this.setViewMediaDetailComponent({
+        //   visible: false,
+        // });
       });
     }
 
@@ -631,9 +626,9 @@ class Media extends React.Component<MediaSourceProps> {
                             }}
                             onDoubleClick={() => {
                               this.toNextFolder(item).then(() => {
-                                this.setViewMediaDetailComponent({
-                                  visible: false,
-                                });
+                                // this.setViewMediaDetailComponent({
+                                //   visible: false,
+                                // });
                               });
                             }}
                           >
@@ -656,7 +651,7 @@ class Media extends React.Component<MediaSourceProps> {
           {/** List Media */}
 
           <Row gutter={20}>
-            <Col span={16}>
+            <Col span={24}>
               <List
                 className={styles.listMediasStyles}
                 grid={{
@@ -750,12 +745,13 @@ class Media extends React.Component<MediaSourceProps> {
                                 ></Alert>,
                                 <SettingTwoTone
                                   style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
-                                  onClick={async () => {
+                                  onClick={(e) => {
                                     this.setSelectedFile(item).then(() => {
                                       this.setEditFileDrawer({
                                         visible: true,
                                       });
                                     });
+                                    e.stopPropagation();
                                   }}
                                 />,
                               ]}
@@ -770,7 +766,7 @@ class Media extends React.Component<MediaSourceProps> {
                 }}
               ></List>
             </Col>
-            <Col span={8}>
+            {/* <Col span={8}>
               {viewMediaDetailComponent?.visible && (
                 <Typography.Title level={4} className="lba-text">
                   Media Detail
@@ -778,10 +774,23 @@ class Media extends React.Component<MediaSourceProps> {
               )}
               {viewMediaDetailComponent?.visible && <ViewMediaDetailComponent {...this.props} />}
               {!viewMediaDetailComponent?.visible && <Empty description={<>Preview Media</>} />}
-            </Col>
+            </Col> */}
           </Row>
-          {/* ========================================================================================================================== */}
-
+          {/* View Detail Media Drawer ========================================================================================================================== */}
+          <Drawer
+            visible={viewMediaDetailComponent?.visible}
+            closable={false}
+            destroyOnClose={true}
+            width={'40%'}
+            onClose={() => {
+              this.setViewMediaDetailComponent({
+                visible: false,
+              });
+            }}
+            title="Media Detail"
+          >
+            <ViewMediaDetailComponent {...this.props} />
+          </Drawer>
           {/* ========================================================================================================================== */}
           {/** Add New File Modal */}
 

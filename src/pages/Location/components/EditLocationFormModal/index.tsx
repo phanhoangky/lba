@@ -42,29 +42,27 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
       if (selectedLocation) {
         const lat = Number.parseFloat(selectedLocation.latitude);
         const lng = Number.parseFloat(selectedLocation.longitude);
-        mapComponent.map.setView([lat, lng]);
-        if (!mapComponent.marker) {
-          if (lat && lng) {
-            const marker = L.marker([lat, lng]);
-            marker.addTo(mapComponent.map);
-            this.setMapComponent({
-              marker,
-            });
+        mapComponent.map.whenReady(() => {
+          if (mapComponent.map) {
+            mapComponent.map.invalidateSize(true);
+            mapComponent.map.setView([lat, lng]);
+            if (!mapComponent.marker) {
+              if (lat && lng) {
+                const marker = L.marker([lat, lng]);
+                marker.addTo(mapComponent.map);
+                this.setMapComponent({
+                  marker,
+                });
+              }
+            } else {
+              console.log('====================================');
+              console.log('Remove Marker aaaa>>>>', mapComponent.marker);
+              console.log('====================================');
+              mapComponent.marker.remove();
+              mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
+            }
           }
-        } else {
-          console.log('====================================');
-          console.log('Remove Marker aaaa>>>>', mapComponent.marker);
-          console.log('====================================');
-          mapComponent.marker.remove();
-
-          // mapComponent.marker.removeFrom(mapComponent.map);
-          mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
-          // const marker = L.marker([lat, lng]);
-          // console.log('====================================');
-          // console.log('Remove Marker >>>>', marker, 'asdads');
-          // console.log('====================================');
-          // marker.addTo(mapComponent.map);
-        }
+        });
       }
     }
   }
@@ -88,7 +86,7 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
           // mapComponent.marker.removeFrom(mapComponent.map);
         }
 
-        const marker = L.marker([35.652832, 139.839478]);
+        const marker = L.marker([lat, lng]);
         console.log('====================================');
         console.log('Remove Marker xyz>>>>', marker);
         console.log('====================================');

@@ -47,7 +47,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   componentDidMount = () => {
     this.setCampaignTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'Error', error);
+        });
         Promise.all([
           this.callGetListCampaigns(),
           this.callGetListDeviceTypes(),
@@ -62,7 +64,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
         });
       })
       .catch((error) => {
-        Promise.reject(error);
+        openNotification('error', 'Error', error);
         this.setCampaignTableLoading(false);
       });
   };
@@ -388,6 +390,21 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                   });
               },
             }}
+            onRow={(record) => {
+              return {
+                onClick: () => {
+                  this.setSelectedCampaign(record).then(() => {
+                    this.setLocationAddressInMap(record).then(() => {
+                      this.setEditCampaignDrawer({
+                        visible: true,
+                      }).then(() => {
+                        this.viewCampaignDetailRef.current?.componentDidMount();
+                      });
+                    });
+                  });
+                },
+              };
+            }}
             title={() => <CampaignTableHeaderComponent {...this.props} />}
           >
             <Column key="name" dataIndex="name" title="Name"></Column>
@@ -488,8 +505,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                       </Button>
                       <Button
                         danger
-                        onClick={() => {
+                        onClick={(e) => {
                           this.deleteCampaignConfirm(record);
+                          e.stopPropagation();
                         }}
                       >
                         <DeleteTwoTone twoToneColor="#f93e3e" />

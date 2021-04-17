@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Empty, Modal, Row, Space, Table, Typography } from 'antd';
+import { Button, Col, Drawer, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import React from 'react';
 import type {
@@ -31,30 +31,33 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
   state = {};
 
   componentDidMount = async () => {
-    this.setViewPlaylistDetailComponent({
-      isLoading: true,
-    });
+    // this.setViewPlaylistDetailComponent({
+    //   isLoading: true,
+    // });
     this.setTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'Error occured', error.message);
+        });
         Promise.all([this.callGetListPlaylist()]).then(async () => {
           const { listPlaylist } = this.props.playlists;
           const first = listPlaylist && listPlaylist.length > 0 ? listPlaylist[0] : null;
           if (first) {
             this.setSelectedPlaylist(first).then(() => {
-              this.viewPlaylistComponentRef.current?.componentDidMount();
+              // this.viewPlaylistComponentRef.current?.componentDidMount();
             });
           }
-          this.setViewPlaylistDetailComponent({
-            isLoading: false,
-          });
+          // this.setViewPlaylistDetailComponent({
+          //   isLoading: false,
+          // });
           this.setTableLoading(false);
         });
       })
-      .catch(() => {
-        this.setViewPlaylistDetailComponent({
-          isLoading: false,
-        });
+      .catch((error) => {
+        openNotification('error', 'Error occured', error.message);
+        // this.setViewPlaylistDetailComponent({
+        //   isLoading: false,
+        // });
         this.setTableLoading(false);
       });
   };
@@ -160,10 +163,10 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
   };
 
   calculateTotalDuration = async () => {
-    const { selectedPlaylistItems } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
     let total: number = 0;
-    selectedPlaylistItems?.forEach((item) => {
+    selectedPlaylist?.playlistItems?.forEach((item) => {
       total += item.duration;
     });
     await this.setTotalDuration(total);
@@ -249,7 +252,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
         }}
       >
         <Row gutter={20}>
-          <Col span={10}>
+          <Col span={24}>
             <Table
               dataSource={listPlaylist}
               loading={tableLoading}
@@ -266,23 +269,29 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
               onRow={(record) => {
                 return {
                   onClick: async () => {
-                    await this.setViewPlaylistDetailComponent({
+                    this.setViewPlaylistDetailComponent({
                       visible: true,
                       isLoading: true,
                     })
                       .then(() => {
-                        this.setSelectedPlaylist(record);
-                        this.setGetItemsByPlaylistIdParam({
-                          id: record.id,
-                        });
-                        this.callGetItemsByPlaylistId().then(() => {
-                          this.calculateTotalDuration().then(() => {
-                            this.viewPlaylistComponentRef.current?.componentDidMount();
-                            this.setViewPlaylistDetailComponent({
-                              isLoading: false,
-                            });
+                        this.setSelectedPlaylist(record).then(() => {
+                          this.viewPlaylistComponentRef.current?.componentDidMount();
+                          this.setViewPlaylistDetailComponent({
+                            isLoading: false,
                           });
                         });
+                        // this.setGetItemsByPlaylistIdParam({
+                        //   id: record.id,
+                        // });
+
+                        // this.callGetItemsByPlaylistId().then(() => {
+                        //   this.calculateTotalDuration().then(() => {
+                        //     this.viewPlaylistComponentRef.current?.componentDidMount();
+                        //     this.setViewPlaylistDetailComponent({
+                        //       isLoading: false,
+                        //     });
+                        //   });
+                        // });
                       })
                       .catch(() => {
                         this.setViewPlaylistDetailComponent({
@@ -298,6 +307,18 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
             >
               <Column key="title" title="Title" dataIndex="title"></Column>
               <Column key="createTime" title="Create Time" dataIndex="createTime"></Column>
+              <Column key="modifyTime" title="Modify Time" dataIndex="modifyTime"></Column>
+              <Column
+                key="totalDuration"
+                title="Duration (s)"
+                render={(record: Playlist) => {
+                  let total: number = 0;
+                  record?.playlistItems.forEach((item) => {
+                    total += item.duration;
+                  });
+                  return `${total} s`;
+                }}
+              ></Column>
               <Column
                 key="action"
                 title="Action"
@@ -306,20 +327,34 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                     <Space>
                       <Button
                         onClick={(e) => {
-                          this.setViewPlaylistDetailComponent({
-                            visible: false,
+                          this.setEditPlaylistDrawer({
+                            visible: true,
+                            isLoading: true,
                           }).then(() => {
-                            this.setSelectedPlaylist(record);
-                            this.setGetItemsByPlaylistIdParam({
-                              id: record.id,
-                            });
-                            this.callGetItemsByPlaylistId();
-                            this.setEditPlaylistDrawer({
-                              visible: true,
-                            }).then(() => {
+                            this.setSelectedPlaylist(record).then(() => {
                               this.editPlaylistModalRef.current?.componentDidMount();
                             });
                           });
+                          // this.setSelectedPlaylist(record).then(() => {
+                          //   this.setGetItemsByPlaylistIdParam({
+                          //     id: record.id,
+                          //   });
+                          //   .then(() => {
+                          //     this.callGetItemsByPlaylistId({
+                          //       id: record.id,
+                          //     });
+                          //   })
+
+                          //   this.setEditPlaylistDrawer({
+                          //     visible: true,
+                          //   }).then(() => {
+                          //     this.editPlaylistModalRef.current?.componentDidMount();
+                          //   });
+                          //   .then(() => {
+
+                          //   });
+                          // });
+
                           e.stopPropagation();
                         }}
                         type="primary"
@@ -349,7 +384,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
               ></Column>
             </Table>
           </Col>
-          <Col span={14}>
+          {/* <Col span={14}>
             {viewPlaylistDetailComponent?.visible && (
               <Typography.Title level={4} className="lba-text">
                 Playlist Detail
@@ -362,9 +397,22 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
             {!viewPlaylistDetailComponent?.visible && (
               <Empty description="Preview Playlist Detail" />
             )}
-          </Col>
+          </Col> */}
         </Row>
-
+        <Drawer
+          visible={viewPlaylistDetailComponent?.visible}
+          width={'40%'}
+          title="Playlist Detail"
+          destroyOnClose={true}
+          closable={false}
+          onClose={() => {
+            this.setViewPlaylistDetailComponent({
+              visible: false,
+            });
+          }}
+        >
+          <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />
+        </Drawer>
         {/* {addNewPlaylistModal.visible && <AddNewPlaylistFormModal {...this.props} />} */}
         <AddNewPlaylistFormModal {...this.props} />
 

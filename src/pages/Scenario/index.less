@@ -216,6 +216,27 @@
   }
 }
 
+.selectPlaylistTable {
+  :global {
+    .selected-playlist {
+      transition: all 0.3s ease;
+      border: 2px solid rgb(16, 223, 144);
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
+      font-weight: bolder;
+      // background-clip: text;
+      // -webkit-background-clip: text;
+      // -webkit-text-fill-color: transparent;
+      // .ant-table-tbody>.ant-table-row-level-0 {
+      //   transition: all 0.3s ease;
+      //   background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      //   color: aliceblue;
+      //   font-weight: bold;
+      // }
+    }
+  }
+}
+
 :global {
   .ant-table-tbody>tr.ant-table-row-level-0:hover>td {
     background: unset;

@@ -5,18 +5,18 @@
 }
 
 :global {
-  .row-dragging {
-    background: #fafafa;
-    border: 1px solid #ccc;
-  }
+  // .row-dragging {
+  //   background: #fafafa;
+  //   border: 1px solid #ccc;
+  // }
 
-  .row-dragging td {
-    padding: 16px;
-  }
+  // .row-dragging td {
+  //   padding: 16px;
+  // }
 
-  .row-dragging .drag-visible {
-    visibility: visible;
-  }
+  // .row-dragging .drag-visible {
+  //   visibility: visible;
+  // }
 }
 
 .customTable {
@@ -26,8 +26,19 @@
       background-image: linear-gradient(135deg, #02aab0, #00cdac);
       color: aliceblue;
     }
-  }
 
+    
+
+    // .ant-table-row, .ant-table-row-level-0 {
+    //   background: unset;
+    // }
+  }
+  .ant-table-row:hover,
+  .ant-table-row-level-0:hover {
+    transition: all 0.3s ease;
+    background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    color: aliceblue;
+  }
 }
 
 // .addNewMediaBtn {
@@ -166,11 +177,13 @@
       border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
     }
     .media-record {
-
+      transition: all 0.3s ease
     }
 
     .selected-media {
+      transition: all 0.3s ease;
       background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: #f4f5f5;
     }
   }
 }

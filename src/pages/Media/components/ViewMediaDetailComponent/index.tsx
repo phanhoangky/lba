@@ -57,7 +57,7 @@ export class ViewMediaDetailComponent extends React.Component<ViewMediaDetailCom
           <Image src={selectedFile?.urlPreview} width={'100%'} />
         )}
         {selectedFile?.type.name.toLowerCase().includes('video') && (
-          <video src={selectedFile?.urlPreview} width="100%"></video>
+          <video src={selectedFile?.urlPreview} width="100%" autoPlay controls></video>
         )}
       </>
     );

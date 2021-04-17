@@ -2,7 +2,7 @@
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import { DeleteTwoTone, EditFilled, ExclamationCircleOutlined } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Modal, Row, Space, Table, Typography } from 'antd';
+import { Button, Col, Drawer, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState } from 'umi';
@@ -30,24 +30,26 @@ class LocationScreen extends React.Component<LocationScreenProps> {
         this.readJWT();
         Promise.all([this.callGetListLocations(), this.callGetListDeviceTypes()]).then(async () => {
           this.setLocationsTableLoading(false).then(async () => {
-            const { listLocations } = this.props.location;
-            if (listLocations && listLocations.length > 0) {
-              const location = listLocations[0];
-              const { data } = await this.reverseGeocoding(location.latitude, location.longitude);
-              const clone = cloneDeep(location);
-              await this.setSelectedLocation({
-                ...clone,
-                address: data.display_name,
-              });
-              this.setSelectedLocation(
-                listLocations && listLocations.length > 0 && listLocations[0],
-              );
-              this.viewLocationRef.current?.componentDidMount();
-            }
+            this.resetMap();
+            // const { listLocations } = this.props.location;
+            // if (listLocations && listLocations.length > 0) {
+            //   const location = listLocations[0];
+            //   const { data } = await this.reverseGeocoding(location.latitude, location.longitude);
+            //   const clone = cloneDeep(location);
+            //   await this.setSelectedLocation({
+            //     ...clone,
+            //     address: data.display_name,
+            //   });
+            //   this.setSelectedLocation(
+            //     listLocations && listLocations.length > 0 && listLocations[0],
+            //   );
+            //   this.viewLocationRef.current?.componentDidMount();
+            // }
           });
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error occured', error);
         this.setLocationsTableLoading(false);
       });
   };
@@ -282,7 +284,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
         }}
       >
         <Row gutter={20}>
-          <Col span={12}>
+          <Col span={24}>
             <Table
               loading={locationTableLoading}
               dataSource={listLocations}
@@ -333,11 +335,10 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       ...clone,
                       address: data.display_name,
                     }).then(() => {
-                      this.setViewLocationDetailComponent({
-                        visible: true,
-                      }).then(() => {
-                        this.viewLocationRef.current?.initialMap();
-                        this.viewLocationRef.current?.componentDidMount();
+                      this.resetMap().then(() => {
+                        this.setViewLocationDetailComponent({
+                          visible: true,
+                        });
                       });
                     });
                     e.stopPropagation();
@@ -395,7 +396,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               ></Column>
             </Table>
           </Col>
-          <Col span={12}>
+          {/* <Col span={12}>
             {viewLocationDetailComponent?.visible && (
               <Typography.Title level={4} className="lba-text">
                 Location Detail
@@ -404,9 +405,26 @@ class LocationScreen extends React.Component<LocationScreenProps> {
             {viewLocationDetailComponent?.visible && (
               <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
             )}
-          </Col>
+          </Col> */}
         </Row>
-
+        <Drawer
+          destroyOnClose={true}
+          closable={false}
+          onClose={() => {
+            this.setViewLocationDetailComponent({
+              visible: false,
+            }).then(() => {
+              this.viewLocationRef.current?.resetMap();
+            });
+          }}
+          title="Location Detail"
+          width={'40%'}
+          visible={viewLocationDetailComponent?.visible}
+        >
+          {viewLocationDetailComponent?.visible && (
+            <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
+          )}
+        </Drawer>
         {/* Add New Location Modal */}
         {/* <AddNewLocationModal {...this.props} /> */}
         <Modal
@@ -417,18 +435,18 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           width={'50%'}
           afterClose={() => {
             this.resetMap().then(async () => {
-              const { selectedLocation } = this.props.location;
-              const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
-              if (old) {
-                const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
-                this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
-                  this.setViewLocationDetailComponent({
-                    visible: true,
-                  }).then(() => {
-                    this.viewLocationRef.current?.componentDidMount();
-                  });
-                });
-              }
+              // const { selectedLocation } = this.props.location;
+              // const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
+              // if (old) {
+              //   const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
+              //   this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
+              //     this.setViewLocationDetailComponent({
+              //       visible: true,
+              //     }).then(() => {
+              //       this.viewLocationRef.current?.componentDidMount();
+              //     });
+              //   });
+              // }
             });
           }}
           destroyOnClose={true}
@@ -464,18 +482,18 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               visible: false,
             });
             this.resetMap().then(async () => {
-              const { selectedLocation } = this.props.location;
-              const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
-              if (old) {
-                const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
-                this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
-                  this.setViewLocationDetailComponent({
-                    visible: true,
-                  }).then(() => {
-                    this.viewLocationRef.current?.componentDidMount();
-                  });
-                });
-              }
+              // const { selectedLocation } = this.props.location;
+              // const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
+              // if (old) {
+              //   const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
+              //   this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
+              //     this.setViewLocationDetailComponent({
+              //       visible: true,
+              //     }).then(() => {
+              //       this.viewLocationRef.current?.componentDidMount();
+              //     });
+              //   });
+              // }
             });
           }}
           width={'50%'}

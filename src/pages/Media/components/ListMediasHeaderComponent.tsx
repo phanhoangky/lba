@@ -203,7 +203,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                   this.setListLoading(true).then(() => {
                     if (searchListMediaParam?.title && searchListMediaParam.title !== '') {
                       this.callSearchListMedia({
-                        orderBy: e === 'name' ? 'title' : e,
+                        orderBy: e,
                         isSort: true,
                       })
                         .then(() => {
@@ -245,23 +245,25 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
             <div style={{ textAlign: 'right' }}>
               <Space>
                 <Button
+                  className="lba-btn"
                   onClick={() => {
                     this.setAddNewFolderModal({
                       visible: true,
                     });
                   }}
                 >
-                  <PlusSquareTwoTone />
+                  <PlusSquareTwoTone twoToneColor="#00cdac" />
                   Add New Folder
                 </Button>
                 <Button
+                  className="lba-btn"
                   onClick={() => {
                     this.setAddNewFileModal({
                       visible: true,
                     });
                   }}
                 >
-                  <PlusSquareTwoTone />
+                  <PlusSquareTwoTone twoToneColor="#00cdac" />
                   Add New File
                 </Button>
 

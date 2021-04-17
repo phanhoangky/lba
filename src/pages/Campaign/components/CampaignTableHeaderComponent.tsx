@@ -106,8 +106,8 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
           }
         >
           <Button>
-            {getListCampaignParam.isDescending && <SortDescendingOutlined />}
-            {!getListCampaignParam.isDescending && <SortAscendingOutlined />}
+            {getListCampaignParam?.isDescending && <SortDescendingOutlined />}
+            {!getListCampaignParam?.isDescending && <SortAscendingOutlined />}
           </Button>
         </Dropdown>
         <Select
@@ -141,7 +141,7 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
               });
             });
           }}
-          icon={<PlusSquareTwoTone />}
+          icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
         >
           Add New Campaign
         </Button>

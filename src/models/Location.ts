@@ -60,6 +60,7 @@ export type LocationModelState = {
     map?: L.Map;
     marker?: L.Marker;
     circle?: L.Circle;
+    layer?: L.TileLayer;
   }
 };
 
@@ -161,12 +162,13 @@ const LocationStore: LocationStoreModel = {
     mapComponent: {
       map: undefined,
       marker: undefined,
-      circle: undefined
+      circle: undefined,
+      layer: undefined,
     },
 
     viewLocationDetailComponent: {
       isLoading: false,
-      visible: true
+      visible: false
     }
   },
 

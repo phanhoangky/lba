@@ -564,6 +564,14 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
               <Divider></Divider>
             </>
           )}
+          {isUpdateMultiple && (
+            <Form.Item name="isPublished" label="Publish">
+              <Switch
+                checkedChildren={<CheckOutlined />}
+                unCheckedChildren={<CloseOutlined />}
+              ></Switch>
+            </Form.Item>
+          )}
           <Form.Item name="scenarioId" label="Scenario">
             <Select size="large">
               {listScenario &&

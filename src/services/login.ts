@@ -62,7 +62,7 @@ export async function EmailLogin(email: string, password: string) {
     return userCredential;
     // ...
   }).catch((error) => {
-    throw error
+    Promise.reject(error);
   })
 }
 

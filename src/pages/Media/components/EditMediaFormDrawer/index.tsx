@@ -239,7 +239,7 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
       //     </>
       //   }
       // >
-      <Form ref={this.formRef} name="edit_file_drawer">
+      <Form ref={this.formRef} name="edit_file_drawer" layout="vertical">
         <Form.Item
           label="Title"
           name="title"

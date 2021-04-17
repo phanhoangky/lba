@@ -522,9 +522,9 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           this.setEditScenariosDrawer({
             visible: false,
           }).then(() => {
-            this.setViewScenarioDetailComponent({
-              visible: true,
-            });
+            // this.setViewScenarioDetailComponent({
+            //   visible: true,
+            // });
           });
         }}
         width={'50%'}
@@ -605,18 +605,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
 
                         {scenarioItem ? (
                           <>
-                            <div
-                              // style={{
-                              //   position: 'relative',
-                              //   width: '100%',
-                              //   height: '80%',
-                              //   display: 'flex',
-                              //   alignItems: 'center',
-                              //   justifyContent: 'center',
-                              //   flexDirection: 'column',
-                              // }}
-                              className="media-wrapper"
-                            >
+                            <div className="media-wrapper">
                               <div
                                 className="remove-btn"
                                 onClick={(e) => {
@@ -628,16 +617,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                               </div>
                               <div className="media-bound">
                                 <div>{scenarioItem?.playlist?.title}</div>
-                                <div
-                                  className="media-container"
-                                  // style={{
-                                  //   // position: 'absolute',
-                                  //   width: '100%',
-                                  //   height: '80%',
-                                  //   // left: 0,
-                                  //   // top: 0,
-                                  // }}
-                                >
+                                <div className="media-container">
                                   {area &&
                                     area.typeMediaName &&
                                     area.typeMediaName.toLowerCase().includes('image') && (

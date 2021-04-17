@@ -158,12 +158,8 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
                     })
 
                     .catch((error) => {
-                      Promise.reject(error);
-                      openNotification(
-                        'error',
-                        'Devices updated fail',
-                        `${selectedDevice?.name} was fail to update`,
-                      );
+                      // Promise.reject(error);
+                      openNotification('error', 'Devices updated fail', error.message);
                       this.setEditMultipleDevicesDrawer({
                         isLoading: false,
                         // visible: false,

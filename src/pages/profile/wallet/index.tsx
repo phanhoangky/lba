@@ -51,7 +51,8 @@ class WalletScreen extends React.Component<WalletProps> {
           this.setTransTableLoading(false);
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error occured', error);
         this.setTransTableLoading(false);
       });
   };

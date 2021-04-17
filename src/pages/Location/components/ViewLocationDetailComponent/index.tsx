@@ -1,5 +1,4 @@
-import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
-import { Col, Divider, Form, Input, Modal, notification, Row, Select, Skeleton } from 'antd';
+import { Col, Divider, Form, Input, Row, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -7,9 +6,6 @@ import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState
 import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
-import type { UpdateLocationParam } from '@/services/LocationService/LocationService';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
-import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 
 export type ViewLocationDetailComponentProps = {
   dispatch: Dispatch;
@@ -34,8 +30,45 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     // }
   };
 
-  initialMap = async () => {
+  componentDidUpdate = () => {
+    // this.initialMap();
+    const { mapComponent } = this.props.location;
+
+    if (mapComponent && mapComponent.map) {
+      const { selectedLocation } = this.props.location;
+      if (selectedLocation) {
+        const lat = Number.parseFloat(selectedLocation.latitude);
+        const lng = Number.parseFloat(selectedLocation.longitude);
+        mapComponent.map.whenReady(() => {
+          if (mapComponent.map) {
+            mapComponent.map.invalidateSize(true);
+            mapComponent.map.setView([lat, lng]);
+            if (!mapComponent.marker) {
+              if (lat && lng) {
+                const marker = L.marker([lat, lng]);
+                marker.addTo(mapComponent.map);
+                this.setMapComponent({
+                  marker,
+                });
+              }
+            } else {
+              console.log('====================================');
+              console.log('Remove Marker aaaa>>>>', mapComponent.marker);
+              console.log('====================================');
+              mapComponent.marker.remove();
+              mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
+            }
+          }
+        });
+      }
+    }
+  };
+
+  initialMap = () => {
     const { mapComponent, selectedLocation } = this.props.location;
+    console.log('====================================');
+    console.log(mapComponent, selectedLocation);
+    console.log('====================================');
     if (mapComponent) {
       if (mapComponent.map && selectedLocation) {
         const lat = Number.parseFloat(selectedLocation.latitude);
@@ -44,31 +77,24 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
         console.log('====================================');
         console.log(mapComponent, lat, lng);
         console.log('====================================');
-        if (!mapComponent.marker) {
-          if (selectedLocation.longitude !== '' && selectedLocation?.latitude !== '') {
-            const marker = L.marker([lat, lng]);
-            marker.addTo(mapComponent.map);
-
-            await this.setMapComponent({
-              marker,
-            });
-            console.log('====================================');
-            console.log('VIew Location >>', mapComponent, marker);
-            console.log('====================================');
-          }
-        } else {
+        if (mapComponent.marker) {
+          mapComponent.marker.setLatLng([lat, lng]);
           mapComponent.marker.remove();
-          mapComponent.marker.removeFrom(mapComponent.map);
-          const marker = L.marker([lat, lng]);
-          console.log('====================================');
-          console.log('Remove Marker >>>>', marker);
-          console.log('====================================');
-          marker.addTo(mapComponent.map);
-
-          await this.setMapComponent({
-            marker,
-          });
+          // mapComponent.marker.removeFrom(mapComponent.map);
         }
+
+        const marker = L.marker([lat, lng]);
+        console.log('====================================');
+        console.log('Remove Marker xyz>>>>', marker);
+        console.log('====================================');
+
+        marker.addTo(mapComponent.map);
+        console.log('====================================');
+        console.log('Remove Marker abc >>>>', marker);
+        console.log('====================================');
+        this.setMapComponent({
+          marker,
+        });
       }
     }
   };
@@ -93,205 +119,11 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     });
   };
 
-  handleAutoCompleteSearch = async (address: string) => {
-    const { mapComponent } = this.props.location;
-    if (address !== '') {
-      const coordination = address.split('-');
-      const lat = Number.parseFloat(coordination[0]);
-      const lon = Number.parseFloat(coordination[1]);
-      if (mapComponent) {
-        if (mapComponent.map) {
-          mapComponent.map.setView([lat, lon]);
-
-          if (mapComponent.marker) {
-            mapComponent.marker.setLatLng([lat, lon]);
-          } else {
-            const marker = L.marker([lat, lon]).addTo(mapComponent.map);
-            // marker.setPopupContent('Marker');
-            this.setMapComponent({
-              marker,
-            });
-          }
-        }
-      }
-
-      await this.setSelectedLocation({
-        longitude: lon,
-        latitude: lat,
-        address,
-      });
-    }
-  };
-
-  onAutoCompleteSelect = async (address: string) => {
-    const { mapComponent } = this.props.location;
-    if (address !== '') {
-      const listLocations = await forwardGeocoding(address);
-      if (listLocations.length > 0) {
-        const location = listLocations[0];
-        const lat = Number.parseFloat(location.lat);
-        const lon = Number.parseFloat(location.lon);
-
-        if (mapComponent) {
-          if (mapComponent.map) {
-            mapComponent.map.setView([lat, lon]);
-
-            if (mapComponent.marker) {
-              mapComponent.marker.setLatLng([lat, lon]);
-            } else {
-              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
-              // marker.setPopupContent('Marker');
-              this.setMapComponent({
-                marker,
-              });
-            }
-          }
-        }
-
-        await this.setSelectedLocation({
-          longitude: lon,
-          latitude: lat,
-          address,
-        });
-      }
-    }
-  };
-
-  setEditLocationModal = async (modal: any) => {
-    await this.props.dispatch({
-      type: `${LOCATION_DISPATCHER}/setEditLocationModalReduder`,
-      payload: {
-        ...this.props.location.editLocationModal,
-        ...modal,
-      },
-    });
-  };
-
-  updateLocation = async (values: any) => {
-    const { selectedLocation } = this.props.location;
-
-    if (selectedLocation) {
-      const updateParam: UpdateLocationParam = {
-        id: selectedLocation.id,
-        description: selectedLocation.description,
-        isActive: selectedLocation.isActive,
-        isApprove: selectedLocation.isApprove,
-        latitude: selectedLocation.latitude,
-        longitude: selectedLocation.longitude,
-        name: selectedLocation.name,
-        typeId: selectedLocation.typeId,
-        ...values,
-      };
-      await this.props.dispatch({
-        type: `${LOCATION_DISPATCHER}/updateLocation`,
-        payload: updateParam,
-      });
-    }
-  };
-
-  callGetListLocations = async (param?: any) => {
-    await this.props.dispatch({
-      type: `${LOCATION_DISPATCHER}/getListLocation`,
-      payload: {
-        ...this.props.location.getListLocationParam,
-        ...param,
-      },
-    });
-  };
-
-  updateConfirm = async (values: any) => {
-    this.setViewLocationDetailComponent({
-      isLoading: true,
-    })
-      .then(() => {
-        this.updateLocation(values).then(() => {
-          this.callGetListLocations().then(() => {
-            this.openNotification('success', `Update ${values.name} successfully`);
-            this.setViewLocationDetailComponent({
-              // visible: false,
-              isLoading: false,
-            });
-          });
-        });
-      })
-      .catch(() => {
-        this.openNotification('error', `Update ${values.name} error`);
-        this.setViewLocationDetailComponent({
-          // visible: false,
-          isLoading: false,
-        });
-      });
-  };
-
-  deleteLocation = async (id: string) => {
-    await this.props.dispatch({
-      type: `${LOCATION_DISPATCHER}/deleteLocation`,
-      payload: id,
-    });
-  };
-
   setLocationsTableLoading = async (loading: boolean) => {
     await this.props.dispatch({
       type: `${LOCATION_DISPATCHER}/setLocationTableLoadingReducer`,
       payload: loading,
     });
-  };
-
-  deleteConfirm = (location: any) => {
-    Modal.confirm({
-      title: `Are you sure want to delete ${location.name}?`,
-      icon: <ExclamationCircleOutlined />,
-      closable: false,
-      onOk: async () => {
-        this.setLocationsTableLoading(true)
-          .then(() => {
-            this.setViewLocationDetailComponent({
-              isLoading: true,
-            });
-            this.deleteLocation(location.id)
-              .then(() => {
-                this.callGetListLocations().then(async () => {
-                  this.openNotification('success', `Delete ${location.name} successfully`);
-                  this.setLocationsTableLoading(false);
-                  this.setViewLocationDetailComponent({
-                    isLoading: false,
-                  });
-                });
-              })
-              .catch((error) => {
-                this.openNotification('error', `Delete ${location.name} error`, error.message);
-                this.setLocationsTableLoading(false);
-                this.setViewLocationDetailComponent({
-                  isLoading: false,
-                });
-              });
-          })
-          .catch(async (error: any) => {
-            this.openNotification('error', `Delete ${location.name} error`, error.message);
-            this.setLocationsTableLoading(false);
-            this.setViewLocationDetailComponent({
-              isLoading: false,
-            });
-          });
-      },
-    });
-  };
-
-  openNotification = (type?: string, message?: string, description?: string) => {
-    if (type) {
-      notification[type]({
-        message: `${message}`,
-        description,
-      });
-    } else {
-      notification.open({
-        message: `${message}`,
-        description,
-        style: {
-          borderColor: 'green',
-        },
-      });
-    }
   };
 
   setViewLocationDetailComponent = async (modal?: any) => {
@@ -304,9 +136,28 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
     });
   };
 
+  resetMap = async () => {
+    const { mapComponent } = this.props.location;
+    if (mapComponent) {
+      if (mapComponent.map) {
+        mapComponent.map.remove();
+      }
+      if (mapComponent.marker) {
+        mapComponent.marker.remove();
+      }
+      if (mapComponent.circle) {
+        mapComponent.circle.remove();
+      }
+      await this.setMapComponent({
+        map: undefined,
+        marker: undefined,
+        circle: undefined,
+      });
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
-  autoCompleteRef = React.createRef<AutoCompleteComponent>();
   render() {
     const { selectedLocation, viewLocationDetailComponent } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;

@@ -123,9 +123,8 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
               visible: true,
             });
           }}
-          icon={<PlusSquareTwoTone />}
         >
-          Add New Scenario
+          <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Scenario
         </Button>
       </Space>
     );

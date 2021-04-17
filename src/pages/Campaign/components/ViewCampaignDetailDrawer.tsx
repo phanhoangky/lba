@@ -2,7 +2,8 @@ import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import { Gauge, Liquid } from '@ant-design/charts';
-import { Button, Col, DatePicker, Divider, Drawer, Input, Row, Space, Tag } from 'antd';
+import { ClockCircleFilled } from '@ant-design/icons';
+import { Button, Col, DatePicker, Divider, Drawer, Form, Input, Row, Space, Tag } from 'antd';
 import L from 'leaflet';
 import moment from 'moment';
 import * as React from 'react';
@@ -108,17 +109,16 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                 if (mapComponent.map) {
                   if (mapComponent.marker) {
                     mapComponent.marker.remove();
-                    this.setMapComponent({
-                      marker: undefined,
-                    });
                   }
                   if (mapComponent.circle) {
                     mapComponent.circle.remove();
-                    this.setMapComponent({
-                      circle: undefined,
-                    });
                   }
                 }
+                this.setMapComponent({
+                  marker: undefined,
+                  circle: undefined,
+                  map: undefined,
+                });
               }
             }
           }}
@@ -130,11 +130,10 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
           visible={editCampaignDrawer?.visible}
           destroyOnClose={true}
           forceRender={true}
-          getContainer={false}
         >
           <Row gutter={24}>
             <Col span={12}>
-              <Row>
+              {/* <Row>
                 <Col span={4}>Name</Col>
                 <Col span={20}>
                   <Input readOnly value={selectedCampaign?.name} />
@@ -148,30 +147,32 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                     readOnly
                     value={selectedCampaign?.budget
                       .toString()
-                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                      .concat(' VND')}
                   />
                 </Col>
               </Row>
-              <br />
               <Row>
                 <Col span={4}>Calculate Fees</Col>
                 <Col span={20}>
                   <Row>
-                    <Col span={8}>Total Fee</Col>
-                    <Col span={16}>
-                      {fees && campaignBudget && campaignBudget * fees.Advertiser + campaignBudget}
+                    <Col span={4}>Total Fee</Col>
+                    <Col span={20}>
+                      {fees && campaignBudget && campaignBudget * fees.Advertiser + campaignBudget}{' '}
+                      VND
                     </Col>
                   </Row>
                   <Row>
-                    <Col span={8}>Remain Fee</Col>
-                    <Col span={16}>
-                      {fees && campaignBudget && campaignBudget - campaignBudget * fees.Supplier}
+                    <Col span={4}>Remain Fee</Col>
+                    <Col span={20}>
+                      {fees && campaignBudget && campaignBudget - campaignBudget * fees.Supplier}{' '}
+                      VND
                     </Col>
                   </Row>
                   <Row>
-                    <Col span={8}>Cancel Fee</Col>
-                    <Col span={16}>
-                      {fees && campaignBudget && campaignBudget * fees.CancelCampagin}
+                    <Col span={4}>Cancel Fee</Col>
+                    <Col span={20}>
+                      {fees && campaignBudget && campaignBudget * fees.CancelCampagin} VND
                     </Col>
                   </Row>
                 </Col>
@@ -210,6 +211,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                           <Button
                             key={uuidv4()}
                             style={{ textAlign: 'center' }}
+                            icon={<ClockCircleFilled className="lba-icon" />}
                           >{`${start}h - ${end}h`}</Button>
                         );
                       }
@@ -243,7 +245,111 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
               <Row>
                 <Col span={4}>Address</Col>
                 <Col span={20}>{selectedCampaign?.address}</Col>
-              </Row>
+              </Row> */}
+              <Form name="view_campaign_detail_form" layout="vertical">
+                <Form.Item label="Name">
+                  <Input readOnly value={selectedCampaign?.name} />
+                </Form.Item>
+                <Form.Item label="Budget">
+                  <Input
+                    readOnly
+                    value={selectedCampaign?.budget
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                      .concat(' VND')}
+                  />
+                </Form.Item>
+                <Form.Item label="Calculate Fees">
+                  <Row gutter={20}>
+                    <Col>
+                      <Form.Item label="Total Fee">
+                        <Input
+                          value={(
+                            fees &&
+                            campaignBudget &&
+                            campaignBudget * fees.Advertiser + campaignBudget
+                          )
+                            ?.toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                            .concat(' VND')}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col>
+                      <Form.Item label="Remain Fee">
+                        <Input
+                          value={(
+                            fees &&
+                            campaignBudget &&
+                            campaignBudget - campaignBudget * fees.Supplier
+                          )
+                            ?.toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                            .concat(' VND')}
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col>
+                      <Form.Item label="Cancel Fee">
+                        <Input
+                          value={(fees && campaignBudget && campaignBudget * fees.CancelCampagin)
+                            ?.toString()
+                            .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                            .concat(' VND')}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form.Item>
+                <Form.Item label="Types">
+                  <Space wrap>{listType}</Space>
+                </Form.Item>
+                <Form.Item label="From - To">
+                  <DatePicker.RangePicker
+                    disabled={true}
+                    value={[
+                      moment(moment(selectedCampaign?.startDate).format('YYYY-MM-DD')),
+                      moment(moment(selectedCampaign?.endDate).format('YYYY-MM-DD')),
+                    ]}
+                    inputReadOnly={true}
+                  />
+                </Form.Item>
+                <Form.Item label="Times">
+                  <Space wrap={true}>
+                    {selectedCampaign?.timeFilter.split('').map((time, index) => {
+                      const start = index;
+                      const end = index + 1 === 24 ? 0 : index + 1;
+                      if (time === '1') {
+                        return (
+                          <Button
+                            key={uuidv4()}
+                            style={{ textAlign: 'center' }}
+                            icon={<ClockCircleFilled className="lba-icon" />}
+                          >{`${start}h - ${end}h`}</Button>
+                        );
+                      }
+                      return '';
+                    })}
+                  </Space>
+                </Form.Item>
+                <Form.Item label="Day In Week">
+                  <Space wrap={true}>
+                    {selectedCampaign?.dateFilter.split('').map((date, index) => {
+                      return (
+                        <Button key={uuidv4()} type={date === '1' ? 'primary' : 'default'}>
+                          {index === 0 && 'Monday'}
+                          {index === 1 && 'Tuesday'}
+                          {index === 2 && 'Wednesday'}
+                          {index === 3 && 'Thursday'}
+                          {index === 4 && 'Friday'}
+                          {index === 5 && 'Saturday'}
+                          {index === 6 && 'Sunday'}
+                        </Button>
+                      );
+                    })}
+                  </Space>
+                </Form.Item>
+              </Form>
               <Divider></Divider>
               <Row>
                 <Col span={24}>

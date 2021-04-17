@@ -55,6 +55,42 @@
                 icon: 'smile',
                 component: './Welcome',
               },
+              {
+                name: 'list.campaign-list',
+                icon: 'GlobalOutlined',
+                path: '/campaign',
+                component: './Campaign',
+              },
+              {
+                name: 'list.earned-screen',
+                icon: 'MoneyCollectOutlined',
+                path: '/earn',
+                component: './Earned',
+              },
+              {
+                name: 'list.transaction-screen',
+                icon: 'TransactionOutlined',
+                path: '/transaction',
+                component: './Transaction',
+              },
+              {
+                name: 'list.scenario-list',
+                icon: 'ContainerOutlined',
+                path: '/scenario',
+                component: './Scenario',
+              },
+              {
+                name: 'list.playlist-list',
+                icon: 'PlaySquareOutlined',
+                path: '/playlist',
+                component: './Playlist',
+              },
+              {
+                name: 'list.media-list',
+                icon: 'PictureOutlined',
+                path: '/medias',
+                component: './Media',
+              },
               // {
               //   name: 'list.brand-list',
               //   icon: 'TagsFilled',
@@ -74,35 +110,12 @@
                 path: '/devices',
                 component: './Device',
               },
-              {
-                name: 'list.media-list',
-                icon: 'PictureOutlined',
-                path: '/medias',
-                component: './Media',
-              },
-              {
-                name: 'list.playlist-list',
-                icon: 'PlaySquareOutlined',
-                path: '/playlist',
-                component: './Playlist',
-              },
-              {
-                name: 'list.scenario-list',
-                icon: 'ContainerOutlined',
-                path: '/scenario',
-                component: './Scenario',
-              },
-              {
-                name: 'list.campaign-list',
-                icon: 'GlobalOutlined',
-                path: '/campaign',
-                component: './Campaign',
-              },
+              
               {
                 path: "/profile",
                 name: "profile",
                 icon: "profile",
-                component: './profile/wallet'
+                component: './profile/wallet',
                 // routes: [
                 //    {
                 //     path: '/',

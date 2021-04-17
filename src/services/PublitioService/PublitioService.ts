@@ -1,4 +1,4 @@
-import { CONSTANTS_PUBLITIO } from './../constantUrls';
+import { CONSTANTS_PUBLITIO } from '../constantUrls';
 import publitio from "./Publitio";
 
 export type GetFilesParam = {

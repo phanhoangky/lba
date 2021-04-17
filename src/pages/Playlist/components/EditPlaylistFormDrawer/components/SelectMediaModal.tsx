@@ -1,8 +1,12 @@
-import { FolderOpenTwoTone, HomeTwoTone } from '@ant-design/icons';
-import { Breadcrumb, Button, Card, Divider, List, Skeleton, Image, Col, Row } from 'antd';
+import {
+  FolderOpenTwoTone,
+  HomeTwoTone,
+  PlaySquareTwoTone,
+  PlusSquareTwoTone,
+} from '@ant-design/icons';
+import { Breadcrumb, Button, Divider, List, Skeleton, Col, Row, Table, Space } from 'antd';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
-import HoverVideoPlayer from 'react-hover-video-player';
 import type {
   Dispatch,
   FolderType,
@@ -15,6 +19,7 @@ import styles from '../index.less';
 import { SelectMediaHeaderComponent } from './SelectMediaHeaderComponent';
 import { v4 as uuidv4 } from 'uuid';
 import { openNotification } from '@/utils/utils';
+import Column from 'antd/lib/table/Column';
 
 export type SelectMediaModalProps = {
   dispatch: Dispatch;
@@ -331,6 +336,18 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
 
     await this.setListMedias(newList);
   };
+
+  setEditPlaylistDrawer = async (drawer: any) => {
+    const { editPlaylistDrawer } = this.props.playlists;
+    await this.props.dispatch({
+      type: 'playlists/setEditPlaylistDrawerReducer',
+      payload: {
+        ...editPlaylistDrawer,
+        ...drawer,
+      },
+    });
+  };
+
   render() {
     const {
       totalItem,
@@ -342,13 +359,23 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       searchListMediaParam,
     } = this.props.media;
 
-    const { totalDuration, maxDuration, minDuration } = this.props.playlists;
+    const { totalDuration, maxDuration, minDuration, selectedPlaylist } = this.props.playlists;
 
     const maxD = maxDuration || 240;
     const minD = minDuration || 10;
     const totalD = totalDuration || 0;
     const availableDuration = maxD - totalD;
     const disalbedCondition = availableDuration < minD;
+
+    const listMedias = listMedia
+      ?.filter((media) => selectedPlaylist?.playlistItems.every((p) => p.mediaSrcId !== media.id))
+      .map((media) => {
+        return {
+          ...media,
+          key: media.id,
+        };
+      });
+
     console.log('====================================');
     console.log(listMedia);
     console.log('====================================');
@@ -376,7 +403,9 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
         {/* ========================================================================================================================== */}
 
         <SelectMediaHeaderComponent {...this.props} />
-        <Divider></Divider>
+        <Divider orientation="left" className="lba-text">
+          Folders
+        </Divider>
         {/* ========================================================================================================================== */}
 
         {/* ========================================================================================================================== */}
@@ -420,7 +449,9 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
           }}
         ></List>
 
-        <Divider></Divider>
+        <Divider orientation="left" className="lba-text">
+          Medias
+        </Divider>
         {/* ========================================================================================================================== */}
 
         {/* ========================================================================================================================== */}
@@ -429,7 +460,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
 
         <Row gutter={20}>
           <Col span={24}>
-            <List
+            {/* <List
               grid={{
                 gutter: 20,
                 md: 2,
@@ -502,20 +533,21 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                             }}
                             style={{ width: '100%', height: '100%' }}
                             cover={
-                              item.type.name.toLowerCase().includes('image') ? (
+                              (item.type.name.toLowerCase().includes('image') && (
                                 <Image
                                   src={item.urlPreview}
                                   alt="image"
                                   height={200}
                                   preview={false}
                                 />
-                              ) : (
+                              )) ||
+                              (item.type.name.toLowerCase().includes('video') && (
                                 <HoverVideoPlayer
-                                  style={{ height: 200 }}
+                                  style={{ height: '200px' }}
                                   videoSrc={item.urlPreview}
                                   restartOnPaused
                                 />
-                              )
+                              ))
                             }
                             // title={item.title}
                           >
@@ -527,7 +559,79 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                   </>
                 );
               }}
-            ></List>
+            ></List> */}
+            <Table
+              dataSource={listMedias}
+              loading={listLoading}
+              // className={styles.customTable}
+              scroll={{
+                y: 400,
+              }}
+              pagination={{
+                current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
+                total: totalItem,
+                pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
+                onChange: async (e) => {
+                  if (searchListMediaParam?.title === '') {
+                    if (getListFileParam && getListFileParam.limit) {
+                      this.setListLoading(true)
+                        .then(() => {
+                          this.callGetListMedia({
+                            offset: getListFileParam.limit ? (e - 1) * getListFileParam.limit : 0,
+                            pageNumber: e - 1,
+                          }).then(() => {
+                            this.setListLoading(false);
+                          });
+                        })
+                        .catch(() => {
+                          this.setListLoading(false);
+                        });
+                    }
+                  } else {
+                    this.setListLoading(true)
+                      .then(() => {
+                        this.callSearchListMedia({
+                          pageNumber: e - 1,
+                        }).then(() => {
+                          this.setListLoading(false);
+                        });
+                      })
+                      .catch(() => {
+                        this.setListLoading(false);
+                      });
+                  }
+                },
+              }}
+            >
+              <Column key="title" title="Title" dataIndex="title"></Column>
+              <Column
+                key="title"
+                title="Action"
+                render={(record) => {
+                  return (
+                    <Space>
+                      <Button
+                        onClick={() => {
+                          this.setEditPlaylistDrawer({
+                            playingUrl: record.urlPreview,
+                            playlingMediaType: record.type.name,
+                          });
+                        }}
+                      >
+                        <PlaySquareTwoTone />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          this.addNewPlaylistItem(record);
+                        }}
+                      >
+                        <PlusSquareTwoTone />
+                      </Button>
+                    </Space>
+                  );
+                }}
+              ></Column>
+            </Table>
           </Col>
         </Row>
       </>

@@ -128,7 +128,7 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
             });
           }}
         >
-          <PlusSquareTwoTone /> Add New Playlist
+          <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Playlist
         </Button>
       </Space>
     );
