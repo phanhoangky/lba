@@ -260,10 +260,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
         // this.setAddNewPlaylistItemsDrawer({
         //   visible: false,
         // });
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
-        openNotification('error', 'Fail to  add new playlist items');
+        openNotification('error', 'Fail to  add new playlist items', error.message);
       });
   };
 
@@ -359,13 +356,13 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       searchListMediaParam,
     } = this.props.media;
 
-    const { totalDuration, maxDuration, minDuration, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
-    const maxD = maxDuration || 240;
-    const minD = minDuration || 10;
-    const totalD = totalDuration || 0;
-    const availableDuration = maxD - totalD;
-    const disalbedCondition = availableDuration < minD;
+    // const maxD = maxDuration || 240;
+    // const minD = minDuration || 10;
+    // const totalD = totalDuration || 0;
+    // const availableDuration = maxD - totalD;
+    // const disalbedCondition = availableDuration < minD;
 
     const listMedias = listMedia
       ?.filter((media) => selectedPlaylist?.playlistItems.every((p) => p.mediaSrcId !== media.id))
@@ -375,10 +372,6 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
           key: media.id,
         };
       });
-
-    console.log('====================================');
-    console.log(listMedia);
-    console.log('====================================');
     return (
       <>
         <Skeleton active loading={listLoading}>
@@ -393,7 +386,9 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                       this.breadScrumbNavigate(index);
                     }}
                   >
-                    {item.name === 'Home' ? <HomeTwoTone /> : item.name}
+                    {item.name === 'Home' ? <HomeTwoTone twoToneColor="#00cdac" style={{
+                      fontSize: '1.2em'
+                    }} /> : item.name}
                   </Breadcrumb.Item>
                 );
               })}
@@ -416,6 +411,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
           }}
           dataSource={listFolder}
           loading={listLoading}
+          className={styles.listFolderStyle}
           renderItem={(item) => {
             return (
               <>
@@ -424,7 +420,8 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                     <List.Item style={{ height: 50 }}>
                       <Button
                         size="large"
-                        type={item.isSelected ? 'primary' : 'default'}
+                        // type={item.isSelected ? 'primary' : 'default'}
+                        className={item.isSelected ? 'selected-folder' : ''}
                         style={{
                           width: 200,
                           height: 50,

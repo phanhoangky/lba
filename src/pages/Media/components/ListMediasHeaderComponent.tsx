@@ -182,8 +182,8 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                 <Select.Option key={'all'} value={-1}>
                   All
                 </Select.Option>
-                <Select.Option key={'Not Sign'} value={0}>
-                  Not Sign
+                <Select.Option key={'Reject'} value={3}>
+                  Reject
                 </Select.Option>
                 <Select.Option key={'Waiting'} value={1}>
                   Waiting
