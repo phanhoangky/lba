@@ -49,7 +49,7 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
       <Space>
         <Input.Search
           enterButton
-          value={getPlaylistParam.searchValue}
+          // value={getPlaylistParam?.searchValue}
           onSearch={(e) => {
             this.setTableLoading(true)
               .then(() => {
@@ -65,15 +65,6 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
               });
           }}
         />
-        <Button
-          onClick={async () => {
-            await this.setAddNewPlaylistModal({
-              visible: true,
-            });
-          }}
-        >
-          <PlusSquareTwoTone /> Add New Playlist
-        </Button>
 
         <Dropdown
           overlay={
@@ -83,6 +74,7 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
                   .then(() => {
                     this.callGetListPlaylist({
                       isDescending: e.key === 'desc',
+                      isSort: true,
                     }).then(() => {
                       this.setTableLoading(false);
                     });
@@ -102,18 +94,21 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
           }
         >
           <Button>
-            {getPlaylistParam.isDescending && <SortDescendingOutlined />}
-            {!getPlaylistParam.isDescending && <SortAscendingOutlined />}
+            {getPlaylistParam?.isDescending && <SortDescendingOutlined />}
+            {!getPlaylistParam?.isDescending && <SortAscendingOutlined />}
           </Button>
         </Dropdown>
         <Select
-          defaultValue=""
-          value={getPlaylistParam.orderBy}
+          style={{
+            width: '150px',
+          }}
+          defaultValue="createTime"
           onChange={(e) => {
             this.setTableLoading(true)
               .then(() => {
                 this.callGetListPlaylist({
                   orderBy: e,
+                  isSort: true,
                 }).then(() => {
                   this.setTableLoading(false);
                 });
@@ -123,9 +118,19 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
               });
           }}
         >
-          <Select.Option value="">Default</Select.Option>
-          <Select.Option value="createDate">Create Date</Select.Option>
+          <Select.Option value="createTime">Create Time</Select.Option>
+          <Select.Option value="title">Title</Select.Option>
         </Select>
+        <Button
+          onClick={async () => {
+            await this.setAddNewPlaylistModal({
+              visible: true,
+            });
+          }}
+          className="lba-btn"
+        >
+          <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Playlist
+        </Button>
       </Space>
     );
   }

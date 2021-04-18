@@ -1,6 +1,6 @@
-import { GetLinkTransfer } from "@/services/MomopaymentService";
+import { GetLinkDeposit, GetLinkSendMoney } from "@/services/MomopaymentService";
 import type { Effect, Reducer } from "umi";
-import type { GetLinkTransferParam } from '@/services/MomopaymentService';
+import type { GetLinkTransferParam ,GetLinkSendMoneyParam} from '@/services/MomopaymentService';
 
 export type momo = {
 
@@ -8,7 +8,13 @@ export type momo = {
 
 export type MomoModelState = {
   amount?: number;
-  linkTransferParam?: GetLinkTransferParam;
+  linkDepositParam?: GetLinkTransferParam;
+
+  linkDepositMoney?: string;
+
+  linkSendMoney?: string;
+
+  linkSendMoneyParam?: GetLinkSendMoneyParam;
 }
 
 export type MomoStoreModel = {
@@ -17,7 +23,8 @@ export type MomoStoreModel = {
   state: MomoModelState;
 
   effects: {
-    getLinkTransfer: Effect;
+    getLinkDeposit: Effect;
+    getLinkSendMoney: Effect;
   },
 
   reducers: {
@@ -25,7 +32,10 @@ export type MomoStoreModel = {
 
     setLinkTransferReducer: Reducer<MomoModelState>;
 
-    setLinkTransferParamReducer: Reducer<MomoModelState>;
+    setLinkDepositParamReducer: Reducer<MomoModelState>;
+    setLinkDepositMoneyReducer: Reducer<MomoModelState>;
+    setLinkSendMoneyReducer: Reducer<MomoModelState>;
+    setLinkSendMoneyParamReducer: Reducer<MomoModelState>;
   }
 }
 
@@ -33,24 +43,38 @@ const MomoStore: MomoStoreModel = {
   namespace: 'momo',
   
   state: {
-    linkTransferParam: {
+    linkDepositParam: {
       amount: 0,
       orderInfo: ""
-    }
+    },
   },
 
 
   effects: {
-    *getLinkTransfer({payload}, { call, put }) {
-      const res = yield call(GetLinkTransfer, payload);
+    *getLinkDeposit({payload}, { call, put }) {
+      const res = yield call(GetLinkDeposit, payload);
 
       yield put({
-        type: "setAmountReducer",
-        payload: res
+        type: "setLinkDepositMoneyReducer",
+        payload: res.result
       })
 
       yield put({
-        type: "setLinkTransferParamReducer",
+        type: "setLinkDepositParamReducer",
+        payload
+      })
+    },
+
+    *getLinkSendMoney({ payload }, {put, call }) {
+      const res = yield call(GetLinkSendMoney, payload);
+
+      yield put({
+        type: "setLinkSendMoneyReducer",
+        payload: res.result
+      })
+
+      yield put({
+        type: "setLinkSendMoneyParamReducer",
         payload
       })
     }
@@ -71,10 +95,31 @@ const MomoStore: MomoStoreModel = {
       }
     },
 
-    setLinkTransferParamReducer(state, { payload }) {
+    setLinkDepositParamReducer(state, { payload }) {
       return {
         ...state,
-        linkTransferParam: payload
+        linkDepositParam: payload
+      }
+    },
+
+    setLinkDepositMoneyReducer(state, { payload }) {
+      return {
+        ...state,
+        linkDepositMoney: payload
+      }
+    },
+
+    setLinkSendMoneyReducer(state, { payload }) {
+      return {
+        ...state,
+        linkSendMoney: payload
+      }
+    },
+
+    setLinkSendMoneyParamReducer(state, { payload }) {
+      return {
+        ...state,
+        linkSendMoneyParam: payload
       }
     }
   }

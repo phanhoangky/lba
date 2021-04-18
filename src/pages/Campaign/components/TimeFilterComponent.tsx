@@ -4,7 +4,12 @@ import type { CampaignModelState, DeviceModelState, Dispatch } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '..';
 import { v4 as uuidv4 } from 'uuid';
-import { CloseOutlined, PlusSquareTwoTone } from '@ant-design/icons';
+import {
+  ClockCircleTwoTone,
+  CloseCircleFilled,
+  CloseOutlined,
+  PlusSquareTwoTone,
+} from '@ant-design/icons';
 
 export type TimeFilterComponentProps = {
   dispatch: Dispatch;
@@ -46,7 +51,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
   addNewTimeFilter = async (startTime: number, endTime: number) => {
     const { createCampaignParam } = this.props.campaign;
 
-    const newList = createCampaignParam.timeFilter.split('').map((time, index) => {
+    const newList = createCampaignParam?.timeFilter.split('').map((time, index) => {
       if (index >= startTime && index <= endTime) {
         return '1';
       }
@@ -54,7 +59,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
       return '0';
     });
     await this.setCreateNewCampaignParam({
-      timeFilter: newList.toString().replaceAll(',', ''),
+      timeFilter: newList?.toString().replaceAll(',', ''),
     });
 
     if (this.timePickerRef.current) {
@@ -65,7 +70,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
   handleRemoveTimeFilter = async (index: number) => {
     const { createCampaignParam } = this.props.campaign;
 
-    const newList = createCampaignParam.timeFilter.split('').map((time, i) => {
+    const newList = createCampaignParam?.timeFilter.split('').map((time, i) => {
       if (index === i) {
         return '0';
       }
@@ -73,7 +78,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
       return time;
     });
     await this.setCreateNewCampaignParam({
-      timeFilter: newList.toString().replaceAll(',', ''),
+      timeFilter: newList?.toString().replaceAll(',', ''),
     });
   };
 
@@ -84,11 +89,11 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
 
     const { inputTimeFilterVisible } = this.state;
 
-    const timeArray = createCampaignParam.timeFilter.split('');
+    const timeArray = createCampaignParam?.timeFilter.split('');
     return (
       <>
-        <Space wrap={true}>
-          {timeArray.map((time, index) => {
+        <Space wrap={true} direction="horizontal">
+          {timeArray?.map((time, index) => {
             const startTime = index;
             const endTime = index + 1 === timeArray.length ? 0 : index + 1;
             return (
@@ -97,13 +102,15 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
                   value={`${startTime} h - ${endTime} h`}
                   readOnly
                   key={uuidv4()}
+                  prefix={<ClockCircleTwoTone twoToneColor="#00cdac" className="lba-icon" />}
                   suffix={
                     <Button
+                      danger
                       onClick={() => {
                         this.handleRemoveTimeFilter(index);
                       }}
                     >
-                      <CloseOutlined />
+                      <CloseCircleFilled className="lba-close-icon" />
                     </Button>
                   }
                 />
@@ -114,10 +121,11 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
         <Divider></Divider>
         {!inputTimeFilterVisible && (
           <Button
+            className="lba-btn"
             onClick={() => {
               this.setState({ inputTimeFilterVisible: true });
             }}
-            icon={<PlusSquareTwoTone />}
+            icon={<PlusSquareTwoTone twoToneColor="#00cdac" className="lba-icon" />}
           >
             New Time
           </Button>
@@ -148,4 +156,4 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
   }
 }
 
-export default connect((state) => ({ ...state }))(TimeFilterCamponent);
+export default connect((state: any) => ({ ...state }))(TimeFilterCamponent);

@@ -1,9 +1,9 @@
-import {  AddNewMediaSource, EditMediaSource, GetListMEdiaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, RemoveMediaSource } from '@/services/MediaSourceService';
+import {  AddNewMediaSource, EditMediaSource, GetListMediaFromFiledId, GetListMediaSource, GetListMediaSourceTypes, GetMediaSourceById, RemoveAllMediaInFolder, RemoveMediaSource } from '@/services/MediaSourceService';
 import type {AddNewMediaParam, EditMediaParam, GetMediaSourcesParam} from '@/services/MediaSourceService'
-import { CreateFolder, CreateMedia, GetFiles, GetFolders, UpdateFile } from '@/services/PublitioService/PublitioService';
+import { CreateFolder, CreateMedia, DeleteFile, GetFiles, GetFolders, RemoveFolder, UpdateFolder } from '@/services/PublitioService/PublitioService';
 import type { UpdateFileParam } from '@/services/PublitioService/PublitioService';
 import type { CreateFileParam, CreateFolderParam, GetFilesParam, GetFoldersParam } from '@/services/PublitioService/PublitioService';
-import type { Effect, Reducer } from 'umi';
+import  { Effect, Reducer } from 'umi';
 
 
 
@@ -12,8 +12,8 @@ export type FolderType = {
   name: string;
   path: string;
   parent_id: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export type FileType = {
@@ -44,6 +44,8 @@ export type FileType = {
   updated_at: string;
   isSelected?: boolean;
   isSigned: number;
+  securityHash: string;
+  fileId: string;
 }
 
 export type MediaSourceTypeModel = {
@@ -59,36 +61,47 @@ export type MediaType = {
 }
 
 export type MediaSourceModelState = {
-  listMedia: any[];
-  listFolder: any[];
-  listLoading: boolean;
-  totalItem: number;
-  breadScrumb: FolderType[];
-  getListFileParam: GetFilesParam;
-  searchListMediaParam: GetMediaSourcesParam;
-  getListFolderParam: GetFoldersParam;
-  createFolderParam: CreateFolderParam;
-  createFileParam: CreateFileParam;
-  updateFileParam: EditMediaParam;
-  addNewFolderModal: {
+  listMedia?: any[];
+  listFolder?: any[];
+  listLoading?: boolean;
+  totalItem?: number;
+  breadScrumb?: FolderType[];
+  getListFileParam?: GetFilesParam;
+  searchListMediaParam?: GetMediaSourcesParam;
+  getListFolderParam?: GetFoldersParam;
+  createFolderParam?: CreateFolderParam;
+  createFileParam?: CreateFileParam;
+  updateFileParam?: EditMediaParam;
+  addNewFolderModal?: {
     visible: boolean,
     isLoading: boolean,
   },
 
-  addNewFileModal: {
+  addNewFileModal?: {
     visible: boolean;
     isLoading: boolean;
     fileList: any;
   };
 
-  editFileDrawer: {
+  editFileDrawer?: {
     visible: boolean,
     isLoading: boolean,
+    removeConfirmVisible: boolean;
     
   },
 
-  selectedFile: FileType,
-  listMediaType: MediaType[]
+  selectedFile?: FileType,
+  listMediaType?: MediaType[],
+
+  renameFolderModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
+  viewMediaDetailComponent?: {
+    isLoading: boolean;
+    visible: boolean;
+  }
 }
 
 
@@ -106,6 +119,9 @@ export type MediaSourceModel = {
     createFolder: Effect;
     updateFile: Effect;
     removeMedia: Effect;
+    removeFolder: Effect;
+    updateFolder: Effect;
+    checkFolderHaveAnySubfolders: Effect;
   },
 
   reducers: {
@@ -129,6 +145,8 @@ export type MediaSourceModel = {
     setSelectedFileReducer: Reducer<MediaSourceModelState>;
     clearCreateFileParamReducer: Reducer<MediaSourceModelState>;
     clearSearchListMediaParamReducer: Reducer<MediaSourceModelState>;
+    setRenameFolderModalReducer: Reducer<MediaSourceModelState>;
+    setViewMediaDetailComponentReducer: Reducer<MediaSourceModelState>;
   }
 }
 
@@ -169,7 +187,8 @@ const MediaSourceStore: MediaSourceModel = {
       offset: 0,
       folder: "/",
       pageNumber: 0,
-
+      order: "date",
+      isDescending: false
     },
 
     searchListMediaParam: {
@@ -209,66 +228,88 @@ const MediaSourceStore: MediaSourceModel = {
 
     editFileDrawer: {
       isLoading: false,
-      visible: false
+      visible: false,
+      removeConfirmVisible: false
     },
 
-    selectedFile: {
-      id: "",
-      folder_id: null,
-      title: "",
-      description: "",
-      type: {
-        id: "",
-        description: "",
-        name: ""
-      },
-      extension: "",
-      size: 0,
-      width: 0,
-      height: 0,
-      privacy: "",
-      option_download: "",
-      option_ad: "",
-      option_transform: "",
-      wm_id: "",
-      urlPreview: "",
-      url_thumbnail: "",
-      url_download: "",
-      versions: 0,
-      hits: 0,
-      created_at: "",
-      updated_at: "",
-      isSigned: 0
-    },
+    // selectedFile: {
+    //   securityHash: "",
+    //   id: "",
+    //   folder_id: null,
+    //   title: "",
+    //   description: "",
+    //   type: {
+    //     id: "",
+    //     description: "",
+    //     name: ""
+    //   },
+    //   extension: "",
+    //   size: 0,
+    //   width: 0,
+    //   height: 0,
+    //   privacy: "",
+    //   option_download: "",
+    //   option_ad: "",
+    //   option_transform: "",
+    //   wm_id: "",
+    //   urlPreview: "",
+    //   url_thumbnail: "",
+    //   url_download: "",
+    //   versions: 0,
+    //   hits: 0,
+    //   created_at: "",
+    //   updated_at: "",
+    //   isSigned: 0
+    // },
     listMediaType: []
     
   },
 
   effects: {
     *getListMediaFromFileId({ payload }, { call, put }) {
+      let data: any = [];
+      if (payload.id) {
+        const {result} = yield call(GetMediaSourceById, payload.id);
+        if (result) {
+          data.push(result);
+          yield put({
+            type: "setListMediaReducer",
+            payload: data
+          })
+        }
+      } else {
+        const listFile = yield call(GetFiles, {
+          ...payload,
+          order: `${payload.order}:${payload.isDescending ? 'desc' : 'asc'}`
+        });
+        const listId = listFile.files.map((file: any) => {
+          return file.id
+        })
+        data = yield call(GetListMediaFromFiledId, listId, payload.isSigned);
+        
+        yield put({
+          type: "setTotalItemReducer",
+          payload: listFile.files_total
+        })
 
-      const listFile = yield call(GetFiles, payload);
-      const listId = listFile.files.map((file: any) => {
-        return file.id
-      })
-      const {data} = yield call(GetListMEdiaFromFiledId, listId);
-
-
+        yield put({
+          type: "setListMediaReducer",
+          payload: data.data.result.data.map((item: any) => {
+            return {
+              ...item,
+              isSelected: false
+            }
+          })
+        })
+      }
       
-      yield put({
-        type: "setListMediaReducer",
-        payload: data.result.data
-      })
 
       yield put({
         type: "setGetListFileParamReducer",
         payload
       })
 
-      yield put({
-        type: "setTotalItemReducer",
-        payload: listFile.files_total
-      })
+      
       
     },
     *searchListMedia({ payload }, { call, put }) {
@@ -292,10 +333,6 @@ const MediaSourceStore: MediaSourceModel = {
     *getListFolder({ payload }, { call, put }) {
       
       const result = yield call(GetFolders, payload);
-
-      console.log('====================================');
-      console.log(result);
-      console.log('====================================');
 
       yield put({
         type: "setListFolderReducer",
@@ -342,30 +379,76 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     *createFolder({ payload }, { call, put }) {
-      const res = yield call(CreateFolder, payload);
+      try {
+        const res = yield call(CreateFolder, payload);
 
-      yield put({
-        type: "clearCreateNewFolderParamReducer"
-      })
-
-      return res
+        yield put({
+          type: "clearCreateNewFolderParamReducer"
+        })
+      
+        return res;
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *updateFile({ payload }, { call }) {
-
       // const res = yield call(UpdateFile, payload);
-      yield call(EditMediaSource, payload);
+      try {
+        return yield call(EditMediaSource, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *removeMedia({ payload }, { call }) {
-      const updateParam: UpdateFileParam = {
-        id: payload.fileId,
-        title: payload.title,
-        description: payload.description,
-        privacy: 0
+      try {
+          const updateParam: UpdateFileParam = {
+            id: payload.fileId,
+            title: payload.title,
+            description: payload.description,
+            privacy: 0,
+            // txHash: payload.hash,
+            docId: payload.id
+          }
+          // yield call(UpdateFile, updateParam);
+          yield call(DeleteFile, payload.fileId);
+        yield call(RemoveMediaSource, updateParam);
+        return true;
+      } catch (error) {
+        return Promise.reject(error);  
       }
-      yield call(UpdateFile, updateParam);
-      yield call(RemoveMediaSource, payload.id);
+    },
+
+    *removeFolder({ payload }, { call }) {
+      // const listFiles = yield call(GetFiles, { folder: payload.id });
+
+      try {
+        yield call(RemoveAllMediaInFolder, payload.path);
+        yield call(RemoveFolder, payload.id);
+        return true;
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+
+    *updateFolder({ payload }, { call }) {
+      try {
+        return yield call(UpdateFolder, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
+    },
+
+    *checkFolderHaveAnySubfolders({ payload }, { call }) {
+      const res = yield call(GetFolders, payload);
+      console.log('====================================');
+      console.log("SubFolder >>>>>", res);
+      console.log('====================================');
+      if (res.folders_count > 0) {
+        return false;
+      }
+      return true;
     }
   },
 
@@ -392,9 +475,6 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     setCreateFileParamReducer(state, { payload }) {
-      console.log('====================================');
-      console.log("Create File Param >>>>", payload);
-      console.log('====================================');
       return {
         ...state,
         createFileParam: {
@@ -415,9 +495,6 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     setGetListFileParamReducer(state, { payload }) {
-      console.log('====================================');
-      console.log("Files >>>>", payload);
-      console.log('====================================');
       return {
         ...state,
         getListFileParam: {
@@ -428,9 +505,6 @@ const MediaSourceStore: MediaSourceModel = {
     },
 
     setGetListFolderParamReducer(state, { payload }) {
-      console.log('====================================');
-      console.log("Folders >>>>", payload);
-      console.log('====================================');
       return {
         ...state,
         getListFolderParam: {
@@ -477,10 +551,7 @@ const MediaSourceStore: MediaSourceModel = {
     setAddNewFolderModalReducer(state, { payload }) {
       return {
         ...state,
-        addNewFolderModal: {
-          ...state?.addNewFolderModal,
-          ...payload
-        }
+        addNewFolderModal: payload
       }
     },
 
@@ -542,7 +613,15 @@ const MediaSourceStore: MediaSourceModel = {
           title: "",
           typeId: "",
           url_preview: "",
-          description: ""
+          description: "",
+          accountId: "",
+          fileId: "",
+          folder: "",
+          isSigned: -1,
+          mediaSrcId: "",
+          public_id: "",
+          tags: "",
+          typeName: "",
         }
       }
     },
@@ -570,6 +649,20 @@ const MediaSourceStore: MediaSourceModel = {
           title: "",
           isSigned: -1
         }
+      }
+    },
+
+    setRenameFolderModalReducer(state, { payload }) {
+      return {
+        ...state,
+        renameFolderModal: payload
+      }
+    },
+
+    setViewMediaDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewMediaDetailComponent: payload
       }
     }
   }

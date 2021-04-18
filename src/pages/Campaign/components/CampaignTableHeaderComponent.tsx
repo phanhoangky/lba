@@ -3,7 +3,7 @@ import {
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Menu, Select, Space } from 'antd';
+import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { CampaignModelState, Dispatch, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
@@ -60,18 +60,24 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
     const { getListCampaignParam } = this.props.campaign;
     return (
       <Space>
-        <Button
-          onClick={async () => {
-            this.setListScenarioWithAtLeastOneItems().then(() => {
-              this.setAddNewCampaignModal({
-                visible: true,
+        <Input.Search
+          enterButton
+          onSearch={(e) => {
+            this.setCampaignTableLoading(true)
+              .then(() => {
+                this.callGetListCampaigns({
+                  searchValue: e,
+                  pageNumber: 0,
+                }).then(() => {
+                  this.setCampaignTableLoading(false);
+                });
+              })
+              .catch(() => {
+                this.setCampaignTableLoading(false);
               });
-            });
           }}
-          icon={<PlusSquareTwoTone />}
-        >
-          Add New Campaign
-        </Button>
+        />
+
         <Dropdown
           overlay={
             <Menu
@@ -80,6 +86,7 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
                   .then(() => {
                     this.callGetListCampaigns({
                       isDescending: e.key === 'desc',
+                      isSort: true,
                     }).then(() => {
                       this.setCampaignTableLoading(false);
                     });
@@ -99,18 +106,21 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
           }
         >
           <Button>
-            {getListCampaignParam.isDescending && <SortDescendingOutlined />}
-            {!getListCampaignParam.isDescending && <SortAscendingOutlined />}
+            {getListCampaignParam?.isDescending && <SortDescendingOutlined />}
+            {!getListCampaignParam?.isDescending && <SortAscendingOutlined />}
           </Button>
         </Dropdown>
         <Select
-          defaultValue=""
-          value={getListCampaignParam.orderBy}
+          style={{
+            width: '150px',
+          }}
+          defaultValue="createTime"
           onChange={(e) => {
             this.setCampaignTableLoading(true)
               .then(() => {
                 this.callGetListCampaigns({
                   orderBy: e,
+                  isSort: true,
                 }).then(() => {
                   this.setCampaignTableLoading(false);
                 });
@@ -120,9 +130,22 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
               });
           }}
         >
-          <Select.Option value="">Default</Select.Option>
-          <Select.Option value="createDate">Create Date</Select.Option>
+          <Select.Option value="createTime">Create Time</Select.Option>
+          <Select.Option value="name">Name</Select.Option>
         </Select>
+        <Button
+          onClick={async () => {
+            this.setListScenarioWithAtLeastOneItems().then(() => {
+              this.setAddNewCampaignModal({
+                visible: true,
+              });
+            });
+          }}
+          className="lba-btn"
+          icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
+        >
+          Add New Campaign
+        </Button>
       </Space>
     );
   }

@@ -1,0 +1,227 @@
+.rowClassName {
+  margin: 2em 0;
+  border-radius: 50px;
+  border: 1px solid black;
+}
+
+:global {
+  // .row-dragging {
+  //   background: #fafafa;
+  //   border: 1px solid #ccc;
+  // }
+
+  // .row-dragging td {
+  //   padding: 16px;
+  // }
+
+  // .row-dragging .drag-visible {
+  //   visibility: visible;
+  // }
+}
+
+.customTable {
+  :global {
+    .ant-table-tbody>tr:hover {
+      transition: all 0.3s ease;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
+    }
+
+    
+
+    // .ant-table-row, .ant-table-row-level-0 {
+    //   background: unset;
+    // }
+  }
+  .ant-table-row:hover,
+  .ant-table-row-level-0:hover {
+    transition: all 0.3s ease;
+    background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    color: aliceblue;
+  }
+}
+
+// .addNewMediaBtn {
+//   :global {
+//     position: relative;
+//     border: 2px solid rgb(16, 223, 144);
+//     transition: all 0.3s ease;
+//     font-weight: bold;
+    
+//     .add-media-overlap {
+//       position: absolute;
+//       top: 0;
+//       left: 0;
+//       height: 100%;
+//       width: 0;
+//       background-image: linear-gradient(135deg, #02aab0, #00cdac);
+//       z-index: 1;
+//     }
+
+//     .add-media-text {
+//       position: relative;
+//       z-index: 2;
+//       width: 100%;
+//       height: 100%;
+//       transition: all 0.3s ease;
+//       top: 0;
+//       left: 0;
+//       display: flex;
+//       align-items: center;
+//       justify-content: center;
+//       background-image: linear-gradient(135deg, #02aab0, #00cdac);
+//       font-weight: bolder;
+//       background-clip: text;
+//       -webkit-background-clip: text;
+//       -webkit-text-fill-color: transparent;
+
+//       .add-icon {
+//         color: #0ae7e7;
+//       }
+//     }
+    
+//   }
+
+//   &:hover .add-media-overlap {
+//     width: 100%;
+//   }
+
+//   &:hover .add-media-text {
+//     color: aliceblue;
+//     background-image: linear-gradient(135deg, #02aab0, #00cdac);
+//     font-weight: bolder;
+//     background-clip: text;
+//     -webkit-background-clip: text;
+//     -webkit-text-fill-color: transparent;
+//   }
+  
+// }
+.editPlaylistModal {
+  :global {
+    * {
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    .add-new-media-btn {
+      padding: 0;
+      position: relative;
+      border: 2px solid rgb(16, 223, 144);
+      transition: all 0.3s ease;
+      font-weight: bold;
+
+      &:hover .add-media-overlap {
+        width: 100%;
+      }
+
+      &:hover .add-media-text {
+        background-image: linear-gradient(135deg, #f4f5f5, #f4f5f5);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: #f4f5f5;
+      }
+    }
+
+    .add-media-overlap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      z-index: 1;
+    }
+
+    .add-media-text {
+      position: absolute;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      transition: all 0.3s ease;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      font-weight: bolder;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      .add-icon {
+        color: #0ae7e7;
+      }
+    }
+  }
+}
+.addNewFileModal {
+  :global {
+    .ant-upload.ant-upload-select-picture-card {
+      width: 100%;
+    }
+  }
+}
+.listMedias {
+  :global {
+    .ant-card-bordered {
+      border-radius: 5px;
+      border-image-slice: 1;
+      border-width: 5px;
+      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+    }
+    .ant-card .ant-card-bordered .ant-card-hoverable .media-record {
+      border-radius: 5px;
+      border-image-slice: 1;
+      border-width: 5px;
+      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+    }
+    .media-record {
+      transition: all 0.3s ease
+    }
+
+    .selected-media {
+      transition: all 0.3s ease;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: #f4f5f5;
+    }
+  }
+}
+.antCardBody {
+  padding: 0;
+  height: 50;
+  align-content: 'center';
+  vertical-align: 'middle';
+  align-items: 'center';
+}
+
+.breadscrumb {
+
+  :global {
+    .breadcrumb-item {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      // &:active {
+      //   text-decoration: underline;
+      // }
+    }
+
+    .ant-breadcrumb {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      >span:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
+
+  }
+
+
+}

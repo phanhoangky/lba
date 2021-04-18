@@ -1,5 +1,6 @@
-import { ControlTwoTone, FilterTwoTone } from '@ant-design/icons';
-import { Button, Input, Select, Space } from 'antd';
+import { openNotification } from '@/utils/utils';
+import { FilterTwoTone, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
+import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch, UserModelState } from 'umi';
 import { connect } from 'umi';
@@ -35,6 +36,16 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
     });
   };
 
+  setEditMultipleDevicesDrawer = async (param?: any) => {
+    this.props.dispatch({
+      type: 'deviceStore/setEditMultipleDevicesDrawerReducer',
+      payload: {
+        ...this.props.deviceStore.editMultipleDevicesDrawer,
+        ...param,
+      },
+    });
+  };
+
   setDevicesTableLoading = async (isLoading: boolean) => {
     await this.props.dispatch({
       type: 'deviceStore/setDevicesTableLoadingReducer',
@@ -43,29 +54,65 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
   };
 
   render() {
-    const { selectedDevices } = this.props.deviceStore;
+    const { selectedDevices, getDevicesParam } = this.props.deviceStore;
     return (
       <Space>
         <Input.Search
           placeholder="Input search text"
           onSearch={(value) => {
-            this.callGetListDevices({
-              name: value.trim(),
-            });
-            // this.props.dispatch({
-            //   type: 'deviceStore/getDevices',
-            //   payload: {
-            //     ...getDevicesParam,
-
-            //   },
-            // });
+            this.setDevicesTableLoading(true)
+              .then(() => {
+                this.callGetListDevices({
+                  name: value.trim(),
+                  pageNumber: 0,
+                }).then(() => {
+                  this.setDevicesTableLoading(false);
+                });
+              })
+              .catch((error) => {
+                openNotification('error', 'Error', error);
+                Promise.reject(error);
+                this.setDevicesTableLoading(false);
+              });
           }}
           enterButton
         />
-        <ControlTwoTone style={{ fontSize: `2em` }} />
+        <Dropdown
+          overlay={
+            <Menu
+              onClick={(e) => {
+                this.setDevicesTableLoading(true)
+                  .then(() => {
+                    this.callGetListDevices({
+                      isSort: true,
+                      isDescending: e.key === 'desc',
+                    }).then(() => {
+                      this.setDevicesTableLoading(false);
+                    });
+                  })
+                  .catch(() => {
+                    this.setDevicesTableLoading(false);
+                  });
+              }}
+            >
+              <Menu.Item key="asc" icon={<SortAscendingOutlined />}>
+                Ascending
+              </Menu.Item>
+              <Menu.Item key="desc" icon={<SortDescendingOutlined />}>
+                Descending
+              </Menu.Item>
+            </Menu>
+          }
+        >
+          <Button>
+            {getDevicesParam?.isDescending && <SortDescendingOutlined />}
+            {!getDevicesParam?.isDescending && <SortAscendingOutlined />}
+          </Button>
+        </Dropdown>
+        <FilterTwoTone style={{ fontSize: `2em` }} />
         <Select
           style={{ width: 120 }}
-          // defaultValue="CreateTime"
+          defaultValue="CreateTime"
           onChange={async (value) => {
             this.setDevicesTableLoading(true)
               .then(() => {
@@ -81,10 +128,9 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
               });
           }}
         >
-          <Select.Option value="CreateTime">Newest</Select.Option>
+          <Select.Option value="CreateTime">Create Time</Select.Option>
           <Select.Option value="Name">Name</Select.Option>
         </Select>
-        <FilterTwoTone style={{ fontSize: `2em` }} />
         <Button
           disabled={selectedDevices && !(selectedDevices?.length > 0)}
           onClick={async () => {
@@ -94,7 +140,10 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
             //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
             //   payload: true,
             // });
-            this.setEditModalVisible(true);
+            // this.setEditModalVisible(true);
+            this.setEditMultipleDevicesDrawer({
+              visible: true,
+            });
           }}
         >
           Edit Multiple Devices

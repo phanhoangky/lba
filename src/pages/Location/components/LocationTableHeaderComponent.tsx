@@ -1,3 +1,4 @@
+import { openNotification } from '@/utils/utils';
 import {
   PlusSquareTwoTone,
   SortAscendingOutlined,
@@ -58,14 +59,58 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
     });
   };
 
+  setEditLocationModal = async (modal: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setEditLocationModalReduder`,
+      payload: {
+        ...this.props.location.editLocationModal,
+        ...modal,
+      },
+    });
+  };
+
+  setViewLocationDetailComponent = async (modal?: any) => {
+    await this.props.dispatch({
+      type: `${LOCATION_DISPATCHER}/setViewLocationDetailComponentReducer`,
+      payload: {
+        ...this.props.location.viewLocationDetailComponent,
+        ...modal,
+      },
+    });
+  };
+
+  resetMap = async () => {
+    const { mapComponent } = this.props.location;
+    if (mapComponent) {
+      if (mapComponent.map) {
+        this.setMapComponent({
+          map: undefined,
+        });
+        if (mapComponent.marker) {
+          mapComponent.marker.remove();
+          this.setMapComponent({
+            marker: undefined,
+          });
+        }
+
+        if (mapComponent.circle) {
+          mapComponent.circle.remove();
+          this.setMapComponent({
+            circle: undefined,
+          });
+        }
+      }
+    }
+  };
+
   render() {
-    const { mapComponent, getListLocationParam } = this.props.location;
+    const { getListLocationParam } = this.props.location;
     return (
-      <Space>
-        <Row>
-          <Col span={12}>
+      <Row>
+        <Col span={24}>
+          <Space>
             <Input.Search
-              width={'40%'}
+              // width={'30%'}
               // value={getListLocationParam?.searchValue}
               enterButton
               onSearch={(e) => {
@@ -74,9 +119,16 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
                     this.callGetListLocations({
                       searchValue: e,
                       pageNumber: 0,
-                    }).then(() => {
-                      this.setLocationsTableLoading(false);
-                    });
+                    })
+                      .then(() => {
+                        this.setLocationsTableLoading(false);
+                      })
+                      .catch((error) => {
+                        console.log('====================================');
+                        console.log(error);
+                        console.log('====================================');
+                        openNotification('error', 'Fail to get list location');
+                      });
                   })
                   .catch(() => {
                     this.setLocationsTableLoading(false);
@@ -118,9 +170,9 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
             </Dropdown>
             <Select
               style={{
-                width: '100px',
+                width: '150px',
               }}
-              defaultValue=""
+              defaultValue="CreateTime"
               value={getListLocationParam?.orderBy}
               onChange={(e) => {
                 this.setLocationsTableLoading(true)
@@ -140,39 +192,28 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
               <Select.Option value="CreateTime">Create Time</Select.Option>
               <Select.Option value="Name">Name</Select.Option>
             </Select>
-          </Col>
-          <Col span={12}>
-            <div
-              style={{
-                textAlign: 'right',
-              }}
-            >
-              <Button
-                onClick={async () => {
-                  this.clearCreateLocationParam().then(() => {
-                    if (mapComponent) {
-                      if (mapComponent.map) {
-                        if (mapComponent.marker) {
-                          mapComponent.marker.removeFrom(mapComponent.map);
-                          this.setMapComponent({
-                            marker: undefined,
-                          });
-                        }
-                      }
-                    }
-                    this.setAddNewLocationModal({
-                      visible: true,
-                    });
+
+            <Button
+              onClick={async () => {
+                this.clearCreateLocationParam().then(() => {
+                  this.resetMap().then(() => {});
+                  this.setViewLocationDetailComponent({
+                    visible: false,
+                  }).then(() => {});
+                  this.setAddNewLocationModal({
+                    visible: true,
                   });
-                }}
-                icon={<PlusSquareTwoTone />}
-              >
-                Add New Location
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      </Space>
+                });
+              }}
+              className="lba-btn"
+              icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
+            >
+              Add New Location
+            </Button>
+          </Space>
+        </Col>
+        {/* <Col span={12}></Col> */}
+      </Row>
     );
   }
 }

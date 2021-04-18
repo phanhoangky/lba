@@ -5,18 +5,7 @@ import {
   PlusOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Col,
-  Divider,
-  Input,
-  Row,
-  DatePicker,
-  TimePicker,
-  Switch,
-  Space,
-  Select,
-} from 'antd';
+import { Button, Col, Divider, Input, Row, DatePicker, TimePicker, Switch, Space } from 'antd';
 import moment from 'moment';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch } from 'umi';
@@ -66,8 +55,8 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
   handleRemoveDateFilter = (index: any) => {
     const { isUpdateMultiple, updateDevicesState, selectedDevice } = this.props.deviceStore;
     const listTimeFilter = isUpdateMultiple
-      ? updateDevicesState.timeFilter
-      : selectedDevice.timeFilter;
+      ? updateDevicesState?.timeFilter
+      : selectedDevice?.timeFilter;
 
     if (isUpdateMultiple) {
       this.props.dispatch({
@@ -105,15 +94,12 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
   // Render function
   render() {
     const { inputVisible } = this.state;
-    const {
-      isUpdateMultiple,
-      selectedDevice,
-      updateDevicesState,
-      listDeviceTypes,
-    } = this.props.deviceStore;
+    const { isUpdateMultiple, selectedDevice, updateDevicesState } = this.props.deviceStore;
 
-    const timeFilter = isUpdateMultiple ? updateDevicesState.timeFilter : selectedDevice.timeFilter;
-    const displayTimeFilter = timeFilter.map((time, index) => {
+    const timeFilter = isUpdateMultiple
+      ? updateDevicesState?.timeFilter
+      : selectedDevice?.timeFilter;
+    const displayTimeFilter = timeFilter?.map((time, index) => {
       return (
         time === '1' && (
           <Input
@@ -141,7 +127,6 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
     });
 
     const { RangePicker } = DatePicker;
-    const { Option } = Select;
 
     return (
       <>
@@ -166,7 +151,7 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
                             type: 'deviceStore/setUpdateDevicesState',
                             payload: {
                               ...updateDevicesState,
-                              timeFilter: timeFilter.map((time, index) => {
+                              timeFilter: timeFilter?.map((time, index) => {
                                 if (index >= startDate && index < endDate) {
                                   return '1';
                                 }
@@ -220,7 +205,7 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
             <Col flex={3}>Discription</Col>
             <Col flex={5}>
               <Input
-                value={selectedDevice.description}
+                value={selectedDevice?.description}
                 onChange={(e) => {
                   this.props.dispatch({
                     type: 'deviceStore/setCurrentDevice',
@@ -273,12 +258,12 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
               value={
                 isUpdateMultiple
                   ? [
-                      moment(moment(updateDevicesState.startDate).format('YYYY/MM/DD')),
-                      moment(moment(updateDevicesState.endDate).format('YYYY/MM/DD')),
+                      moment(moment(updateDevicesState?.startDate).format('YYYY/MM/DD')),
+                      moment(moment(updateDevicesState?.endDate).format('YYYY/MM/DD')),
                     ]
                   : [
-                      moment(moment(selectedDevice.startDate).format('YYYY/MM/DD')),
-                      moment(moment(selectedDevice.endDate).format('YYYY/MM/DD')),
+                      moment(moment(selectedDevice?.startDate).format('YYYY/MM/DD')),
+                      moment(moment(selectedDevice?.endDate).format('YYYY/MM/DD')),
                     ]
               }
             />
@@ -293,7 +278,7 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
                 <Switch
                   checkedChildren={<CheckOutlined />}
                   unCheckedChildren={<CloseOutlined />}
-                  checked={selectedDevice.isPublished}
+                  checked={selectedDevice?.isPublished}
                   onChange={(value) => {
                     this.props.dispatch({
                       type: 'deviceStore/setCurrentDevice',
@@ -309,17 +294,17 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
             <Divider></Divider>
           </>
         )}
-        <Row>
+        {/* <Row>
           <Col flex={2}>Type</Col>
           <Col flex={5}>
             <Select
               showSearch
               style={{ width: 200 }}
               placeholder="Select a type"
-              defaultValue={listDeviceTypes[0].typeName}
+              defaultValue={listDeviceTypes?.[0].typeName}
               optionFilterProp="children"
               onChange={(value) => {
-                const { typeName } = listDeviceTypes.filter((t) => t.id === value)[0];
+                const { typeName } = listDeviceTypes?.filter((t) => t.id === value)[0];
                 if (isUpdateMultiple) {
                   this.props.dispatch({
                     type: 'deviceStore/setUpdateDevicesState',
@@ -343,10 +328,10 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
                 }
               }}
               value={
-                isUpdateMultiple ? updateDevicesState.currentType : selectedDevice.type.typeName
+                isUpdateMultiple ? updateDevicesState?.currentType : selectedDevice?.type.typeName
               }
             >
-              {listDeviceTypes.map((type) => {
+              {listDeviceTypes?.map((type) => {
                 return (
                   <Option key={`${type.id}`} value={type.id}>
                     {type.typeName}
@@ -355,11 +340,11 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
               })}
             </Select>
           </Col>
-        </Row>
+        </Row> */}
         <Divider></Divider>
       </>
     );
   }
 }
 
-export default connect((state) => ({ ...state }))(DrawerUpdateMultipleDevice);
+export default connect((state: any) => ({ ...state }))(DrawerUpdateMultipleDevice);

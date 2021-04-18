@@ -1,9 +1,11 @@
-import { sortArea } from '@/utils/utils';
-import { Col, List, Row } from 'antd';
+import { EyeFilled } from '@ant-design/icons';
+import { Button, Col, List, Modal, Row } from 'antd';
 import * as React from 'react';
 import type { CampaignModelState, Dispatch, LocationModelState, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '../..';
+import { ViewScenarioDetailComponent } from './ViewScenarioDetailComponent';
+import styles from '../../index.less';
 
 export type SelectScenarioPartProps = {
   dispatch: Dispatch;
@@ -13,6 +15,25 @@ export type SelectScenarioPartProps = {
 };
 
 class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
+  componentDidMount = async () => {
+    this.setScenarioTableLoading(true).then(() => {
+      this.callGetListScenario()
+        .then(() => {
+          this.setScenarioTableLoading(false);
+        })
+        .catch(() => {
+          this.setScenarioTableLoading(false);
+        });
+    });
+  };
+
+  setScenarioTableLoading = async (isLoading: boolean) => {
+    await this.props.dispatch({
+      type: `scenarios/setTableLoadingReducer`,
+      payload: isLoading,
+    });
+  };
+
   setCreateNewCampaignParam = async (param: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setCreateCampaignParamReducer`,
@@ -24,7 +45,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
   };
 
   callGetListScenario = async (param?: any) => {
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'scenarios/getListScenarios',
       payload: {
         ...this.props.scenarios.getListScenarioParam,
@@ -65,10 +86,50 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
     }
   };
 
+  setSelectedScenario = async (item: any) => {
+    await this.props.dispatch({
+      type: 'scenarios/setSelectedScenarioReducer',
+      payload: {
+        ...this.props.scenarios.selectedSenario,
+        ...item,
+      },
+    });
+  };
+
+  setAddNewCampaignModal = async (modal: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setAddNewCampaignModalReducer`,
+      payload: {
+        ...this.props.campaign.addNewCampaignModal,
+        ...modal,
+      },
+    });
+  };
+
+  setPreviewScenarioModal = async (param?: any) => {
+    await this.setAddNewCampaignModal({
+      previewScenarioModal: {
+        ...this.props.campaign.addNewCampaignModal?.previewScenarioModal,
+        ...param,
+      },
+    });
+  };
+
+  handlePreviewScenario = async (item: any) => {
+    this.setSelectedScenario(item).then(() => {
+      this.setPreviewScenarioModal({
+        visible: true,
+      });
+    });
+  };
+
   render() {
     const { listScenario, getListScenarioParam, totalItem, tableLoading } = this.props.scenarios;
-
-    const selectedScenario = listScenario?.filter((s) => s.isSelected)[0];
+    const { addNewCampaignModal } = this.props.campaign;
+    console.log('====================================');
+    console.log(listScenario);
+    console.log('====================================');
+    // const selectedScenario = listScenario?.filter((s) => s.isSelected)[0];
 
     return (
       <>
@@ -78,6 +139,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
               bordered
               loading={tableLoading}
               dataSource={listScenario}
+              className={styles.listScenarios}
               pagination={{
                 current: getListScenarioParam?.pageNumber ? getListScenarioParam.pageNumber + 1 : 1,
                 pageSize: getListScenarioParam?.pageLimitItem
@@ -92,11 +154,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
               }}
               renderItem={(item) => (
                 <List.Item
-                  style={
-                    item.isSelected
-                      ? { backgroundColor: '#b3def5', transition: '0.5s ease' }
-                      : { transition: '0.5s ease' }
-                  }
+                  className={item.isSelected ? 'selected-scenario' : 'scenario-record'}
                   onClick={async () => {
                     this.setCreateNewCampaignParam({
                       scenarioId: item.id,
@@ -106,49 +164,41 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
                       });
                     });
                   }}
+                  extra={
+                    <>
+                      <Button
+                        className="lba-btn"
+                        onClick={() => {
+                          this.handlePreviewScenario(item);
+                        }}
+                      >
+                        <EyeFilled /> Detail
+                      </Button>
+                    </>
+                  }
                 >
                   <List.Item.Meta title={item.title} description={item.description} />
                 </List.Item>
               )}
             ></List>
           </Col>
-          {/* <Col span={12}>
-            <div
-              id="areaWrapper"
-              style={{
-                margin: `0 auto`,
-                display: 'flex',
-                width: '100%',
-                boxSizing: 'border-box',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {selectedScenario &&
-                sortArea(selectedScenario?.layout.areas).map((area) => {
-                  return (
-                    <>
-                      <div
-                        key={area.id}
-                        style={{
-                          flex: `${area.width * 100}%`,
-                          position: 'relative',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          height: `${area.height * 100}%`,
-                          textAlign: 'center',
-                          border: `2px solid black`,
-                          transition: 'ease',
-                          transitionDuration: '1s',
-                        }}
-                      ></div>
-                    </>
-                  );
-                })}
-            </div>
-          </Col> */}
+          <Modal
+            visible={addNewCampaignModal?.previewScenarioModal?.visible}
+            closable={false}
+            centered
+            destroyOnClose={true}
+            title="Scenario Preview"
+            onCancel={() => {
+              this.setPreviewScenarioModal({
+                visible: false,
+              });
+            }}
+            footer={null}
+          >
+            {addNewCampaignModal?.previewScenarioModal?.visible && (
+              <ViewScenarioDetailComponent {...this.props} />
+            )}
+          </Modal>
         </Row>
       </>
     );

@@ -4,45 +4,46 @@ import {
   Button,
   Modal,
   Divider,
-  Space,
-  // Drawer,
+  Drawer,
   List,
   Card,
   Skeleton,
   Breadcrumb,
-  // Popconfirm,
-  Input,
+  Alert,
+  Dropdown,
+  Menu,
   Row,
   Col,
-  Select,
-  Alert,
 } from 'antd';
 import * as React from 'react';
 import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
-// import VideoThumbnail from 'react-video-thumbnail';
-// import ReactPlayer from 'react-player';
 import HoverVideoPlayer from 'react-hover-video-player';
-// import AddNewModal from './components/AddNewFileModal';
-// import EditMediaDrawer from './components/EditMediaDrawer';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { cloneDeep } from 'lodash';
 
 import {
-  // DeleteTwoTone,
-  // EditOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DeleteTwoTone,
   ExclamationCircleOutlined,
+  FolderOpenFilled,
   FolderOpenTwoTone,
   FormOutlined,
   HomeTwoTone,
-  PlusSquareTwoTone,
   SettingTwoTone,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
 import type { EditMediaParam } from '@/services/MediaSourceService';
 import { AddNewFolderFormModal } from './components/AddNewFolderFormModal';
 import { AddNewFileFormModal } from './components/AddNewFileFormModal';
-import EditMediaFormDrawer from './components/EditMediaFormDrawer';
+import { EditMediaFormDrawer } from './components/EditMediaFormDrawer';
+import { ListMediasHeaderComponent } from './components/ListMediasHeaderComponent';
+import { EditDrawerFooter } from './components/EditMediaFormDrawer/EditDrawerFooter';
+import { RenameFolderModal } from './components/RenameFolderModal';
+import styles from './index.less';
+import { openNotification } from '@/utils/utils';
+import { ViewMediaDetailComponent } from './components/ViewMediaDetailComponent';
 
 export type MediaSourceProps = {
   dispatch: Dispatch;
@@ -58,31 +59,25 @@ class Media extends React.Component<MediaSourceProps> {
   componentDidMount = () => {
     this.setListLoading(true)
       .then(() => {
-        this.getCurrentUser().then(() => {
-          this.readJWT().then(() => {
-            this.callGetListFolders().then(() => {
-              this.callGetListMedia().then(() => {
-                this.callGetListMediaType().then(() => {
-                  this.addBreadscrumbHome().then(() => {
-                    this.setListLoading(false);
-                  });
-                });
-              });
+        this.getCurrentUser().then(async () => {
+          this.readJWT().catch((error) => {
+            openNotification('error', 'Error Occured', error.message);
+          });
+          Promise.all([
+            this.callGetListFolders(),
+            this.callGetListMedia(),
+            this.callGetListMediaType(),
+            this.addBreadscrumbHome(),
+          ]).then(() => {
+            this.setGetListFilesParam({
+              id: undefined,
             });
+            this.setListLoading(false);
           });
         });
-        // Promise.all([
-        //   this.getCurrentUser(),
-        //   this.readJWT(),
-        //   this.callGetListFolders(),
-        //   this.callGetListMedia(),
-        //   this.callGetListMediaType(),
-        //   this.addBreadscrumbHome(),
-        // ]).then(() => {
-        //   this.setListLoading(false);
-        // });
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error occured', error);
         this.setListLoading(false);
       });
   };
@@ -90,23 +85,25 @@ class Media extends React.Component<MediaSourceProps> {
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
+
   addBreadscrumbHome = async () => {
     const { user } = this.props;
+    await this.setBreadScrumb([
+      {
+        id: user.currentUser?.rootFolderId,
+        name: 'Home',
+        path: '',
+        parent_id: '',
+      },
+    ]);
+  };
+
+  setListMedias = async (list: any) => {
     await this.props.dispatch({
-      type: 'media/setBreadScrumbReducer',
-      payload: [
-        {
-          id: user.currentUser?.rootFolderId,
-          name: 'Home',
-          path: '',
-          parent_id: '',
-          created_at: '',
-          updated_at: '',
-        },
-      ],
+      type: 'media/setListMediaReducer',
+      payload: list,
     });
   };
 
@@ -120,20 +117,18 @@ class Media extends React.Component<MediaSourceProps> {
   getCurrentUser = async () => {
     const res = await this.props.dispatch({
       type: 'user/getCurrentUser',
-      payload: '',
     });
-
-    await this.setCreateFileParam({
-      accountId: this.props.user.currentUser?.id,
-    });
-
-    await this.setGetListFilesParam({
-      folder: res.rootFolderId,
-    });
-
-    await this.setGetListFolderParam({
-      parent_id: res.rootFolderId,
-    });
+    Promise.all([
+      this.setCreateFileParam({
+        accountId: this.props.user.currentUser?.id,
+      }),
+      this.setGetListFilesParam({
+        folder: res.rootFolderId,
+      }),
+      this.setGetListFolderParam({
+        parent_id: res.rootFolderId,
+      }),
+    ]);
   };
 
   setCreateFileParam = async (param: any) => {
@@ -166,7 +161,7 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  async callGetListMedia(payload?: any) {
+  callGetListMedia = async (payload?: any) => {
     const { dispatch, media } = this.props;
     await dispatch({
       type: 'media/getListMediaFromFileId',
@@ -175,7 +170,7 @@ class Media extends React.Component<MediaSourceProps> {
         ...payload,
       },
     });
-  }
+  };
 
   callSearchListMedia = async (payload?: any) => {
     await this.props.dispatch({
@@ -203,25 +198,17 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  setListMediaLoading = async (isLoading: boolean) => {
-    await this.props.dispatch({
-      type: 'media/setListMediaLoading',
-      payload: isLoading,
-    });
-  };
-
   setSelectedFolder = async (folder: any) => {
     const { listFolder } = this.props.media;
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'media/setListFolderReducer',
-      payload: listFolder.map((f: any) => {
+      payload: listFolder?.map((f: any) => {
         if (f.id === folder.id) {
           return {
             ...f,
             isSelected: true,
           };
         }
-
         return {
           ...f,
           isSelected: false,
@@ -232,51 +219,33 @@ class Media extends React.Component<MediaSourceProps> {
 
   toNextFolder = async (item: any) => {
     const { getListFolderParam, getListFileParam, breadScrumb } = this.props.media;
-    this.callGetListFolders({
-      ...getListFolderParam,
-      parent_id: item.id,
-    }).then(() => {
-      this.callGetListMedia({
-        ...getListFileParam,
-        folder: item.id,
-      }).then(() => {
-        const newItem: FolderType = {
-          id: item.id,
-          name: item.name,
-          created_at: '',
-          updated_at: '',
-          parent_id: '',
-          path: '',
-        };
-        const newList = cloneDeep(breadScrumb);
-        newList.push(newItem);
-        this.props.dispatch({
-          type: 'media/setBreadScrumbReducer',
-          payload: newList,
+    this.setListLoading(true).then(() => {
+      Promise.all([
+        this.callGetListFolders({
+          ...getListFolderParam,
+          parent_id: item.id,
+        }),
+        this.callGetListMedia({
+          ...getListFileParam,
+          folder: item.id,
+        }),
+      ])
+        .then(() => {
+          const newItem: FolderType = {
+            id: item.id,
+            name: item.name,
+            parent_id: '',
+            path: '',
+          };
+          const newList = cloneDeep(breadScrumb);
+          newList?.push(newItem);
+          this.setBreadScrumb(newList).then(() => {
+            this.setListLoading(false);
+          });
+        })
+        .catch(() => {
+          this.setListLoading(false);
         });
-      });
-    });
-  };
-
-  setAddNewFolderModal = async (modal: any) => {
-    const { addNewFolderModal } = this.props.media;
-    await this.props.dispatch({
-      type: 'media/setAddNewFolderModalReducer',
-      payload: {
-        ...addNewFolderModal,
-        ...modal,
-      },
-    });
-  };
-
-  setAddNewFileModal = async (modal: any) => {
-    const { addNewFileModal } = this.props.media;
-    await this.props.dispatch({
-      type: 'media/setAddNewFileModalReducer',
-      payload: {
-        ...addNewFileModal,
-        ...modal,
-      },
     });
   };
 
@@ -284,12 +253,12 @@ class Media extends React.Component<MediaSourceProps> {
     const { createFileParam } = this.props.media;
     const { currentUser } = this.props.user;
     const hash = new Keccak(256);
-    const byte = await createFileParam.file.arrayBuffer();
+    const byte = await createFileParam?.file.arrayBuffer();
     hash.update(Buffer.from(byte));
     const security = hash.digest('hex');
     if (currentUser) {
-      if (createFileParam.isSigned) {
-        await currentUser.ether?.addDocument(security, createFileParam.isSigned);
+      if (createFileParam?.isSigned) {
+        await currentUser.ether?.addDocument(security);
       }
     }
 
@@ -300,107 +269,31 @@ class Media extends React.Component<MediaSourceProps> {
         securityHash: security,
         public_id: security,
         accountId: this.props.user.currentUser?.id,
-        fileId: createFileParam.fileId,
-        isSigned: createFileParam.isSigned,
+        fileId: createFileParam?.fileId,
+        isSigned: createFileParam?.isSigned,
       },
     });
 
     this.setListLoading(true)
-      .then(() => {
-        this.callGetListMedia().then(() => {
-          this.callGetListFolders().then(() => {
-            this.clearCreateFileParam().then(() => {
-              this.clearFilelist().then(() => {
-                this.setListLoading(false);
-              });
-            });
-          });
+      .then(async () => {
+        Promise.all([
+          this.callGetListMedia(),
+          this.callGetListFolders(),
+          this.clearCreateFileParam(),
+          this.clearFilelist(),
+        ]).then(() => {
+          this.setListLoading(false);
         });
       })
       .catch(() => {
         this.setListLoading(false);
       });
   };
+
   clearFilelist = async () => {
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'media/clearAddNewFileNodalFileList',
-      payload: '',
     });
-  };
-
-  signMedia = async (item: any) => {
-    Modal.confirm({
-      centered: true,
-      title: 'Do you want to sign this media?',
-      icon: <ExclamationCircleOutlined />,
-      onOk: async () => {
-        // const { createFileParam } = this.props.media;
-        // await this.setCreateFileParam({
-        //   isSigned: 1,
-        // });
-        this.setListLoading(true)
-          .then(async () => {
-            const { currentUser } = this.props.user;
-
-            const signature = await currentUser?.ether?.signDocument(item.securityHash);
-            console.log('====================================');
-            console.log(item, currentUser?.ether, signature);
-            console.log('====================================');
-            this.updateFile({
-              isSigned: 1,
-              hash: signature,
-            }).then(() => {
-              this.callGetListMedia().then(() => {
-                this.setListLoading(false);
-              });
-            });
-          })
-          .catch(() => {
-            this.setListLoading(false);
-          });
-      },
-      onCancel: async () => {},
-    });
-  };
-
-  // showConfirmCreateNewFile = async () => {
-  //   this.setAddNewFileModal({
-  //     isLoading: true,
-  //   })
-  //     .then(() => {
-  //       this.addNewFile().then(() => {
-  //         this.setAddNewFileModal({
-  //           isLoading: false,
-  //         });
-  //       });
-  //     })
-  //     .catch(() => {
-  //       this.setAddNewFileModal({
-  //         isLoading: false,
-  //       });
-  //     });
-  // };
-
-  createFolder = async () => {
-    const { breadScrumb, createFolderParam } = this.props.media;
-    const res = await this.props.dispatch({
-      type: 'media/createFolder',
-      payload: {
-        ...createFolderParam,
-        parent_id: breadScrumb[breadScrumb.length - 1].id,
-      },
-    });
-    console.log('====================================');
-    console.log('Created Folder >>>>', res);
-    console.log('====================================');
-    this.setListLoading(true);
-    this.callGetListFolders()
-      .then(() => {
-        this.setListLoading(false);
-      })
-      .catch(() => {
-        this.setListLoading(false);
-      });
   };
 
   setEditFileDrawer = async (modal: any) => {
@@ -414,28 +307,45 @@ class Media extends React.Component<MediaSourceProps> {
   };
 
   setSelectedFile = async (item: any) => {
-    this.props.dispatch({
+    const { listMedia } = this.props.media;
+    await this.props.dispatch({
       type: 'media/setSelectedFileReducer',
-      payload: {
-        ...this.props.media.selectedFile,
-        ...item,
-      },
+      // payload: {
+      //   ...this.props.media.selectedFile,
+      //   ...item,
+      // },
+      payload: item,
     });
+
+    const newList = listMedia?.map((m) => {
+      if (m.id === item.id) {
+        return {
+          ...m,
+          isSelected: true,
+        };
+      }
+      return {
+        ...m,
+        isSelected: false,
+      };
+    });
+
+    await this.setListMedias(newList);
   };
 
   updateFile = async (modal?: any) => {
     const { selectedFile } = this.props.media;
 
     const param: EditMediaParam = {
-      id: selectedFile.id,
-      description: selectedFile.description,
-      title: selectedFile.title,
-      typeId: selectedFile.type.id,
-      isSigned: selectedFile.isSigned,
+      id: selectedFile?.id,
+      description: selectedFile?.description,
+      title: selectedFile?.title,
+      typeId: selectedFile?.type.id,
+      isSigned: selectedFile?.isSigned,
       ...modal,
     };
 
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'media/updateFile',
       payload: param,
     });
@@ -458,27 +368,30 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  breadScrumbNavigate = async (index: number) => {
+  breadScrumbNavigate = (index: number) => {
     const { breadScrumb, getListFileParam } = this.props.media;
-    const newBreadScrumb = breadScrumb.slice(0, index + 1);
+    if (breadScrumb) {
+      const newBreadScrumb = breadScrumb.slice(0, index + 1);
 
-    await this.setListLoading(true);
-    this.setBreadScrumb(newBreadScrumb)
-      .then(() => {
-        this.callGetListFolders({
-          parent_id: breadScrumb[index].id,
-        }).then(() => {
-          this.callGetListMedia({
-            ...getListFileParam,
-            folder: breadScrumb[index].id,
-          }).then(() => {
-            this.setListLoading(false);
+      this.setListLoading(true)
+        .then(() => {
+          this.setBreadScrumb(newBreadScrumb).then(() => {
+            this.callGetListFolders({
+              parent_id: breadScrumb[index].id,
+            }).then(() => {
+              this.callGetListMedia({
+                ...getListFileParam,
+                folder: breadScrumb[index].id,
+              }).then(() => {
+                this.setListLoading(false);
+              });
+            });
           });
+        })
+        .catch(() => {
+          this.setListLoading(false);
         });
-      })
-      .catch(() => {
-        this.setListLoading(false);
-      });
+    }
   };
 
   setBreadScrumb = async (list: any) => {
@@ -488,15 +401,116 @@ class Media extends React.Component<MediaSourceProps> {
     });
   };
 
-  setSearchListMediaParam = async (params: any) => {
-    await this.props.dispatch({
-      type: 'media/setSearchListMediaParamReducer',
+  removeFolder = async (id: string, path: string) => {
+    const res = await this.props.dispatch({
+      type: `media/removeFolder`,
       payload: {
-        ...this.props.media.searchListMediaParam,
-        ...params,
+        id,
+        path,
+      },
+    });
+    return res;
+  };
+
+  checkFolderHaveAnySubfolders = async (parent_id: string) => {
+    const res = await this.props.dispatch({
+      type: `media/checkFolderHaveAnySubfolders`,
+      payload: {
+        parent_id,
+      },
+    });
+    return res;
+  };
+
+  handleRemoveFolder = async (item: any) => {
+    Modal.confirm({
+      centered: true,
+      closable: false,
+      title: `Do you want to remove ${item.name} ?`,
+      icon: <ExclamationCircleOutlined />,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
+      content: (
+        <>
+          If you remove this folder, every files inside will be removes aslo{'\n'}
+          <span>No undo option is possible</span>
+        </>
+      ),
+      onOk: () => {
+        this.setListLoading(true).then(() => {
+          this.removeFolder(item.id, item.path)
+            .then(() => {
+              this.callGetListFolders().then(() => {
+                openNotification('success', 'Remove folder successfully');
+                this.setListLoading(false);
+              });
+            })
+            .catch((error) => {
+              openNotification('error', 'Fail to remove folders', error.message);
+              this.setListLoading(false);
+            });
+        });
+      },
+      onCancel: () => {
+        this.setListLoading(false);
       },
     });
   };
+
+  handleFolderContextMenuClick = async (menu: any, item: any) => {
+    if (menu.key === 'open') {
+      this.toNextFolder(item).then(() => {
+        // this.setViewMediaDetailComponent({
+        //   visible: false,
+        // });
+      });
+    }
+
+    if (menu.key === 'remove') {
+      this.handleRemoveFolder(item).then(() => {
+        // this.setViewMediaDetailComponent({
+        //   visible: false,
+        // });
+      });
+    }
+
+    if (menu.key === 'rename') {
+      this.setSelectedFolder(item).then(() => {
+        this.setRenameFolderModal({
+          visible: true,
+        });
+      });
+    }
+  };
+
+  setRenameFolderModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: `media/setRenameFolderModalReducer`,
+      payload: {
+        ...this.props.media.renameFolderModal,
+        ...param,
+      },
+    });
+  };
+
+  setViewMediaDetailComponent = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'media/setViewMediaDetailComponentReducer',
+      payload: {
+        ...this.props.media.viewMediaDetailComponent,
+        ...param,
+      },
+    });
+  };
+  editMediaFormRef = React.createRef<EditMediaFormDrawer>();
+  editMediaFooterRef = React.createRef<EditDrawerFooter>();
+  renameFolderModalRef = React.createRef<RenameFolderModal>();
   render() {
     const {
       totalItem,
@@ -507,6 +521,9 @@ class Media extends React.Component<MediaSourceProps> {
       breadScrumb,
       editFileDrawer,
       searchListMediaParam,
+      selectedFile,
+      renameFolderModal,
+      viewMediaDetailComponent,
     } = this.props.media;
 
     const signatureOfMedia = (status: number) => {
@@ -521,161 +538,49 @@ class Media extends React.Component<MediaSourceProps> {
     };
 
     const messageOfSignature = (status: number) => {
-      if (status === 0) {
-        return 'Not Verify';
+      if (status === 3) {
+        return 'Rejected';
       }
 
       if (status === 1) {
-        return 'Waiting for server';
+        return 'Waiting';
       }
       return 'Approved';
     };
+
     return (
       <>
-        <PageContainer>
+        <PageContainer
+          title={false}
+          header={{
+            ghost: false,
+            style: {
+              padding: 0,
+            },
+          }}
+        >
           <Skeleton active loading={listLoading}>
-            <Breadcrumb>
-              <Breadcrumb.Item></Breadcrumb.Item>
-              {breadScrumb.map((item: FolderType, index: number) => {
-                return (
-                  <Breadcrumb.Item
-                    key={item.id}
-                    onClick={() => {
-                      this.breadScrumbNavigate(index);
-                    }}
-                  >
-                    {item.name === 'Home' ? <HomeTwoTone /> : item.name}
-                  </Breadcrumb.Item>
-                );
-              })}
+            <Breadcrumb className={styles.breadscrumb}>
+              {breadScrumb &&
+                breadScrumb.map((item: FolderType, index: number) => {
+                  return (
+                    <Breadcrumb.Item
+                      className="breadcrumb-item"
+                      key={item.id}
+                      onClick={() => {
+                        this.breadScrumbNavigate(index);
+                      }}
+                    >
+                      {item.name === 'Home' ? <HomeTwoTone /> : item.name}
+                    </Breadcrumb.Item>
+                  );
+                })}
             </Breadcrumb>
           </Skeleton>
-
+          <Divider></Divider>
           {/* ========================================================================================================================== */}
 
-          <Skeleton active loading={listLoading}>
-            <Row>
-              <Col span={12}>
-                <Space>
-                  <Input.Search
-                    style={{
-                      width: '100%',
-                    }}
-                    enterButton
-                    value={searchListMediaParam.title}
-                    onChange={async (e) => {
-                      this.setSearchListMediaParam({
-                        title: e.target.value,
-                      });
-                    }}
-                    onSearch={async (e) => {
-                      await this.setListLoading(true);
-                      if (e !== '') {
-                        this.callSearchListMedia({
-                          title: e,
-                        })
-                          .then(() => {
-                            this.setListLoading(false);
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      } else {
-                        this.callGetListMedia({
-                          folder: breadScrumb[breadScrumb.length - 1].id,
-                        })
-                          .then(() => {
-                            this.setListLoading(false);
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      }
-                    }}
-                  />
-                  <Select
-                    style={{ width: '100px' }}
-                    defaultValue={-1}
-                    value={searchListMediaParam.isSigned}
-                    onChange={(e) => {
-                      this.setListLoading(true)
-                        .then(() => {
-                          this.callSearchListMedia({
-                            isSigned: e === -1 ? undefined : e,
-                          }).then(() => {
-                            this.setListLoading(false);
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }}
-                  >
-                    <Select.Option key={'all'} value={-1}>
-                      All
-                    </Select.Option>
-                    <Select.Option key={'Not Sign'} value={0}>
-                      Not Sign
-                    </Select.Option>
-                    <Select.Option key={'Waiting'} value={1}>
-                      Waiting
-                    </Select.Option>
-                    <Select.Option key={'Approved'} value={2}>
-                      Approved
-                    </Select.Option>
-                  </Select>
-                </Space>
-              </Col>
-              <Col span={12}>
-                <div style={{ textAlign: 'right' }}>
-                  <Space>
-                    <Button
-                      onClick={() => {
-                        this.setAddNewFolderModal({
-                          visible: true,
-                        });
-                      }}
-                    >
-                      <PlusSquareTwoTone />
-                      Add New Folder
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        this.setAddNewFileModal({
-                          visible: true,
-                        });
-                      }}
-                    >
-                      <PlusSquareTwoTone />
-                      Add New File
-                    </Button>
-
-                    {/* <Select
-                      defaultValue={'Current Files'}
-                      value={
-                        getListFileParam.filter_privacy === 'public'
-                          ? 'Current Files'
-                          : 'Deleted Files'
-                      }
-                      showSearch
-                      onChange={async (e) => {
-                        this.callGetListMedia({
-                          filter_privacy: e,
-                        });
-                      }}
-                    >
-                      <Select.Option key={'Public'} value={'public'}>
-                        Current Files
-                      </Select.Option>
-                      <Select.Option key={'Private'} value={'private'}>
-                        Deleted Files
-                      </Select.Option>
-                    </Select> */}
-                  </Space>
-                </div>
-              </Col>
-            </Row>
-          </Skeleton>
+          <ListMediasHeaderComponent {...this.props} />
           <Divider></Divider>
           {/* ========================================================================================================================== */}
 
@@ -684,39 +589,82 @@ class Media extends React.Component<MediaSourceProps> {
           <List
             grid={{
               gutter: 20,
-              xs: 1,
-              sm: 2,
-              md: 2,
-              lg: 2,
-              xl: 3,
-              xxl: 6,
             }}
+            className={styles.listFolderStyles}
             dataSource={listFolder}
+            loading={listLoading}
             renderItem={(item) => {
               return (
                 <>
-                  {listFolder.length > 0 && (
+                  {listFolder && listFolder.length > 0 && (
                     <Skeleton active loading={listLoading}>
                       <List.Item style={{ height: 50 }}>
-                        <Button
-                          size="large"
-                          type={item.isSelected ? 'primary' : 'default'}
-                          style={{
-                            width: 200,
-                            height: 50,
-                            borderRadius: '5px',
-                            textAlign: 'left',
-                          }}
-                          icon={<FolderOpenTwoTone twoToneColor="#ffbb55" />}
-                          onClick={() => {
-                            this.setSelectedFolder(item);
-                          }}
-                          onDoubleClick={() => {
-                            this.toNextFolder(item);
-                          }}
+                        <Dropdown
+                          overlay={
+                            <Menu
+                              onClick={(e) => {
+                                this.handleFolderContextMenuClick(e, item);
+                              }}
+                            >
+                              <Menu.Item
+                                key="open"
+                                icon={
+                                  <FolderOpenFilled
+                                    style={{
+                                      color: '#00cdac',
+                                    }}
+                                  />
+                                }
+                              >
+                                Open
+                              </Menu.Item>
+                              <Menu.Item
+                                key="rename"
+                                icon={
+                                  <FormOutlined
+                                    style={{
+                                      color: '#00cdac',
+                                    }}
+                                  />
+                                }
+                              >
+                                Rename
+                              </Menu.Item>
+                              <Menu.Item
+                                key="remove"
+                                icon={<DeleteTwoTone twoToneColor="#f93e3e" />}
+                              >
+                                Remove
+                              </Menu.Item>
+                            </Menu>
+                          }
+                          trigger={['contextMenu']}
                         >
-                          {item.name}
-                        </Button>
+                          <Button
+                            size="large"
+                            // type={item.isSelected ? 'primary' : 'default'}
+                            className={item.isSelected ? 'selected-folder' : ''}
+                            style={{
+                              width: 200,
+                              height: 50,
+                              borderRadius: '5px',
+                              textAlign: 'left',
+                            }}
+                            icon={<FolderOpenTwoTone twoToneColor="#ffbb55" />}
+                            onClick={() => {
+                              this.setSelectedFolder(item);
+                            }}
+                            onDoubleClick={() => {
+                              this.toNextFolder(item).then(() => {
+                                // this.setViewMediaDetailComponent({
+                                //   visible: false,
+                                // });
+                              });
+                            }}
+                          >
+                            {item.name}
+                          </Button>
+                        </Dropdown>
                       </List.Item>
                     </Skeleton>
                   )}
@@ -732,117 +680,149 @@ class Media extends React.Component<MediaSourceProps> {
 
           {/** List Media */}
 
-          <List
-            grid={{
-              gutter: 10,
-              xs: 1,
-              sm: 2,
-              md: 2,
-              lg: 2,
-              xl: 3,
-              xxl: 4,
-            }}
-            split
-            style={{ alignItems: 'center', alignContent: 'center' }}
-            dataSource={listMedia}
-            pagination={{
-              current: 1 + getListFileParam.pageNumber,
-              total: totalItem,
-              pageSize: getListFileParam.limit,
-              onChange: async (e) => {
-                if (searchListMediaParam.title === '') {
-                  if (getListFileParam.limit) {
-                    await this.setListLoading(true);
-
-                    this.callGetListMedia({
-                      offset: (e - 1) * getListFileParam.limit,
-                      pageNumber: e - 1,
-                    })
-                      .then(() => {
-                        this.setListLoading(false);
-                      })
-                      .catch(() => {
-                        this.setListLoading(false);
-                      });
-                  }
-                } else {
-                  await this.setListLoading(true);
-
-                  this.callSearchListMedia({
-                    pageNumber: e - 1,
-                  })
-                    .then(() => {
-                      this.setListLoading(false);
-                    })
-                    .catch(() => {
-                      this.setListLoading(false);
-                    });
-                }
-              },
-            }}
-            header={<>{/* <Skeleton active loading={listLoading}></Skeleton> */}</>}
-            renderItem={(item) => {
-              return (
-                <>
-                  {listMedia.length > 0 && (
-                    <Skeleton active avatar loading={listLoading}>
-                      <List.Item>
-                        <Card
-                          bordered
-                          hoverable
-                          onClick={() => {
-                            this.setSelectedFile(item);
-                          }}
-                          style={{ width: '100%', height: '100%' }}
-                          cover={
-                            item.type.name.toLowerCase().includes('image') ? (
-                              <Image src={item.urlPreview} alt="image" height={200} />
-                            ) : (
-                              <HoverVideoPlayer
-                                style={{ height: 200 }}
-                                videoSrc={item.urlPreview}
-                                restartOnPaused
-                              />
-                            )
-                          }
-                          // title={item.title}
-                          actions={[
-                            <Alert
-                              style={{ height: '40px' }}
-                              type={signatureOfMedia(item.isSigned)}
-                              message={messageOfSignature(item.isSigned)}
-                              icon={<FormOutlined />}
-                              showIcon={true}
+          <Row gutter={20}>
+            <Col span={24}>
+              <List
+                className={styles.listMediasStyles}
+                grid={{
+                  gutter: 20,
+                  md: 2,
+                  lg: 2,
+                  xl: 3,
+                  xxl: 3,
+                }}
+                style={{ alignItems: 'center', alignContent: 'center' }}
+                dataSource={listMedia}
+                loading={listLoading}
+                pagination={{
+                  current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
+                  total: totalItem,
+                  pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
+                  onChange: async (e) => {
+                    if (searchListMediaParam?.title === '') {
+                      if (getListFileParam && getListFileParam.limit) {
+                        this.setListLoading(true)
+                          .then(() => {
+                            this.callGetListMedia({
+                              offset: getListFileParam.limit ? (e - 1) * getListFileParam.limit : 0,
+                              pageNumber: e - 1,
+                            }).then(() => {
+                              this.setListLoading(false);
+                            });
+                          })
+                          .catch(() => {
+                            this.setListLoading(false);
+                          });
+                      }
+                    } else {
+                      this.setListLoading(true)
+                        .then(() => {
+                          this.callSearchListMedia({
+                            pageNumber: e - 1,
+                          }).then(() => {
+                            this.setListLoading(false);
+                          });
+                        })
+                        .catch(() => {
+                          this.setListLoading(false);
+                        });
+                    }
+                  },
+                }}
+                header={false}
+                renderItem={(item) => {
+                  return (
+                    <>
+                      {listMedia && listMedia.length > 0 && (
+                        <Skeleton active avatar loading={listLoading}>
+                          <List.Item>
+                            <Card
+                              className={item.isSelected ? 'selected-media' : 'normal-media'}
+                              bordered
+                              hoverable
                               onClick={() => {
-                                if (item.isSigned === 0) {
-                                  this.signMedia(item);
-                                }
-                              }}
-                            ></Alert>,
-
-                            <SettingTwoTone
-                              style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
-                              onClick={async () => {
                                 this.setSelectedFile(item).then(() => {
-                                  this.setEditFileDrawer({
+                                  this.setViewMediaDetailComponent({
                                     visible: true,
                                   });
                                 });
                               }}
-                            />,
-                          ]}
-                        >
-                          <Card.Meta title={item.title} />
-                        </Card>
-                      </List.Item>
-                    </Skeleton>
-                  )}
-                </>
-              );
+                              style={{ width: '100%', height: '100%' }}
+                              cover={
+                                item.type.name.toLowerCase().includes('image') ? (
+                                  <Image
+                                    src={item.urlPreview}
+                                    alt="image"
+                                    height={200}
+                                    preview={false}
+                                  />
+                                ) : (
+                                  <HoverVideoPlayer
+                                    style={{ height: 200 }}
+                                    videoSrc={item.urlPreview}
+                                    restartOnPaused
+                                  />
+                                )
+                              }
+                              // title={item.title}
+                              actions={[
+                                <Alert
+                                  style={{ height: '40px' }}
+                                  type={signatureOfMedia(item.isSigned)}
+                                  message={messageOfSignature(item.isSigned)}
+                                  icon={<FormOutlined />}
+                                  showIcon={true}
+                                ></Alert>,
+                                <SettingTwoTone
+                                  className="lba-icon"
+                                  twoToneColor="#00cdac"
+                                  style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
+                                  onClick={(e) => {
+                                    this.setSelectedFile(item).then(() => {
+                                      this.setEditFileDrawer({
+                                        visible: true,
+                                      });
+                                    });
+                                    e.stopPropagation();
+                                  }}
+                                />,
+                              ]}
+                            >
+                              <Card.Meta title={item.title} />
+                            </Card>
+                          </List.Item>
+                        </Skeleton>
+                      )}
+                    </>
+                  );
+                }}
+              ></List>
+            </Col>
+            {/* <Col span={8}>
+              {viewMediaDetailComponent?.visible && (
+                <Typography.Title level={4} className="lba-text">
+                  Media Detail
+                </Typography.Title>
+              )}
+              {viewMediaDetailComponent?.visible && <ViewMediaDetailComponent {...this.props} />}
+              {!viewMediaDetailComponent?.visible && <Empty description={<>Preview Media</>} />}
+            </Col> */}
+          </Row>
+          {/* View Detail Media Drawer ========================================================================================================================== */}
+          <Drawer
+            visible={viewMediaDetailComponent?.visible}
+            closable={false}
+            destroyOnClose={true}
+            width={'40%'}
+            onClose={() => {
+              this.setViewMediaDetailComponent({
+                visible: false,
+              });
             }}
-          ></List>
-          {/* ========================================================================================================================== */}
-
+            title="Media Detail"
+          >
+            <ViewMediaDetailComponent {...this.props} />
+          </Drawer>
           {/* ========================================================================================================================== */}
           {/** Add New File Modal */}
 
@@ -857,9 +837,61 @@ class Media extends React.Component<MediaSourceProps> {
 
           {/** Edit File */}
           {/* ========================================================================================================================== */}
-          {editFileDrawer.visible && <EditMediaFormDrawer {...this.props} />}
+          {/* {editFileDrawer.visible && <EditMediaFormDrawer {...this.props} />} */}
+          <Drawer
+            closable={false}
+            destroyOnClose={true}
+            visible={editFileDrawer?.visible}
+            width={700}
+            onClose={async () => {
+              await this.setEditFileDrawer({
+                visible: false,
+              });
+            }}
+            title={
+              <>
+                <div>{selectedFile?.title}</div>
+              </>
+            }
+            footer={
+              <>
+                <EditDrawerFooter
+                  ref={this.editMediaFooterRef}
+                  handleUpdate={async () => {
+                    this.editMediaFormRef.current?.handleUpdateFile();
+                  }}
+                  {...this.props}
+                />
+              </>
+            }
+          >
+            <EditMediaFormDrawer ref={this.editMediaFormRef} {...this.props} />
+          </Drawer>
+          {/* ========================================================================================================================== */}
 
           {/* ========================================================================================================================== */}
+          {/* Rename Folder Modal */}
+          <Modal
+            visible={renameFolderModal?.visible}
+            confirmLoading={renameFolderModal?.isLoading}
+            destroyOnClose={true}
+            closable={false}
+            centered
+            onCancel={() => {
+              this.setRenameFolderModal({
+                visible: false,
+                isLoading: false,
+              });
+            }}
+            onOk={() => {
+              this.renameFolderModalRef.current?.handleUpdateFolder();
+            }}
+          >
+            {renameFolderModal?.visible && (
+              <RenameFolderModal ref={this.renameFolderModalRef} {...this.props} />
+            )}
+          </Modal>
+          {/* End Rename Folder Modal */}
         </PageContainer>
       </>
     );

@@ -20,8 +20,13 @@ export type AuthenticationRequest = {
   walletAddress?: string,
   uid?: string,
   rootFolderId?: string,
+  newUser?: string;
 }
 
+export type UpdateProfileParam = {
+  displayName: string;
+  photoUrl: string;
+}
 // export async function fakeAccountLogin(params: LoginParamsType) {
 //   return request('/api/login/account', {
 //     method: 'POST',
@@ -42,6 +47,64 @@ export async function GoogleLogin() {
 }
 
 export async function PostAuthentication(params: AuthenticationRequest) {
-  const res = await  ApiHelper.post("accounts/authenticate", { ...params });
-  return res
+  const res = await ApiHelper.post("accounts/authenticate", { ...params })
+  return res;
+}
+
+export async function EmailLogin(email: string, password: string) {
+  return firebase.auth().signInWithEmailAndPassword(email, password)
+  .then((userCredential) => {
+    // Signed in
+    const {user} = userCredential;
+    console.log('====================================');
+    console.log("Login >>>", user, userCredential);
+    console.log('====================================');
+    return userCredential;
+    // ...
+  }).catch((error) => {
+    Promise.reject(error);
+  })
+}
+
+export async function CreateUserWithEmailAndPasswordHandler(email: string, password: string) {
+  return firebase.auth().createUserWithEmailAndPassword(email, password)
+  .then((userCredential) => {
+     // Signed up
+    const {user} = userCredential;
+    console.log('====================================');
+    console.log(user);
+    console.log('====================================');
+    return userCredential;
+    // ...
+  }).catch((error) => {
+    throw error;
+  })
+}
+
+export async function SendEmailLink(email: string) {
+    const actionCodeSettings = {
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be in the authorized domains list in the Firebase Console.
+    url: 'http://localhost:8000/account/login',
+    // This must be true.
+    handleCodeInApp: true,
+    iOS: {
+      bundleId: 'com.example.ios'
+    },
+    android: {
+      packageName: 'com.example.android',
+      installApp: true,
+      minimumVersion: '12'
+    },
+    dynamicLinkDomain: 'example.page.link'
+  };
+  return firebase.auth().sendSignInLinkToEmail(email, actionCodeSettings).then((userCredential) => {
+    return userCredential;
+  }).catch((error) => {
+    throw error;
+  })
+}
+
+export async function SignOut() {
+  await firebase.auth().signOut();
 }

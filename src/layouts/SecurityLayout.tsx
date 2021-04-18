@@ -6,6 +6,7 @@ import { stringify } from 'querystring';
 // import type { ConnectState } from '@/models/connect';
 import type { CurrentUser } from '@/models/user';
 import type { ConnectState } from '@/models/connect';
+import { openNotification } from '@/utils/utils';
 
 type SecurityLayoutProps = {
   dispatch: Dispatch;
@@ -23,13 +24,16 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
   };
 
   componentDidMount = async () => {
+    await this.readJWT().catch((error) => {
+      console.log('====================================');
+      console.log(error);
+      console.log('====================================');
+      openNotification('error', 'Error when read JWT', error.message);
+    });
+
     this.setState({
       isReady: true,
     });
-
-    this.setState({});
-    await this.readJWT();
-
     // await dispatch({
     //   type: 'user/getCurrentUser',
     // });
@@ -67,5 +71,5 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
 
 export default connect(({ user, loading }: ConnectState) => ({
   currentUser: user.currentUser,
-  loading: loading.global,
+  loading: loading.models.user,
 }))(SecurityLayout);

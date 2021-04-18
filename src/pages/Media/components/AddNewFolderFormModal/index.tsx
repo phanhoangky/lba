@@ -1,4 +1,6 @@
-import { Card, Input, Modal, Skeleton, Form } from 'antd';
+import { openNotification } from '@/utils/utils';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { Input, Modal, Skeleton, Form } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
@@ -23,25 +25,46 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
 
   createFolder = async (values: any) => {
     const { breadScrumb, createFolderParam } = this.props.media;
-    const res = await this.props.dispatch({
+    await this.props.dispatch({
       type: 'media/createFolder',
       payload: {
         ...createFolderParam,
-        parent_id: breadScrumb[breadScrumb.length - 1].id,
+        parent_id: breadScrumb?.[breadScrumb.length - 1].id,
         ...values,
       },
     });
-    console.log('====================================');
-    console.log('Created Folder >>>>', res);
-    console.log('====================================');
-    this.setListLoading(true);
-    this.callGetListFolders()
-      .then(() => {
-        this.setListLoading(false);
-      })
-      .catch(() => {
-        this.setListLoading(false);
+  };
+
+  handleCreateFolder = async () => {
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        this.setAddNewFolderModal({
+          isLoading: true,
+        }).then(() => {
+          this.createFolder(values)
+            .then(() => {
+              this.callGetListFolders().then(() => {
+                openNotification(
+                  'success',
+                  'Create Folder Successfully',
+                  `${values.name} was created`,
+                );
+                this.setAddNewFolderModal({
+                  isLoading: false,
+                  visible: false,
+                });
+              });
+            })
+            .catch((error) => {
+              openNotification('error', 'Create Folder fail', error.message);
+              this.setAddNewFolderModal({
+                isLoading: false,
+                visible: false,
+              });
+            });
+        });
       });
+    }
   };
 
   callGetListFolders = async (payload?: any) => {
@@ -85,55 +108,41 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
-    const { listLoading, addNewFolderModal } = this.props.media;
+    const { addNewFolderModal } = this.props.media;
     return (
       <Modal
-        title={
-          <>
-            <Skeleton active loading={listLoading}>
-              Create New Folder
-            </Skeleton>
-          </>
-        }
-        visible={addNewFolderModal.visible}
-        confirmLoading={addNewFolderModal.isLoading}
+        centered
+        title={<>Create New Folder</>}
+        visible={addNewFolderModal?.visible}
+        confirmLoading={addNewFolderModal?.isLoading}
         closable={false}
         destroyOnClose={true}
         onOk={() => {
-          if (this.formRef.current) {
-            this.formRef.current.validateFields().then((values) => {
-              this.setAddNewFolderModal({
-                isLoading: true,
-              });
-
-              this.createFolder(values)
-                .then(() => {
-                  this.setAddNewFolderModal({
-                    isLoading: false,
-                    visible: false,
-                  });
-                })
-                .catch(() => {
-                  this.setAddNewFolderModal({
-                    isLoading: false,
-                    visible: false,
-                  });
-                });
-            });
-          }
+          this.handleCreateFolder();
         }}
         onCancel={() => {
           this.setAddNewFolderModal({
             visible: false,
           });
         }}
+        cancelButtonProps={{
+          icon: <CloseCircleFilled className="lba-close-icon" />,
+          danger: true,
+        }}
+        okButtonProps={{
+          className: 'lba-btn',
+          icon: <CheckCircleFilled className="lba-icon" />,
+        }}
       >
-        <Card title={'Enter new folder name'}>
-          <Form ref={this.formRef} layout="vertical" name="Create_Folder">
+        <Form ref={this.formRef} layout="vertical" name="Create_Folder">
+          <Skeleton active loading={addNewFolderModal?.isLoading}>
             <Form.Item
               label="Folder Name"
               name="name"
-              rules={[{ required: true, message: 'Please input name' }]}
+              rules={[
+                { required: true, message: 'Please input name' },
+                { max: 50, message: 'Name cannot exceed 50 characters' },
+              ]}
             >
               <Input
                 type="text"
@@ -145,8 +154,8 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
                 }}
               />
             </Form.Item>
-          </Form>
-        </Card>
+          </Skeleton>
+        </Form>
       </Modal>
     );
   }

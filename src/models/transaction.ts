@@ -1,6 +1,6 @@
-import { GetListTransactions } from "@/services/TransactionService";
+import { CreateTransaction, GetListTransactions } from "@/services/TransactionService";
 import type { GetListTransactionParam } from "@/services/TransactionService";
-import type { Effect, Reducer } from "umi";
+import  { Effect, Reducer } from "umi";
 import moment from "moment";
 import { diffTwoDate } from "@/utils/utils";
 
@@ -35,6 +35,7 @@ export type TransactionStoreModel = {
 
   effects: {
     getListTransactions: Effect;
+    createTransaction: Effect;
   },
 
   reducers: {
@@ -94,6 +95,10 @@ const TransactionStore: TransactionStoreModel = {
         type: "setGetListTransactionParamReducer",
         payload
       })
+    },
+
+    *createTransaction({ payload }, { call }) {
+      yield call(CreateTransaction, payload);
     }
   },
 

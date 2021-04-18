@@ -32,40 +32,17 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
     className = `${styles.right}  ${styles.dark}`;
   }
 
-  const setMomoAmount = async (e) => {
-    if (props.dispatch) {
-      await props.dispatch({
-        type: 'momo/setAmountReducer',
-        payload: e,
-      });
-    }
-  };
-
-  const getLinkTransfer = async () => {
-    if (props.dispatch) {
-      await props.dispatch({
-        type: 'momo/getLinkTransfer',
-        payload: {
-          amount: props.momo?.amount?.toString(),
-          orderInfo: '',
-        },
-      });
-    }
-  };
-  console.log('====================================');
-  console.log(props.momo);
-  console.log('====================================');
   return (
     <div className={className}>
       <Button
         className={styles.action}
-        icon={<WalletTwoTone />}
+        icon={<WalletTwoTone twoToneColor="#00cdac" />}
         onClick={() => {
           history.push('/profile');
         }}
       >
         {props.currentUser &&
-          props.currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+          props.currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}{' '}
         VND
       </Button>
       {/* <InputNumber

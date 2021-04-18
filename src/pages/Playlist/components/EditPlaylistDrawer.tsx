@@ -50,12 +50,14 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   };
 
   onSortEnd = ({ oldIndex, newIndex }: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
-    if (oldIndex !== newIndex) {
+    const { selectedPlaylist } = this.props.playlists;
+    if (oldIndex !== newIndex && selectedPlaylist) {
       const array: PlaylistItem[] = [];
-      const newData = arrayMove(array.concat(selectedPlaylistItems), oldIndex, newIndex).filter(
-        (el) => !!el,
-      );
+      const newData = arrayMove(
+        array.concat(selectedPlaylist.playlistItems),
+        oldIndex,
+        newIndex,
+      ).filter((el) => !!el);
       console.log('Sorted items: ', newData);
 
       this.props.dispatch({
@@ -93,9 +95,9 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   };
 
   selectPlaylistItem = async (record: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
-    if (selectedPlaylistItems.some((playlist) => playlist.id === record.id)) {
-      const newList = selectedPlaylistItems.map((item) => {
+    const { selectedPlaylist } = this.props.playlists;
+    if (selectedPlaylist?.playlistItems.some((playlist) => playlist.id === record.id)) {
+      const newList = selectedPlaylist.playlistItems.map((item) => {
         if (item.id === record.id) {
           return {
             ...item,
@@ -112,9 +114,11 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   };
 
   DraggableBodyRow = ({ className, style, ...restProps }: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     // function findIndex base on Table rowKey props and should always be a right array index
-    const index = selectedPlaylistItems.findIndex((x) => x.index === restProps['data-row-key']);
+    const index = selectedPlaylist?.playlistItems.findIndex(
+      (x) => x.index === restProps['data-row-key'],
+    );
     return <SortableItemComponent key={Math.random() + 100} index={index} {...restProps} />;
   };
 
@@ -141,10 +145,10 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   };
 
   removeItem = async (record: any) => {
-    const { selectedPlaylistItems } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
     await this.props.dispatch({
       type: 'playlists/setSelectedPlaylistItemsReducer',
-      payload: selectedPlaylistItems
+      payload: selectedPlaylist?.playlistItems
         .filter((item) => item.id !== record.id)
         .map((item, index) => {
           return {
@@ -163,10 +167,10 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   };
 
   calculateTotalDuration = async () => {
-    const { selectedPlaylistItems } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
     let total: number = 0;
-    selectedPlaylistItems.forEach((item) => {
+    selectedPlaylist?.playlistItems.forEach((item) => {
       total += item.duration;
     });
     await this.setTotalDuration(total);
@@ -180,9 +184,9 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
   };
 
   getSelectedPlaylistItem = () => {
-    const { selectedPlaylistItems } = this.props.playlists;
-    if (selectedPlaylistItems.some((item) => item.isSelected)) {
-      const selected = selectedPlaylistItems.filter((playlist) => playlist.isSelected)[0];
+    const { selectedPlaylist } = this.props.playlists;
+    if (selectedPlaylist?.playlistItems.some((item) => item.isSelected)) {
+      const selected = selectedPlaylist.playlistItems.filter((playlist) => playlist.isSelected)[0];
       return selected;
     }
 
@@ -211,16 +215,16 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
     return null;
   };
   render() {
-    const { selectedPlaylist, editPlaylistDrawer, selectedPlaylistItems } = this.props.playlists;
+    const { selectedPlaylist, editPlaylistDrawer } = this.props.playlists;
     return (
       <>
-        <Skeleton active loading={editPlaylistDrawer.isLoading}>
+        <Skeleton active loading={editPlaylistDrawer?.isLoading}>
           <Row>
             <Col span={4}>Title</Col>
             <Col span={20}>
               <Input
                 type="text"
-                value={selectedPlaylist.title}
+                value={selectedPlaylist?.title}
                 onChange={(e) => {
                   this.setSelectedPlaylist({
                     title: e.target.value,
@@ -235,7 +239,7 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
             <Col span={20}>
               <Input
                 type="text"
-                value={selectedPlaylist.description}
+                value={selectedPlaylist?.description}
                 onChange={(e) => {
                   this.setSelectedPlaylist({
                     description: e.target.value,
@@ -255,7 +259,7 @@ class EditPlaylistDrawer extends Component<EditPlaylistDrawerProps> {
                 row: this.DraggableBodyRow,
               },
             }}
-            dataSource={selectedPlaylistItems}
+            dataSource={selectedPlaylist?.playlistItems}
             title={() => {
               return (
                 <>

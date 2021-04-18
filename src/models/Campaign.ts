@@ -1,8 +1,8 @@
 import type { BaseGetRequest } from "@/services/BaseRequest";
-import { createCampaign, deleteCampaign, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
+import { createCampaign, deleteCampaign, getCampaignById, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
 import type { CreateCampaignParam } from '@/services/CampaignService/CampaignService';
 import moment from "moment";
-import type { Effect, Reducer } from "umi";
+import { Effect, Reducer } from "umi";
 import { GetFees } from "@/services/FeeService";
 
 export type Campaign = {
@@ -23,29 +23,44 @@ export type Campaign = {
   modifyTime?: string;
   isActive: boolean;
   address: string;
-  types: any[]
+  types: any[];
+  name: string;
+  isLoading?: boolean;
+  percentMoneyUsed?: number;
+  percentWin?: number;
+  campaignDeviceTypes?: any[],
 };
 
 export type CampaignModelState = {
-  listCampaign: Campaign[];
-  campaignsTableLoading: boolean;
-  totalCampaigns: number; 
-  selectedCampaign: Campaign;
+  listCampaign?: Campaign[];
+  campaignsTableLoading?: boolean;
+  totalCampaigns?: number; 
+  selectedCampaign?: Campaign;
   
-  getListCampaignParam: BaseGetRequest & {mail: string};
+  getListCampaignParam?: BaseGetRequest & {mail: string, id?: string};
 
-  createCampaignParam: CreateCampaignParam;
+  createCampaignParam?: CreateCampaignParam;
 
-  addNewCampaignModal: {
+  addNewCampaignModal?: {
     visible: boolean;
     isLoading: boolean;
     address: string;
     currentStep: number;
+    previewScenarioModal?: {
+      visible: boolean;
+      isLoading: boolean;
+    },
     fees?: any;
-    
   };
+  
+  fees?: any;
 
-  editCampaignDrawer: {
+  editCampaignDrawer?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
+  viewCampaignDetailComponent?: {
     visible: boolean;
     isLoading: boolean;
   }
@@ -78,6 +93,10 @@ export type CampaignModelStore = {
     setSelectedCampaignReducer: Reducer<CampaignModelState>;
 
     setEditCampaignReducer: Reducer<CampaignModelState>;
+
+    setViewCampaignDetailComponentReducer: Reducer<CampaignModelState>;
+
+    setFeesReducer: Reducer<CampaignModelState>;
   }
 };
 
@@ -90,6 +109,7 @@ const CampaignStore: CampaignModelStore = {
     totalCampaigns: 0,
 
     selectedCampaign: {
+      name: "",
       id: "",
       budget: 0,
       description: "",
@@ -118,7 +138,9 @@ const CampaignStore: CampaignModelStore = {
       maxBid: 0,
       radius: 0,
       scenarioId: "",
-      typeIds: []
+      typeIds: [],
+      address: "",
+      name: ""
     },
 
     getListCampaignParam: {
@@ -136,33 +158,48 @@ const CampaignStore: CampaignModelStore = {
       isLoading: false,
       address: "",
       currentStep: 1,
+      previewScenarioModal: {
+        isLoading: false,
+        visible :false
+      }
     },
 
     editCampaignDrawer: {
       isLoading: false,
       visible: false,
-    }
+    },
+
+    viewCampaignDetailComponent: {
+      visible: false,
+      isLoading: false,
+    },
+    
   },
 
   effects: {
     *getListCampaigns({ payload }, { call, put }) {
-      const { data } = yield call(getListCampaigns, payload);
 
+      let list: any = [];
+      if (payload.id) {
+        const campaign = yield call(getCampaignById, payload.id);
+        list.push(campaign.result);
+      } else {
+        const { data } = yield call(getListCampaigns, payload);
+        list = data.result.data;
+      }
       yield put({
         type: "setListCampaignReducer",
-        payload: data.result.data.map((campaign: any) => {
+        payload: list.map((c: any) => {
           return {
-            key: campaign.id,
-            ...campaign,
-            maxBid: campaign.maxBid.toFixed(2),
-            budget: campaign.budget.toFixed(2),
+            key: c.id,
+            ...c,
           }
         })
       })
 
       yield put({
         type: "setTotalCampaignReducer",
-        payload: data.result.totalItem
+        payload: list.length
       })
 
       yield put({
@@ -172,21 +209,39 @@ const CampaignStore: CampaignModelStore = {
     },
 
     *createCampaign({ payload }, { call }) {
-      yield call(createCampaign, payload);
+      try {
+        return yield call(createCampaign, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *deleteCampaign({ payload }, { call }) {
-      yield call(deleteCampaign, payload);
+      try {
+        return yield call(deleteCampaign, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
-    *getListFee({ payload }, { call }) {
+    *getListFee({ payload }, { call, put }) {
       const res = yield call(GetFees, payload);
-      
+      console.log('====================================');
+      console.log(res);
+      console.log('====================================');
+      yield put({
+        type: "setFeesReducer",
+        payload: res.result
+      })
       return res;
     },
 
     *updateCampaign({ payload }, { call }) {
-      yield call(updateCampaign, payload);
+      try {
+        return yield call(updateCampaign, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
   },
 
@@ -235,10 +290,7 @@ const CampaignStore: CampaignModelStore = {
     setCreateCampaignParamReducer(state, { payload }) {
       return {
         ...state,
-        createCampaignParam: {
-          ...state?.createCampaignParam,
-          ...payload
-        }
+        createCampaignParam: payload
       }
     },
 
@@ -256,7 +308,9 @@ const CampaignStore: CampaignModelStore = {
           maxBid: 0,
           radius: 0,
           scenarioId: "",
-          typeIds: []
+          typeIds: [],
+          name: "",
+          address: ""
         }
       }
     },
@@ -279,8 +333,22 @@ const CampaignStore: CampaignModelStore = {
           ...payload
         }
       }
+    },
+
+    setViewCampaignDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewCampaignDetailComponent: payload
+      }
+    },
+
+    setFeesReducer(state, { payload }) {
+      return {
+        ...state,
+        fees: payload
+      }
     }
-  }
+   }
 }
 
 

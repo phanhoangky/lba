@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { DeviceModelState, Dispatch } from 'umi';
 import { connect } from 'umi';
-import { Image } from 'antd';
+import { Divider, Image } from 'antd';
 
 export type ViewScreenShotModalProps = {
   dispatch: Dispatch;
@@ -11,8 +11,9 @@ export type ViewScreenShotModalProps = {
 export class ViewScreenShotModal extends React.Component<ViewScreenShotModalProps> {
   componentDidMount = async () => {
     const { selectedDevice } = this.props.deviceStore;
-    if (selectedDevice && selectedDevice.macaddress)
+    if (selectedDevice && selectedDevice.macaddress) {
       await this.fetchDevicesScreenShot(selectedDevice.macaddress);
+    }
   };
 
   componentDidUpdate = async () => {
@@ -31,17 +32,16 @@ export class ViewScreenShotModal extends React.Component<ViewScreenShotModalProp
   render() {
     const { listDevicesScreenShot } = this.props.deviceStore;
 
-    const firstUrl =
-      listDevicesScreenShot && listDevicesScreenShot.length > 0 && listDevicesScreenShot;
-    let url = '';
-    console.log('====================================');
-    console.log(listDevicesScreenShot, firstUrl);
-    console.log('====================================');
+    // const firstUrl =
+    //   listDevicesScreenShot && listDevicesScreenShot.length > 0 && listDevicesScreenShot;
+    // let url = '';
     return (
       <>
-        {listDevicesScreenShot && (
-          <Image width={'100%'} height={'100%'} src={listDevicesScreenShot} />
-        )}
+        {listDevicesScreenShot && <Image src={listDevicesScreenShot.url} />}
+        <Divider orientation="center" className="lba-text">
+          Time Shoot
+        </Divider>
+        {listDevicesScreenShot && listDevicesScreenShot.createDate}
         {/* <img src={listDevicesScreenShot[0]} width={'100%'} height={'100%'} /> */}
       </>
     );

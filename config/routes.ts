@@ -13,6 +13,27 @@
             path: '/account/login',
             component: './User/login',
           },
+          {
+            name: 'register-result',
+            icon: 'smile',
+            path: '/account/register-result',
+            component: './User/register-result',
+          },
+          {
+            name: 'register',
+            icon: 'smile',
+            path: '/account/register',
+            component: './User/register',
+          },
+          {
+            name: 'forgot-password',
+            icon: 'smile',
+            path: '/account/forgot-password',
+            component: './User/forgot-password',
+          },
+          {
+            component: '404',
+          },
         ],
       },
       {
@@ -34,6 +55,42 @@
                 icon: 'smile',
                 component: './Welcome',
               },
+              {
+                name: 'list.campaign-list',
+                icon: 'GlobalOutlined',
+                path: '/campaign',
+                component: './Campaign',
+              },
+              {
+                name: 'list.earned-screen',
+                icon: 'MoneyCollectOutlined',
+                path: '/earn',
+                component: './Earned',
+              },
+              {
+                name: 'list.transaction-screen',
+                icon: 'TransactionOutlined',
+                path: '/transaction',
+                component: './Transaction',
+              },
+              {
+                name: 'list.scenario-list',
+                icon: 'ContainerOutlined',
+                path: '/scenario',
+                component: './Scenario',
+              },
+              {
+                name: 'list.playlist-list',
+                icon: 'PlaySquareOutlined',
+                path: '/playlist',
+                component: './Playlist',
+              },
+              {
+                name: 'list.media-list',
+                icon: 'PictureOutlined',
+                path: '/medias',
+                component: './Media',
+              },
               // {
               //   name: 'list.brand-list',
               //   icon: 'TagsFilled',
@@ -46,41 +103,19 @@
                 path: '/location',
                 component: './Location',
               },
-              {
-                name: 'list.campaign-list',
-                icon: 'GlobalOutlined',
-                path: '/campaign',
-                component: './Campaign',
-              },
+              
               {
                 name: 'list.device-list',
                 icon: 'FundProjectionScreen',
                 path: '/devices',
                 component: './Device',
               },
-              {
-                name: 'list.media-list',
-                icon: 'PictureOutlined',
-                path: '/medias',
-                component: './Media',
-              },
-              {
-                name: 'list.playlist-list',
-                icon: 'PlaySquareOutlined',
-                path: '/playlist',
-                component: './Playlist',
-              },
-              {
-                name: 'list.scenario-list',
-                icon: 'ContainerOutlined',
-                path: '/scenario',
-                component: './Scenario',
-              },
+              
               {
                 path: "/profile",
                 name: "profile",
                 icon: "profile",
-                component: './profile/wallet'
+                component: './profile/wallet',
                 // routes: [
                 //    {
                 //     path: '/',

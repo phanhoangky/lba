@@ -24,25 +24,24 @@ export type CreateDeviceParams = {
 export type UpdateDeviceParams = {
   description: string,
   name: string,
-  typeId: string,
   dateFilter: string,
   endDate: string,
   minBid: 0,
   isPublished: boolean,
   startDate: string,
-  timeFilter: string
+  timeFilter: string,
+  defaultScenarioId?: string;
 }
 
 export type UpdateListDevicesParam = {
   idList: string[],
-  typeId: string,
   endDate: string,
   startDate: string,
   isPublished: boolean,
   timeFilter: string[],
   dateFilter: string[],
   minBid: 0,
-  currentType: string;
+  defaultScenarioId?: string;
 }
 
 export async function GetDevices(param: GetDeviceParams) {
@@ -56,14 +55,19 @@ export async function GetDevices(param: GetDeviceParams) {
 export async function UpdateDevice(param: UpdateDeviceParams, id: string) {
   console.log("Param: >>>>", param, id);
   
-  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.DEVICES_URL}/${id}`, { ...param })
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.DEVICES_URL}/${id}`, { ...param }).catch((error) => {
+    return Promise.reject(error);
+  })
   return data
 }
 
 export async function UpdateListDevices(param: UpdateListDevicesParam) {
   console.log("Update List Devices Param >>>", param);
   
-  await ApiHelper.put(CONSTANTS_LBA.DEVICES_URL, { ...param });
+  const { data } = await ApiHelper.put(CONSTANTS_LBA.DEVICES_URL, { ...param }).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 export async function GetListTypes() {
@@ -78,8 +82,10 @@ export async function GetDevicesByTypeId(param: GetDeviceParams, id: string) {
 }
 
 export async function DeleteDevice(id: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.DEVICES_URL}/${id}`);
-
+  const {data } = await ApiHelper.delete(`${CONSTANTS_LBA.DEVICES_URL}/${id}`).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 

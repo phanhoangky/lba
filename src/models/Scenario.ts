@@ -58,13 +58,21 @@ export type ScenarioModelState = {
     playlistLoading: boolean;
   };
 
+  viewScenarioDetailComponent?: {
+    visible: boolean;
+    isLoading: boolean;
+    playlistLoading: boolean;
+  }
+
   selectedArea?: Area;
 
   playlistsDrawer?: {
     visible: boolean;
     isLoading: boolean;
     totalItem: number;
-    listPlaylists: Playlist[]
+    listPlaylists: Playlist[];
+    urlPreview?: string;
+    mediaType?: string;
   },
 
   getListPlaylistParam?: GetListPlaylistParam;
@@ -101,6 +109,8 @@ export type ScenarioStoreModel = {
     setSelectedAreaReducer: Reducer<ScenarioModelState>;
     setSelectedPlaylistReducer: Reducer<ScenarioModelState>;
     setSelectedPlaylistItemsReducer: Reducer<ScenarioModelState>;
+
+    setViewScenarioDetailComponentReducer: Reducer<ScenarioModelState>;
   };
 };
 
@@ -173,7 +183,7 @@ const ScenarioStore: ScenarioStoreModel = {
       isLoading: false,
       visible: false,
       totalItem: 0,
-      listPlaylists: []
+      listPlaylists: [],
     },
 
     getListPlaylistParam: {
@@ -195,7 +205,13 @@ const ScenarioStore: ScenarioStoreModel = {
       isSelected: false
     },
 
-    selectedPlaylistItems: []
+    selectedPlaylistItems: [],
+
+    viewScenarioDetailComponent: {
+      visible: false,
+      isLoading: false,
+      playlistLoading: false
+    }
   },
 
   effects: {
@@ -224,14 +240,18 @@ const ScenarioStore: ScenarioStoreModel = {
     },
 
     *createScenario({ payload }, { call, put }) {
-      console.log('====================================');
-      console.log('Effects Create scenarios');
-      console.log('====================================');
-      yield call(CreateNewScenario, payload);
+      try {
 
-      yield put({
-        type: 'clearCreateScenarioParamReducer',
-      });
+        const data=  yield call(CreateNewScenario, payload);
+        yield put({
+          type: 'clearCreateScenarioParamReducer',
+        });
+        return data;
+      } catch (error) {
+        return Promise.reject(error);
+      }
+
+      
     },
 
     *getListPlaylist({ payload }, { call, put }) {
@@ -261,14 +281,19 @@ const ScenarioStore: ScenarioStoreModel = {
     },
 
     *updateScenario({ payload }, { call }) {
-      console.log('====================================');
-      console.log("UpdateScenario >>>>");
-      console.log('====================================');
-      yield call(UpdateScenario, payload);
+      try {
+        return yield call(UpdateScenario, payload);
+      } catch (error) {
+        return Promise.reject(error);
+      }
     },
 
     *removeScenario({ payload }, { call }) {
-      yield call(RemoveScenario, payload); 
+      try {
+        return yield call(RemoveScenario, payload); 
+      } catch (error) {
+        return Promise.reject(error);
+      }
     }
   },
 
@@ -399,6 +424,13 @@ const ScenarioStore: ScenarioStoreModel = {
       return {
         ...state,
         selectedPlaylistItems: payload
+      }
+    },
+
+    setViewScenarioDetailComponentReducer(state, { payload }) {
+      return {
+        ...state,
+        viewScenarioDetailComponent: payload
       }
     }
   },

@@ -1,5 +1,5 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
-import { UploadOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, DeleteTwoTone, SettingFilled, UploadOutlined } from '@ant-design/icons';
 import {
   Button,
   Drawer,
@@ -12,6 +12,8 @@ import {
   Col,
   Checkbox,
   Table,
+  Modal,
+  Skeleton,
 } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
@@ -25,11 +27,13 @@ import type {
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-import { sortArea } from '@/utils/utils';
+import { openNotification, sortArea } from '@/utils/utils';
 import { v4 as uuidv4 } from 'uuid';
 import SelectPlaylistDrawer from '../SelectPlaylistDrawer';
 import ReactPlayer from 'react-player';
 import Column from 'antd/lib/table/Column';
+import { SCENARIO_STORE } from '../..';
+import styles from '../../index.less';
 
 export type EditScenarioFormDrawerProps = {
   dispatch: Dispatch;
@@ -39,7 +43,7 @@ export type EditScenarioFormDrawerProps = {
   layouts: LayoutModelState;
 };
 
-class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps> {
+export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps> {
   componentDidMount() {
     const { selectedSenario } = this.props.scenarios;
     if (this.formRef.current) {
@@ -62,9 +66,6 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
 
       const height = (width * 9) / 16;
       element.style.height = `${height}px`;
-      // console.log('====================================');
-      // console.log('Calculated >>>', height, element);
-      // console.log('====================================');
     }
   };
 
@@ -107,43 +108,94 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
   };
 
   removeScenario = async (id: string) => {
-    await this.setEditScenariosDrawer({
-      visible: false,
+    await this.props.dispatch({
+      type: 'scenarios/removeScenario',
+      payload: id,
     });
-
-    await this.setTableLoading(true);
-    this.props
-      .dispatch({
-        type: 'scenarios/removeScenario',
-        payload: id,
-      })
-      .then(() => {
-        this.callGetListScenario().then(() => {
-          this.setTableLoading(false);
-        });
-      })
-      .catch(() => {
-        this.setTableLoading(false);
-      });
   };
 
-  updateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
-    await this.setEditScenariosDrawer({
-      visible: false,
+  handleRemoveScenario = async (record: any) => {
+    Modal.confirm({
+      title: `Are you sure you want to delete ${record.title}`,
+      centered: true,
+      closable: false,
+      onOk: async () => {
+        this.setEditScenariosDrawer({
+          isLoading: true,
+        })
+          .then(() => {
+            this.removeScenario(record.id)
+              .then(async () => {
+                this.callGetListScenario().then(() => {
+                  openNotification(
+                    'success',
+                    'Remove Scenario Successfully',
+                    `${record.title} was removed`,
+                  );
+                  this.setEditScenariosDrawer({
+                    isLoading: false,
+                    visible: false,
+                  });
+                });
+              })
+              .catch((error) => {
+                this.setEditScenariosDrawer({
+                  isLoading: false,
+                  visible: false,
+                });
+                openNotification('error', 'Fail to remove scenario ', error.message);
+              });
+          })
+          .catch((error) => {
+            openNotification('error', 'Fail to remove scenario ', error.message);
+            this.setEditScenariosDrawer({
+              isLoading: false,
+              visible: false,
+            });
+          });
+      },
     });
+  };
 
-    await this.setTableLoading(true);
-    this.props
-      .dispatch({
-        type: 'scenarios/updateScenario',
-        payload: updateScenarioParam,
-      })
+  updateScenario = async (param: any) => {
+    await this.props.dispatch({
+      type: 'scenarios/updateScenario',
+      payload: param,
+    });
+  };
+
+  handleUpdateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
+    this.setEditScenariosDrawer({
+      isLoading: true,
+    });
+    this.setTableLoading(true)
       .then(() => {
-        this.callGetListScenario().then(() => {
-          this.setTableLoading(false);
-        });
+        this.updateScenario(updateScenarioParam)
+          .then(() => {
+            this.callGetListScenario().then(async () => {
+              openNotification(
+                'success',
+                'Edit Scenario Successfully',
+                `Edit campaign ${updateScenarioParam.title} successfully`,
+              );
+              this.setEditScenariosDrawer({
+                isLoading: false,
+              });
+              this.setTableLoading(false);
+            });
+          })
+          .catch((error) => {
+            this.setEditScenariosDrawer({
+              isLoading: false,
+            });
+            this.setTableLoading(false);
+            openNotification('error', 'Fail to edit scenario', error.message);
+          });
       })
       .catch(() => {
+        this.setEditScenariosDrawer({
+          isLoading: false,
+        });
         this.setTableLoading(false);
       });
   };
@@ -176,9 +228,6 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     const selectedScenarioItem = selectedSenario?.scenarioItems.filter(
       (item) => item?.area?.id === selectedArea?.id,
     );
-    console.log('====================================');
-    console.log(selectedScenarioItem, selectedPlaylist);
-    console.log('====================================');
     if (selectedScenarioItem) {
       if (selectedScenarioItem.length > 0) {
         this.setSelectedScenario({
@@ -204,11 +253,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
           playlist: selectedPlaylist,
           scenario: selectedSenario,
         };
-
         selectedSenario?.scenarioItems.push(newScenarioItem);
-        console.log('====================================');
-        console.log(selectedSenario);
-        console.log('====================================');
         this.setSelectedScenario({
           scenarioItems: selectedSenario?.scenarioItems,
         });
@@ -289,8 +334,8 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
   getSelectedPlaylistItem = () => {
     const { selectedPlaylistItems } = this.props.playlists;
 
-    const result = selectedPlaylistItems.filter((p) => p.isSelected);
-    if (result.length > 0) {
+    const result = selectedPlaylistItems?.filter((p) => p.isSelected);
+    if (result && result.length > 0) {
       return result[0];
     }
 
@@ -369,6 +414,34 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     });
   };
 
+  handleSaveChange = async () => {
+    const { selectedSenario } = this.props.scenarios;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        const updateParam: UpdateScenarioParam = {
+          description: selectedSenario?.description,
+          id: selectedSenario?.id,
+          layoutId: selectedSenario?.layoutId,
+          scenarioItems: selectedSenario?.scenarioItems.map((item) => {
+            return {
+              id: item.id,
+              areaId: item?.area?.id,
+              audioArea: item.audioArea,
+              displayOrder: item.displayOrder,
+              isActive: item.isActive,
+              playlistId: item?.playlist?.id,
+              scenarioId: selectedSenario.id,
+            };
+          }),
+          title: selectedSenario?.title,
+          ...values,
+        };
+
+        this.handleUpdateScenario(updateParam);
+      });
+    }
+  };
+
   setSelectedScenarioItem = async (item?: ScenarioItem) => {
     const { selectedSenario } = this.props.scenarios;
     const newScenarioItems = selectedSenario?.scenarioItems.map((scenario) => {
@@ -389,6 +462,16 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     });
   };
 
+  setViewScenarioDetailComponent = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${SCENARIO_STORE}/setViewScenarioDetailComponentReducer`,
+      payload: {
+        ...this.props.scenarios.viewScenarioDetailComponent,
+        ...param,
+      },
+    });
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -400,13 +483,16 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
     } = this.props.scenarios;
 
     const selectedScenarioItem = selectedSenario?.scenarioItems?.filter((s) => s.isSelected)[0];
+
+    const disableChoosePlaylists = !playlistsDrawer?.listPlaylists.some((s) => s.isSelected);
     return (
-      <Drawer
+      <Modal
         visible={editScenarioDrawer?.visible}
         destroyOnClose={true}
-        getContainer={false}
+        confirmLoading={editScenarioDrawer?.isLoading}
+        centered
         title="Edit Scenario"
-        afterVisibleChange={() => {
+        afterClose={() => {
           this.clearSelectedPlaylistItems();
         }}
         closable={false}
@@ -415,226 +501,215 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
             <div style={{ textAlign: 'right' }}>
               <Space>
                 <Button
+                  loading={editScenarioDrawer?.isLoading}
                   danger
                   onClick={() => {
                     if (selectedSenario) {
-                      this.removeScenario(selectedSenario.id);
+                      this.handleRemoveScenario(selectedSenario);
                     }
                   }}
                 >
+                  <DeleteTwoTone twoToneColor="#f93e3e" />
                   Remove
                 </Button>
                 <Button
+                  loading={editScenarioDrawer?.isLoading}
                   onClick={() => {
-                    if (this.formRef.current) {
-                      this.formRef.current.validateFields().then((values) => {
-                        const updateParam: UpdateScenarioParam = {
-                          description: selectedSenario?.description,
-                          id: selectedSenario?.id,
-                          layoutId: selectedSenario?.layoutId,
-                          scenarioItems: selectedSenario?.scenarioItems.map((item) => {
-                            return {
-                              id: item.id,
-                              areaId: item?.area?.id,
-                              audioArea: item.audioArea,
-                              displayOrder: item.displayOrder,
-                              isActive: item.isActive,
-                              playlistId: item?.playlist?.id,
-                              scenarioId: selectedSenario.id,
-                            };
-                          }),
-                          title: selectedSenario?.title,
-                          ...values,
-                        };
-
-                        this.updateScenario(updateParam);
-                      });
-                    }
+                    this.handleSaveChange();
                   }}
+                  className="lba-btn"
                 >
-                  Save Change
+                  <SettingFilled className="lba-icon" /> Save Change
                 </Button>
               </Space>
             </div>
           </>
         }
-        onClose={() => {
+        onCancel={() => {
           this.setEditScenariosDrawer({
             visible: false,
+          }).then(() => {
+            // this.setViewScenarioDetailComponent({
+            //   visible: true,
+            // });
           });
         }}
-        width={'80%'}
+        width={'50%'}
       >
         {/* <EditScenarioDrawer {...this.props} /> */}
         <Form name="edit_scenario_form" layout="vertical" ref={this.formRef}>
-          <Form.Item
-            name="title"
-            label="Title"
-            rules={[{ required: true, message: 'Please input title' }]}
-          >
-            <Input />
-          </Form.Item>
+          <Skeleton active loading={editScenarioDrawer?.isLoading}>
+            <Form.Item
+              name="title"
+              label="Title"
+              rules={[
+                { required: true, message: 'Please input title' },
+                { max: 50, message: 'Title cannot exceed 50 characters' },
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Skeleton>
 
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={4} />
-          </Form.Item>
+          <Skeleton active loading={editScenarioDrawer?.isLoading}>
+            <Form.Item
+              name="description"
+              label="Description"
+              rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+            >
+              <Input.TextArea rows={4} />
+            </Form.Item>
+          </Skeleton>
         </Form>
         {/* AREA */}
         <Row gutter={20}>
           <Col span={12}>
-            <div
-              id="areaWrapper"
-              style={{
-                margin: `0 auto`,
-                display: 'flex',
-                width: '100%',
-                boxSizing: 'border-box',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              {selectedSenario &&
-                selectedSenario.layout.areas &&
-                sortArea(selectedSenario.layout.areas).map((area) => {
-                  const scenarioItem = this.checkAreaIsUsed(area);
-                  return (
-                    <div
-                      key={area.id}
-                      style={{
-                        flex: `${area.width * 100}%`,
-                        position: 'relative',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: `${area.height * 100}%`,
-                        textAlign: 'center',
-                        border: selectedArea?.id === area.id ? `5px ridge red` : `2px solid black`,
-                        transition: 'ease',
-                        transitionDuration: '1s',
-                      }}
-                      onDoubleClick={() => {
-                        this.setPlaylistDrawer({
-                          visible: true,
-                        });
-                      }}
-                      onClick={async () => {
-                        this.setSelectedScenarioItem(scenarioItem).then(() => {
-                          this.setSelectedArea(area);
-                        });
-                      }}
-                    >
-                      {scenarioItem ? (
-                        <>
-                          <div
-                            style={{
-                              position: 'relative',
-                              width: '100%',
-                              height: '80%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexDirection: 'column',
-                            }}
-                          >
-                            <div>{scenarioItem?.playlist?.title}</div>
-                            <div>
-                              {area &&
-                                area.typeMediaName &&
-                                area.typeMediaName.toLowerCase().includes('image') && (
-                                  <Image
-                                    src={area.urlPreview}
-                                    width={'100%'}
-                                    height={'100%'}
-                                    preview={false}
-                                  />
-                                )}
-                              {area &&
-                                area.typeMediaName &&
-                                area.typeMediaName.toLowerCase().includes('video') && (
-                                  <video
-                                    src={area.urlPreview}
-                                    width={'100%'}
-                                    autoPlay
-                                    controls
-                                  ></video>
-                                )}
+            <Skeleton active loading={editScenarioDrawer?.isLoading}>
+              <div
+                id="areaWrapper"
+                // style={{
+                //   margin: `0 auto`,
+                //   display: 'flex',
+                //   width: '100%',
+                //   boxSizing: 'border-box',
+                //   justifyContent: 'center',
+                //   alignItems: 'center',
+                // }}
+                className={styles.areaWrapper}
+              >
+                {selectedSenario &&
+                  selectedSenario.layout.areas &&
+                  sortArea(selectedSenario.layout.areas).map((area) => {
+                    const scenarioItem = this.checkAreaIsUsed(area);
+                    return (
+                      <div
+                        key={area.id}
+                        className={selectedArea?.id === area.id ? 'selected-area' : 'custom-area'}
+                        style={{
+                          flex: `${area.width * 100}%`,
+                          position: 'relative',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          height: `${area.height * 100}%`,
+                          textAlign: 'center',
+                          transition: 'ease',
+                          transitionDuration: '1s',
+                        }}
+                        onDoubleClick={() => {
+                          this.setPlaylistDrawer({
+                            visible: true,
+                          });
+                        }}
+                        onClick={async () => {
+                          this.setSelectedScenarioItem(scenarioItem).then(() => {
+                            this.setSelectedArea(area);
+                          });
+                        }}
+                      >
+                        <div className="area-overlap"></div>
+
+                        {scenarioItem ? (
+                          <>
+                            <div className="media-wrapper">
+                              <div
+                                className="remove-btn"
+                                onClick={(e) => {
+                                  this.removeScenarioItems(scenarioItem);
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <DeleteTwoTone twoToneColor="#f93e3e" />
+                              </div>
+                              <div className="media-bound">
+                                <div>{scenarioItem?.playlist?.title}</div>
+                                <div className="media-container">
+                                  {area &&
+                                    area.typeMediaName &&
+                                    area.typeMediaName.toLowerCase().includes('image') && (
+                                      <Image
+                                        src={area.urlPreview}
+                                        width={'100%'}
+                                        height={'100%'}
+                                        preview={false}
+                                      />
+                                    )}
+                                  {area &&
+                                    area.typeMediaName &&
+                                    area.typeMediaName.toLowerCase().includes('video') && (
+                                      <video
+                                        src={area.urlPreview}
+                                        width={'100%'}
+                                        autoPlay
+                                        controls
+                                      ></video>
+                                    )}
+                                </div>
+                              </div>
                             </div>
-                            {/* {!area.urlPreview && (
-                              <ReactPlayer
-                                url={scenarioItem.playlist?.playlistItems.map((item) => {
-                                  return item.mediaSrc.urlPreview;
-                                })}
-                                playing
-                                height="100%"
-                                controls={true}
-                                width={'100%'}
+                            <div className="audio-checkbox">
+                              <Checkbox
+                                checked={scenarioItem.audioArea}
+                                onChange={(e) => {
+                                  this.setAudioArea(scenarioItem.id, e.target.checked);
+                                }}
                               />
-                            )} */}
-                          </div>
-                          <div
-                            style={{
-                              position: 'relative',
-                              width: '100%',
-                              height: '20%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <Checkbox
-                              checked={scenarioItem.audioArea}
-                              onChange={(e) => {
-                                this.setAudioArea(scenarioItem.id, e.target.checked);
-                              }}
-                            />
-                          </div>
-                        </>
-                      ) : (
-                        <UploadOutlined />
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
+                            </div>
+                          </>
+                        ) : (
+                          <UploadOutlined />
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </Skeleton>
           </Col>
           <Col span={12}>
-            <Row gutter={20}>
-              <Col span={24}>
-                {selectedScenarioItem?.playlist ? (
-                  <>
-                    <Divider />
-                    <Table
-                      dataSource={selectedScenarioItem?.playlist?.playlistItems}
-                      loading={editScenarioDrawer?.playlistLoading}
-                      scroll={{
-                        x: 400,
-                        y: 400,
-                      }}
-                      onRow={(record) => {
-                        return {
-                          onClick: () => {
-                            console.log('====================================');
-                            console.log(record);
-                            console.log('====================================');
-                            this.setUrlAreasOfScenario(
-                              selectedArea,
-                              record.mediaSrc.urlPreview,
-                              record.mediaSrc.type.name,
-                            );
-                          },
-                        };
-                      }}
-                    >
-                      <Column key="title" dataIndex={['mediaSrc', 'title']} title="Title"></Column>
-                      <Column key="title" dataIndex="duration" title="Duration"></Column>
-                    </Table>
-                  </>
-                ) : (
-                  ''
-                )}
-              </Col>
-            </Row>
+            <Skeleton active loading={editScenarioDrawer?.isLoading}>
+              <Row gutter={20}>
+                <Col span={24}>
+                  {selectedScenarioItem?.playlist ? (
+                    <>
+                      <Divider />
+                      <Table
+                        dataSource={selectedScenarioItem?.playlist?.playlistItems.map((item) => {
+                          return {
+                            ...item,
+                            key: item.id,
+                          };
+                        })}
+                        loading={editScenarioDrawer?.playlistLoading}
+                        scroll={{
+                          y: 400,
+                        }}
+                        onRow={(record) => {
+                          return {
+                            onClick: () => {
+                              this.setUrlAreasOfScenario(
+                                selectedArea,
+                                record.mediaSrc.urlPreview,
+                                record.mediaSrc.type.name,
+                              );
+                            },
+                          };
+                        }}
+                      >
+                        <Column
+                          key="title"
+                          dataIndex={['mediaSrc', 'title']}
+                          title="Title"
+                        ></Column>
+                        <Column key="duration" dataIndex="duration" title="Duration"></Column>
+                      </Table>
+                    </>
+                  ) : (
+                    ''
+                  )}
+                </Col>
+              </Row>
+            </Skeleton>
           </Col>
         </Row>
 
@@ -645,8 +720,8 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
         {/** Select Playlist Drawer */}
 
         <Drawer
-          title="Playlist"
-          width={`80%`}
+          title="Choose playlist"
+          width={`50%`}
           closable={false}
           destroyOnClose={true}
           afterVisibleChange={() => {
@@ -655,13 +730,20 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
           onClose={() => {
             this.setPlaylistDrawer({
               visible: false,
+              urlPreview: undefined,
+              mediaType: undefined,
             });
           }}
           visible={playlistsDrawer?.visible}
           footer={
             <>
               <div style={{ textAlign: 'right' }}>
-                <Button type="primary" onClick={() => this.choosePlaylist()}>
+                <Button
+                  disabled={disableChoosePlaylists}
+                  onClick={() => this.choosePlaylist()}
+                  className="lba-btn"
+                  icon={<CheckCircleFilled className="lba-icon" />}
+                >
                   Choose Playlist
                 </Button>
               </div>
@@ -670,7 +752,7 @@ class EditScenarioFormDrawer extends React.Component<EditScenarioFormDrawerProps
         >
           <SelectPlaylistDrawer {...this.props} />
         </Drawer>
-      </Drawer>
+      </Modal>
     );
   }
 }

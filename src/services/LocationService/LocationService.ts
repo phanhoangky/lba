@@ -12,9 +12,7 @@ export type CreateLocationParam = {
   longitude: string;
   latitude: string;
   typeId: string;
-  brandId: string;
   address: string;
-
 }
 
 export type UpdateLocationParam = {
@@ -30,18 +28,42 @@ export type UpdateLocationParam = {
 }
 
 export async function GetLocations(param: GetLocationParam) {
-  const response = await ApiHelper.get(`${CONSTANTS_LBA.LOCATION_URL}`, { params: { ...param } });
+  const response = await ApiHelper.get(`${CONSTANTS_LBA.LOCATION_URL}`, { params: { ...param } }).catch((error) => {
+    return Promise.reject(error);
+  });;
   return response;
 }
 
 export async function CreateLocation(param: CreateLocationParam) {
-  await ApiHelper.post(`${CONSTANTS_LBA.LOCATION_URL}`, param);
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.LOCATION_URL}`, param).catch((error) => {
+    
+    return Promise.reject(new Error(error));
+  });
+  const { code } = data;
+  if (code === 401) {
+    return Promise.reject(new Error("Your account is disabled"));
+  }
+  return data;
 }
 
 export async function UpdateLocation(param: UpdateLocationParam) {
-  await ApiHelper.put(`${CONSTANTS_LBA.LOCATION_URL}/${param.id}`, param);
+  const {data} = await ApiHelper.put(`${CONSTANTS_LBA.LOCATION_URL}/${param.id}`, param).catch((error) => {
+    return Promise.reject(error);
+  });
+  const { code } = data;
+  if (code === 401) {
+    return Promise.reject(new Error("Your account is disabled"));
+  }
+  return data;
 }
 
 export async function DeleteLocation(id: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.LOCATION_URL}/${id}`);
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.LOCATION_URL}/${id}`).catch((error) => {
+    return Promise.reject(error);
+  });
+  const { code } = data;
+  if (code === 401) {
+    return Promise.reject(new Error("Your account is disabled"));
+  }
+  return data;
 }

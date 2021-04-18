@@ -1,20 +1,29 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Col, Descriptions, Divider, Row, Space, Table } from 'antd';
+import { Avatar, Button, Col, Divider, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
+  CampaignModelState,
   DeviceModelState,
   Dispatch,
+  MediaSourceModelState,
   MomoModelState,
   ProfileWalletModelState,
   TransactionModelState,
   UserModelState,
 } from 'umi';
-import { connect } from 'umi';
+import { connect, history } from 'umi';
 import { WalletHeaderComponent } from './components/WalletHeaderComponent';
-import styles from './index.less';
+// import styles from './index.less';
 import { v4 as uuidv4 } from 'uuid';
 import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
+import type { TransactionType } from '@/models/transaction';
+import { CAMPAIGN } from '@/pages/Campaign';
+import { CheckCircleFilled, CloseCircleFilled, EditFilled, LockFilled } from '@ant-design/icons';
+import { UpdateProfileModal } from './components/UpdateProfileModal';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
+// import styles from './index.less';
+import { openNotification } from '@/utils/utils';
 
 type WalletProps = {
   dispatch: Dispatch;
@@ -23,6 +32,8 @@ type WalletProps = {
   momo: MomoModelState;
   transaction: TransactionModelState;
   profileWallet: ProfileWalletModelState;
+  campaign: CampaignModelState;
+  media: MediaSourceModelState;
 };
 
 export const TRANSACTION_STORE = 'transaction';
@@ -33,38 +44,39 @@ class WalletScreen extends React.Component<WalletProps> {
     tableLoading: false,
   };
 
-  componentDidMount = async () => {
+  componentDidMount = () => {
     this.setTransTableLoading(true)
-      .then(() => {
-        this.readJWT()
-          .then(() => {
-            this.getListTransactions();
-          })
-          .then(() => {
-            this.setTransTableLoading(false);
-          });
+      .then(async () => {
+        this.readJWT();
+        Promise.all([this.getListTransactions()]).then(() => {
+          this.setTransTableLoading(false);
+        });
       })
-      .catch(() => {
+      .catch((error) => {
+        openNotification('error', 'Error occured', error);
         this.setTransTableLoading(false);
       });
+  };
+
+  setCurrentUser = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/saveCurrentUser',
+      payload: {
+        ...this.props.user.currentUser,
+        ...param,
+      },
+    });
   };
 
   readJWT = async () => {
     await this.props.dispatch({
       type: 'user/readJWT',
-      payload: '',
     });
   };
 
   getListTransactions = async (param?: any) => {
     const { getListTransactionsParam } = this.props.transaction;
-    // const payload = {
-    //   holder: this.props.user.currentUser?.ether?.wallet.address,
-    //   token: this.props.user.currentUser?.ether?.evn.SUPPORT_ADDRESS,
-    //   limit: getTransactionsParam?.limit ? getTransactionsParam.limit : 10,
-    //   page: getTransactionsParam?.page ? getTransactionsParam.page : 1,
-    //   ...param,
-    // };
+
     await this.props.dispatch({
       type: `${TRANSACTION_STORE}/getListTransactions`,
       payload: {
@@ -80,19 +92,181 @@ class WalletScreen extends React.Component<WalletProps> {
       payload: isLoading,
     });
   };
+
+  setGetListCampaignParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${CAMPAIGN}/setGetListCampaignParamReducer`,
+      payload: {
+        ...this.props.campaign.getListCampaignParam,
+        ...param,
+      },
+    });
+  };
+
+  setGetListFileParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: `media/setGetListFileParamReducer`,
+      payload: {
+        ...this.props.media.getListFileParam,
+        ...param,
+      },
+    });
+  };
+
+  setUpdateProfileModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'profileWallet/setUpdateProfileModalReducer',
+      payload: {
+        ...this.props.profileWallet.updateProfileModal,
+        ...param,
+      },
+    });
+  };
+
+  redirectByTypeTransaction = async (record: TransactionType) => {
+    if (record.type === 1) {
+      this.setGetListCampaignParam({
+        id: record.campaignId,
+      }).then(() => {
+        history.push('/campaign');
+      });
+    }
+
+    if (record.type === 3) {
+      this.setGetListFileParam({
+        id: record.mediaSrcId,
+      }).then(() => {
+        history.push('/medias');
+      });
+
+      // history.push('/medias');
+    }
+  };
+
+  setUpdateProfileParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/setUpdateProfileParamReducer',
+      payload: {
+        ...this.props.user.updateProfileParam,
+        ...param,
+      },
+    });
+  };
+
+  setChangePasswordModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/setChangePasswordModalReducer',
+      payload: {
+        ...this.props.user.changePasswordModal,
+        ...param,
+      },
+    });
+  };
+
+  updateProfileModalRef = React.createRef<UpdateProfileModal>();
+  changePasswordModalRef = React.createRef<ChangePasswordModal>();
   render() {
-    const { currentUser } = this.props.user;
+    const { currentUser, changePasswordModal } = this.props.user;
     const {
       getListTransactionsParam,
       listTransactions,
       transTableLoading,
       totalItem,
     } = this.props.transaction;
+
+    const { updateProfileModal } = this.props.profileWallet;
     return (
-      <PageContainer>
-        <WalletHeaderComponent {...this.props} />
-        <Divider orientation="right">View Transaction</Divider>
-        <Row gutter={20}>
+      <PageContainer
+        title={false}
+        header={{
+          ghost: false,
+          style: {
+            padding: 0,
+          },
+        }}
+      >
+        <Row justify="space-between" gutter={20}>
+          <Col span={15} offset={1}>
+            <Row>
+              <WalletHeaderComponent {...this.props} />
+            </Row>
+            <Divider orientation="left" className="lba-text">
+              View Transaction
+            </Divider>
+            <Row>
+              <Col span={24}>
+                <Table
+                  dataSource={listTransactions?.map((item) => {
+                    return {
+                      ...item,
+                      key: uuidv4(),
+                    };
+                  })}
+                  loading={transTableLoading}
+                  scroll={{
+                    x: 500,
+                    y: 400,
+                  }}
+                  pagination={{
+                    current: getListTransactionsParam?.pageNumber
+                      ? getListTransactionsParam?.pageNumber + 1
+                      : 1,
+                    pageSize: getListTransactionsParam?.pageLimitItem
+                      ? getListTransactionsParam?.pageLimitItem
+                      : 10,
+                    total: totalItem,
+                    onChange: (e) => {
+                      this.setTransTableLoading(true)
+                        .then(() => {
+                          this.getListTransactions({
+                            pageNumber: e - 1,
+                          }).then(() => {
+                            this.setTransTableLoading(false);
+                          });
+                        })
+                        .catch(() => {
+                          this.setTransTableLoading(false);
+                        });
+                    },
+                  }}
+                  onRow={(record) => {
+                    return {
+                      onDoubleClick: () => {
+                        this.redirectByTypeTransaction(record);
+                      },
+                    };
+                  }}
+                >
+                  <Column
+                    key="sender"
+                    title="Sender"
+                    dataIndex={['senderNavigation', 'email']}
+                  ></Column>
+                  <Column
+                    key="receiver"
+                    title="Receiver"
+                    dataIndex={['receiverNavigation', 'email']}
+                  ></Column>
+                  <Column
+                    key="type"
+                    title="Type"
+                    render={(record) => {
+                      return TYPE_TRANSACTIONS[record.type];
+                    }}
+                  ></Column>
+                  <Column
+                    key="value"
+                    title="Value"
+                    render={(record) => {
+                      return <>{record.value} VND</>;
+                    }}
+                  ></Column>
+                  {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
+                  <Column key="age" title="Age" dataIndex="age"></Column>
+                </Table>
+              </Col>
+            </Row>
+          </Col>
           <Col span={8}>
             <div
               style={{
@@ -104,96 +278,198 @@ class WalletScreen extends React.Component<WalletProps> {
               <Avatar
                 size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
                 src={currentUser && currentUser.avatar}
+                style={{
+                  border: '4px solid #fff',
+                  borderRadius: '50%',
+                  height: '100px',
+                  marginRight: '10px',
+                  width: '100px',
+                }}
               />
             </div>
-            <Space direction="vertical" wrap>
-              <Descriptions
-                title="User Info"
-                layout="vertical"
-                bordered
-                className={styles.descriptionStyle}
-                contentStyle={styles.contentProfileStyle}
-              >
-                <Descriptions.Item label="UserName">
-                  {currentUser && currentUser.name}
-                </Descriptions.Item>
-                <Descriptions.Item label="Telephone">1810000000</Descriptions.Item>
-                <Descriptions.Item label="Email">
-                  {currentUser && currentUser.email}
-                </Descriptions.Item>
-                <Descriptions.Item label="Your Balance">
+            <Space
+              direction="vertical"
+              wrap
+              style={{
+                width: '100%',
+              }}
+            >
+              {/* <Form layout="horizontal">
+                <Divider />
+                <Form.Item label="Username">{currentUser && currentUser.name}</Form.Item>
+                <Divider />
+                <Form.Item label="Email">{currentUser && currentUser.email}</Form.Item>
+                <Divider />
+                <Form.Item label="Your Balance">
+                  {currentUser &&
+                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                </Form.Item>
+                <Divider />
+              </Form> */}
+              <Divider></Divider>
+              <Row>
+                <Col span={6} className="lba-text">
+                  Username
+                </Col>
+                <Col span={18}>{currentUser && currentUser.name}</Col>
+              </Row>
+              <Row>
+                <Col span={6} className="lba-text">
+                  Email
+                </Col>
+                <Col span={18}>{currentUser && currentUser.email}</Col>
+              </Row>
+              <Row>
+                <Col span={6} className="lba-text">
+                  Balance
+                </Col>
+                <Col span={18}>
                   {currentUser &&
                     currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
                   VND
-                </Descriptions.Item>
-              </Descriptions>
+                </Col>
+              </Row>
+              <Divider orientation="center" className="lba-text">
+                Setting
+              </Divider>
+              <Button
+                className="add-new-media-btn"
+                block
+                size="large"
+                onClick={() => {
+                  this.setUpdateProfileModal({
+                    visible: true,
+                  });
+                }}
+              >
+                <div className="add-media-overlap"></div>
+                <div className="add-media-text">
+                  <Space>
+                    <EditFilled className="lba-icon" />
+                    Update Proflile
+                  </Space>
+                </div>
+              </Button>
+              <Button
+                className="add-new-media-btn"
+                block
+                size="large"
+                onClick={() => {
+                  this.setChangePasswordModal({
+                    visible: true,
+                  });
+                }}
+              >
+                <div className="add-media-overlap"></div>
+                <div className="add-media-text">
+                  <Space>
+                    <LockFilled className="lba-icon" /> Change Password
+                  </Space>
+                </div>
+              </Button>
+              {/* <div>
+                <Button
+                  className={styles.lbaButtonStyle}
+                  block
+                  size="large"
+                  onClick={() => {
+                    this.setUpdateProfileModal({
+                      visible: true,
+                    });
+                  }}
+                >
+                  <div className="lba-btn-overlay"></div>
+                  <div className="lba-btn-text">
+                    <EditFilled /> Update Profile
+                  </div>
+                </Button>
+                <Button
+                  block
+                  size="large"
+                  onClick={() => {
+                    this.setChangePasswordModal({
+                      visible: true,
+                    });
+                  }}
+                >
+                  <LockFilled /> Change Password
+                </Button>
+              </div> */}
             </Space>
           </Col>
-          <Col span={16}>
-            <Table
-              dataSource={listTransactions?.map((item) => {
-                return {
-                  ...item,
-                  key: uuidv4(),
-                };
-              })}
-              loading={transTableLoading}
-              scroll={{
-                x: 500,
-                y: 400,
-              }}
-              pagination={{
-                current: getListTransactionsParam?.pageNumber
-                  ? getListTransactionsParam?.pageNumber + 1
-                  : 1,
-                pageSize: getListTransactionsParam?.pageLimitItem
-                  ? getListTransactionsParam?.pageLimitItem
-                  : 10,
-                total: totalItem,
-                onChange: (e) => {
-                  this.setTransTableLoading(true)
-                    .then(() => {
-                      this.getListTransactions({
-                        pageNumber: e - 1,
-                      }).then(() => {
-                        this.setTransTableLoading(false);
-                      });
-                    })
-                    .catch(() => {
-                      this.setTransTableLoading(false);
-                    });
-                },
-              }}
-            >
-              <Column
-                key="sender"
-                title="Sender"
-                dataIndex={['senderNavigation', 'email']}
-              ></Column>
-              <Column
-                key="receiver"
-                title="Receiver"
-                dataIndex={['receiverNavigation', 'email']}
-              ></Column>
-              <Column
-                key="type"
-                title="Type"
-                render={(record) => {
-                  return TYPE_TRANSACTIONS[record.type];
-                }}
-              ></Column>
-              <Column
-                key="value"
-                title="Value"
-                render={(record) => {
-                  return <>{record.value} VND</>;
-                }}
-              ></Column>
-              {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
-              <Column key="age" title="Age" dataIndex="age"></Column>
-            </Table>
-          </Col>
         </Row>
+
+        {/* Update Profile Modal */}
+        <Modal
+          title="Update Profile"
+          visible={updateProfileModal?.visible}
+          closable={false}
+          width={'40%'}
+          destroyOnClose={true}
+          centered
+          confirmLoading={updateProfileModal?.isLoading}
+          onOk={() => {
+            this.updateProfileModalRef.current?.handleUpdateProfile();
+          }}
+          afterClose={() => {
+            this.setUpdateProfileParam({
+              file: undefined,
+              name: undefined,
+            });
+          }}
+          onCancel={() => {
+            this.setUpdateProfileModal({
+              visible: false,
+            });
+
+            this.setUpdateProfileParam({
+              file: undefined,
+              name: undefined,
+            });
+          }}
+          cancelButtonProps={{
+            icon: <CloseCircleFilled className="lba-close-icon" />,
+            danger: true,
+          }}
+          okButtonProps={{
+            className: 'lba-btn',
+            icon: <CheckCircleFilled className="lba-icon" />,
+          }}
+        >
+          {updateProfileModal?.visible && (
+            <UpdateProfileModal ref={this.updateProfileModalRef} {...this.props} />
+          )}
+        </Modal>
+        {/* End Update Profile Modal */}
+
+        {/* Change Password Modal */}
+        <Modal
+          title="Change Password"
+          visible={changePasswordModal?.visible}
+          confirmLoading={changePasswordModal?.isLoading}
+          destroyOnClose={true}
+          closable={false}
+          footer={false}
+          centered
+          width={'40%'}
+          onOk={() => {
+            this.changePasswordModalRef.current?.handleChangePassword().then(() => {
+              this.setChangePasswordModal({
+                visible: false,
+                isLoading: false,
+              });
+            });
+          }}
+          onCancel={() => {
+            this.setChangePasswordModal({
+              visible: false,
+            });
+          }}
+        >
+          {changePasswordModal?.visible && (
+            <ChangePasswordModal ref={this.changePasswordModalRef} {...this.props} />
+          )}
+        </Modal>
       </PageContainer>
     );
   }

@@ -3,7 +3,6 @@ import type { GetListTransactionParam } from '@/services/TOMOService';
 import { diffTwoDate } from "@/utils/utils";
 import moment from "moment";
 import type { Effect, Reducer } from "umi";
-import type { GetLinkTransferParam } from "@/services/MomopaymentService";
 
 export type TransactionType = {
   address: string;
@@ -38,7 +37,15 @@ export type ProfileWalletModelState = {
     isLoading: boolean;
   },
 
-  linkTransferParam?: GetLinkTransferParam;
+  sendModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
+
+  updateProfileModal?: {
+    visible: boolean;
+    isLoading: boolean;
+  },
 
   refreshBalanceLoading?: boolean,
 }
@@ -51,7 +58,7 @@ export type WalletStoreType = {
   state: ProfileWalletModelState,
 
   effects: {
-    setListTransactions: Effect
+    setListTransactions: Effect;
   },
 
   reducers: {
@@ -62,7 +69,9 @@ export type WalletStoreType = {
     setTransTableLoadingReducer: Reducer<ProfileWalletModelState>;
     setQRModalReducer: Reducer<ProfileWalletModelState>;
     setDepositModalReducer: Reducer<ProfileWalletModelState>;
+    setSendModalReducer: Reducer<ProfileWalletModelState>;
     setRefreshBalanceLoadingReducer: Reducer<ProfileWalletModelState>;
+    setUpdateProfileModalReducer: Reducer<ProfileWalletModelState>;
 
   }
 
@@ -94,6 +103,11 @@ const WalletModel: WalletStoreType = {
       visible: false,
     },
 
+    sendModal: {
+      visible: false,
+      isLoading: false,
+    },
+
     refreshBalanceLoading: false,
   },
 
@@ -101,7 +115,6 @@ const WalletModel: WalletStoreType = {
     *setListTransactions({ payload }, { call, put }) {
       
       const result = yield call(GetListTransactions, payload);
-      console.log("Profile Wallet >>>>", result, result.data);
       
       yield put({
         type: "setListTransactionsReducer",
@@ -181,12 +194,26 @@ const WalletModel: WalletStoreType = {
       }
     },
 
+    setSendModalReducer(state, { payload }) {
+      return {
+        ...state,
+        sendModal: payload
+      }
+    },
+
     setRefreshBalanceLoadingReducer(state, { payload }) {
       return {
         ...state,
         refreshBalanceLoading: payload
       }
-    }
+    },
+
+    setUpdateProfileModalReducer(state, { payload }) {
+      return {
+        ...state,
+        updateProfileModal: payload
+      }
+    },
   }
 }
 

@@ -1,4 +1,4 @@
-import { CONSTANTS_PUBLITIO } from './../constantUrls';
+import { CONSTANTS_PUBLITIO } from '../constantUrls';
 import publitio from "./Publitio";
 
 export type GetFilesParam = {
@@ -9,6 +9,8 @@ export type GetFilesParam = {
   filter_privacy?: string;
   filter_type?: string;
   order?: string;
+  id?: string;
+  isDescending?: boolean;
 }
 
 export type GetFoldersParam = {
@@ -44,12 +46,21 @@ export type UpdateFileParam = {
   title?: string; //
   description?: string; //
   privacy?: number | string;
+  txHash?: string;
+  docId?: string;
+}
+
+export type UpdateFolderParam = {
+  id: string;
+  name: string;
 }
 
 
 export async function CreateMedia(param: any) {
 
-  const res = await publitio.uploadFile(param.file, "file", param);
+  const res = await publitio.uploadFile(param.file, "file", param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
   return res;
 }
 
@@ -58,18 +69,44 @@ export async function GetFiles(param: GetFilesParam) {
   return data;
 }
 
+export async function DeleteFile(id: string) {
+  const res = await publitio.call(`${CONSTANTS_PUBLITIO.DELETE_FILE_URL}/${id}`, "DELETE").catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+  return res;
+}
+
 export async function GetFolders(param: GetFoldersParam) {
   const data = await publitio.call(`${CONSTANTS_PUBLITIO.GET_FOLDERS_URL}`, "GET", param);
   return data;
 }
 
 export async function CreateFolder(param: CreateFolderParam) {
-  const data = await publitio.call(`${CONSTANTS_PUBLITIO.CREATE_FOLDER_URL}`, "POST", param);
+  const data = await publitio.call(`${CONSTANTS_PUBLITIO.CREATE_FOLDER_URL}`, "POST", param).catch((error) => {
+    console.log('====================================');
+    console.log(error);
+    console.log('====================================');
+    return Promise.reject(new Error(error));
+  });
   return data;
 }
 
 export async function UpdateFile(param: UpdateFileParam) {
 
-  const res = await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FILE_URL}/${param.id}`, "PUT", param);
+  const res = await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FILE_URL}/${param.id}`, "PUT", param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
   return res;
+}
+
+export async function RemoveFolder(id: string) {
+  await publitio.call(`${CONSTANTS_PUBLITIO.REMOVE_FOLDER_URL}/${id}`, "DELETE").catch((error) => {
+    return Promise.reject(new Error(error));
+  });
+}
+
+export async function UpdateFolder(param: UpdateFolderParam) {
+  await publitio.call(`${CONSTANTS_PUBLITIO.UPDATE_FOLDER_URL}/${param.id}`, "PUT", param).catch((error) => {
+    return Promise.reject(new Error(error));
+  });
 }

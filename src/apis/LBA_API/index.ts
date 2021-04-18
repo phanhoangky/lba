@@ -1,10 +1,11 @@
+import { openNotification } from "@/utils/utils";
 import axios from "axios";
 import { history } from "umi";
 
 
 const ApiHelper = axios.create({
-  // baseURL: "https://location-base-advertising.herokuapp.com/api/v1/",
-  baseURL: "https://localhost:44333/api/v1",
+  baseURL: "https://location-base-advertising.herokuapp.com/api/v1/",
+  // baseURL: "https://localhost:44333/api/v1/",
   headers: {
     "Accept": "application/json",
     'Access-Control-Allow-Origin':  '*',
@@ -26,22 +27,52 @@ ApiHelper.interceptors.request.use(config => {
   return config;
   
 }, error => {
-    return Promise.reject(error)
+  return Promise.reject(error);
 })
 
 ApiHelper.interceptors.response.use(
-  response => response,
+  response => {
+    const { data } = response;
+    if (data.code === 401) {
+      return Promise.reject(new Error(data.message));
+    }
+    return response;
+  },
   error => {
+    console.log('====================================');
+    console.error(error.response);
+    console.log('====================================');
     if (error.response) {
-      const { status } = error.response;
-      if (status === 401) {
-        history.push("/account/login");
+      
+      const { status, data } = error.response;
+      const { errors } = data;
+      let listError = "";
+      errors.id.forEach((element: string) => {
+        listError = listError.concat(`${element} \n`);
+      });
+      console.log('====================================');
+      console.log(data ,status);
+      console.log('====================================');
+      if (status) {
+        openNotification("error", error.response.status, listError);
+        if (status === 401) {
+          history.replace("/account/login");
+        } else {
+          history.replace('/exception/500')
+        }
       } else {
-        history.push('/exception/500')
+        
+        history.replace('/exception/500');
       }
     } else {
-      history.push('/exception/500')
+      openNotification("error", "Cannot connect to server");
+      // history.replace('/account/login');
+      // throw error;
     }
+    // Promise.reject(new Error(error)).catch(e => {
+    return Promise.reject(error)
+    // });
+    // throw new Error(error);
   }
 )
 

@@ -54,7 +54,7 @@ class AddNewScenarioModal extends React.Component<AddNewScenarioModalProps> {
           <Col span={10}>Title</Col>
           <Col span={14}>
             <Input
-              value={createScenarioParam.title}
+              value={createScenarioParam?.title}
               onChange={(e) => {
                 this.setCreateScenarioParam({
                   title: e.target.value,
@@ -67,7 +67,7 @@ class AddNewScenarioModal extends React.Component<AddNewScenarioModalProps> {
           <Col span={10}>Description</Col>
           <Col span={14}>
             <Input
-              value={createScenarioParam.description}
+              value={createScenarioParam?.description}
               onChange={(e) => {
                 this.setCreateScenarioParam({
                   description: e.target.value,

@@ -1,70 +1,34 @@
 
-
-.drag {
-  :global {
-    .row-dragging {
-      background: rgb(48, 46, 46);
-      border: 1px solid #ccc;
-    }
-
-    .row-dragging td {
-      padding: 16px;
-      visibility: visible;
-    }
-
-    .row-dragging tr {
-      visibility: visible;
-    }
-
-    .row-dragging .drag-visible {
-      visibility: visible;
-    }
-  }
-}
-
 :global {
   .row-dragging {
-    background: rgb(48, 46, 46);
-    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+    background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    color: aliceblue;
+    position: relative;
+    z-index: 2000;
   }
 
   .row-dragging td {
     padding: 16px;
-    visibility: visible;
-  }
-
-  .row-dragging tr {
-    visibility: visible;
+    position: relative;
+    z-index: 2000;
   }
 
   .row-dragging .drag-visible {
     visibility: visible;
+    position: relative;
+    z-index: 2000;
   }
 }
-
-.rowDragging {
-  background: rgb(48, 46, 46);
-  border: 1px solid #ccc;
-}
-
-.rowDragging td {
-  padding: 16px;
-  visibility: visible;
-}
-
-.rowDragging .dragVisible {
-  visibility: visible;
-}
-
-.dragVisible {
+.customTable {
   :global {
-    .drag-visible {
-      visibility: visible;
+    .ant-table-tbody>tr:hover {
+      transition: all 0.3s ease;
+      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      color: aliceblue;
     }
   }
-  .drag-visible {
-    visibility: visible;
-  }
+  
 }
 
 .selectedRow {

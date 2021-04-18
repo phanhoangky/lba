@@ -1,4 +1,4 @@
-import { CONSTANTS_TOMO } from './../constantUrls';
+import { CONSTANTS_TOMO } from '../constantUrls';
 import TOMOApiHelper from "@/apis/TOMO_API"
 
 

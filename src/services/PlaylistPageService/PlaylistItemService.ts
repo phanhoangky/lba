@@ -27,12 +27,18 @@ export type GetPlaylistItemByPlaylistIdParam = BaseGetRequest & {
 }
 
 export async function AddNewPlaylistItem(param: AddNewPlaylistItemParam) {
-  await ApiHelper.post(`${CONSTANTS_LBA.PLAYLIST_ITEM_URL}`, param);
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.PLAYLIST_ITEM_URL}`, param).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 export async function EditPlayListItem(param: EditPlayListItemParam) {
 
-  await ApiHelper.put(`${CONSTANTS_LBA.PLAYLIST_ITEM_URL}/${param.id}`, param);
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.PLAYLIST_ITEM_URL}/${param.id}`, param).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 export async function GetPlaylistItemByPlaylistId(params: GetPlaylistItemByPlaylistIdParam) {
@@ -61,5 +67,9 @@ export async function UpdatePlaylistItemsByPlaylistId(param: UpdatePlaylistItems
       }
     })
   }
-  await ApiHelper.put(`${CONSTANTS_LBA.PLAYLIST_URL}/${param.id}/playlistitems`, newParam)
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.PLAYLIST_URL}/${param.id}/playlistitems`, newParam).catch((error) => {
+    return Promise.reject(error);
+  })
+
+  return data;
 }

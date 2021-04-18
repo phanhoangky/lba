@@ -2,16 +2,16 @@ import { Button, Result } from 'antd';
 import type { IRouteProps } from 'umi';
 import { FormattedMessage, formatMessage, Link } from 'umi';
 import React from 'react';
-
+import lba from '@/assets/lba.png';
 import styles from './style.less';
 
 const actions = (
   <div className={styles.actions}>
-    <a href="">
+    {/* <a href="">
       <Button size="large" type="primary">
         <FormattedMessage id="userandregister-result.register-result.view-mailbox" />
       </Button>
-    </a>
+    </a> */}
     <Link to="/">
       <Button size="large">
         <FormattedMessage id="userandregister-result.register-result.back-home" />
@@ -26,13 +26,21 @@ const RegisterResult: React.FC<IRouteProps> = ({ location }) => (
     status="success"
     title={
       <div className={styles.title}>
-        <FormattedMessage
+        {/* <FormattedMessage
           id="userandregister-result.register-result.msg"
-          values={{ email: (location?.state as any)?.account || 'AntDesign@example.com' }}
-        />
+          // values={{ email: (location?.state as any)?.account || 'AntDesign@example.com' }}
+          values={{}}
+        /> */}
+        Your registration is complete
       </div>
     }
-    subTitle={formatMessage({ id: 'userandregister-result.register-result.activation-email' })}
+    subTitle={
+      <div>
+        {/* formatMessage({ id: 'userandregister-result.register-result.activation-email' }) */}
+        We're excited to have you registered. We already send verification email to your email.
+        First, you need to confirm your account.
+      </div>
+    }
     extra={actions}
   />
 );

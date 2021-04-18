@@ -1,6 +1,7 @@
 import { CONSTANTS_LBA } from './constantUrls';
 import  ApiHelper  from '@/apis/LBA_API';
 import qs from 'qs';
+import type { UpdateFileParam } from './PublitioService/PublitioService';
 
 export type GetMediaSourcesParam = {
   isSort: boolean;
@@ -33,7 +34,7 @@ export type EditMediaParam = {
   typeId: string;
   description: string;
   isSigned: number;
-  hash?: string;
+  txHash?: string;
 }
 
 export async function GetListMediaSource(param: GetMediaSourcesParam) {
@@ -42,14 +43,20 @@ export async function GetListMediaSource(param: GetMediaSourcesParam) {
   return res;
 }
 
-export async function GetListMEdiaFromFiledId(listId: any) {
+export async function GetMediaSourceById(id: string) {
+  const { data } = await ApiHelper.get(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${id}`);
+  return data;
+}
+
+export async function GetListMediaFromFiledId(listId: any, isSigned?: number) {
   console.log('====================================');
   console.log(listId);
   console.log('====================================');
 
   const res = ApiHelper.get(`${CONSTANTS_LBA.MEDIA_SRC_URL}/list`, {
     params: {
-      listFileId: listId
+      listFileId: listId,
+      isSigned
     },
     paramsSerializer: params => {
       return qs.stringify(params);
@@ -67,14 +74,37 @@ export async function AddNewMediaSource(param: AddNewMediaParam) {
   console.log('====================================');
   console.log("AddNewMediaSource>>>>", param);
   console.log('====================================');
-  await ApiHelper.post(CONSTANTS_LBA.MEDIA_SRC_URL, param)
+  const { data } = await ApiHelper.post(CONSTANTS_LBA.MEDIA_SRC_URL, param).catch((error) => {
+    return Promise.reject(error);
+  });
+
+  return data;
 }
 
 export async function EditMediaSource(param: EditMediaParam) {
-  await ApiHelper.put(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.id}`, param);
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.id}`, param).catch((error) => {
+    return Promise.reject(error);
+  });
+  return data;
 }
 
 
-export async function RemoveMediaSource(id: string) {
-  await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${id}`);
+export async function RemoveMediaSource(param: UpdateFileParam) {
+  console.log('====================================');
+  console.log("Param >>>", param);
+  console.log('====================================');
+  // await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`, { params: { txHash: param.txHash }});
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/${param.docId}`).catch((error) => {
+    return Promise.reject(error);
+  });
+
+  return data;
+}
+
+export async function RemoveAllMediaInFolder(path: string) {
+  const { data } = await ApiHelper.delete(`${CONSTANTS_LBA.MEDIA_SRC_URL}/folder`, { params: { path } }).catch((error) => {
+    return Promise.reject(error);
+  });
+  
+  return data;
 }

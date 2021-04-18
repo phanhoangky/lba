@@ -11,7 +11,8 @@ import type {
 import { connect } from 'umi';
 import styles from '../../index.less';
 import TitleStep from './TitleStep';
-import { Animated } from 'react-animated-css';
+import { openNotification } from '@/utils/utils';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
@@ -56,16 +57,30 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           isLoading: true,
         })
           .then(() => {
-            this.createNewScenario(values).then(() => {
-              this.callGetListScenario().then(() => {
+            this.createNewScenario(values)
+              .then(() => {
+                this.callGetListScenario().then(() => {
+                  openNotification(
+                    'success',
+                    'Create Scenario Successfully',
+                    `Create campaign ${values.title} successfully`,
+                  );
+                  this.setAddNewScenarioModal({
+                    visible: false,
+                    isLoading: false,
+                  }).then(() => {
+                    this.setTableLoading(false);
+                  });
+                });
+              })
+              .catch((error) => {
+                openNotification('error', 'Fail to Create Scenario', error.message);
                 this.setAddNewScenarioModal({
                   visible: false,
                   isLoading: false,
-                }).then(() => {
-                  this.setTableLoading(false);
                 });
+                this.setTableLoading(false);
               });
-            });
           })
           .catch(() => {
             this.setAddNewScenarioModal({
@@ -89,8 +104,8 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
     });
   };
 
-  setCreateScenarioParam = (param: any) => {
-    this.props.dispatch({
+  setCreateScenarioParam = async (param: any) => {
+    await this.props.dispatch({
       type: 'scenarios/setCreateScenarioParamReducer',
       payload: {
         ...this.props.scenarios.createScenarioParam,
@@ -99,25 +114,35 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
     });
   };
 
+  setListScenarioLayouts = async (list: any) => {
+    await this.props.dispatch({
+      type: 'layouts/setListLayoutsReducer',
+      payload: list,
+    });
+  };
+
+  clearListScenarioLayouts = async () => {
+    const newList = this.props.layouts.listLayouts.map((item) => ({ ...item, isSelected: false }));
+    this.setListScenarioLayouts(newList);
+  };
+
   chooseLayout = async (layout: any) => {
     this.setCreateScenarioParam({
       layoutId: layout.id,
-    });
-    await this.props.dispatch({
-      type: 'layouts/setListLayoutsReducer',
-      payload: this.props.layouts.listLayouts.map((item) => {
+    }).then(() => {
+      const newList = this.props.layouts.listLayouts.map((item) => {
         if (item.id === layout.id) {
           return {
             ...item,
             isSelected: true,
           };
         }
-
         return {
           ...item,
           isSelected: false,
         };
-      }),
+      });
+      this.setListScenarioLayouts(newList);
     });
   };
 
@@ -129,49 +154,44 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
 
     return (
       <Modal
+        title="Create New Scenario Layout"
         visible={addNewScenarioModal?.visible}
         confirmLoading={addNewScenarioModal?.isLoading}
         closable={false}
-        width={'70%'}
+        width={'50%'}
         destroyOnClose={true}
         onCancel={() => {
           this.setAddNewScenarioModal({
             visible: false,
+          }).then(() => {
+            this.clearListScenarioLayouts();
           });
         }}
         okButtonProps={{
           disabled: listLayouts.every((layouts) => !layouts.isSelected),
+          className: 'lba-btn',
+          icon: <CheckCircleFilled className="lba-icon" />,
+        }}
+        cancelButtonProps={{
+          icon: <CloseCircleFilled className="lba-close-icon" />,
+          danger: true,
         }}
         onOk={async () => {
           if (addNewScenarioModal?.currentStep === 0) {
             this.formRef.current?.validateFields().then((values) => {
-              this.onCreateScenarios(values);
-              this.setAddNewScenarioModal({
-                currentStep: 1,
+              this.onCreateScenarios(values).catch((error) => {
+                openNotification('error', 'Fail to Create Scenario', error.message);
               });
+              // this.setAddNewScenarioModal({
+              //   currentStep: 1,
+              // });
             });
           }
         }}
       >
-        {/* <AddNewScenarioModal {...this.props} /> */}
-        {/* <Steps current={addNewScenarioModal.currentStep} onChange={(e) => {}}>
-          <Steps.Step title="Finished" description="This is a description." />
-          <Steps.Step
-            title="In Progress"
-            subTitle="Left 00:00:08"
-            description="This is a description."
-          />
-          <Steps.Step title="Waiting" description="This is a description." />
-        </Steps> */}
-        <Animated
-          animationIn="zoomIn"
-          animationOut="fadeOut"
-          isVisible={addNewScenarioModal?.currentStep === 0}
-        >
-          <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
-            <TitleStep {...this.props} />
-          </Form>
-        </Animated>
+        <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
+          <TitleStep {...this.props} />
+        </Form>
 
         {/* <Animated
           animationIn="zoomIn"
@@ -200,24 +220,23 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           dataSource={listLayouts}
           grid={{
             gutter: 20,
-            xs: 1,
-            sm: 2,
             md: 2,
             lg: 2,
             xl: 3,
-            xxl: 4,
+            xxl: 3,
           }}
           split
+          className={styles.listScenarios}
           style={{ alignItems: 'center', alignContent: 'center' }}
           renderItem={(item) => {
             return (
               <List.Item>
                 <Card
-                  style={{ width: '100%', borderRadius: 20, borderColor: 'red', padding: 5 }}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: 5 }}
                   hoverable
                   title={item.title}
                   cover={<Image src={item.layoutUrl} height={150} />}
-                  className={item.isSelected ? styles.selectedLayout : ''}
+                  className={item.isSelected ? styles.selectedLayout : 'card-lba'}
                   onClick={() => {
                     this.chooseLayout(item);
                   }}

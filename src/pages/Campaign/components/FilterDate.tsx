@@ -24,7 +24,7 @@ class FilterDateComponent extends React.Component<FilterDateComponentProps> {
 
   setDateFilter = async (index: number) => {
     const { createCampaignParam } = this.props.campaign;
-    const newList = createCampaignParam.dateFilter.split('').map((date, i) => {
+    const newList = createCampaignParam?.dateFilter.split('').map((date, i) => {
       if (index === i) {
         return date === '1' ? '0' : '1';
       }
@@ -33,7 +33,7 @@ class FilterDateComponent extends React.Component<FilterDateComponentProps> {
     });
 
     await this.setCreateNewCampaignParam({
-      dateFilter: newList.toString().replaceAll(',', ''),
+      dateFilter: newList?.toString().replaceAll(',', ''),
     });
   };
 
@@ -41,15 +41,16 @@ class FilterDateComponent extends React.Component<FilterDateComponentProps> {
     const { createCampaignParam } = this.props.campaign;
     return (
       <>
-        <Space>
-          {createCampaignParam.dateFilter.split('').map((date, index) => {
+        <Space wrap>
+          {createCampaignParam?.dateFilter.split('').map((date, index) => {
             return (
               <Button
                 key={`${uuidv4()}`}
                 onClick={() => {
                   this.setDateFilter(index);
                 }}
-                type={date === '1' ? 'primary' : 'default'}
+                // type={date === '1' ? 'primary' : 'default'}
+                className={date === '1' ? 'lba-btn' : ''}
               >
                 {index === 0 && 'Monday'}
                 {index === 1 && 'Tuesday'}
