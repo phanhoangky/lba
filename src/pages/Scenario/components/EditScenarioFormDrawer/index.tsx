@@ -1,5 +1,5 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
-import { DeleteTwoTone, SettingFilled, UploadOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, DeleteTwoTone, SettingFilled, UploadOutlined } from '@ant-design/icons';
 import {
   Button,
   Drawer,
@@ -414,6 +414,34 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
     });
   };
 
+  handleSaveChange = async () => {
+    const { selectedSenario } = this.props.scenarios;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        const updateParam: UpdateScenarioParam = {
+          description: selectedSenario?.description,
+          id: selectedSenario?.id,
+          layoutId: selectedSenario?.layoutId,
+          scenarioItems: selectedSenario?.scenarioItems.map((item) => {
+            return {
+              id: item.id,
+              areaId: item?.area?.id,
+              audioArea: item.audioArea,
+              displayOrder: item.displayOrder,
+              isActive: item.isActive,
+              playlistId: item?.playlist?.id,
+              scenarioId: selectedSenario.id,
+            };
+          }),
+          title: selectedSenario?.title,
+          ...values,
+        };
+
+        this.handleUpdateScenario(updateParam);
+      });
+    }
+  };
+
   setSelectedScenarioItem = async (item?: ScenarioItem) => {
     const { selectedSenario } = this.props.scenarios;
     const newScenarioItems = selectedSenario?.scenarioItems.map((scenario) => {
@@ -455,6 +483,8 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
     } = this.props.scenarios;
 
     const selectedScenarioItem = selectedSenario?.scenarioItems?.filter((s) => s.isSelected)[0];
+
+    const disableChoosePlaylists = !playlistsDrawer?.listPlaylists.some((s) => s.isSelected);
     return (
       <Modal
         visible={editScenarioDrawer?.visible}
@@ -484,35 +514,12 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                 </Button>
                 <Button
                   loading={editScenarioDrawer?.isLoading}
-                  type="primary"
                   onClick={() => {
-                    if (this.formRef.current) {
-                      this.formRef.current.validateFields().then((values) => {
-                        const updateParam: UpdateScenarioParam = {
-                          description: selectedSenario?.description,
-                          id: selectedSenario?.id,
-                          layoutId: selectedSenario?.layoutId,
-                          scenarioItems: selectedSenario?.scenarioItems.map((item) => {
-                            return {
-                              id: item.id,
-                              areaId: item?.area?.id,
-                              audioArea: item.audioArea,
-                              displayOrder: item.displayOrder,
-                              isActive: item.isActive,
-                              playlistId: item?.playlist?.id,
-                              scenarioId: selectedSenario.id,
-                            };
-                          }),
-                          title: selectedSenario?.title,
-                          ...values,
-                        };
-
-                        this.handleUpdateScenario(updateParam);
-                      });
-                    }
+                    this.handleSaveChange();
                   }}
+                  className="lba-btn"
                 >
-                  <SettingFilled /> Save Change
+                  <SettingFilled className="lba-icon" /> Save Change
                 </Button>
               </Space>
             </div>
@@ -731,7 +738,12 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           footer={
             <>
               <div style={{ textAlign: 'right' }}>
-                <Button type="primary" onClick={() => this.choosePlaylist()}>
+                <Button
+                  disabled={disableChoosePlaylists}
+                  onClick={() => this.choosePlaylist()}
+                  className="lba-btn"
+                  icon={<CheckCircleFilled className="lba-icon" />}
+                >
                   Choose Playlist
                 </Button>
               </div>

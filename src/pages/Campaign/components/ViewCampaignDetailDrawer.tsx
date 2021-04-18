@@ -57,8 +57,6 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
     }
   }
 
-  componentDidUpdate = () => {};
-
   setMapComponent = async (payload: any) => {
     await this.props.dispatch({
       type: `${LOCATION_DISPATCHER}/setMapComponentReducer`,

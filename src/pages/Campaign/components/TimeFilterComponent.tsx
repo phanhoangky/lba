@@ -4,7 +4,12 @@ import type { CampaignModelState, DeviceModelState, Dispatch } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '..';
 import { v4 as uuidv4 } from 'uuid';
-import { ClockCircleTwoTone, CloseOutlined, PlusSquareTwoTone } from '@ant-design/icons';
+import {
+  ClockCircleTwoTone,
+  CloseCircleFilled,
+  CloseOutlined,
+  PlusSquareTwoTone,
+} from '@ant-design/icons';
 
 export type TimeFilterComponentProps = {
   dispatch: Dispatch;
@@ -97,14 +102,15 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
                   value={`${startTime} h - ${endTime} h`}
                   readOnly
                   key={uuidv4()}
-                  prefix={<ClockCircleTwoTone className="site-form-item-icon" />}
+                  prefix={<ClockCircleTwoTone twoToneColor="#00cdac" className="lba-icon" />}
                   suffix={
                     <Button
+                      danger
                       onClick={() => {
                         this.handleRemoveTimeFilter(index);
                       }}
                     >
-                      <CloseOutlined />
+                      <CloseCircleFilled className="lba-close-icon" />
                     </Button>
                   }
                 />
@@ -115,10 +121,11 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
         <Divider></Divider>
         {!inputTimeFilterVisible && (
           <Button
+            className="lba-btn"
             onClick={() => {
               this.setState({ inputTimeFilterVisible: true });
             }}
-            icon={<PlusSquareTwoTone />}
+            icon={<PlusSquareTwoTone twoToneColor="#00cdac" className="lba-icon" />}
           >
             New Time
           </Button>

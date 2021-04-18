@@ -55,9 +55,6 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
                 });
               }
             } else {
-              console.log('====================================');
-              console.log('Remove Marker aaaa>>>>', mapComponent.marker);
-              console.log('====================================');
               mapComponent.marker.remove();
               mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
             }
@@ -69,17 +66,11 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
 
   initialMap = () => {
     const { mapComponent, selectedLocation } = this.props.location;
-    console.log('====================================');
-    console.log(mapComponent);
-    console.log('====================================');
     if (mapComponent) {
       if (mapComponent.map && selectedLocation) {
         const lat = Number.parseFloat(selectedLocation.latitude);
         const lng = Number.parseFloat(selectedLocation.longitude);
         mapComponent.map.setView([lat, lng]);
-        console.log('====================================');
-        console.log(mapComponent, lat, lng);
-        console.log('====================================');
         if (mapComponent.marker) {
           mapComponent.marker.setLatLng([lat, lng]);
           mapComponent.marker.remove();
@@ -87,14 +78,8 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
         }
 
         const marker = L.marker([lat, lng]);
-        console.log('====================================');
-        console.log('Remove Marker xyz>>>>', marker);
-        console.log('====================================');
 
         marker.addTo(mapComponent.map);
-        console.log('====================================');
-        console.log('Remove Marker abc >>>>', marker);
-        console.log('====================================');
         this.setMapComponent({
           marker,
         });
@@ -325,10 +310,10 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
 
   autoCompleteRef = React.createRef<AutoCompleteComponent>();
   render() {
-    const { selectedLocation, editLocationModal, mapComponent } = this.props.location;
+    const { selectedLocation, editLocationModal } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
     console.log('====================================');
-    console.log(mapComponent);
+    console.log(listDeviceTypes);
     console.log('====================================');
     return (
       <>

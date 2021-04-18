@@ -331,6 +331,7 @@ class Device extends React.Component<DeviceProps> {
                 return (
                   <Space>
                     <Button
+                      type="primary"
                       onClick={async () => {
                         this.setMultipleUpdateMode(false).then(() => {
                           this.setSelectedDevice(record).then(() => {

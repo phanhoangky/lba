@@ -1,5 +1,11 @@
 import { openNotification } from '@/utils/utils';
-import { CheckOutlined, ClockCircleTwoTone, CloseOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+  CheckOutlined,
+  ClockCircleTwoTone,
+  CloseCircleFilled,
+  CloseOutlined,
+  PlusSquareFilled,
+} from '@ant-design/icons';
 import {
   Button,
   Col,
@@ -35,9 +41,6 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
   componentDidMount() {
     const { selectedDevice, isUpdateMultiple } = this.props.deviceStore;
     if (!isUpdateMultiple) {
-      console.log('====================================');
-      console.log(selectedDevice);
-      console.log('====================================');
       if (this.formRef.current) {
         this.formRef.current.setFieldsValue({
           description: selectedDevice?.description,
@@ -86,9 +89,6 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
   };
 
   onUpdateMultipleDevices = async (values: any) => {
-    console.log('====================================');
-    console.log(values);
-    console.log('====================================');
     this.setEditMultipleDevicesDrawer({
       isLoading: true,
     }).then(() => {
@@ -133,9 +133,6 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
   };
 
   onUpdateDevice = async (values: any) => {
-    console.log('====================================');
-    console.log(values);
-    console.log('====================================');
     this.setEditMultipleDevicesDrawer({
       isLoading: true,
     }).then(() => {
@@ -234,7 +231,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
         time === '1' && (
           <Skeleton key={Math.random() + 100} active loading={editMultipleDevicesDrawer?.isLoading}>
             <Input
-              prefix={<ClockCircleTwoTone className="site-form-item-icon" />}
+              prefix={<ClockCircleTwoTone twoToneColor="#00cdac" />}
               readOnly
               style={{
                 fontWeight: 'bolder',
@@ -243,11 +240,12 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
               size={'small'}
               suffix={
                 <Button
+                  danger
                   onClick={() => {
                     this.handleRemoveDateFilter(index.toString());
                   }}
                 >
-                  <CloseOutlined />
+                  <CloseCircleFilled className="lba-close-icon" />
                 </Button>
               }
               value={`${index} h - ${index + 1} h`}
@@ -498,11 +496,12 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
               )}
               {!inputVisible && (
                 <Button
+                  className="lba-btn"
                   onClick={() => {
                     this.setState({ inputVisible: true });
                   }}
                 >
-                  <PlusOutlined /> New Time
+                  <PlusSquareFilled className="lba-icon" /> New Time
                 </Button>
               )}
             </Col>
@@ -561,6 +560,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                 </Col>
                 {/* </Skeleton> */}
               </Row>
+              <Form.Item valuePropName="checked" label="Publish" name="isPublished"></Form.Item>
               <Divider></Divider>
             </>
           )}

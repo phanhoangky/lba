@@ -19,10 +19,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
 import type { TransactionType } from '@/models/transaction';
 import { CAMPAIGN } from '@/pages/Campaign';
-import { EditFilled, LockFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, EditFilled, LockFilled } from '@ant-design/icons';
 import { UpdateProfileModal } from './components/UpdateProfileModal';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
-import styles from './index.less';
+// import styles from './index.less';
+import { openNotification } from '@/utils/utils';
 
 type WalletProps = {
   dispatch: Dispatch;
@@ -189,7 +190,9 @@ class WalletScreen extends React.Component<WalletProps> {
             <Row>
               <WalletHeaderComponent {...this.props} />
             </Row>
-            <Divider orientation="left">View Transaction</Divider>
+            <Divider orientation="left" className="lba-text">
+              View Transaction
+            </Divider>
             <Row>
               <Col span={24}>
                 <Table
@@ -322,7 +325,8 @@ class WalletScreen extends React.Component<WalletProps> {
                 </Col>
                 <Col span={18}>
                   {currentUser &&
-                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                    currentUser.balance?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}{' '}
+                  VND
                 </Col>
               </Row>
               <Divider orientation="center" className="lba-text">
@@ -422,6 +426,14 @@ class WalletScreen extends React.Component<WalletProps> {
               file: undefined,
               name: undefined,
             });
+          }}
+          cancelButtonProps={{
+            icon: <CloseCircleFilled className="lba-close-icon" />,
+            danger: true,
+          }}
+          okButtonProps={{
+            className: 'lba-btn',
+            icon: <CheckCircleFilled className="lba-icon" />,
           }}
         >
           {updateProfileModal?.visible && (

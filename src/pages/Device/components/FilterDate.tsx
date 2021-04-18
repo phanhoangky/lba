@@ -14,7 +14,7 @@ class FilterDate extends React.Component<FilterTimeProps> {
 
   render() {
     const { isUpdateMultiple, selectedDevice, updateDevicesState } = this.props.deviceStore;
-    const data = isUpdateMultiple ? updateDevicesState.dateFilter : selectedDevice.dateFilter;
+    const data = isUpdateMultiple ? updateDevicesState?.dateFilter : selectedDevice?.dateFilter;
     return (
       <>
         <Row>
@@ -54,7 +54,8 @@ class FilterDate extends React.Component<FilterTimeProps> {
                         });
                       }
                     }}
-                    type={d === '1' ? 'primary' : 'default'}
+                    // type={d === '1' ? 'primary' : 'default'}
+                    className={d === '1' ? 'lba-btn' : ''}
                     key={`${Math.random() + 100}`}
                   >
                     {index === 0 && 'Monday'}

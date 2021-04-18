@@ -1,5 +1,5 @@
 import { openNotification } from '@/utils/utils';
-import { CloseSquareTwoTone, EditOutlined } from '@ant-design/icons';
+import { CloseCircleFilled, DeleteFilled, EditFilled } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
@@ -52,7 +52,7 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
       >
         <Space>
           <Button
-            icon={<CloseSquareTwoTone />}
+            icon={<CloseCircleFilled className="lba-icon" />}
             onClick={async () => {
               // await this.props.dispatch({
               //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
@@ -67,7 +67,8 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
           </Button>
           {!isUpdateMultiple && (
             <Button
-              icon={<CloseSquareTwoTone />}
+              danger
+              icon={<DeleteFilled className="lba-close-icon" />}
               onClick={async () => {
                 this.setEditMultipleDevicesDrawer({
                   isLoading: true,
@@ -103,15 +104,13 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
             </Button>
           )}
           <Button
-            icon={<EditOutlined />}
+            className="lba-btn"
+            icon={<EditFilled className="lba-icon" />}
             onClick={async () => {
               this.setEditMultipleDevicesDrawer({
                 isLoading: true,
               }).then(() => {
                 if (isUpdateMultiple) {
-                  console.log('====================================');
-                  console.log('Multiple >>>', isUpdateMultiple);
-                  console.log('====================================');
                   this.props
                     .onUpdateMultipleDevices()
                     .then(() => {

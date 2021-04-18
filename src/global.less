@@ -26,12 +26,36 @@ body,
 
   }
   .lba-btn {
+    box-sizing: border-box;
     position: relative;
     background-image: linear-gradient(135deg, #02aab0, #00cdac);
     color: #fff;
+    &:hover {
+      border: 2px solid rgb(16, 223, 144);
+      color: #00cdac;
+      background-image:  linear-gradient(135deg, #fdffff, rgba(253, 253, 255, 0.867));
+    }
+    .lba-icon {
+      color: #fff;
+
+      &:hover {
+        color: #00cdac;
+      }
+    }
+  }
+  .lba-btn:hover .lba-icon {
+    color: #00cdac;
   }
   .lba-icon {
     color: #00cdac;
+  }
+  .lba-close-icon {
+    color:rgba(255, 0, 21, 0.867)
+  }
+  .image-lba-icon {
+    &:hover {
+      cursor: pointer;
+    }
   }
   .ant-form-item-label>label {
     position: unset;

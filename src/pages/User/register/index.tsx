@@ -111,7 +111,7 @@ const Register: FC<RegisterProps> = ({ dispatch, userAndregister }) => {
   };
 
   const register = async (user: any) => {
-    dispatch({
+    await dispatch({
       type: 'user/registerEmail',
       payload: user,
     });

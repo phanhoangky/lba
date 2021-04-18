@@ -42,6 +42,11 @@ export type UserModelState = {
     visible: boolean;
     isLoading: boolean;
     currentStep: number;
+  },
+
+  registerModal?: {
+    visible: boolean;
+    isLoading: boolean;
   }
 };
 
@@ -76,6 +81,8 @@ export type UserModelType = {
     setChangePasswordModalReducer: Reducer<UserModelState>;
     
     saveCredentialReducer: Reducer<UserModelState>;
+
+    setRegisterModalReducer: Reducer<UserModelState>;
   };
 };
 
@@ -450,6 +457,13 @@ const UserModel: UserModelType = {
       return {
         ...state,
         credential: payload,
+      }
+    },
+
+    setRegisterModalReducer(state, { payload }) {
+      return {
+        ...state,
+        registerModal: payload
       }
     }
   },

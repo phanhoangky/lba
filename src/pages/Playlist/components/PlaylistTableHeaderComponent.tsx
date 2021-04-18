@@ -100,7 +100,7 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
         </Dropdown>
         <Select
           style={{
-            width: '100px',
+            width: '150px',
           }}
           defaultValue="createTime"
           onChange={(e) => {
@@ -127,6 +127,7 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
               visible: true,
             });
           }}
+          className="lba-btn"
         >
           <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Playlist
         </Button>

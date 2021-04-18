@@ -5,10 +5,11 @@ import type {
   Dispatch,
   MomoModelState,
   ProfileWalletModelState,
+  TransactionModelState,
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-import { LoadingOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, LoadingOutlined } from '@ant-design/icons';
 import Copy from '@/assets/Copy.svg';
 import QR from '@/assets/QR.svg';
 import BuyIcon from '@/assets/Buy.svg';
@@ -37,6 +38,7 @@ export type WalletHeaderComponentProps = {
   deviceStore: DeviceModelState;
   momo: MomoModelState;
   profileWallet: ProfileWalletModelState;
+  transaction: TransactionModelState;
 };
 
 export class WalletHeaderComponent extends React.Component<WalletHeaderComponentProps> {
@@ -157,6 +159,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
     const generator = new RandomIcon();
     const date = new Date();
     generator.generate(currentUser?.ether?.wallet.address + date.getDate().toString());
+
     return (
       <>
         <div
@@ -278,6 +281,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                             src={BuyIcon}
                             width={'25px'}
                             height={'25px'}
+                            className="image-lba-icon"
                             onClick={() => {
                               this.setDepositModal({
                                 visible: true,
@@ -289,6 +293,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                             src={SendIcon}
                             width={'22px'}
                             height={'22px'}
+                            className="image-lba-icon"
                             onClick={() => {
                               this.setSendModal({
                                 visible: true,
@@ -309,6 +314,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                               preview={false}
                               src={Exchange}
                               width={'25px'}
+                              className="image-lba-icon"
                               height={'25px'}
                               onClick={() => {
                                 this.onRefreshBalance();
@@ -330,6 +336,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
           centered
           closable={false}
           width={'20%'}
+          title="Wallet Address"
           visible={QRModal?.visible}
           destroyOnClose={true}
           onCancel={() => {
@@ -337,7 +344,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
               visible: false,
             });
           }}
-          onOk={() => {}}
+          footer={null}
         >
           {QRModal?.visible && <QRModalComponent {...this.props} />}
         </Modal>
@@ -357,6 +364,14 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
               visible: false,
             });
           }}
+          cancelButtonProps={{
+            icon: <CloseCircleFilled className="lba-close-icon" />,
+            danger: true,
+          }}
+          okButtonProps={{
+            className: 'lba-btn',
+            icon: <CheckCircleFilled className="lba-icon" />,
+          }}
           onOk={() => {
             // this.depositMoney();
             this.setDepositModal({
@@ -370,8 +385,7 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
                   });
                 })
                 .catch((error) => {
-                  Promise.reject(error);
-                  openNotification('error', 'Fail to perform deposit action', error);
+                  openNotification('error', 'Fail to perform deposit action', error.message);
                   this.setDepositModal({
                     isLoading: false,
                   });
@@ -398,6 +412,14 @@ export class WalletHeaderComponent extends React.Component<WalletHeaderComponent
           }}
           onOk={() => {
             this.sendMoneyModalRef.current?.handleSendMoney();
+          }}
+          cancelButtonProps={{
+            icon: <CloseCircleFilled className="lba-close-icon" />,
+            danger: true,
+          }}
+          okButtonProps={{
+            className: 'lba-btn',
+            icon: <CheckCircleFilled className="lba-icon" />,
           }}
         >
           {sendModal?.visible && <SendModal ref={this.sendMoneyModalRef} {...this.props} />}

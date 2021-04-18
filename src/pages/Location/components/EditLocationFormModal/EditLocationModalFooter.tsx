@@ -24,12 +24,12 @@ export class EditLocationModalFooter extends React.Component<EditLocationModalFo
           <DeleteTwoTone twoToneColor="#f93e3e" /> Remove Location
         </Button>
         <Button
-          type="primary"
+          className="lba-btn"
           onClick={() => {
             this.props.onUpdate();
           }}
         >
-          <EditFilled /> Update Location
+          <EditFilled className="lba-icon" /> Update Location
         </Button>
       </Space>
     );

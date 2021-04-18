@@ -1,10 +1,12 @@
-import { Col, Divider, Form, FormInstance, InputNumber, Row, Skeleton } from 'antd';
+import { Col, Divider, Form, InputNumber, Row } from 'antd';
+import type { FormInstance } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MomoModelState, ProfileWalletModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import QRCode from 'qrcode';
 import styles from './index.less';
 import { openNotification } from '@/utils/utils';
+import { BarcodeOutlined } from '@ant-design/icons';
 
 export type DepositModalProps = {
   dispatch: Dispatch;
@@ -35,11 +37,7 @@ export class DepositModal extends React.Component<DepositModalProps> {
   };
 
   generateQR = async (text: any) => {
-    const result = await QRCode.toDataURL(text);
-    console.log('====================================');
-    console.log('QR >>>', result);
-    console.log('====================================');
-
+    // const result = await QRCode.toDataURL(text);
     QRCode.toCanvas(text, { errorCorrectionLevel: 'H' }, (err, canvas) => {
       if (err) {
         throw err;
@@ -70,9 +68,9 @@ export class DepositModal extends React.Component<DepositModalProps> {
     this.formRef.current
       ?.validateFields()
       .then((values) => {
-        console.log('====================================');
-        console.log(values);
-        console.log('====================================');
+        // console.log('====================================');
+        // console.log(values);
+        // console.log('====================================');
         this.depositMoney({
           amount: values.amount,
         })
@@ -87,17 +85,17 @@ export class DepositModal extends React.Component<DepositModalProps> {
             });
           })
           .catch((err) => {
-            console.log('====================================');
-            console.log(err);
-            console.log('====================================');
-            openNotification('error', 'fail to deposit money');
+            // console.log('====================================');
+            // console.log(err);
+            // console.log('====================================');
+            openNotification('error', 'fail to deposit money', err.message);
           });
       })
       .catch((err) => {
-        console.log('====================================');
-        console.log(err);
-        console.log('====================================');
-        openNotification('error', 'fail to deposit money');
+        // console.log('====================================');
+        // console.log(err);
+        // console.log('====================================');
+        openNotification('error', 'fail to deposit money', err.message);
       });
   };
 
@@ -105,13 +103,14 @@ export class DepositModal extends React.Component<DepositModalProps> {
 
   render() {
     const { currentUser } = this.props.user;
-    const { linkDepositParam } = this.props.momo;
+    // const { linkDepositParam } = this.props.momo;
     const { depositModal } = this.props.profileWallet;
-    const equivalent =
-      linkDepositParam &&
-      currentUser &&
-      currentUser.balance &&
-      linkDepositParam?.amount + Number.parseFloat(currentUser.balance.toString());
+    // const equivalent =
+    //   linkDepositParam &&
+    //   currentUser &&
+    //   currentUser.balance &&
+    //   linkDepositParam?.amount + Number.parseFloat(currentUser.balance.toString());
+
     return (
       <>
         <Row gutter={20}>
@@ -140,16 +139,18 @@ export class DepositModal extends React.Component<DepositModalProps> {
                   }}
                 />
               </Form.Item>
-              <Form.Item name="equivalent" label="Equivalent Balance">
+              {/* <Form.Item name="equivalent" label="Equivalent Balance">
                 {equivalent}
-              </Form.Item>
+              </Form.Item> */}
             </Form>
             <Divider></Divider>
           </Col>
           <Col span={12} className={styles.QRConstainer}>
-            <Skeleton active loading={depositModal?.isLoading}>
-              <div id="qr-container"></div>
-            </Skeleton>
+            {depositModal?.isLoading && <>LOADING</>}
+            <div id="qr-container"></div>
+            <div className="qr-preview">
+              <BarcodeOutlined />
+            </div>
           </Col>
         </Row>
       </>

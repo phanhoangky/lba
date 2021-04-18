@@ -15,6 +15,25 @@ export type SelectScenarioPartProps = {
 };
 
 class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
+  componentDidMount = async () => {
+    this.setScenarioTableLoading(true).then(() => {
+      this.callGetListScenario()
+        .then(() => {
+          this.setScenarioTableLoading(false);
+        })
+        .catch(() => {
+          this.setScenarioTableLoading(false);
+        });
+    });
+  };
+
+  setScenarioTableLoading = async (isLoading: boolean) => {
+    await this.props.dispatch({
+      type: `scenarios/setTableLoadingReducer`,
+      payload: isLoading,
+    });
+  };
+
   setCreateNewCampaignParam = async (param: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setCreateCampaignParamReducer`,
@@ -26,7 +45,7 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
   };
 
   callGetListScenario = async (param?: any) => {
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'scenarios/getListScenarios',
       payload: {
         ...this.props.scenarios.getListScenarioParam,
@@ -107,7 +126,9 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
   render() {
     const { listScenario, getListScenarioParam, totalItem, tableLoading } = this.props.scenarios;
     const { addNewCampaignModal } = this.props.campaign;
-
+    console.log('====================================');
+    console.log(listScenario);
+    console.log('====================================');
     // const selectedScenario = listScenario?.filter((s) => s.isSelected)[0];
 
     return (
@@ -164,12 +185,15 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
           <Modal
             visible={addNewCampaignModal?.previewScenarioModal?.visible}
             closable={false}
+            centered
             destroyOnClose={true}
+            title="Scenario Preview"
             onCancel={() => {
               this.setPreviewScenarioModal({
                 visible: false,
               });
             }}
+            footer={null}
           >
             {addNewCampaignModal?.previewScenarioModal?.visible && (
               <ViewScenarioDetailComponent {...this.props} />

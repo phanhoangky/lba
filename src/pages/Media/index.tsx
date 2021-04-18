@@ -23,7 +23,9 @@ import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 import { cloneDeep } from 'lodash';
 
 import {
+  CheckCircleFilled,
   CloseCircleFilled,
+  DeleteTwoTone,
   ExclamationCircleOutlined,
   FolderOpenFilled,
   FolderOpenTwoTone,
@@ -58,7 +60,9 @@ class Media extends React.Component<MediaSourceProps> {
     this.setListLoading(true)
       .then(() => {
         this.getCurrentUser().then(async () => {
-          this.readJWT();
+          this.readJWT().catch((error) => {
+            openNotification('error', 'Error Occured', error.message);
+          });
           Promise.all([
             this.callGetListFolders(),
             this.callGetListMedia(),
@@ -424,6 +428,14 @@ class Media extends React.Component<MediaSourceProps> {
       closable: false,
       title: `Do you want to remove ${item.name} ?`,
       icon: <ExclamationCircleOutlined />,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       content: (
         <>
           If you remove this folder, every files inside will be removes aslo{'\n'}
@@ -440,9 +452,6 @@ class Media extends React.Component<MediaSourceProps> {
               });
             })
             .catch((error) => {
-              console.log('====================================');
-              console.log(error);
-              console.log('====================================');
               openNotification('error', 'Fail to remove folders', error.message);
               this.setListLoading(false);
             });
@@ -597,13 +606,34 @@ class Media extends React.Component<MediaSourceProps> {
                                 this.handleFolderContextMenuClick(e, item);
                               }}
                             >
-                              <Menu.Item key="open" icon={<FolderOpenFilled />}>
+                              <Menu.Item
+                                key="open"
+                                icon={
+                                  <FolderOpenFilled
+                                    style={{
+                                      color: '#00cdac',
+                                    }}
+                                  />
+                                }
+                              >
                                 Open
                               </Menu.Item>
-                              <Menu.Item key="rename" icon={<FormOutlined />}>
+                              <Menu.Item
+                                key="rename"
+                                icon={
+                                  <FormOutlined
+                                    style={{
+                                      color: '#00cdac',
+                                    }}
+                                  />
+                                }
+                              >
                                 Rename
                               </Menu.Item>
-                              <Menu.Item key="remove" icon={<CloseCircleFilled />}>
+                              <Menu.Item
+                                key="remove"
+                                icon={<DeleteTwoTone twoToneColor="#f93e3e" />}
+                              >
                                 Remove
                               </Menu.Item>
                             </Menu>
@@ -744,6 +774,8 @@ class Media extends React.Component<MediaSourceProps> {
                                   showIcon={true}
                                 ></Alert>,
                                 <SettingTwoTone
+                                  className="lba-icon"
+                                  twoToneColor="#00cdac"
                                   style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
                                   onClick={(e) => {
                                     this.setSelectedFile(item).then(() => {

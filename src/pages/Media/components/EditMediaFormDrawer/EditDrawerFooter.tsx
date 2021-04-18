@@ -131,9 +131,6 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                         });
                       })
                       .catch((error) => {
-                        console.log('====================================');
-                        console.log(error);
-                        console.log('====================================');
                         openNotification('error', 'fail to remove media', error.message);
                       });
                     // if (signature && !signature.toLowerCase().includes('fail')) {
@@ -173,7 +170,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
               </Button>
             </Popconfirm>
             <Button
-              type="primary"
+              className="lba-btn"
               onClick={async () => {
                 // await this.setEditFileDrawer({
                 //   visible: false,
@@ -211,7 +208,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                   });
               }}
             >
-              <EditFilled /> Update Media
+              <EditFilled className="lba-icon" /> Update Media
             </Button>
           </Space>
         </div>

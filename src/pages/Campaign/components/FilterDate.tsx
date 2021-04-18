@@ -49,7 +49,8 @@ class FilterDateComponent extends React.Component<FilterDateComponentProps> {
                 onClick={() => {
                   this.setDateFilter(index);
                 }}
-                type={date === '1' ? 'primary' : 'default'}
+                // type={date === '1' ? 'primary' : 'default'}
+                className={date === '1' ? 'lba-btn' : ''}
               >
                 {index === 0 && 'Monday'}
                 {index === 1 && 'Tuesday'}

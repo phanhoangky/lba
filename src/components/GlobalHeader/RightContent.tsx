@@ -36,7 +36,7 @@ const GlobalHeaderRight: React.SFC<GlobalHeaderRightProps> = (props) => {
     <div className={className}>
       <Button
         className={styles.action}
-        icon={<WalletTwoTone />}
+        icon={<WalletTwoTone twoToneColor="#00cdac" />}
         onClick={() => {
           history.push('/profile');
         }}

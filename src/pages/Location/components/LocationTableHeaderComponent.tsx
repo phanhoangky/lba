@@ -205,7 +205,8 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
                   });
                 });
               }}
-              icon={<PlusSquareTwoTone />}
+              className="lba-btn"
+              icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
             >
               Add New Location
             </Button>

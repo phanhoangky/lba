@@ -96,9 +96,6 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
               isLoading: false,
               visible: false,
             });
-            console.log('====================================');
-            console.log(error);
-            console.log('====================================');
             openNotification('error', 'Error', error.message);
           });
       })
@@ -213,10 +210,6 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
     const { mapComponent } = this.props.location;
     if (address !== '') {
       const listLocations = await forwardGeocoding(address);
-
-      console.log('====================================');
-      console.log('List Location >>>', listLocations);
-      console.log('====================================');
       if (listLocations.length > 0) {
         const location = listLocations[0];
         const lat = Number.parseFloat(location.lat);

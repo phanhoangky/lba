@@ -134,7 +134,7 @@ const Login: React.FC<LoginProps> = (props) => {
     <Row>
       <Col span={8}>
         <div className={styles.main}>
-          <div className="form-title">Login Form</div>
+          <div className="form-title">Login</div>
           <ProForm
             initialValues={{
               autoLogin: true,
@@ -273,7 +273,6 @@ const Login: React.FC<LoginProps> = (props) => {
               }}
             ></div>
           </ProForm>
-          <Divider />
 
           <Divider />
           <div style={{ width: '100%', textAlign: 'center' }}>

@@ -695,7 +695,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                   }}
                 ></Column>
               </Table>
-              <Button
+              {/* <Button
                 className="add-new-media-btn"
                 block
                 size="large"
@@ -707,7 +707,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
               >
                 <div className="add-media-overlap"></div>
                 <div className="add-media-text">Add New Media</div>
-              </Button>
+              </Button> */}
             </Col>
           </Row>
           <Divider orientation="center" className="lba-text">

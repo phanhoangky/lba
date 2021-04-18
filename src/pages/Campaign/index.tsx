@@ -7,6 +7,8 @@ import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import { openNotification } from '@/utils/utils';
 import {
   CaretRightOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
   DeleteTwoTone,
   ExclamationCircleOutlined,
   EyeFilled,
@@ -48,23 +50,22 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
     this.setCampaignTableLoading(true)
       .then(async () => {
         this.readJWT().catch((error) => {
-          openNotification('error', 'Error', error);
+          openNotification('error', 'Error', error.message);
         });
         Promise.all([
           this.callGetListCampaigns(),
           this.callGetListDeviceTypes(),
-          this.callGetListScenario(),
           this.callGetListLocations(),
           this.callGetFee(),
         ]).then(async () => {
-          this.setGetListCampaignParam({
+          await this.setGetListCampaignParam({
             id: undefined,
           });
-          this.setCampaignTableLoading(false);
+          await this.setCampaignTableLoading(false);
         });
       })
       .catch((error) => {
-        openNotification('error', 'Error', error);
+        openNotification('error', 'Error', error.message);
         this.setCampaignTableLoading(false);
       });
   };
@@ -137,7 +138,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   };
 
   callGetListScenario = async (param?: any) => {
-    this.props.dispatch({
+    await this.props.dispatch({
       type: 'scenarios/getListScenarios',
       payload: {
         ...this.props.scenarios.getListScenarioParam,
@@ -533,6 +534,12 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             }}
             okButtonProps={{
               disabled: disabledOkButton,
+              className: 'lba-btn',
+              icon: <CheckCircleFilled className="lba-icon" />,
+            }}
+            cancelButtonProps={{
+              icon: <CloseCircleFilled className="lba-close-icon" />,
+              danger: true,
             }}
             onOk={() => {
               // this.okConfirm();

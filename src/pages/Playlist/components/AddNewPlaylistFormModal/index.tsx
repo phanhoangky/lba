@@ -1,4 +1,5 @@
 import { openNotification } from '@/utils/utils';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Modal, Form, Input } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
@@ -125,6 +126,14 @@ class AddNewPlaylistFormModal extends React.Component<AddNewPlaylistFormModalPro
               this.onCreatePlaylist(values);
             });
           }
+        }}
+        okButtonProps={{
+          className: 'lba-btn',
+          icon: <CheckCircleFilled className="lba-icon" />,
+        }}
+        cancelButtonProps={{
+          icon: <CloseCircleFilled className="lba-close-icon" />,
+          danger: true,
         }}
       >
         {/* <AddNewPlaylistModal {...this.props} /> */}

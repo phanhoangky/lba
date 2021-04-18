@@ -264,9 +264,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
         }
       })
       .catch((error) => {
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
         openNotification('error', 'Fail to create new campaign', `${error.message}`);
         this.clearCreateNewCampaignParam();
         this.setAddNewCampaignModal({
@@ -368,9 +365,6 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
   handleAfterClose = async () => {
     this.clearCreateNewCampaignParam().then(() => {
       this.selectScenario(undefined).then(() => {
-        console.log('====================================');
-        console.log('Reset map >>');
-        console.log('====================================');
         this.resetMap();
       });
     });
@@ -457,7 +451,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                     {
                       type: 'number',
                       min: 100000,
-                      validator: (rule, value, error) => {
+                      validator: (rule, value) => {
                         if (value > maxBudget) {
                           return Promise.reject(new Error('Budget is over your balance'));
                         }

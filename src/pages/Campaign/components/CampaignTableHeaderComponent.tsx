@@ -141,6 +141,7 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
               });
             });
           }}
+          className="lba-btn"
           icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
         >
           Add New Campaign

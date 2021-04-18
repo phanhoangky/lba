@@ -97,7 +97,7 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
           </Button>
         </Dropdown>
         <Select
-          style={{ width: '100px' }}
+          style={{ width: '150px' }}
           defaultValue="createTime"
           onChange={(e) => {
             this.setTableLoading(true)
@@ -123,6 +123,7 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
               visible: true,
             });
           }}
+          className="lba-btn"
         >
           <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Scenario
         </Button>

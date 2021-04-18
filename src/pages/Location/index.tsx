@@ -1,6 +1,12 @@
 // import { Location } from '@/models/Location';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
-import { DeleteTwoTone, EditFilled, ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DeleteTwoTone,
+  EditFilled,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Button, Col, Drawer, Modal, Row, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
@@ -338,6 +344,8 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       this.resetMap().then(() => {
                         this.setViewLocationDetailComponent({
                           visible: true,
+                        }).then(() => {
+                          this.viewLocationRef.current?.componentDidMount();
                         });
                       });
                     });
@@ -421,9 +429,10 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           width={'40%'}
           visible={viewLocationDetailComponent?.visible}
         >
-          {viewLocationDetailComponent?.visible && (
-            <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
-          )}
+          <ViewLocationDetailComponent ref={this.viewLocationRef} {...this.props} />
+          {/* {viewLocationDetailComponent?.visible && (
+            
+          )} */}
         </Drawer>
         {/* Add New Location Modal */}
         {/* <AddNewLocationModal {...this.props} /> */}
@@ -458,8 +467,15 @@ class LocationScreen extends React.Component<LocationScreenProps> {
             this.setAddNewLocationModal({
               visible: false,
             });
-
             this.clearCreateLocationParam();
+          }}
+          okButtonProps={{
+            className: 'lba-btn',
+            icon: <CheckCircleFilled className="lba-icon" />,
+          }}
+          cancelButtonProps={{
+            icon: <CloseCircleFilled className="lba-close-icon" />,
+            danger: true,
           }}
         >
           {addNewLocationModal?.visible && (

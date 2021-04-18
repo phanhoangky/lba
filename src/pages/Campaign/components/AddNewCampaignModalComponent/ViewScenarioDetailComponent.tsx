@@ -19,13 +19,7 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
       item.playlist?.playlistItems.forEach((playlistItem, index) => {
         const previous = item.playlist?.playlistItems[index - 1];
         const deplayTime = previous ? index * previous.duration : 0;
-        console.log('====================================');
-        console.log('>>>', playlistItem.mediaSrc.urlPreview, previous, deplayTime);
-        console.log('====================================');
         setTimeout(() => {
-          console.log('====================================');
-          console.log('Set URL');
-          console.log('====================================');
           this.setUrlAreasOfScenario(
             item.area,
             playlistItem.mediaSrc.urlPreview,
@@ -77,29 +71,17 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
   setUrlAreasOfScenario = async (item: any, urlPreview: string, typeName: string) => {
     const { selectedSenario } = this.props.scenarios;
     const newAreas = selectedSenario?.layout.areas.map((area) => {
-      console.log('====================================');
-      console.log('Param >>>>', area, item, urlPreview, typeName);
-      console.log('====================================');
-      console.log('====================================');
-      console.log(area.id === item.id);
-      console.log('====================================');
       if (area.id === item.id) {
         const newArea = {
           ...area,
           urlPreview,
           typeMediaName: typeName,
         };
-        console.log('====================================');
-        console.log('New Area >>>');
-        console.log('====================================');
         return newArea;
       }
 
       return area;
     });
-    console.log('====================================');
-    console.log('New Areassssss >>>', newAreas);
-    console.log('====================================');
     await this.setSelectedScenario({
       layout: {
         ...selectedSenario?.layout,
@@ -124,29 +106,23 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
 
   render() {
     const { selectedSenario } = this.props.scenarios;
-    console.log('====================================');
-    console.log(selectedSenario);
-    console.log('====================================');
     return (
       <div
         id="areaWrapper"
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '80%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        // style={{
+        //   position: 'relative',
+        //   width: '100%',
+        //   height: '80%',
+        //   display: 'flex',
+        //   alignItems: 'center',
+        //   justifyContent: 'center',
+        // }}
         className={styles.areaWrapper}
       >
         {selectedSenario &&
           selectedSenario.layout.areas &&
           sortArea(selectedSenario.layout.areas).map((area) => {
             const scenarioItem = this.checkAreaIsUsed(area);
-            console.log('====================================');
-            console.log(scenarioItem, area);
-            console.log('====================================');
             return (
               <div
                 key={area.id}
@@ -159,10 +135,10 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
                   alignItems: 'center',
                   height: `${area.height * 100}%`,
                   textAlign: 'center',
-                  border: `2px solid black`,
                   transition: 'ease',
                   transitionDuration: '1s',
                 }}
+                className="area-item"
               >
                 {scenarioItem ? (
                   <>

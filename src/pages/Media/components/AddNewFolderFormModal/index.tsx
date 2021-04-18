@@ -1,4 +1,5 @@
 import { openNotification } from '@/utils/utils';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Input, Modal, Skeleton, Form } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
@@ -123,6 +124,14 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
           this.setAddNewFolderModal({
             visible: false,
           });
+        }}
+        cancelButtonProps={{
+          icon: <CloseCircleFilled className="lba-close-icon" />,
+          danger: true,
+        }}
+        okButtonProps={{
+          className: 'lba-btn',
+          icon: <CheckCircleFilled className="lba-icon" />,
         }}
       >
         <Form ref={this.formRef} layout="vertical" name="Create_Folder">

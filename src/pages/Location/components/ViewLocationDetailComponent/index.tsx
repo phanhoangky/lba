@@ -17,17 +17,17 @@ export type ViewLocationDetailComponentProps = {
 export class ViewLocationDetailComponent extends React.Component<ViewLocationDetailComponentProps> {
   componentDidMount = () => {
     this.initialMap();
-    // if (this.formRef.current) {
-    //   const { selectedLocation } = this.props.location;
-    //   if (selectedLocation) {
-    //     this.formRef.current.setFieldsValue({
-    //       name: selectedLocation.name,
-    //       description: selectedLocation.description,
-    //       typeId: selectedLocation.typeId,
-    //       address: selectedLocation.address,
-    //     });
-    //   }
-    // }
+    if (this.formRef.current) {
+      const { selectedLocation } = this.props.location;
+      if (selectedLocation) {
+        this.formRef.current.setFieldsValue({
+          name: selectedLocation.name,
+          description: selectedLocation.description,
+          typeId: selectedLocation.typeId,
+          address: selectedLocation.address,
+        });
+      }
+    }
   };
 
   componentDidUpdate = () => {
@@ -52,9 +52,6 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 });
               }
             } else {
-              console.log('====================================');
-              console.log('Remove Marker aaaa>>>>', mapComponent.marker);
-              console.log('====================================');
               mapComponent.marker.remove();
               mapComponent.marker.setLatLng([lat, lng]).addTo(mapComponent.map);
             }
@@ -66,17 +63,11 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
 
   initialMap = () => {
     const { mapComponent, selectedLocation } = this.props.location;
-    console.log('====================================');
-    console.log(mapComponent, selectedLocation);
-    console.log('====================================');
     if (mapComponent) {
       if (mapComponent.map && selectedLocation) {
         const lat = Number.parseFloat(selectedLocation.latitude);
         const lng = Number.parseFloat(selectedLocation.longitude);
         mapComponent.map.setView([lat, lng]);
-        console.log('====================================');
-        console.log(mapComponent, lat, lng);
-        console.log('====================================');
         if (mapComponent.marker) {
           mapComponent.marker.setLatLng([lat, lng]);
           mapComponent.marker.remove();
@@ -84,14 +75,8 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
         }
 
         const marker = L.marker([lat, lng]);
-        console.log('====================================');
-        console.log('Remove Marker xyz>>>>', marker);
-        console.log('====================================');
 
         marker.addTo(mapComponent.map);
-        console.log('====================================');
-        console.log('Remove Marker abc >>>>', marker);
-        console.log('====================================');
         this.setMapComponent({
           marker,
         });
@@ -177,17 +162,13 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 <Col span={12}>
                   <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                     <Form.Item label="Name">
-                      <Input
-                        value={selectedLocation.name}
-                        readOnly
-                        placeholder="input placeholder"
-                      />
+                      <Input value={selectedLocation.name} readOnly />
                     </Form.Item>
                   </Skeleton>
                 </Col>
                 <Col span={12}>
                   <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                    <Form.Item label="Type">
+                    <Form.Item name="typeId" label="Type">
                       <Select
                         disabled
                         style={{ width: '100%' }}

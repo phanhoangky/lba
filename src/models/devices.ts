@@ -95,7 +95,7 @@ export type DeviceModelType = {
     setSelectedDevices: Reducer<DeviceModelState>;
     setEditMultipleDevicesDrawerVisible: Reducer<DeviceModelState>;
     setUpdateDevicesState: Reducer<DeviceModelState>;
-    // setListDeviceTypes: Reducer<DeviceModelState>;
+    setListDeviceTypes: Reducer<DeviceModelState>;
     clearUpdateDevicesDrawer: Reducer<DeviceModelState>;
     setMultipleUpdateMode: Reducer<DeviceModelState>;
     setGetDevicesParamReducer: Reducer<DeviceModelState>;
@@ -418,16 +418,16 @@ const DeviceModel: DeviceModelType = {
       };
     },
 
-    // setListDeviceTypes(state, { payload }) {
-    //   return {
-    //     ...state,
-    //     listDeviceTypes: payload,
-    //     updateDevicesState: {
-    //       ...state?.updateDevicesState,
-    //       currentType: payload[0].typeName,
-    //     },
-    //   };
-    // },
+    setListDeviceTypes(state, { payload }) {
+      return {
+        ...state,
+        listDeviceTypes: payload,
+        updateDevicesState: {
+          ...state?.updateDevicesState,
+          currentType: payload[0].typeName,
+        },
+      };
+    },
 
     clearUpdateDevicesDrawer(state) {
       return {

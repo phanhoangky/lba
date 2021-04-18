@@ -12,6 +12,7 @@ import { connect } from 'umi';
 import styles from '../../index.less';
 import TitleStep from './TitleStep';
 import { openNotification } from '@/utils/utils';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
@@ -103,8 +104,8 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
     });
   };
 
-  setCreateScenarioParam = (param: any) => {
-    this.props.dispatch({
+  setCreateScenarioParam = async (param: any) => {
+    await this.props.dispatch({
       type: 'scenarios/setCreateScenarioParamReducer',
       payload: {
         ...this.props.scenarios.createScenarioParam,
@@ -120,25 +121,28 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
     });
   };
 
+  clearListScenarioLayouts = async () => {
+    const newList = this.props.layouts.listLayouts.map((item) => ({ ...item, isSelected: false }));
+    this.setListScenarioLayouts(newList);
+  };
+
   chooseLayout = async (layout: any) => {
     this.setCreateScenarioParam({
       layoutId: layout.id,
-    });
-    await this.props.dispatch({
-      type: 'layouts/setListLayoutsReducer',
-      payload: this.props.layouts.listLayouts.map((item) => {
+    }).then(() => {
+      const newList = this.props.layouts.listLayouts.map((item) => {
         if (item.id === layout.id) {
           return {
             ...item,
             isSelected: true,
           };
         }
-
         return {
           ...item,
           isSelected: false,
         };
-      }),
+      });
+      this.setListScenarioLayouts(newList);
     });
   };
 
@@ -159,10 +163,18 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
         onCancel={() => {
           this.setAddNewScenarioModal({
             visible: false,
+          }).then(() => {
+            this.clearListScenarioLayouts();
           });
         }}
         okButtonProps={{
           disabled: listLayouts.every((layouts) => !layouts.isSelected),
+          className: 'lba-btn',
+          icon: <CheckCircleFilled className="lba-icon" />,
+        }}
+        cancelButtonProps={{
+          icon: <CloseCircleFilled className="lba-close-icon" />,
+          danger: true,
         }}
         onOk={async () => {
           if (addNewScenarioModal?.currentStep === 0) {
@@ -177,17 +189,6 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           }
         }}
       >
-        {/* <AddNewScenarioModal {...this.props} /> */}
-        {/* <Steps current={addNewScenarioModal.currentStep} onChange={(e) => {}}>
-          <Steps.Step title="Finished" description="This is a description." />
-          <Steps.Step
-            title="In Progress"
-            subTitle="Left 00:00:08"
-            description="This is a description."
-          />
-          <Steps.Step title="Waiting" description="This is a description." />
-        </Steps> */}
-
         <Form ref={this.formRef} name="add_new_scenario" layout="vertical">
           <TitleStep {...this.props} />
         </Form>
@@ -219,8 +220,6 @@ class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalPro
           dataSource={listLayouts}
           grid={{
             gutter: 20,
-            xs: 1,
-            sm: 2,
             md: 2,
             lg: 2,
             xl: 3,

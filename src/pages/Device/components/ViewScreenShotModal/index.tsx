@@ -12,9 +12,6 @@ export class ViewScreenShotModal extends React.Component<ViewScreenShotModalProp
   componentDidMount = async () => {
     const { selectedDevice } = this.props.deviceStore;
     if (selectedDevice && selectedDevice.macaddress) {
-      console.log('====================================');
-      console.log('call fetch device screen');
-      console.log('====================================');
       await this.fetchDevicesScreenShot(selectedDevice.macaddress);
     }
   };
@@ -38,13 +35,12 @@ export class ViewScreenShotModal extends React.Component<ViewScreenShotModalProp
     // const firstUrl =
     //   listDevicesScreenShot && listDevicesScreenShot.length > 0 && listDevicesScreenShot;
     // let url = '';
-    console.log('====================================');
-    console.log(listDevicesScreenShot);
-    console.log('====================================');
     return (
       <>
-        {listDevicesScreenShot && <Image height={300} src={listDevicesScreenShot.url} />}
-        <Divider></Divider>
+        {listDevicesScreenShot && <Image src={listDevicesScreenShot.url} />}
+        <Divider orientation="center" className="lba-text">
+          Time Shoot
+        </Divider>
         {listDevicesScreenShot && listDevicesScreenShot.createDate}
         {/* <img src={listDevicesScreenShot[0]} width={'100%'} height={'100%'} /> */}
       </>

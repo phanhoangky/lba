@@ -1,6 +1,6 @@
 import type { CreateFileParam } from '@/services/PublitioService/PublitioService';
-import { UploadOutlined } from '@ant-design/icons';
-import { Form, Input, Modal, Skeleton, Upload } from 'antd';
+import { CheckCircleFilled, CloseCircleFilled, UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Modal, Upload } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import { Keccak } from 'sha3';
@@ -89,9 +89,6 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
     const security = hash.digest('hex');
     const signature = await currentUser?.ether?.addDocument(security);
     if (signature && !signature.toLowerCase().includes('Fail'.toLowerCase())) {
-      console.log('====================================');
-      console.log('Param  222>>>', security, signature);
-      console.log('====================================');
       const param: CreateFileParam = {
         ...createFileParam,
         ...values,
@@ -103,9 +100,6 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         isSigned: 1,
         mediaSrcId: uuidv4(),
       };
-      console.log('====================================');
-      console.log('Param >>>', signature, param);
-      console.log('====================================');
       this.createFile(param).then(() => {
         openNotification('success', 'Create File Successfully', `Create ${values.title}`);
         Promise.all([this.callGetListMedia(), this.clearCreateFileParam(), this.clearFilelist()]);
@@ -156,24 +150,26 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
-    const { listLoading, addNewFileModal, listMediaType, breadScrumb } = this.props.media;
+    const { addNewFileModal, listMediaType, breadScrumb } = this.props.media;
     return (
       <Modal
         className={styles.addNewFileModal}
         centered
-        title={
-          <>
-            <Skeleton active loading={listLoading}>
-              Add New File
-            </Skeleton>
-          </>
-        }
+        title={<>Add New File</>}
         visible={addNewFileModal?.visible}
         closable={false}
         onOk={() => {
           this.showConfirmCreateNewFile();
         }}
         destroyOnClose={true}
+        okButtonProps={{
+          className: 'lba-btn',
+          icon: <CheckCircleFilled className="lba-icon" />,
+        }}
+        cancelButtonProps={{
+          icon: <CloseCircleFilled className="lba-close-icon" />,
+          danger: true,
+        }}
         confirmLoading={addNewFileModal?.isLoading}
         onCancel={() => {
           this.clearFilelist();
@@ -196,9 +192,6 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
               // fileList={addNewFileModal.fileList}
               showUploadList={true}
               beforeUpload={(file) => {
-                console.log('====================================');
-                console.log(file);
-                console.log('====================================');
                 if (!LIST_SUPPORTED_FILES.some((f) => file.type.includes(f))) {
                   openNotification('error', 'file is not support');
                   return Upload.LIST_IGNORE;
