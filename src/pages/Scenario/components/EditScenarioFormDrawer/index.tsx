@@ -175,8 +175,8 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
             this.callGetListScenario().then(async () => {
               openNotification(
                 'success',
-                'Edit Scenario Successfully',
-                `Edit campaign ${updateScenarioParam.title} successfully`,
+                'Update Scenario Successfully',
+                `Update Scenario ${updateScenarioParam.title} successfully`,
               );
               this.setEditScenariosDrawer({
                 isLoading: false,

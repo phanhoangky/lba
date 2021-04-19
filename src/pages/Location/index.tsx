@@ -33,7 +33,9 @@ class LocationScreen extends React.Component<LocationScreenProps> {
   componentDidMount = async () => {
     this.setLocationsTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'error', error.message);
+        });
         Promise.all([this.callGetListLocations(), this.callGetListDeviceTypes()]).then(async () => {
           this.setLocationsTableLoading(false).then(async () => {
             this.resetMap();

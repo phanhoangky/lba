@@ -39,7 +39,9 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
     // });
     this.setTableLoading(true)
       .then(async () => {
-        // this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'Error', error.message);
+        });
         Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(() => {
           // const { listScenario } = this.props.scenarios;
           // const first = listScenario && listScenario.length > 0 ? listScenario[0] : null;

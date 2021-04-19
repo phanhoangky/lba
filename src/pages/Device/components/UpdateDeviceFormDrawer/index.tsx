@@ -49,6 +49,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
             moment(moment(selectedDevice?.endDate).format('YYYY/MM/DD')),
           ],
           scenarioId: selectedDevice?.defaultScenarioId,
+          isPublished: selectedDevice?.isPublished,
         });
       }
     }
