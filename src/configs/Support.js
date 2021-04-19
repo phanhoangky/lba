@@ -93,12 +93,9 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id) {
-    console.log("Hash Id >>>>", hash_id);
+    // console.log("Hash Id >>>>", hash_id);
     const signature = await this.getOwnerDocument(`0x${hash_id}`);
     console.log("signature>>>>>>>", signature);
-    if (signature != null && signature === this.wallet.address) {
-      return "Fail -- Already signed this";
-    }
     if (signature != null && signature !== ethers.constants.AddressZero && signature !== this.wallet.address) {
       return "Fail -- This media is belong to another user";
     }
@@ -241,7 +238,7 @@ export default class EtherService {
   }
 
   async cancelCampaign(id) {
-    console.log("Cancel Campaign >>>", id);
+    console.log("Cancel Campaign >>>", id, this.contract);
     const cancelCampaign = await this.contract.cancelCampaign(id);
     console.log("Cancel Campaign >>>", cancelCampaign);
     const receipt = await cancelCampaign.wait();

@@ -170,6 +170,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                     .then(() => {
                       this.callSearchListMedia({
                         isSigned: e === -1 ? undefined : e,
+                        pageNumber: 0,
                       }).then(() => {
                         this.setListLoading(false);
                       });

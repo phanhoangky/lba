@@ -14,6 +14,7 @@ import {
   Drawer,
   Form,
   Input,
+  InputNumber,
   Row,
   Select,
   Skeleton,
@@ -50,6 +51,8 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
           ],
           scenarioId: selectedDevice?.defaultScenarioId,
           isPublished: selectedDevice?.isPublished,
+          minBid: selectedDevice?.minBid,
+          slot: selectedDevice?.slot,
         });
       }
     }
@@ -541,9 +544,9 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
             {/* </Skeleton> */}
           </Form.Item>
           <Divider></Divider>
-          {!isUpdateMultiple && (
+          {/* {!isUpdateMultiple && (
             <>
-              {/* <Row>
+              <Row>
                 <Col flex={2}>Publish</Col>
                 <Col flex={5}>
                   <Switch
@@ -562,7 +565,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                   />
                 </Col>
               </Row>
-              <Form.Item valuePropName="checked" label="Publish" name="isPublished"></Form.Item> */}
+              <Form.Item valuePropName="checked" label="Publish" name="isPublished"></Form.Item>
               <Form.Item name="isPublished" label="Publish">
                 <Switch
                   checkedChildren={<CheckOutlined />}
@@ -573,13 +576,49 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
             </>
           )}
           {isUpdateMultiple && (
-            <Form.Item name="isPublished" label="Publish">
-              <Switch
-                checkedChildren={<CheckOutlined />}
-                unCheckedChildren={<CloseOutlined />}
-              ></Switch>
-            </Form.Item>
-          )}
+            
+          )} */}
+          <Form.Item name="isPublished" label="Publish" valuePropName="checked">
+            <Switch
+              checkedChildren={<CheckOutlined />}
+              unCheckedChildren={<CloseOutlined />}
+            ></Switch>
+          </Form.Item>
+          <Row gutter={20}>
+            <Col span={12}>
+              <Form.Item
+                name="slot"
+                label="Slot"
+                rules={[
+                  { required: true, message: 'Please input slot of device' },
+                  {
+                    type: 'number',
+                    min: 1,
+                    max: 10,
+                    message: 'Slot must is a number between 1 and 10',
+                  },
+                ]}
+              >
+                <InputNumber style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="minBid"
+                label="Mininum Bid"
+                rules={[
+                  { required: true, message: 'Please input minimum bid money of device' },
+                  {
+                    type: 'number',
+                    min: 1,
+                    message: 'Min bid must is a money larger than 1 VND',
+                  },
+                ]}
+              >
+                <InputNumber style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
           <Form.Item name="scenarioId" label="Scenario">
             <Select size="large">
               {listScenario &&

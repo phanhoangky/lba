@@ -18,6 +18,7 @@ export type DeviceType = {
   macaddress: string;
   id: string;
   isPublished: boolean;
+  slot: number;
   dateFilter: string[];
   timeFilter: string[];
   startDate?: string;
@@ -121,6 +122,7 @@ const DeviceModel: DeviceModelType = {
       resolution: '',
       description: '',
       macaddress: '',
+      slot: 1,
       name: '',
       createTime: '',
       id: '',
@@ -274,7 +276,8 @@ const DeviceModel: DeviceModelType = {
         dateFilter: payload.dateFilter.toString().replaceAll(',', ''),
         description: payload.description,
         endDate: payload.endDate,
-        minBid: 0,
+        minBid: payload.minBid,
+        slot: payload.slot,
         isPublished: payload.isPublished,
         startDate: payload.startDate,
         timeFilter: payload.timeFilter.toString().replaceAll(',', ''),

@@ -394,8 +394,9 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                       </Button>
                       <Button
                         danger
-                        onClick={() => {
+                        onClick={(e) => {
                           this.deleteConfirm(record);
+                          e.stopPropagation();
                         }}
                       >
                         <DeleteTwoTone twoToneColor="#f93e3e" />

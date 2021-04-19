@@ -22,33 +22,32 @@ export type CreateDeviceParams = {
 }
 
 export type UpdateDeviceParams = {
-  description: string,
-  name: string,
-  dateFilter: string,
-  endDate: string,
-  minBid: 0,
-  isPublished: boolean,
-  startDate: string,
-  timeFilter: string,
+  description: string;
+  name: string;
+  dateFilter: string;
+  endDate: string
+  minBid: number;
+  isPublished: boolean;
+  startDate: string;
+  timeFilter: string;
+  slot: number;
   defaultScenarioId?: string;
 }
 
 export type UpdateListDevicesParam = {
-  idList: string[],
-  endDate: string,
-  startDate: string,
-  isPublished: boolean,
-  timeFilter: string[],
-  dateFilter: string[],
-  minBid: 0,
+  idList: string[];
+  endDate: string;
+  startDate: string;
+  isPublished: boolean;
+  timeFilter: string[];
+  dateFilter: string[];
+  minBid: 0;
   defaultScenarioId?: string;
 }
 
 export async function GetDevices(param: GetDeviceParams) {
 
   const {data} = await ApiHelper.get(CONSTANTS_LBA.DEVICES_URL, { params: { ...param } })
-  console.log(data);
-  
   return data;
 }
 

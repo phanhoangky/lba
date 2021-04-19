@@ -393,7 +393,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                       </Button>
                       <Button
                         danger
-                        onClick={() => {
+                        onClick={(e) => {
                           this.setTableLoading(true)
                             .then(() => {
                               this.editScenarioModalRef.current
@@ -405,6 +405,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                             .catch(() => {
                               this.setTableLoading(false);
                             });
+                          e.stopPropagation();
                         }}
                       >
                         <DeleteTwoTone twoToneColor="#f93e3e" />
