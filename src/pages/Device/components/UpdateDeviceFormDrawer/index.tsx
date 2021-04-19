@@ -125,7 +125,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
     console.log(values);
     console.log('====================================');
     await this.props.dispatch({
-      type: 'deviceStore/ ',
+      type: 'deviceStore/updateDevice',
       payload: {
         ...this.props.deviceStore.selectedDevice,
         ...values,
