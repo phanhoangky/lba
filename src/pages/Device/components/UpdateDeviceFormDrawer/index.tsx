@@ -121,8 +121,11 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
   };
 
   updateDevice = async (values: any) => {
+    console.log('====================================');
+    console.log(values);
+    console.log('====================================');
     await this.props.dispatch({
-      type: 'deviceStore/updateDevice',
+      type: 'deviceStore/ ',
       payload: {
         ...this.props.deviceStore.selectedDevice,
         ...values,
@@ -539,8 +542,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
           <Divider></Divider>
           {!isUpdateMultiple && (
             <>
-              <Row>
-                {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
+              {/* <Row>
                 <Col flex={2}>Publish</Col>
                 <Col flex={5}>
                   <Switch
@@ -558,9 +560,14 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
                     }}
                   />
                 </Col>
-                {/* </Skeleton> */}
               </Row>
-              <Form.Item valuePropName="checked" label="Publish" name="isPublished"></Form.Item>
+              <Form.Item valuePropName="checked" label="Publish" name="isPublished"></Form.Item> */}
+              <Form.Item name="isPublished" label="Publish">
+                <Switch
+                  checkedChildren={<CheckOutlined />}
+                  unCheckedChildren={<CloseOutlined />}
+                ></Switch>
+              </Form.Item>
               <Divider></Divider>
             </>
           )}

@@ -93,6 +93,7 @@ export default class EtherService {
 
   // Add document to smart contract for identify it with wallet
   async addDocument(hash_id) {
+    console.log("Hash Id >>>>", hash_id);
     const signature = await this.getOwnerDocument(`0x${hash_id}`);
     console.log("signature>>>>>>>", signature);
     if (signature != null && signature === this.wallet.address) {

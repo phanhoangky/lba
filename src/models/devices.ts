@@ -281,6 +281,9 @@ const DeviceModel: DeviceModelType = {
         name: payload.name,
         defaultScenarioId: payload.scenarioId
       };
+      console.log('====================================');
+      console.log(param);
+      console.log('====================================');
       yield call(UpdateDevice, param, payload.id);
     },
 
