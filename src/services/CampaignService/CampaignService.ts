@@ -5,6 +5,7 @@ import { CONSTANTS_LBA } from "../constantUrls"
 export type CreateCampaignParam = {
   scenarioId: string;
   budget: number;
+  totalMoney: number;
   description: string;
   location: string;
   typeIds: string[];

@@ -205,14 +205,14 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
             </>
           ),
           onOk: () => {
-            this.okConfirm(values);
+            this.okConfirm(values, addNewCampaignModal?.fees.totalFee);
           },
         });
       });
     }
   };
 
-  okConfirm = async (values: any) => {
+  okConfirm = async (values: any, totalFee: number) => {
     const { addNewCampaignModal } = this.props.campaign;
     const { currentUser } = this.props.user;
 
@@ -234,6 +234,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
             campaignId,
             hash,
             ...values,
+            totalMoney: totalFee,
           })
             .then(() => {
               openNotification(
