@@ -1,9 +1,13 @@
+@lba-color-text: rgb(0, 0, 0);
+@lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
 
 :global {
   .row-dragging {
     transition: all 0.3s ease;
-    background-image: linear-gradient(135deg, #02aab0, #00cdac);
-    color: aliceblue;
+    // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    background-image: @lba-background-image;
+    // color: aliceblue;
+    color: @lba-color-text;
     position: relative;
     z-index: 2000;
   }
@@ -24,8 +28,10 @@
   :global {
     .ant-table-tbody>tr:hover {
       transition: all 0.3s ease;
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
-      color: aliceblue;
+      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
+      // color: aliceblue;
+      color: @lba-color-text;
     }
   }
   

@@ -1,6 +1,6 @@
 import { openNotification } from '@/utils/utils';
 import { CloseCircleFilled, DeleteFilled, EditFilled } from '@ant-design/icons';
-import { Button, Space } from 'antd';
+import { Button, Popconfirm, Space } from 'antd';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
@@ -14,7 +14,20 @@ export type UpdateDeviceDrawerFooterProps = {
   onUpdateDevice: () => Promise<any>;
 };
 
-export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawerFooterProps> {
+export type UpdateDeviceDrawerFooterStates = {
+  deletePopconfirmVisible: boolean;
+};
+export class UpdateDeviceDrawerFooter extends React.Component<
+  UpdateDeviceDrawerFooterProps,
+  UpdateDeviceDrawerFooterStates
+> {
+  constructor(props: UpdateDeviceDrawerFooterProps) {
+    super(props);
+    this.state = {
+      deletePopconfirmVisible: false,
+    };
+  }
+
   setEditMultipleDevicesDrawer = async (param?: any) => {
     this.props.dispatch({
       type: 'deviceStore/setEditMultipleDevicesDrawerReducer',
@@ -42,8 +55,27 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
       payload: selectedDevice?.id,
     });
   };
+
+  confirmDeleteDevice = async () => {
+    const { selectedDevice } = this.props.deviceStore;
+    this.setEditMultipleDevicesDrawer({
+      isLoading: true,
+    }).then(() => {
+      this.deleteDevice().then(() => {
+        this.callGetListDevices()
+          .then(() => {
+            openNotification(
+              'success',
+              'Delete Device Success',
+              `${selectedDevice?.name} was deleted`,
+            );
+          })
+          .then(() => {});
+      });
+    });
+  };
   render() {
-    const { isUpdateMultiple, selectedDevice } = this.props.deviceStore;
+    const { isUpdateMultiple, selectedDevice, editMultipleDevicesDrawer } = this.props.deviceStore;
     return (
       <div
         style={{
@@ -52,7 +84,7 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
       >
         <Space>
           <Button
-            icon={<CloseCircleFilled className="lba-icon" />}
+            icon={<CloseCircleFilled className="lba-close-icon" />}
             onClick={async () => {
               // await this.props.dispatch({
               //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
@@ -66,42 +98,61 @@ export class UpdateDeviceDrawerFooter extends React.Component<UpdateDeviceDrawer
             Close Drawer
           </Button>
           {!isUpdateMultiple && (
-            <Button
-              danger
-              icon={<DeleteFilled className="lba-close-icon" />}
-              onClick={async () => {
-                this.setEditMultipleDevicesDrawer({
-                  isLoading: true,
-                })
-                  .then(() => {
-                    this.deleteDevice()
-                      .then(() => {
-                        this.callGetListDevices().then(() => {
-                          openNotification(
-                            'success',
-                            'Devices delete successfuly',
-                            `${selectedDevice?.name} was deleted`,
-                          );
-                          this.setEditMultipleDevicesDrawer({
-                            isLoading: false,
-                            visible: false,
-                          });
-                        });
-                      })
-                      .catch((error) => {
-                        openNotification('error', 'Fail to delete device', error.message);
-                      });
-                  })
-                  .catch(() => {
-                    this.setEditMultipleDevicesDrawer({
-                      isLoading: false,
-                      visible: false,
-                    });
-                  });
-              }}
+            // <Button
+            //   danger
+            //   icon={<DeleteFilled className="lba-close-icon" />}
+            //   onClick={async () => {
+            //     this.setEditMultipleDevicesDrawer({
+            //       isLoading: true,
+            //     })
+            //       .then(() => {
+            //         this.deleteDevice()
+            //           .then(() => {
+            //             this.callGetListDevices().then(() => {
+            //               openNotification(
+            //                 'success',
+            //                 'Devices delete successfuly',
+            //                 `${selectedDevice?.name} was deleted`,
+            //               );
+            //               this.setEditMultipleDevicesDrawer({
+            //                 isLoading: false,
+            //                 visible: false,
+            //               });
+            //             });
+            //           })
+            //           .catch((error) => {
+            //             openNotification('error', 'Fail to delete device', error.message);
+            //           });
+            //       })
+            //       .catch(() => {
+            //         this.setEditMultipleDevicesDrawer({
+            //           isLoading: false,
+            //           visible: false,
+            //         });
+            //       });
+            //   }}
+            // >
+            //   Delete Device
+            // </Button>
+            <Popconfirm
+              title="Title"
+              visible={this.state.deletePopconfirmVisible}
+              onConfirm={this.confirmDeleteDevice}
+              okButtonProps={{ loading: editMultipleDevicesDrawer?.isLoading }}
+              onCancel={() => {}}
             >
-              Delete Device
-            </Button>
+              <Button
+                danger
+                icon={<DeleteFilled className="lba-close-icon" />}
+                onClick={() => {
+                  this.setState({
+                    deletePopconfirmVisible: true,
+                  });
+                }}
+              >
+                Open Popconfirm with async logic
+              </Button>
+            </Popconfirm>
           )}
           <Button
             className="lba-btn"

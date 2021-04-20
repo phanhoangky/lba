@@ -391,21 +391,21 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                   });
               },
             }}
-            onRow={(record) => {
-              return {
-                onClick: () => {
-                  this.setSelectedCampaign(record).then(() => {
-                    this.setLocationAddressInMap(record).then(() => {
-                      this.setEditCampaignDrawer({
-                        visible: true,
-                      }).then(() => {
-                        this.viewCampaignDetailRef.current?.componentDidMount();
-                      });
-                    });
-                  });
-                },
-              };
-            }}
+            // onRow={(record) => {
+            //   return {
+            //     onClick: () => {
+            //       this.setSelectedCampaign(record).then(() => {
+            //         this.setLocationAddressInMap(record).then(() => {
+            //           this.setEditCampaignDrawer({
+            //             visible: true,
+            //           }).then(() => {
+            //             this.viewCampaignDetailRef.current?.componentDidMount();
+            //           });
+            //         });
+            //       });
+            //     },
+            //   };
+            // }}
             title={() => <CampaignTableHeaderComponent {...this.props} />}
           >
             <Column key="name" dataIndex="name" title="Name"></Column>

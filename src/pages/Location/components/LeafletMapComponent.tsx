@@ -29,13 +29,8 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
     // setTimeout(() => {
     //   mymap.invalidateSize(true);
     // }, 500);
-
-    console.log('====================================');
-    console.log('My map >>>', mymap);
-    console.log('====================================');
     await this.setMapComponent({
       map: mymap,
-      layer,
     });
 
     mymap.on('click', async (e: any) => {
@@ -62,19 +57,6 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
               marker,
             });
           }
-          // if (mapComponent.circle) {
-          //   // mapComponent.circle.setLatLng(e.latlng);
-          //   mapComponent.circle.remove();
-          //   mapComponent.circle.removeFrom(mymap);
-          //   const circle = L.circle(e.latlng);
-          //   console.log('====================================');
-          //   console.log('Remove circle', circle);
-          //   console.log('====================================');
-          //   circle.addTo(mymap);
-          //   this.setMapComponent({
-          //     circle,
-          //   });
-          // }
           const { data } = await reverseGeocoding(e.latlng.lat, e.latlng.lng);
 
           if (addNewLocationModal?.visible) {

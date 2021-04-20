@@ -3,7 +3,10 @@
 // Global LBA Styles
 @lba-color-text: rgb(0, 0, 0);
 @lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
-
+@lba-table-hover-background: linear-gradient(135deg, #747474, #c5c5c5);
+@lba-icon-color: rgb(252, 206, 0);
+@lba-color-text-hover: rgb(20, 20, 20);
+@lba-form-label-text: linear-gradient(135deg, #000000, #995905);
 // Switch Styles
 @lba-switch-background-image: linear-gradient(135deg, #a18b29, #ffee00);
 @lba-switch-border-color: linear-gradient(135deg, #a18b29, #ffee00);
@@ -35,6 +38,18 @@ body,
     // }
 
   }
+  .ant-menu.ant-menu-dark .ant-menu-item-selected,
+  .ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
+    background-image: @lba-background-image;
+    
+  }
+
+  .ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon+span,
+  .ant-menu-dark .ant-menu-item-selected .anticon+span {
+    color: @lba-color-text;
+    font-weight: bold;
+  }
+
   .lba-btn {
     box-sizing: border-box;
     font-weight: bold;
@@ -47,18 +62,18 @@ body,
       background-image:  linear-gradient(135deg, #fdffff, rgba(253, 253, 255, 0.867));
     }
     .lba-icon {
-      color: #fff;
+      color: @lba-color-text;
 
       &:hover {
-        color: @lba-color-text;
+        color: @lba-icon-color;
       }
     }
   }
   .lba-btn:hover .lba-icon {
-    color: #00cdac;
+    color: @lba-icon-color;
   }
   .lba-icon {
-    color: #00cdac;
+    color: @lba-icon-color;
   }
   .lba-close-icon {
     color:rgba(255, 0, 21, 0.867)
@@ -75,7 +90,7 @@ body,
   .ant-form-item-label>label {
     font-weight: bolder;
     // background-image: linear-gradient(135deg, #02aab0, #00cdac);
-    background-image: @lba-background-image;
+    background-image: @lba-form-label-text;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -91,7 +106,7 @@ body,
   .ant-drawer-title {
     font-weight: bolder;
     // background-image: linear-gradient(135deg, #02aab0, #00cdac);
-    background-image: @lba-background-image;
+    background-image: @lba-form-label-text;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -151,10 +166,10 @@ body,
   .ant-table-tbody>.ant-table-row:hover, .ant-table-row-level-0:hover {
     transition: all 0.3s ease;
     // background-image: linear-gradient(135deg, #02aab0, #00cdac);
-    background-image: @lba-background-image;
+    background-image: @lba-table-hover-background;
     // color: aliceblue;
     // color: rgb(0, 0, 0);
-    color: @lba-color-text;
+    color: @lba-color-text-hover;
     // font-weight: bold;
     position: relative;
     z-index: 2000;

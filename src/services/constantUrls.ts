@@ -52,7 +52,7 @@ export enum CONSTANTS_LOCATIONIQ {
 //   SIGN_MEDIA = 3,
 // }
 
-export const TYPE_TRANSACTIONS: string[] = ["Transfer", "Create Campaign", "Delete Campaign", "Sign Media"]
+export const TYPE_TRANSACTIONS: string[] = ["Transfer", "Create Campaign", "Delete Campaign", "Sign Media", "Delete Media", "Media Income"]
 
 export const LIST_SUPPORTED_FILES: string[] = ["jpg", 'jpeg', 'jpe', 'png', 'gif', 'bmp', 'psd', 'webp', 'ico', 'mp4'];
 

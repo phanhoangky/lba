@@ -1,3 +1,6 @@
+@lba-color-text: rgb(0, 0, 0);
+@lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
+
 .rowClassName {
   margin: 2em 0;
   border-radius: 50px;
@@ -23,8 +26,10 @@
   :global {
     .ant-table-tbody>tr:hover {
       transition: all 0.3s ease;
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
-      color: aliceblue;
+      background-image: @lba-background-image;
+      color: @lba-color-text;
+      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      // color: aliceblue;
     }
 
     
@@ -36,8 +41,10 @@
   .ant-table-row:hover,
   .ant-table-row-level-0:hover {
     transition: all 0.3s ease;
-    background-image: linear-gradient(135deg, #02aab0, #00cdac);
-    color: aliceblue;
+    background-image: @lba-background-image;
+    color: @lba-color-text;
+    // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    // color: aliceblue;
   }
 }
 
@@ -105,7 +112,8 @@
     .add-new-media-btn {
       padding: 0;
       position: relative;
-      border: 2px solid rgb(16, 223, 144);
+      // border: 2px solid rgb(16, 223, 144);
+      border: 2px solid @lba-background-image;
       transition: all 0.3s ease;
       font-weight: bold;
 
@@ -128,7 +136,8 @@
       left: 0;
       height: 100%;
       width: 0;
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
       z-index: 1;
     }
 
@@ -143,14 +152,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
       font-weight: bolder;
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
 
       .add-icon {
-        color: #0ae7e7;
+        color: @lba-color-text;
+        // color: #0ae7e7;
       }
     }
   }
@@ -165,9 +176,12 @@
 .listFolderStyle {
   :global {
     .selected-folder {
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
-      color: aliceblue;
-      border: 2px solid rgb(16, 223, 144);
+      background-image: @lba-background-image;
+      color: @lba-color-text;
+      border: 2px solid @lba-background-image;
+      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      // color: aliceblue;
+      // border: 2px solid rgb(16, 223, 144);
     }
   }
 }
@@ -177,13 +191,15 @@
       border-radius: 5px;
       border-image-slice: 1;
       border-width: 5px;
-      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      border-image-source: @lba-background-image;
+      // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
     }
     .ant-card .ant-card-bordered .ant-card-hoverable .media-record {
       border-radius: 5px;
       border-image-slice: 1;
       border-width: 5px;
-      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      border-image-source: @lba-background-image;
+      // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
     }
     .media-record {
       transition: all 0.3s ease

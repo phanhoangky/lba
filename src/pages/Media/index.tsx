@@ -29,6 +29,7 @@ import {
   FolderOpenTwoTone,
   FormOutlined,
   HomeTwoTone,
+  SettingFilled,
   SettingTwoTone,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
@@ -572,7 +573,7 @@ class Media extends React.Component<MediaSourceProps> {
                     >
                       {item.name === 'Home' ? (
                         <HomeTwoTone
-                          twoToneColor="#00cdac"
+                          twoToneColor="#000000"
                           style={{
                             fontSize: '1.2em',
                           }}
@@ -783,9 +784,8 @@ class Media extends React.Component<MediaSourceProps> {
                               icon={<FormOutlined />}
                               showIcon={true}
                             ></Alert>,
-                            <SettingTwoTone
+                            <SettingFilled
                               className="lba-icon"
-                              twoToneColor="#00cdac"
                               style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
                               onClick={(e) => {
                                 this.setSelectedFile(item).then(() => {
@@ -893,6 +893,14 @@ class Media extends React.Component<MediaSourceProps> {
             }}
             onOk={() => {
               this.renameFolderModalRef.current?.handleUpdateFolder();
+            }}
+            okButtonProps={{
+              className: 'lba-btn',
+              icon: <CheckCircleFilled className="lba-icon" />,
+            }}
+            cancelButtonProps={{
+              icon: <CloseCircleFilled className="lba-close-icon" />,
+              danger: true,
             }}
           >
             {renameFolderModal?.visible && (

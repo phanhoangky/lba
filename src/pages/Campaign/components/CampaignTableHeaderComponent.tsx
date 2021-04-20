@@ -1,8 +1,4 @@
-import {
-  PlusSquareTwoTone,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-} from '@ant-design/icons';
+import { PlusSquareFilled, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { CampaignModelState, Dispatch, ScenarioModelState } from 'umi';
@@ -142,7 +138,7 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
             });
           }}
           className="lba-btn"
-          icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
+          icon={<PlusSquareFilled className="lba-icon" />}
         >
           Add New Campaign
         </Button>

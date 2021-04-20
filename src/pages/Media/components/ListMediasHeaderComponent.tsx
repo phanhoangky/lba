@@ -1,7 +1,7 @@
 import { openNotification } from '@/utils/utils';
 import {
   ControlTwoTone,
-  PlusSquareTwoTone,
+  PlusSquareFilled,
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
@@ -253,7 +253,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                     });
                   }}
                 >
-                  <PlusSquareTwoTone twoToneColor="#00cdac" />
+                  <PlusSquareFilled className="lba-icon" />
                   Add New Folder
                 </Button>
                 <Button
@@ -264,7 +264,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                     });
                   }}
                 >
-                  <PlusSquareTwoTone twoToneColor="#00cdac" />
+                  <PlusSquareFilled className="lba-icon" />
                   Add New File
                 </Button>
 
