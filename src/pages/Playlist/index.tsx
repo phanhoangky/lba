@@ -16,7 +16,7 @@ import { connect } from 'umi';
 import { EditPlaylistFormDrawer } from './components/EditPlaylistFormDrawer';
 import { PlaylistTableHeaderComponent } from './components/PlaylistTableHeaderComponent';
 import { ViewEditPlaylistComponent } from './components/ViewEditPlaylistComponent';
-import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import { openNotification } from '@/utils/utils';
 import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
 
@@ -202,6 +202,14 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
       title: `Are you sure you want to remove ${record?.title}`,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: async () => {
         this.setTableLoading(true)
           .then(() => {
@@ -357,9 +365,9 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
 
                           e.stopPropagation();
                         }}
-                        type="primary"
+                        className="lba-btn"
                       >
-                        <EditFilled />
+                        <EditFilled className="lba-icon" />
                       </Button>
                       <Button
                         onClick={(e) => {

@@ -125,9 +125,6 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
   };
 
   updateDevice = async (values: any) => {
-    console.log('====================================');
-    console.log(values);
-    console.log('====================================');
     await this.props.dispatch({
       type: 'deviceStore/updateDevice',
       payload: {
@@ -149,7 +146,6 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
             this.setEditMultipleDevicesDrawer({
               isLoading: false,
             });
-            openNotification('success', 'Update Device Success');
           });
         })
         .catch((error) => {
@@ -238,7 +234,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
         time === '1' && (
           <Skeleton key={Math.random() + 100} active loading={editMultipleDevicesDrawer?.isLoading}>
             <Input
-              prefix={<ClockCircleTwoTone twoToneColor="#00cdac" />}
+              prefix={<ClockCircleTwoTone twoToneColor="#fda502" />}
               readOnly
               style={{
                 fontWeight: 'bolder',
@@ -267,7 +263,7 @@ export class UpdateDeviceFormDrawer extends React.Component<UpdateDeviceFormDraw
         title={isUpdateMultiple ? 'Update Multiple Devices' : selectedDevice?.name}
         key="updateMultipleDevies"
         visible={this.props.deviceStore.editMultipleDevicesDrawer?.visible}
-        width={700}
+        width={'40%'}
         closable={false}
         getContainer={false}
         destroyOnClose={true}

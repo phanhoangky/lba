@@ -4,7 +4,7 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../Location';
 // import AsyncSelect from 'react-select/async';
 import { autoComplete } from '@/services/MapService/LocationIQService';
-import { AutoComplete } from 'antd';
+import { AutoComplete, Input } from 'antd';
 
 export type AutoCompleteComponentProps = {
   dispatch: Dispatch;
@@ -110,7 +110,9 @@ export class AutoCompleteComponent extends React.Component<AutoCompleteComponent
           this.props.onInputChange(e);
         }}
         placeholder="input address here"
-      />
+      >
+        <Input.TextArea></Input.TextArea>
+      </AutoComplete>
     );
   }
 }

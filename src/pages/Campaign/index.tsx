@@ -170,50 +170,54 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       icon: <ExclamationCircleOutlined />,
       closable: false,
       centered: true,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: () => {
-        this.setCampaignTableLoading(true)
-          .then(async () => {
-            const { currentUser } = this.props.user;
+        this.setCampaignTableLoading(true).then(async () => {
+          const { currentUser } = this.props.user;
 
-            if (currentUser) {
-              const result = await currentUser.ether?.cancelCampaign(item.id);
-              if (isObject(result)) {
-                const deleteParam: DeleteCampaignParam = {
-                  id: item.id,
-                  hash: result.hash,
-                  value: result.feeCancel,
-                };
-                this.deleteCampaign(deleteParam)
-                  .then(async () => {
-                    openNotification(
-                      'success',
-                      'Delete campaign successfully',
-                      `${item.name} was deleted`,
-                    );
-                    this.callGetListCampaigns().then(() => {
-                      this.setCampaignTableLoading(false);
-                    });
-                  })
-                  .catch((error) => {
-                    Promise.reject(error);
-                    openNotification('error', 'Fail to delete campaign', error);
+          if (currentUser) {
+            const result = await currentUser.ether?.cancelCampaign(item.id);
+            if (isObject(result)) {
+              const deleteParam: DeleteCampaignParam = {
+                id: item.id,
+                hash: result.hash,
+                value: result.feeCancel,
+              };
+              this.deleteCampaign(deleteParam)
+                .then(async () => {
+                  openNotification(
+                    'success',
+                    'Delete campaign successfully',
+                    `${item.name} was deleted`,
+                  );
+                  this.callGetListCampaigns().then(() => {
                     this.setCampaignTableLoading(false);
                   });
-              } else {
-                openNotification('error', 'Fail to delete campaign', result);
-                this.setCampaignTableLoading(false);
-              }
+                })
+                .catch((error) => {
+                  openNotification('error', 'Fail to delete campaign', error.message);
+                  this.setCampaignTableLoading(false);
+                });
+            } else {
+              openNotification('error', 'Fail to delete campaign', result);
+              this.setCampaignTableLoading(false);
             }
-          })
-          .catch(() => {
-            this.setCampaignTableLoading(false);
-          });
+          }
+        });
       },
       onCancel() {
         // console.log('Cancel');
       },
     });
   };
+
   setSelectedCampaign = async (param: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setSelectedCampaignReducer`,
@@ -301,7 +305,6 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           .catch((error) => {
             openNotification('error', 'Fail to update campaign', error);
             this.setLoadingCampaignRecord(item, false);
-            Promise.reject(error);
           });
       })
       .catch(() => {
@@ -489,7 +492,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                   <>
                     <Space align={'center'}>
                       <Button
-                        type="primary"
+                        className="lba-btn"
                         onClick={() => {
                           this.setSelectedCampaign(record).then(() => {
                             this.setLocationAddressInMap(record).then(() => {
@@ -502,7 +505,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                           });
                         }}
                       >
-                        <EyeFilled />
+                        <EyeFilled className="lba-icon" />
                       </Button>
                       <Button
                         danger

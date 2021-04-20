@@ -1,12 +1,13 @@
 import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPageService/PlaylistItemService';
 import { openNotification } from '@/utils/utils';
 import {
-  CloseSquareTwoTone,
+  CheckCircleFilled,
+  CloseCircleFilled,
   DeleteTwoTone,
   MenuOutlined,
   MinusSquareTwoTone,
   PlaySquareTwoTone,
-  SettingTwoTone,
+  SettingFilled,
 } from '@ant-design/icons';
 import {
   Button,
@@ -59,9 +60,6 @@ const SortableContainerComponent = SortableContainer((props: any) => <tbody {...
 export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDrawerProps> {
   componentDidMount = () => {
     const { selectedPlaylist } = this.props.playlists;
-    console.log('====================================');
-    console.log(selectedPlaylist, this.formRef, this.formRef.current);
-    console.log('====================================');
     if (this.formRef.current && selectedPlaylist) {
       this.formRef.current.setFieldsValue({
         title: selectedPlaylist.title,
@@ -176,39 +174,40 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       title: `Are you sure you want to remove ${selectedPlaylist?.title}`,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: () => {
         this.setEditPlaylistDrawer({
           isLoading: true,
-        })
-          .then(() => {
-            this.removePlaylist()
-              .then(() => {
-                this.callGetListPlaylist().then(() => {
-                  openNotification(
-                    'success',
-                    'Remove playlist successfully',
-                    `Playlist ${selectedPlaylist?.title} was removed`,
-                  );
-                  this.setEditPlaylistDrawer({
-                    isLoading: false,
-                    visible: false,
-                  });
-                });
-              })
-              .catch((error) => {
-                openNotification('error', 'Fail to remove playlist', error.message);
+        }).then(() => {
+          this.removePlaylist()
+            .then(() => {
+              this.callGetListPlaylist().then(() => {
+                openNotification(
+                  'success',
+                  'Remove playlist successfully',
+                  `Playlist ${selectedPlaylist?.title} was removed`,
+                );
                 this.setEditPlaylistDrawer({
                   isLoading: false,
                   visible: false,
                 });
               });
-          })
-          .catch(() => {
-            this.setEditPlaylistDrawer({
-              isLoading: false,
-              visible: false,
+            })
+            .catch((error) => {
+              openNotification('error', 'Fail to remove playlist', error.message);
+              this.setEditPlaylistDrawer({
+                isLoading: false,
+                visible: false,
+              });
             });
-          });
+        });
       },
       onCancel: () => {
         this.setEditPlaylistDrawer({
@@ -528,7 +527,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                       visible: false,
                     });
                   }}
-                  icon={<CloseSquareTwoTone />}
+                  icon={<CloseCircleFilled className="lba-icon" />}
                 >
                   Cancel
                 </Button>
@@ -573,7 +572,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                     }
                   }}
                   className="lba-btn"
-                  icon={<SettingTwoTone twoToneColor="#00cdac" />}
+                  icon={<SettingFilled className="lba-icon" />}
                 >
                   Save Change
                 </Button>

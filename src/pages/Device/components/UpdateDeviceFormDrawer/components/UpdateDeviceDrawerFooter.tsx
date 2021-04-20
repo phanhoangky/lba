@@ -1,5 +1,5 @@
 import { openNotification } from '@/utils/utils';
-import { CloseCircleFilled, DeleteFilled, EditFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, DeleteFilled, EditFilled } from '@ant-design/icons';
 import { Button, Popconfirm, Space } from 'antd';
 import * as React from 'react';
 import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
@@ -61,17 +61,28 @@ export class UpdateDeviceDrawerFooter extends React.Component<
     this.setEditMultipleDevicesDrawer({
       isLoading: true,
     }).then(() => {
-      this.deleteDevice().then(() => {
-        this.callGetListDevices()
-          .then(() => {
-            openNotification(
-              'success',
-              'Delete Device Success',
-              `${selectedDevice?.name} was deleted`,
-            );
-          })
-          .then(() => {});
-      });
+      this.deleteDevice()
+        .then(() => {
+          this.callGetListDevices()
+            .then(() => {
+              openNotification(
+                'success',
+                'Delete Device Success',
+                `${selectedDevice?.name} was deleted`,
+              );
+            })
+            .then(() => {
+              this.setEditMultipleDevicesDrawer({
+                isLoading: false,
+                visible: false,
+              });
+            });
+        })
+        .catch(() => {
+          this.setEditMultipleDevicesDrawer({
+            isLoading: false,
+          });
+        });
     });
   };
   render() {
@@ -135,11 +146,23 @@ export class UpdateDeviceDrawerFooter extends React.Component<
             //   Delete Device
             // </Button>
             <Popconfirm
-              title="Title"
+              title={`Are you sure want to delete ${selectedDevice?.name} ?`}
               visible={this.state.deletePopconfirmVisible}
               onConfirm={this.confirmDeleteDevice}
-              okButtonProps={{ loading: editMultipleDevicesDrawer?.isLoading }}
-              onCancel={() => {}}
+              okButtonProps={{
+                loading: editMultipleDevicesDrawer?.isLoading,
+                className: 'lba-btn',
+                icon: <CheckCircleFilled className="lba-icon" />,
+              }}
+              cancelButtonProps={{
+                icon: <CloseCircleFilled className="lba-close-icon" />,
+                danger: true,
+              }}
+              onCancel={() => {
+                this.setState({
+                  deletePopconfirmVisible: false,
+                });
+              }}
             >
               <Button
                 danger
@@ -150,7 +173,7 @@ export class UpdateDeviceDrawerFooter extends React.Component<
                   });
                 }}
               >
-                Open Popconfirm with async logic
+                Delete Device
               </Button>
             </Popconfirm>
           )}
@@ -203,7 +226,6 @@ export class UpdateDeviceDrawerFooter extends React.Component<
                       );
                       this.setEditMultipleDevicesDrawer({
                         isLoading: false,
-                        visible: false,
                       });
                     })
 

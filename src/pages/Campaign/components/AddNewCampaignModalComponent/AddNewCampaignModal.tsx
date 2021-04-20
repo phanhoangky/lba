@@ -2,6 +2,7 @@ import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
 import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
 import {
+  AutoComplete,
   Col,
   DatePicker,
   Divider,
@@ -46,11 +47,23 @@ export type AddNewCampaignModalProps = {
   user: UserModelState;
 };
 
-export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProps> {
+export type AddNewCampaignModalStates = {
+  budgetOptions: any[];
+};
+
+export class AddNewCampaignModal extends React.Component<
+  AddNewCampaignModalProps,
+  AddNewCampaignModalStates
+> {
   /**
    *
    */
-
+  constructor(props: AddNewCampaignModalProps) {
+    super(props);
+    this.state = {
+      budgetOptions: [],
+    };
+  }
   setAddNewCampaignModal = async (modal: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setAddNewCampaignModalReducer`,
@@ -218,73 +231,47 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
 
     this.setAddNewCampaignModal({
       isLoading: true,
-    })
-      .then(async () => {
-        const campaignId = uuidv4();
-        if (currentUser && addNewCampaignModal) {
-          const hash = await currentUser.ether?.createCampaign(
-            campaignId,
-            addNewCampaignModal.fees.totalFee,
-            values.budget,
-            addNewCampaignModal.fees.remainFee,
-            addNewCampaignModal.fees.cancelFee,
-          );
-          // throw new Error('sdsd');
-          this.createNewCampaign({
-            campaignId,
-            hash,
-            ...values,
-            totalMoney: totalFee,
-          })
-            .then(() => {
-              openNotification(
-                'success',
-                'Create New Campaign Successfully',
-                `Created ${values.name} campaign`,
-              );
-              this.callGetListCampaigns().then(() => {
-                this.clearCreateNewCampaignParam();
-                this.setAddNewCampaignModal({
-                  visible: false,
-                  isLoading: false,
-                });
-              });
-            })
-            .catch((error) => {
-              openNotification(
-                'error',
-                'Fail to create new campaign',
-                `Fail to created ${values.title} campaign`,
-              );
+    }).then(async () => {
+      const campaignId = uuidv4();
+      if (currentUser && addNewCampaignModal) {
+        const hash = await currentUser.ether?.createCampaign(
+          campaignId,
+          addNewCampaignModal.fees.totalFee,
+          values.budget.trim(),
+          addNewCampaignModal.fees.remainFee,
+          addNewCampaignModal.fees.cancelFee,
+        );
+        // throw new Error('sdsd');
+        this.createNewCampaign({
+          campaignId,
+          hash,
+          ...values,
+          budget: values.budget.trim(),
+          totalMoney: totalFee,
+        })
+          .then(() => {
+            openNotification(
+              'success',
+              'Create New Campaign Successfully',
+              `Created ${values.name} campaign`,
+            );
+            this.callGetListCampaigns().then(() => {
+              this.clearCreateNewCampaignParam();
               this.setAddNewCampaignModal({
                 visible: false,
                 isLoading: false,
               });
-              return Promise.reject(error);
             });
-        }
-      })
-      .catch((error) => {
-        openNotification('error', 'Fail to create new campaign', `${error.message}`);
-        this.clearCreateNewCampaignParam();
-        this.setAddNewCampaignModal({
-          visible: false,
-          isLoading: false,
-        });
-      });
-    // if (this.formRef.current) {
-    //   this.formRef.current
-    //     .validateFields()
-    //     .then(async (values) => {
-
-    //     })
-    //     .catch((error) => {
-    //       console.log('====================================');
-    //       console.error(error);
-    //       console.log('====================================');
-    //       openNotification('error', 'Fail to create new campaign', 'fail');
-    //     });
-    // }
+          })
+          .catch((error) => {
+            openNotification('error', 'Fail to create new campaign', error.message);
+            this.setAddNewCampaignModal({
+              visible: false,
+              isLoading: false,
+            });
+          });
+      }
+    });
   };
 
   callGetListLocations = async (param?: any) => {
@@ -354,7 +341,7 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
         cancelFee,
       };
 
-      await this.setAddNewCampaignModal({
+      this.setAddNewCampaignModal({
         fees: {
           ...fees,
           ...newFes,
@@ -417,6 +404,29 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
     }
   };
 
+  convertOptions = (value: string, trailing: number) => {
+    let newValue = value;
+    for (let i = 0; i < trailing; i += 1) {
+      newValue = newValue.concat('0');
+    }
+    return {
+      value: `${newValue}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' '),
+    };
+  };
+  handleOnSearchBudget = (value: string) => {
+    const searchOptions = [
+      this.convertOptions(value, 1),
+      this.convertOptions(value, 2),
+      this.convertOptions(value, 3),
+      this.convertOptions(value, 4),
+    ];
+    this.setState({
+      budgetOptions: searchOptions,
+    });
+  };
+
+  // handleOnSelectBudget = async (value: string) => {};
+
   formRef = React.createRef<FormInstance<any>>();
   datePickerRef = React.createRef<any>();
   autoCompleteRef = React.createRef<AutoCompleteComponent>();
@@ -460,6 +470,10 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                         return Promise.resolve();
                       },
                     },
+                    {
+                      type: 'number',
+                      message: 'Budget must be a number',
+                    },
                   ]}
                 >
                   {/* <InputNumber
@@ -470,16 +484,22 @@ export class AddNewCampaignModal extends React.Component<AddNewCampaignModalProp
                       this.hanldeOnChangeBudget(e);
                     }}
                   /> */}
-                  <InputNumber
+                  {/* <InputNumber
                     style={{ width: '100%' }}
                     onChange={(e) => {
                       this.hanldeOnChangeBudget(e);
                     }}
-                  />
+                  /> */}
+                  <AutoComplete
+                    options={this.state.budgetOptions}
+                    // onSelect={(e) => {
+                    //   this.handleOnSelectBudget(e);
+                    // }}
+                    onSearch={(e) => {
+                      this.handleOnSearchBudget(e);
+                    }}
+                  ></AutoComplete>
                 </Form.Item>
-                {/* <Row>Total Fee {addNewCampaignModal.fees && addNewCampaignModal.fees.totalFee}</Row>
-            <Row>Remain Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.remainFee}</Row>
-            <Row>Cancel Fee{addNewCampaignModal.fees && addNewCampaignModal.fees.cancelFee}</Row> */}
                 <Form.Item
                   name="description"
                   label="Description"

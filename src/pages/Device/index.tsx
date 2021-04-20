@@ -8,7 +8,13 @@ import Column from 'antd/lib/table/Column';
 // import DrawerUpdateMultipleDevice from './components/DrawerUpdateMultipleDevice';
 import { UpdateDeviceFormDrawer } from './components/UpdateDeviceFormDrawer';
 import { DevicesTableHeaderComponent } from './components/DevicesTableHeaderComponent';
-import { EditFilled } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DeleteTwoTone,
+  EditFilled,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import { ViewScreenShotModal } from './components/ViewScreenShotModal';
 import { openNotification } from '@/utils/utils';
 
@@ -40,7 +46,9 @@ class Device extends React.Component<DeviceProps> {
   componentDidMount = async () => {
     this.setDevicesTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'Error', error.message);
+        });
         Promise.all([
           this.callGetListScenarios({ isPaging: false }),
           this.callGetListDevices(),
@@ -194,6 +202,47 @@ class Device extends React.Component<DeviceProps> {
       },
     });
   };
+
+  deleteDevice = async (id: string) => {
+    await this.props.dispatch({
+      type: 'deviceStore/deleteDevice',
+      payload: id,
+    });
+  };
+
+  confirmDeleteDevice = async (device: any) => {
+    Modal.confirm({
+      centered: true,
+      closable: false,
+      title: 'Confirm ?',
+      content: `Are you sure want to delete ${device.name} ?`,
+      icon: <ExclamationCircleOutlined />,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
+      onOk: () => {
+        this.setDevicesTableLoading(true).then(() => {
+          this.deleteDevice(device.id)
+            .then(() => {
+              this.callGetListDevices().then(() => {
+                openNotification('success', 'Delete Device Success', `${device?.name} was deleted`);
+                this.setDevicesTableLoading(false);
+              });
+            })
+            .catch((error) => {
+              openNotification('error', 'Fail to delete device', error.message);
+              this.setDevicesTableLoading(false);
+            });
+        });
+      },
+    });
+  };
+
   updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
 
   render() {
@@ -238,11 +287,7 @@ class Device extends React.Component<DeviceProps> {
             scroll={{ y: 400, x: 500 }}
             loading={devicesTableLoading}
             title={() => {
-              return (
-                <>
-                  <DevicesTableHeaderComponent {...this.props} />
-                </>
-              );
+              return <DevicesTableHeaderComponent {...this.props} />;
             }}
             onRow={(record) => {
               return {
@@ -271,44 +316,12 @@ class Device extends React.Component<DeviceProps> {
                   .catch(() => {
                     this.setDevicesTableLoading(false);
                   });
-
-                // this.props
-                //   .dispatch({
-                //     type: 'deviceStore/getDevices',
-                //     payload: {
-                //       ...getDevicesParam,
-                //       pageNumber: current - 1,
-                //     },
-                //   })
-                //   .then(() => {
-
-                //   })
-
-                // this.setState({ currentPage: current });
               },
             }}
           >
             <Column key="Name" title="Name" dataIndex="name" width="100"></Column>
             <Column key="resolution" title="Resolution" dataIndex="resolution" width="100"></Column>
             <Column key="macAddress" title="MacAddress" dataIndex="macaddress" width="100"></Column>
-            {/* <Column
-              key="description"
-              title="Description"
-              dataIndex="description"
-              width="100"
-              ellipsis={{ showTitle: true }}
-              render={(description) => {
-                return (
-                  <>
-                    <Tooltip placement="topLeft" title={description}>
-                      {description}
-                    </Tooltip>
-                  </>
-                );
-              }}
-            ></Column> */}
-            {/* <Column key="type" title="Type" dataIndex="typeName" width="100"></Column> */}
-
             <Column
               key="location"
               title="Location"
@@ -331,7 +344,7 @@ class Device extends React.Component<DeviceProps> {
                 return (
                   <Space>
                     <Button
-                      type="primary"
+                      className="lba-btn"
                       onClick={async () => {
                         this.setMultipleUpdateMode(false).then(() => {
                           this.setSelectedDevice(record).then(() => {
@@ -345,7 +358,17 @@ class Device extends React.Component<DeviceProps> {
                         // this.setEditModalVisible(true);
                       }}
                     >
-                      <EditFilled />
+                      <EditFilled className="lba-icon" />
+                    </Button>
+                    <Button
+                      danger
+                      onClick={async (e) => {
+                        // this.setEditModalVisible(true);
+                        this.confirmDeleteDevice(record);
+                        e.stopPropagation();
+                      }}
+                    >
+                      <DeleteTwoTone twoToneColor="#f93e3e" />
                     </Button>
                   </Space>
                 );
@@ -359,7 +382,7 @@ class Device extends React.Component<DeviceProps> {
                 return (
                   <Space>
                     <Button
-                      type="primary"
+                      className="lba-btn"
                       onClick={async () => {
                         this.setSelectedDevice(record).then(() => {
                           this.setViewScreenshotModal({

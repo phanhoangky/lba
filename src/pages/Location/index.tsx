@@ -159,42 +159,42 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       icon: <ExclamationCircleOutlined />,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onCancel: () => {},
       onOk: async () => {
-        this.setLocationsTableLoading(true)
-          .then(() => {
-            this.setEditLocationModal({
-              isLoading: true,
-            });
-            this.deleteLocation(location.id)
-              .then(() => {
-                openNotification(
-                  'success',
-                  `Delete ${location.name} successfully`,
-                  `${location.name} was deleted`,
-                );
-                this.callGetListLocations().then(async () => {
-                  this.setLocationsTableLoading(false);
-                  this.setEditLocationModal({
-                    isLoading: false,
-                  });
-                });
-              })
-              .catch((error: any) => {
-                openNotification('error', `Delete ${location.name} error`, error.message);
+        this.setLocationsTableLoading(true).then(() => {
+          this.setEditLocationModal({
+            isLoading: true,
+          });
+          this.deleteLocation(location.id)
+            .then(() => {
+              openNotification(
+                'success',
+                `Delete ${location.name} successfully`,
+                `${location.name} was deleted`,
+              );
+              this.callGetListLocations().then(async () => {
                 this.setLocationsTableLoading(false);
                 this.setEditLocationModal({
                   isLoading: false,
                 });
               });
-          })
-          .catch((error: any) => {
-            openNotification('error', `Delete ${location.name} error`, error.message);
-            this.setLocationsTableLoading(false);
-            this.setEditLocationModal({
-              isLoading: false,
+            })
+            .catch((error: any) => {
+              openNotification('error', `Delete ${location.name} error`, error.message);
+              this.setLocationsTableLoading(false);
+              this.setEditLocationModal({
+                isLoading: false,
+              });
             });
-          });
+        });
       },
     });
   };
@@ -366,7 +366,6 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                   return (
                     <Space>
                       <Button
-                        type="primary"
                         onClick={async (e) => {
                           this.setViewLocationDetailComponent({
                             visible: false,
@@ -389,8 +388,9 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                           });
                           e.stopPropagation();
                         }}
+                        className="lba-btn"
                       >
-                        <EditFilled />
+                        <EditFilled className="lba-icon" />
                       </Button>
                       <Button
                         danger

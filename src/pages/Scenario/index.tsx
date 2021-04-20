@@ -387,9 +387,9 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                           });
                           e.stopPropagation();
                         }}
-                        type="primary"
+                        className="lba-btn"
                       >
-                        <EditFilled />
+                        <EditFilled className="lba-icon" />
                       </Button>
                       <Button
                         danger

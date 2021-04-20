@@ -8,7 +8,7 @@ import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
 import type { UpdateLocationParam } from '@/services/LocationService/LocationService';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleOutlined } from '@ant-design/icons';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
 
 export type EditLocationFormModalProps = {
@@ -245,37 +245,38 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
       title: `Are you sure want to delete ${location.name}?`,
       icon: <ExclamationCircleOutlined />,
       closable: false,
+      centered: true,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: async () => {
-        this.setLocationsTableLoading(true)
-          .then(() => {
-            this.setEditLocationModal({
-              isLoading: true,
-            });
-            this.deleteLocation(location.id)
-              .then(() => {
-                this.openNotification('success', `Delete ${location.name} successfully`);
-                this.callGetListLocations().then(async () => {
-                  this.setLocationsTableLoading(false);
-                  this.setEditLocationModal({
-                    isLoading: false,
-                  });
-                });
-              })
-              .catch(async (error: any) => {
-                this.openNotification('error', `Delete ${location.name} error`, error.message);
+        this.setLocationsTableLoading(true).then(() => {
+          this.setEditLocationModal({
+            isLoading: true,
+          });
+          this.deleteLocation(location.id)
+            .then(() => {
+              this.openNotification('success', `Delete ${location.name} successfully`);
+              this.callGetListLocations().then(async () => {
                 this.setLocationsTableLoading(false);
                 this.setEditLocationModal({
                   isLoading: false,
                 });
               });
-          })
-          .catch(async (error: any) => {
-            this.openNotification('error', `Delete ${location.name} error`, error.message);
-            this.setLocationsTableLoading(false);
-            this.setEditLocationModal({
-              isLoading: false,
+            })
+            .catch(async (error: any) => {
+              this.openNotification('error', `Delete ${location.name} error`, error.message);
+              this.setLocationsTableLoading(false);
+              this.setEditLocationModal({
+                isLoading: false,
+              });
             });
-          });
+        });
       },
     });
   };
@@ -312,9 +313,6 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
   render() {
     const { selectedLocation, editLocationModal } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
-    console.log('====================================');
-    console.log(listDeviceTypes);
-    console.log('====================================');
     return (
       <>
         <Form
