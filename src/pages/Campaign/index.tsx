@@ -555,9 +555,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               this.addNewModalRef.current?.handleAfterClose();
             }}
           >
-            {addNewCampaignModal?.visible && (
-              <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
-            )}
+            <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
           </Modal>
           {/* End Add New Campaign Modal */}
 

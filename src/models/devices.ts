@@ -59,7 +59,12 @@ export type DeviceModelState = {
   viewScreenshotModal?: {
     visible: boolean;
     isLoading: boolean;
-    metadata?: ScreenShotMetadata
+    metadata?: ScreenShotMetadata;
+  }
+
+  viewDeviceDetailModal?: {
+    visible: boolean;
+    isLoading: boolean;
   }
 };
 
@@ -106,6 +111,8 @@ export type DeviceModelType = {
     setViewScreenshotModalReducer: Reducer<DeviceModelState>;
     setListDevicesScreenShotReducer: Reducer<DeviceModelState>;
     setEditMultipleDevicesDrawerReducer: Reducer<DeviceModelState>;
+
+    setViewDeviceDetailModalReducer: Reducer<DeviceModelState>;
   };
 };
 
@@ -542,6 +549,13 @@ const DeviceModel: DeviceModelType = {
       return {
         ...state,
         editMultipleDevicesDrawer: payload
+      }
+    },
+
+    setViewDeviceDetailModalReducer(state, { payload }) {
+      return {
+        ...state,
+        viewDeviceDetailModal: payload
       }
     }
   },

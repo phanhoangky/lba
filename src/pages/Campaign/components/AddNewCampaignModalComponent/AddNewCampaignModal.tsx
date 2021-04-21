@@ -1,6 +1,6 @@
 import { AutoCompleteComponent } from '@/pages/common/AutoCompleteComponent';
 import { LOCATION_DISPATCHER } from '@/pages/Location';
-import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
+import { LeafletMapComponent } from '@/pages/Location/components/LeafletMapComponent';
 import {
   AutoComplete,
   Col,
@@ -64,6 +64,23 @@ export class AddNewCampaignModal extends React.Component<
       budgetOptions: [],
     };
   }
+
+  componentDidMount = () => {
+    // const { mapComponent } = this.props.location;
+    //   mapComponent?.map?.whenReady(() => {
+    //     setTimeout(() => {
+    //       if (mapComponent && mapComponent.map) {
+    //         console.log('====================================');
+    //         console.log('Initital >>>>', mapComponent.map);
+    //         console.log('====================================');
+    //         this.mapRef.current?.handleOnDragEvent(mapComponent.map);
+    //       }
+    //     }, 500);
+    //   });
+  };
+
+  componentDidUpdate = () => {};
+
   setAddNewCampaignModal = async (modal: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setAddNewCampaignModalReducer`,
@@ -236,10 +253,10 @@ export class AddNewCampaignModal extends React.Component<
       if (currentUser && addNewCampaignModal) {
         const hash = await currentUser.ether?.createCampaign(
           campaignId,
-          addNewCampaignModal.fees.totalFee,
+          Math.round(addNewCampaignModal.fees.totalFee),
           values.budget.trim(),
-          addNewCampaignModal.fees.remainFee,
-          addNewCampaignModal.fees.cancelFee,
+          Math.round(addNewCampaignModal.fees.remainFee),
+          Math.round(addNewCampaignModal.fees.cancelFee),
         );
         // throw new Error('sdsd');
         this.createNewCampaign({
@@ -247,7 +264,7 @@ export class AddNewCampaignModal extends React.Component<
           hash,
           ...values,
           budget: values.budget.trim(),
-          totalMoney: totalFee,
+          totalMoney: Math.round(totalFee),
         })
           .then(() => {
             openNotification(
@@ -430,6 +447,7 @@ export class AddNewCampaignModal extends React.Component<
   formRef = React.createRef<FormInstance<any>>();
   datePickerRef = React.createRef<any>();
   autoCompleteRef = React.createRef<AutoCompleteComponent>();
+  mapRef = React.createRef<LeafletMapComponent>();
   render() {
     const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
 
@@ -463,16 +481,16 @@ export class AddNewCampaignModal extends React.Component<
                       type: 'number',
                       min: 100000,
                       validator: (rule, value) => {
+                        if (Number.isNaN(Number(value))) {
+                          return Promise.reject(new Error('Budget must be a number'));
+                        }
+
                         if (value > maxBudget) {
                           return Promise.reject(new Error('Budget is over your balance'));
                         }
 
                         return Promise.resolve();
                       },
-                    },
-                    {
-                      type: 'number',
-                      message: 'Budget must be a number',
                     },
                   ]}
                 >
@@ -622,7 +640,44 @@ export class AddNewCampaignModal extends React.Component<
                 )}
                 <Row>
                   <Col span={24}>
-                    <LeafletMapComponent {...this.props} />
+                    <LeafletMapComponent
+                      showLocations={true}
+                      onClick={async (data: any, e) => {
+                        // const { createCampaignParam } = this.props.campaign;
+                        const { mapComponent } = this.props.location;
+                        if (mapComponent && createCampaignParam && createCampaignParam.radius > 0) {
+                          if (mapComponent.map) {
+                            if (!mapComponent.circle && createCampaignParam.radius !== 0) {
+                              const circle = L.circle(e, {
+                                radius: createCampaignParam.radius,
+                              });
+                              circle.addTo(mapComponent.map);
+                              await this.setMapComponent({
+                                circle,
+                              });
+                            } else if (mapComponent.circle) {
+                              mapComponent.circle
+                                .setLatLng(e)
+                                .setRadius(createCampaignParam.radius);
+                              // mapComponent.circle?.remove();
+                              // const circle = L.circle(e.latlng, {
+                              //   radius: createCampaignParam.radius,
+                              // });
+                              // circle.addTo(mapComponent.map);
+                              // await this.setMapComponent({
+                              //   circle,
+                              // });
+                            }
+                          }
+                        }
+                        await this.setCreateNewCampaignParam({
+                          location: `${data.lat}-${data.lon}`,
+                          address: data.display_name,
+                        });
+                      }}
+                      ref={this.mapRef}
+                      {...this.props}
+                    />
                   </Col>
                 </Row>
               </Col>
@@ -630,29 +685,35 @@ export class AddNewCampaignModal extends React.Component<
 
               {/* Start Column */}
               <Col span={12}>
-                <Row>
+                {/* <Row>
                   <Col span={10}>
                     <Typography.Title level={4} className="lba-text">
                       Time Filter
                     </Typography.Title>
                   </Col>
-                </Row>
-                <Row>
+                </Row> */}
+                <Form.Item label="Time Filter">
+                  <TimeFilterComponent {...this.props} />
+                </Form.Item>
+                {/* <Row>
                   <Col span={24}>
                     <TimeFilterComponent {...this.props} />
                   </Col>
-                </Row>
+                </Row> */}
                 <Divider></Divider>
-                <Row>
+                {/* <Row>
                   <Col span={10}>
                     <Typography.Title level={4} className="lba-text">
                       Date Filter
                     </Typography.Title>
                   </Col>
-                </Row>
-                <Space>
-                  <FilterDate {...this.props} />
-                </Space>
+                </Row> */}
+                <Form.Item label="Date Filter">
+                  <Space>
+                    <FilterDate {...this.props} />
+                  </Space>
+                </Form.Item>
+
                 <Divider></Divider>
                 <Row style={{ textAlign: 'center' }}>
                   <Col span={24}>

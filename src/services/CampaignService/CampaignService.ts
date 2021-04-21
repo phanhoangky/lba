@@ -33,6 +33,13 @@ export type DeleteCampaignParam = {
   value: number;
 }
 
+export type GetAllLocationInBoundParam = {
+  northWestLatitude: number;
+  northWestLongitude: number;
+  southEastLatitude: number;
+  southEastLongitude: number;
+}
+
 export enum CAMPAIGN_STATUS {
   CREATE = 0,
   PAUSE = 1,
@@ -68,5 +75,10 @@ export async function updateCampaign(param: UpdateCampaignParam) {
   const { data } = await ApiHelper.put(`${CONSTANTS_LBA.CAMPAIGN_URL}/${param.id}`, param).catch((error) => {
     return Promise.reject(new Error(error));
   });
+  return data;
+}
+
+export async function getAllLocationInBound(param: GetAllLocationInBoundParam) {
+  const { data } = await ApiHelper.get(`${CONSTANTS_LBA.CAMPAIGN_URL}/locations`, { params: { ...param } });
   return data;
 }

@@ -363,7 +363,7 @@ const UserModel: UserModelType = {
       history.push('/account/register-result')
     },
 
-    *updateProfile({ payload }, { call }) {
+    *updateProfile({ payload }, { call, put }) {
       console.log('====================================');
       console.log(payload);
       console.log('====================================');
@@ -373,16 +373,32 @@ const UserModel: UserModelType = {
         const file = yield call(CreateMedia, {
           file: payload.file
         })
-
         yield currentUser.updateProfile({
           displayName: payload.name,
           photoURL: file.url_preview,
-        })
+        });
+
+        yield put({
+        type: "saveCurrentUser",
+        payload: {
+          avatar: file.url_preview,
+          name: payload.name
+        }
+      })
       } else {
         yield currentUser.updateProfile({
           displayName: payload.name,
-        })
+        });
+        
+        yield put({
+        type: "saveCurrentUser",
+        payload: {
+          name: payload.name
+        }
+      })
       }
+
+     
     },
 
     *sendResetPassword({ payload }) {

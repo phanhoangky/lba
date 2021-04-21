@@ -1,7 +1,7 @@
 import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
-import { Button, Modal, Space, Table, Tooltip } from 'antd';
+import { Button, Drawer, Modal, Space, Table, Tooltip } from 'antd';
 import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
@@ -14,9 +14,11 @@ import {
   DeleteTwoTone,
   EditFilled,
   ExclamationCircleOutlined,
+  EyeFilled,
 } from '@ant-design/icons';
 import { ViewScreenShotModal } from './components/ViewScreenShotModal';
 import { openNotification } from '@/utils/utils';
+import { ViewDeviceDetailComponent } from './components/ViewDeviceDetailComponent';
 
 type DeviceProps = {
   dispatch: Dispatch;
@@ -243,6 +245,15 @@ class Device extends React.Component<DeviceProps> {
     });
   };
 
+  setViewDeviceDetailModal = async (modal?: any) => {
+    await this.props.dispatch({
+      type: `deviceStore/setViewDeviceDetailModalReducer`,
+      payload: {
+        ...this.props.deviceStore.viewDeviceDetailModal,
+        ...modal,
+      },
+    });
+  };
   updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
 
   render() {
@@ -252,6 +263,7 @@ class Device extends React.Component<DeviceProps> {
       // editMultipleDevicesDrawerVisible,
       viewScreenshotModal,
       devicesTableLoading,
+      viewDeviceDetailModal,
     } = this.props.deviceStore;
 
     const { selectedRowKeys } = this.state;
@@ -345,6 +357,18 @@ class Device extends React.Component<DeviceProps> {
                   <Space>
                     <Button
                       className="lba-btn"
+                      onClick={() => {
+                        this.setSelectedDevice(record).then(() => {
+                          this.setViewDeviceDetailModal({
+                            visible: true,
+                          });
+                        });
+                      }}
+                    >
+                      <EyeFilled className="lba-icon" />
+                    </Button>
+                    <Button
+                      className="lba-btn"
                       onClick={async () => {
                         this.setMultipleUpdateMode(false).then(() => {
                           this.setSelectedDevice(record).then(() => {
@@ -428,6 +452,23 @@ class Device extends React.Component<DeviceProps> {
         </Modal>
 
         {/** End Screenshot Modal */}
+
+        {/* View Device Detail Modal */}
+        <Drawer
+          title="Device Detail"
+          visible={viewDeviceDetailModal?.visible}
+          closable={false}
+          destroyOnClose={true}
+          width={'40%'}
+          onClose={() => {
+            this.setViewDeviceDetailModal({
+              visible: false,
+            });
+          }}
+        >
+          <ViewDeviceDetailComponent {...this.props} />
+        </Drawer>
+        {/* End View Device Detail Modal */}
       </>
     );
   }

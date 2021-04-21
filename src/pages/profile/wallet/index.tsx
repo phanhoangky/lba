@@ -47,7 +47,9 @@ class WalletScreen extends React.Component<WalletProps> {
   componentDidMount = () => {
     this.setTransTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'Error', error.message);
+        });
         Promise.all([this.getListTransactions()]).then(() => {
           this.setTransTableLoading(false);
         });
@@ -308,19 +310,19 @@ class WalletScreen extends React.Component<WalletProps> {
               </Form> */}
               <Divider></Divider>
               <Row>
-                <Col span={6} className="lba-text">
+                <Col span={6} className="lba-label">
                   Username
                 </Col>
                 <Col span={18}>{currentUser && currentUser.name}</Col>
               </Row>
               <Row>
-                <Col span={6} className="lba-text">
+                <Col span={6} className="lba-label">
                   Email
                 </Col>
                 <Col span={18}>{currentUser && currentUser.email}</Col>
               </Row>
               <Row>
-                <Col span={6} className="lba-text">
+                <Col span={6} className="lba-label">
                   Balance
                 </Col>
                 <Col span={18}>
@@ -329,11 +331,11 @@ class WalletScreen extends React.Component<WalletProps> {
                   VND
                 </Col>
               </Row>
-              <Divider orientation="center" className="lba-text">
+              <Divider orientation="center" className="lba-label">
                 Setting
               </Divider>
               <Button
-                className="add-new-media-btn"
+                className="lba-special-btn"
                 block
                 size="large"
                 onClick={() => {
@@ -342,16 +344,16 @@ class WalletScreen extends React.Component<WalletProps> {
                   });
                 }}
               >
-                <div className="add-media-overlap"></div>
-                <div className="add-media-text">
+                <div className="lba-btn-overlap"></div>
+                <div className="lba-special-btn-text">
                   <Space>
-                    <EditFilled className="lba-icon" />
+                    <EditFilled className="lba-special-btn-icon" />
                     Update Proflile
                   </Space>
                 </div>
               </Button>
               <Button
-                className="add-new-media-btn"
+                className="lba-special-btn"
                 block
                 size="large"
                 onClick={() => {
@@ -360,10 +362,10 @@ class WalletScreen extends React.Component<WalletProps> {
                   });
                 }}
               >
-                <div className="add-media-overlap"></div>
-                <div className="add-media-text">
+                <div className="lba-btn-overlap"></div>
+                <div className="lba-special-btn-text">
                   <Space>
-                    <LockFilled className="lba-icon" /> Change Password
+                    <LockFilled className="lba-special-btn-icon" /> Change Password
                   </Space>
                 </div>
               </Button>
@@ -421,11 +423,10 @@ class WalletScreen extends React.Component<WalletProps> {
             this.setUpdateProfileModal({
               visible: false,
             });
-
-            this.setUpdateProfileParam({
-              file: undefined,
-              name: undefined,
-            });
+            // this.setUpdateProfileParam({
+            //   file: undefined,
+            //   name: undefined,
+            // });
           }}
           cancelButtonProps={{
             icon: <CloseCircleFilled className="lba-close-icon" />,

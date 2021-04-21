@@ -1,9 +1,10 @@
 import type { BaseGetRequest } from "@/services/BaseRequest";
-import { createCampaign, deleteCampaign, getCampaignById, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
+import { createCampaign, deleteCampaign, getAllLocationInBound, getCampaignById, getListCampaigns, updateCampaign } from "@/services/CampaignService/CampaignService";
 import type { CreateCampaignParam } from '@/services/CampaignService/CampaignService';
 import moment from "moment";
 import { Effect, Reducer } from "umi";
 import { GetFees } from "@/services/FeeService";
+import type { Location } from '@/models/Location';
 
 export type Campaign = {
   id: string;
@@ -63,7 +64,9 @@ export type CampaignModelState = {
   viewCampaignDetailComponent?: {
     visible: boolean;
     isLoading: boolean;
-  }
+  },
+
+  listLocations?: Location[]
 };
 
 export type CampaignModelStore = {
@@ -77,6 +80,7 @@ export type CampaignModelStore = {
     deleteCampaign: Effect;
     getListFee: Effect;
     updateCampaign: Effect;
+    getListLocationInBound: Effect;
   };
 
   reducers: {
@@ -97,6 +101,8 @@ export type CampaignModelStore = {
     setViewCampaignDetailComponentReducer: Reducer<CampaignModelState>;
 
     setFeesReducer: Reducer<CampaignModelState>;
+
+    setListLocationsReducer: Reducer<CampaignModelState>;
   }
 };
 
@@ -175,6 +181,7 @@ const CampaignStore: CampaignModelStore = {
       isLoading: false,
     },
     
+    listLocations: []
   },
 
   effects: {
@@ -243,6 +250,17 @@ const CampaignStore: CampaignModelStore = {
       } catch (error) {
         return Promise.reject(error);
       }
+    },
+
+    *getListLocationInBound({ payload }, { call, put }) {
+      const data = yield call(getAllLocationInBound, payload);
+
+      yield put({
+        type: "setListLocationsReducer",
+        payload: data
+      });
+
+      return data;
     }
   },
 
@@ -251,6 +269,13 @@ const CampaignStore: CampaignModelStore = {
       return {
         ...state,
         listCampaign: payload
+      }
+    },
+
+    setListLocationsReducer(state, { payload }) {
+      return {
+        ...state,
+        listLocations: payload
       }
     },
 

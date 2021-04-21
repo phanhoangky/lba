@@ -5,6 +5,7 @@ import type { DeviceModelState, Dispatch } from 'umi';
 type FilterTimeProps = {
   dispatch: Dispatch;
   deviceStore: DeviceModelState;
+  disabled?: boolean;
 };
 
 class FilterDate extends React.Component<FilterTimeProps> {
@@ -24,34 +25,36 @@ class FilterDate extends React.Component<FilterTimeProps> {
                 return (
                   <Button
                     onClick={() => {
-                      if (isUpdateMultiple) {
-                        this.props.dispatch({
-                          type: 'deviceStore/setUpdateDevicesState',
-                          payload: {
-                            ...updateDevicesState,
-                            dateFilter: data.map((value, i) => {
-                              const state = value === '0' ? '1' : '0';
-                              if (i === index) {
-                                return state;
-                              }
-                              return value;
-                            }),
-                          },
-                        });
-                      } else {
-                        this.props.dispatch({
-                          type: 'deviceStore/setCurrentDevice',
-                          payload: {
-                            ...selectedDevice,
-                            dateFilter: data.map((value, i) => {
-                              const state = value === '0' ? '1' : '0';
-                              if (i === index) {
-                                return state;
-                              }
-                              return value;
-                            }),
-                          },
-                        });
+                      if (!this.props.disabled) {
+                        if (isUpdateMultiple) {
+                          this.props.dispatch({
+                            type: 'deviceStore/setUpdateDevicesState',
+                            payload: {
+                              ...updateDevicesState,
+                              dateFilter: data.map((value, i) => {
+                                const state = value === '0' ? '1' : '0';
+                                if (i === index) {
+                                  return state;
+                                }
+                                return value;
+                              }),
+                            },
+                          });
+                        } else {
+                          this.props.dispatch({
+                            type: 'deviceStore/setCurrentDevice',
+                            payload: {
+                              ...selectedDevice,
+                              dateFilter: data.map((value, i) => {
+                                const state = value === '0' ? '1' : '0';
+                                if (i === index) {
+                                  return state;
+                                }
+                                return value;
+                              }),
+                            },
+                          });
+                        }
                       }
                     }}
                     // type={d === '1' ? 'primary' : 'default'}

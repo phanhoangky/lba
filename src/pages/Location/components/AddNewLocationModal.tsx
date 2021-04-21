@@ -365,7 +365,16 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
         </Form>
         <Row>
           <Col span={24}>
-            <LeafletMapComponent {...this.props} />
+            <LeafletMapComponent
+              onClick={async (data: any) => {
+                await this.setCreateLocationParam({
+                  address: data.display_name,
+                  longitude: data.lon,
+                  latitude: data.lat,
+                });
+              }}
+              {...this.props}
+            />
           </Col>
         </Row>
         {/* </Modal> */}

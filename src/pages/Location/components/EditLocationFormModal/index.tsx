@@ -211,7 +211,6 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
                   // visible: false,
                   isLoading: false,
                 });
-                Promise.reject(error);
               });
           });
         })
@@ -221,7 +220,6 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
             // visible: false,
             isLoading: false,
           });
-          Promise.reject(error);
         });
     }
   };
@@ -423,7 +421,16 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
           )}
           <Divider></Divider>
         </Form>
-        <LeafletMapComponent {...this.props} />
+        <LeafletMapComponent
+          onClick={(data: any) => {
+            this.setSelectedLocation({
+              address: data.display_name,
+              longitude: data.lon,
+              latitude: data.lat,
+            });
+          }}
+          {...this.props}
+        />
       </>
     );
   }

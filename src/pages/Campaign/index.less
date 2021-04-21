@@ -1,5 +1,6 @@
 @lba-color-text: rgb(0, 0, 0);
 @lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
+@lba-border-image: linear-gradient(135deg, #995905, #ffbb00);
 
 .listScenarios {
   :global {
@@ -43,10 +44,14 @@
       border-image-slice: 1;
       border-width: 5px;
       // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
-      border-image-source: @lba-background-image;
+      border-image-source: @lba-border-image;
       .area-item {
+        border-radius: 5px;
+        border-image-slice: 1;
+        border-width: 5px;
+        border-style: solid;
+        border-image-source: @lba-border-image;
         // border: 5px solid #00cdac;
-        border: 5px solid @lba-background-image;
         border-radius: 5px;
       }
 

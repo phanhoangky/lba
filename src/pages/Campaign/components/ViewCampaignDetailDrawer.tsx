@@ -334,7 +334,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                   <Space wrap={true}>
                     {selectedCampaign?.dateFilter.split('').map((date, index) => {
                       return (
-                        <Button key={uuidv4()} type={date === '1' ? 'primary' : 'default'}>
+                        <Button key={uuidv4()} className={date === '1' ? 'lba-btn' : ''}>
                           {index === 0 && 'Monday'}
                           {index === 1 && 'Tuesday'}
                           {index === 2 && 'Wednesday'}
@@ -351,7 +351,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
               <Divider></Divider>
               <Row>
                 <Col span={24}>
-                  <LeafletMapComponent {...this.props} />
+                  <LeafletMapComponent disabled={true} showLocations={true} {...this.props} />
                 </Col>
               </Row>
             </Col>

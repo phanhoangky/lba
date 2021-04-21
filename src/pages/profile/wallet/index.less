@@ -1,6 +1,10 @@
 
 @lba-color-text: rgb(0, 0, 0);
 @lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
+@lba-background-image-hover: linear-gradient(135deg, #000000, #646464);
+@lba-color-text-hover: linear-gradient(135deg, #181818, #707070);
+@lba-icon-color: #ffbb00;
+@lba-icon-color-hover: #000000;
 
 .CardMeta {
   & :global {
@@ -26,10 +30,13 @@
 
 :global {
   
-  .add-new-media-btn {
+  .lba-special-btn {
     padding: 0;
     position: relative;
-    border: 2px solid @lba-background-image;
+    // border: 2px solid @lba-background-image;
+    border-style: solid;
+    border-width: 2px;
+    border-image-source: @lba-background-image;
     // border: 2px solid rgb(16, 223, 144);
     transition: all 0.3s ease;
     font-weight: bold;
@@ -43,24 +50,29 @@
       background: unset;
     }
 
-    &:hover .add-media-overlap {
+    &:hover .lba-btn-overlap {
       width: 100%;
       transition: all 0.3s ease;
     }
 
-    &:hover .add-media-text {
+    &:hover .lba-special-btn-text {
       transition: all 0.3s ease;
       // background-image: linear-gradient(135deg, #f4f5f5, #f4f5f5);
-      background-image: @lba-color-text;
+      background-image: @lba-background-image-hover;
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       // color: #f4f5f5;
-      color: @lba-color-text;
+      // color: @lba-color-text-hover;
+    }
+
+    &:hover .lba-special-btn-icon {
+      // background-image: @lba-background-image-hover;
+      color: @lba-icon-color-hover;
     }
   }
 
-  .add-media-overlap {
+  .lba-btn-overlap {
     position: absolute;
     top: 0;
     left: 0;
@@ -72,7 +84,7 @@
     z-index: 1;
   }
 
-  .add-media-text {
+  .lba-special-btn-text {
     position: absolute;
     z-index: 2;
     width: 100%;
@@ -90,9 +102,12 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    .lba-icon {
-      // color: #0ae7e7;
-      color: @lba-color-text;
+    .lba-special-btn-icon {
+      color: @lba-icon-color;
+      // background-image: @lba-background-image;
+      // background-clip: text;
+      // -webkit-background-clip: text;
+      // -webkit-text-fill-color: transparent;
     }
   }
 }
