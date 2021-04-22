@@ -123,6 +123,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                           );
                           this.setEditFileDrawer({
                             isLoading: false,
+                            visible: false,
                           }).then(() => {
                             this.setState({
                               removeConfirmVisible: false,

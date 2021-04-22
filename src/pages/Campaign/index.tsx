@@ -165,8 +165,17 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   };
 
   deleteCampaignConfirm = async (item: Campaign) => {
+    const { fees } = this.props.campaign;
+    const cancelFee = item.budget * fees.CancelCampagin;
     Modal.confirm({
       title: `Do you want to delete ${item.name} ?`,
+      content: (
+        <>
+          <span style={{ color: 'red' }}>
+            Cancel fee is {cancelFee.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} VND
+          </span>
+        </>
+      ),
       icon: <ExclamationCircleOutlined />,
       closable: false,
       centered: true,

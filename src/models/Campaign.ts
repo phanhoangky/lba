@@ -234,9 +234,6 @@ const CampaignStore: CampaignModelStore = {
 
     *getListFee({ payload }, { call, put }) {
       const res = yield call(GetFees, payload);
-      console.log('====================================');
-      console.log(res);
-      console.log('====================================');
       yield put({
         type: "setFeesReducer",
         payload: res.result

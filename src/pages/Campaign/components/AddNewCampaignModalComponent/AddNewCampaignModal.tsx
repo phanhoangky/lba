@@ -573,7 +573,8 @@ export class AddNewCampaignModal extends React.Component<
                     ref={this.datePickerRef}
                     format={'YYYY/MM/DD'}
                     disabledDate={(current) => {
-                      return current <= moment().endOf('day');
+                      const today = moment().format('YYYY/MM/DD');
+                      return current < moment(today, 'YYYY/MM/DD');
                     }}
                     onChange={(e) => {
                       if (e) {
