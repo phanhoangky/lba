@@ -115,31 +115,31 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
           // }
 
           // if (addNewCampaignModal?.visible) {
-          //   const { createCampaignParam } = this.props.campaign;
+          // const { createCampaignParam } = this.props.campaign;
 
-          //   if (createCampaignParam && createCampaignParam.radius > 0) {
-          //     if (mapComponent.map) {
-          //       if (!mapComponent.circle && createCampaignParam.radius !== 0) {
-          //         const circle = L.circle(e.latlng, {
-          //           radius: createCampaignParam.radius,
-          //         });
-          //         circle.addTo(mapComponent.map);
-          //         await this.setMapComponent({
-          //           circle,
-          //         });
-          //       } else if (mapComponent.circle) {
-          //         mapComponent.circle.setLatLng(e.latlng).setRadius(createCampaignParam.radius);
-          //         // mapComponent.circle?.remove();
-          //         // const circle = L.circle(e.latlng, {
-          //         //   radius: createCampaignParam.radius,
-          //         // });
-          //         // circle.addTo(mapComponent.map);
-          //         // await this.setMapComponent({
-          //         //   circle,
-          //         // });
-          //       }
+          // if (createCampaignParam && createCampaignParam.radius > 0) {
+          //   if (mapComponent.map) {
+          //     if (!mapComponent.circle && createCampaignParam.radius !== 0) {
+          //       const circle = L.circle(e.latlng, {
+          //         radius: createCampaignParam.radius,
+          //       });
+          //       circle.addTo(mapComponent.map);
+          //       await this.setMapComponent({
+          //         circle,
+          //       });
+          //     } else if (mapComponent.circle) {
+          //       mapComponent.circle.setLatLng(e.latlng).setRadius(createCampaignParam.radius);
+          //       // mapComponent.circle?.remove();
+          //       // const circle = L.circle(e.latlng, {
+          //       //   radius: createCampaignParam.radius,
+          //       // });
+          //       // circle.addTo(mapComponent.map);
+          //       // await this.setMapComponent({
+          //       //   circle,
+          //       // });
           //     }
           //   }
+          // }
           //   await this.setCreateNewCampaignParam({
           //     location: `${data.lat}-${data.lon}`,
           //     address: data.display_name,

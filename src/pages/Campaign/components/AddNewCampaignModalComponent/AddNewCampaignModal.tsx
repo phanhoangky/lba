@@ -36,7 +36,7 @@ import TimeFilterComponent from '../TimeFilterComponent';
 import { v4 as uuidv4 } from 'uuid';
 import { openNotification } from '@/utils/utils';
 import { forwardGeocoding } from '@/services/MapService/LocationIQService';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleOutlined } from '@ant-design/icons';
 
 export type AddNewCampaignModalProps = {
   dispatch: Dispatch;
@@ -234,6 +234,14 @@ export class AddNewCampaignModal extends React.Component<
               />
             </>
           ),
+          okButtonProps: {
+            className: 'lba-btn',
+            icon: <CheckCircleFilled className="lba-icon" />,
+          },
+          cancelButtonProps: {
+            icon: <CloseCircleFilled className="lba-close-icon" />,
+            danger: true,
+          },
           onOk: () => {
             this.okConfirm(values, addNewCampaignModal?.fees.totalFee);
           },
@@ -251,10 +259,18 @@ export class AddNewCampaignModal extends React.Component<
     }).then(async () => {
       const campaignId = uuidv4();
       if (currentUser && addNewCampaignModal) {
+        const total = Math.round(addNewCampaignModal.fees.totalFee);
+        const remainFee = Math.round(addNewCampaignModal.fees.remainFee);
+        const cancel = Math.round(addNewCampaignModal.fees.cancelFee);
+        const money = Number.parseFloat(values.budget.trim());
+        console.log('====================================');
+        console.log('Fee >>>', total, remainFee, cancel);
+        console.log('Budget >>>', money);
+        console.log('====================================');
         const hash = await currentUser.ether?.createCampaign(
           campaignId,
           Math.round(addNewCampaignModal.fees.totalFee),
-          values.budget.trim(),
+          money,
           Math.round(addNewCampaignModal.fees.remainFee),
           Math.round(addNewCampaignModal.fees.cancelFee),
         );
@@ -346,11 +362,12 @@ export class AddNewCampaignModal extends React.Component<
   };
 
   hanldeOnChangeBudget = async (e: any) => {
+    const money = Number.parseFloat(e);
     const { fees } = this.props.campaign;
     if (fees) {
-      const totalFee = e * fees.Advertiser + e;
-      const remainFee = e - e * fees.Supplier;
-      const cancelFee = e * fees.CancelCampagin;
+      const totalFee = money * fees.Advertiser + money;
+      const remainFee = money - money * fees.Supplier;
+      const cancelFee = money * fees.CancelCampagin;
 
       const newFes = {
         remainFee,
@@ -427,7 +444,7 @@ export class AddNewCampaignModal extends React.Component<
       newValue = newValue.concat('0');
     }
     return {
-      value: `${newValue}`.replace(/\B(?=(\d{3})+(?!\d))/g, ' '),
+      value: `${newValue}`,
     };
   };
   handleOnSearchBudget = (value: string) => {
@@ -477,6 +494,11 @@ export class AddNewCampaignModal extends React.Component<
                   label="Budget"
                   rules={[
                     { required: true, message: 'Please input budget of this campaign' },
+                    // {
+                    //   type: 'number',
+                    //   min: 100000,
+                    //   message: 'at least 100000 VND to create a campaign',
+                    // },
                     {
                       type: 'number',
                       min: 100000,
@@ -487,6 +509,12 @@ export class AddNewCampaignModal extends React.Component<
 
                         if (value > maxBudget) {
                           return Promise.reject(new Error('Budget is over your balance'));
+                        }
+
+                        if (value < 100000) {
+                          return Promise.reject(
+                            new Error('At least 100000 VND to create a campaign'),
+                          );
                         }
 
                         return Promise.resolve();
@@ -515,6 +543,9 @@ export class AddNewCampaignModal extends React.Component<
                     // }}
                     onSearch={(e) => {
                       this.handleOnSearchBudget(e);
+                    }}
+                    onChange={(e) => {
+                      this.hanldeOnChangeBudget(e);
                     }}
                   ></AutoComplete>
                 </Form.Item>
@@ -643,30 +674,33 @@ export class AddNewCampaignModal extends React.Component<
                     <LeafletMapComponent
                       showLocations={true}
                       onClick={async (data: any, e) => {
-                        // const { createCampaignParam } = this.props.campaign;
+                        const createParam = this.props.campaign.createCampaignParam;
+
                         const { mapComponent } = this.props.location;
-                        if (mapComponent && createCampaignParam && createCampaignParam.radius > 0) {
+                        console.log('====================================');
+                        console.log('mapComponent >>>', mapComponent);
+                        console.log(data, e, createParam);
+                        console.log('====================================');
+                        if (mapComponent && createParam && createParam.radius > 0) {
                           if (mapComponent.map) {
-                            if (!mapComponent.circle && createCampaignParam.radius !== 0) {
+                            if (!mapComponent.circle && createParam.radius !== 0) {
                               const circle = L.circle(e, {
-                                radius: createCampaignParam.radius,
+                                radius: createParam.radius,
                               });
                               circle.addTo(mapComponent.map);
                               await this.setMapComponent({
                                 circle,
                               });
                             } else if (mapComponent.circle) {
-                              mapComponent.circle
-                                .setLatLng(e)
-                                .setRadius(createCampaignParam.radius);
-                              // mapComponent.circle?.remove();
-                              // const circle = L.circle(e.latlng, {
-                              //   radius: createCampaignParam.radius,
-                              // });
-                              // circle.addTo(mapComponent.map);
-                              // await this.setMapComponent({
-                              //   circle,
-                              // });
+                              // mapComponent.circle.setLatLng(e).setRadius(createParam.radius);
+                              mapComponent.circle?.remove();
+                              const circle = L.circle(e, {
+                                radius: createParam.radius,
+                              });
+                              circle.addTo(mapComponent.map);
+                              await this.setMapComponent({
+                                circle,
+                              });
                             }
                           }
                         }
@@ -717,7 +751,7 @@ export class AddNewCampaignModal extends React.Component<
                 <Divider></Divider>
                 <Row style={{ textAlign: 'center' }}>
                   <Col span={24}>
-                    <Typography.Title level={4} className="lba-text">
+                    <Typography.Title level={4} className="lba-label">
                       Choose Scenario
                     </Typography.Title>
                   </Col>

@@ -200,22 +200,26 @@ export default class EtherService {
     if (remainBudget <= 100000) return "Not Enough Remain Budget";
     let minFeeCancel = feeCancel;
     if (feeCancel <= 100000) minFeeCancel = 100000;
-
     const totalWithFeeBN = ethers.BigNumber.from(totalWithFee.toString());
     const totalBudgetBN = ethers.BigNumber.from(totalBudget.toString());
     const remainBudgetBN = ethers.BigNumber.from(remainBudget.toString());
     const feeCancelBN = ethers.BigNumber.from(minFeeCancel.toString());
-
+    console.log('====================================');
+    console.log("totalWithFeeBN Campaign  >>>", totalWithFeeBN);
+    console.log("totalBudgetBN Campaign  >>>", totalBudgetBN);
+    console.log("remainBudgetBN Campaign  >>>", remainBudgetBN);
+    console.log("feeCancelBN Campaign  >>>", feeCancelBN);
+    console.log('====================================');
     const balance = await this.getBalance();
     if (totalWithFeeBN.lt(balance)) {
       const approveToTransferMoney = await this.contract.approve(this.evn.SUPPORT_ADDRESS, totalWithFeeBN);
       let receipt = await approveToTransferMoney.wait();
+
       if (receipt.status === 1) {
         const overrides = {
           gasLimit: ethers.BigNumber.from("2000000"),
           gasPrice: ethers.BigNumber.from("10000000000000"),
         };
-
         const createCampaign = await this.contract.createCampaign(campaignId, totalWithFeeBN, totalBudgetBN, remainBudgetBN, feeCancelBN, overrides);
         receipt = await createCampaign.wait();
         if (receipt.status !== 1) {

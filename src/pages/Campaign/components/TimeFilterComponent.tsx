@@ -4,7 +4,7 @@ import type { CampaignModelState, DeviceModelState, Dispatch } from 'umi';
 import { connect } from 'umi';
 import { CAMPAIGN } from '..';
 import { v4 as uuidv4 } from 'uuid';
-import { ClockCircleTwoTone, CloseCircleFilled, PlusSquareFilled } from '@ant-design/icons';
+import { ClockCircleFilled, CloseCircleFilled, PlusSquareFilled } from '@ant-design/icons';
 
 export type TimeFilterComponentProps = {
   dispatch: Dispatch;
@@ -97,7 +97,7 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
                   value={`${startTime} h - ${endTime} h`}
                   readOnly
                   key={uuidv4()}
-                  prefix={<ClockCircleTwoTone twoToneColor="#00cdac" className="lba-icon" />}
+                  prefix={<ClockCircleFilled className="lba-icon" />}
                   suffix={
                     <Button
                       danger
