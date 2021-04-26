@@ -1,9 +1,10 @@
 import { LOCATION_DISPATCHER } from '@/pages/Location';
-import LeafletMapComponent from '@/pages/Location/components/LeafletMapComponent';
+import { LeafletMapComponent } from '@/pages/Location/components/LeafletMapComponent';
+import { TAG_COLOR } from '@/services/constantUrls';
 import { reverseGeocoding } from '@/services/MapService/LocationIQService';
 import { Gauge, Liquid } from '@ant-design/charts';
-import { ClockCircleFilled } from '@ant-design/icons';
-import { Button, Col, DatePicker, Divider, Drawer, Form, Input, Row, Space, Tag } from 'antd';
+import { CaretRightFilled, ClockCircleFilled } from '@ant-design/icons';
+import { Button, Col, Divider, Form, Row, Space, Tag } from 'antd';
 import L from 'leaflet';
 import moment from 'moment';
 import * as React from 'react';
@@ -54,6 +55,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
           });
         }
       }
+      mapComponent.map.invalidateSize(true);
     }
   }
 
@@ -85,8 +87,8 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
     });
   };
   render() {
-    const { selectedCampaign, editCampaignDrawer, fees } = this.props.campaign;
-    const { mapComponent } = this.props.location;
+    const { selectedCampaign, fees } = this.props.campaign;
+    // const { mapComponent } = this.props.location;
     const campaignBudget = selectedCampaign ? selectedCampaign.budget : 0;
     const listType = selectedCampaign?.campaignDeviceTypes?.map((type) => {
       return (
@@ -97,7 +99,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
     });
     return (
       <>
-        <Drawer
+        {/* <Drawer
           title={<>Campaign Detail</>}
           width={'80%'}
           closable={false}
@@ -128,10 +130,10 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
           visible={editCampaignDrawer?.visible}
           destroyOnClose={true}
           forceRender={true}
-        >
-          <Row gutter={24}>
-            <Col span={12}>
-              {/* <Row>
+        > */}
+        <Row gutter={24}>
+          <Col span={12}>
+            {/* <Row>
                 <Col span={4}>Name</Col>
                 <Col span={20}>
                   <Input readOnly value={selectedCampaign?.name} />
@@ -244,24 +246,31 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                 <Col span={4}>Address</Col>
                 <Col span={20}>{selectedCampaign?.address}</Col>
               </Row> */}
-              <Form name="view_campaign_detail_form" layout="vertical">
-                <Form.Item label="Name">
-                  <Input readOnly value={selectedCampaign?.name} />
-                </Form.Item>
-                <Form.Item label="Budget">
-                  <Input
+            <Form name="view_campaign_detail_form" layout="vertical">
+              <Form.Item label="Name">
+                {/* <Input readOnly value={selectedCampaign?.name} /> */}
+                <Tag color={TAG_COLOR}>{selectedCampaign?.name}</Tag>
+              </Form.Item>
+              <Form.Item label="Budget">
+                {/* <Input
                     readOnly
                     value={selectedCampaign?.budget
                       .toString()
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                       .concat(' VND')}
-                  />
-                </Form.Item>
-                <Form.Item label="Calculate Fees">
-                  <Row gutter={20}>
-                    <Col>
-                      <Form.Item label="Total Fee">
-                        <Input
+                  /> */}
+                <Tag color={TAG_COLOR}>
+                  {selectedCampaign?.budget
+                    .toString()
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                    .concat(' VND')}
+                </Tag>
+              </Form.Item>
+              <Form.Item label="Calculate Fees">
+                <Row gutter={20}>
+                  <Col>
+                    <Form.Item label="Total Fee">
+                      {/* <Input
                           value={(
                             fees &&
                             campaignBudget &&
@@ -270,12 +279,22 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                             ?.toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                             .concat(' VND')}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col>
-                      <Form.Item label="Remain Fee">
-                        <Input
+                        /> */}
+                      <Tag color={TAG_COLOR}>
+                        {(
+                          fees &&
+                          campaignBudget &&
+                          campaignBudget * fees.Advertiser + campaignBudget
+                        )
+                          ?.toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                          .concat(' VND')}
+                      </Tag>
+                    </Form.Item>
+                  </Col>
+                  <Col>
+                    <Form.Item label="Remain Fee">
+                      {/* <Input
                           value={(
                             fees &&
                             campaignBudget &&
@@ -284,127 +303,148 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                             ?.toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                             .concat(' VND')}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col>
-                      <Form.Item label="Cancel Fee">
-                        <Input
+                        /> */}
+                      <Tag color={TAG_COLOR}>
+                        {(fees && campaignBudget && campaignBudget - campaignBudget * fees.Supplier)
+                          ?.toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                          .concat(' VND')}
+                      </Tag>
+                    </Form.Item>
+                  </Col>
+                  <Col>
+                    <Form.Item label="Cancel Fee">
+                      {/* <Input
                           value={(fees && campaignBudget && campaignBudget * fees.CancelCampagin)
                             ?.toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                             .concat(' VND')}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form.Item>
-                <Form.Item label="Types">
-                  <Space wrap>{listType}</Space>
-                </Form.Item>
-                <Form.Item label="From - To">
-                  <DatePicker.RangePicker
+                        /> */}
+                      <Tag color={TAG_COLOR}>
+                        {(fees && campaignBudget && campaignBudget * fees.CancelCampagin)
+                          ?.toString()
+                          .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                          .concat(' VND')}
+                      </Tag>
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </Form.Item>
+              <Form.Item label="Types">
+                <Space wrap>{listType}</Space>
+              </Form.Item>
+              <Form.Item label="From - To">
+                {/* <DatePicker.RangePicker
                     disabled={true}
                     value={[
                       moment(moment(selectedCampaign?.startDate).format('YYYY-MM-DD')),
                       moment(moment(selectedCampaign?.endDate).format('YYYY-MM-DD')),
                     ]}
                     inputReadOnly={true}
-                  />
-                </Form.Item>
-                <Form.Item label="Times">
-                  <Space wrap={true}>
-                    {selectedCampaign?.timeFilter.split('').map((time, index) => {
-                      const start = index;
-                      const end = index + 1 === 24 ? 0 : index + 1;
-                      if (time === '1') {
-                        return (
-                          <Button
-                            key={uuidv4()}
-                            style={{ textAlign: 'center' }}
-                            icon={<ClockCircleFilled className="lba-icon" />}
-                          >{`${start}h - ${end}h`}</Button>
-                        );
-                      }
-                      return '';
-                    })}
-                  </Space>
-                </Form.Item>
-                <Form.Item label="Day In Week">
-                  <Space wrap={true}>
-                    {selectedCampaign?.dateFilter.split('').map((date, index) => {
+                  /> */}
+                <Space wrap direction="horizontal">
+                  <Tag color={TAG_COLOR}>
+                    {moment(selectedCampaign?.startDate).format('YYYY-MM-DD')}
+                  </Tag>
+                  <CaretRightFilled className="lba-icon" />
+                  <Tag color={TAG_COLOR}>
+                    {moment(selectedCampaign?.startDate).format('YYYY-MM-DD')}
+                  </Tag>
+                </Space>
+              </Form.Item>
+              <Form.Item label="Times">
+                <Space wrap={true}>
+                  {selectedCampaign?.timeFilter.split('').map((time, index) => {
+                    const start = index;
+                    const end = index + 1 === 24 ? 0 : index + 1;
+                    if (time === '1') {
                       return (
-                        <Button key={uuidv4()} className={date === '1' ? 'lba-btn' : ''}>
-                          {index === 0 && 'Monday'}
-                          {index === 1 && 'Tuesday'}
-                          {index === 2 && 'Wednesday'}
-                          {index === 3 && 'Thursday'}
-                          {index === 4 && 'Friday'}
-                          {index === 5 && 'Saturday'}
-                          {index === 6 && 'Sunday'}
-                        </Button>
+                        <Button
+                          key={uuidv4()}
+                          style={{ textAlign: 'center' }}
+                          icon={<ClockCircleFilled className="lba-icon" />}
+                        >{`${start}h - ${end}h`}</Button>
                       );
-                    })}
-                  </Space>
-                </Form.Item>
-              </Form>
-              <Divider></Divider>
-              <Row>
-                <Col span={24}>
-                  <LeafletMapComponent disabled={true} showLocations={true} {...this.props} />
-                </Col>
-              </Row>
-            </Col>
-            <Col span={12}>
-              <Divider orientation="left"></Divider>
-              <Gauge
-                percent={selectedCampaign?.percentMoneyUsed ? selectedCampaign.percentMoneyUsed : 0}
-                range={{ color: 'l(0) 0:#bde8ff 1:#9ec9ff' }}
-                startAngle={Math.PI}
-                endAngle={2 * Math.PI}
-                statistic={{
-                  title: {
-                    offsetY: 36,
-                    style: {
-                      fontSize: '36px',
-                      color: '#4B535E',
-                    },
-                    formatter: function formatter() {
-                      return 'Percent Money Used';
-                    },
+                    }
+                    return '';
+                  })}
+                </Space>
+              </Form.Item>
+              <Form.Item label="Day In Week">
+                <Space wrap={true}>
+                  {selectedCampaign?.dateFilter.split('').map((date, index) => {
+                    return (
+                      <Button key={uuidv4()} className={date === '1' ? 'lba-btn' : ''}>
+                        {index === 0 && 'Monday'}
+                        {index === 1 && 'Tuesday'}
+                        {index === 2 && 'Wednesday'}
+                        {index === 3 && 'Thursday'}
+                        {index === 4 && 'Friday'}
+                        {index === 5 && 'Saturday'}
+                        {index === 6 && 'Sunday'}
+                      </Button>
+                    );
+                  })}
+                </Space>
+              </Form.Item>
+            </Form>
+            <Divider></Divider>
+            <Row>
+              <Col span={24}>
+                <LeafletMapComponent disabledClick={true} showLocations={true} {...this.props} />
+              </Col>
+            </Row>
+          </Col>
+          <Col span={12}>
+            <Divider orientation="left"></Divider>
+            <Gauge
+              percent={selectedCampaign?.percentMoneyUsed ? selectedCampaign.percentMoneyUsed : 0}
+              range={{ color: 'l(0) 0:#bde8ff 1:#9ec9ff' }}
+              startAngle={Math.PI}
+              endAngle={2 * Math.PI}
+              statistic={{
+                title: {
+                  offsetY: 36,
+                  style: {
+                    fontSize: '36px',
+                    color: '#4B535E',
                   },
-                  // content: {
-                  //   style: {
-                  //     fontSize: '24px',
-                  //     lineHeight: '44px',
-                  //     color: '#4B535E',
-                  //   },
-                  //   formatter: function formatter() {
-                  //     return 'Percent Money Used';
-                  //   },
-                  // },
-                }}
-              />
-              <Divider orientation="left"></Divider>
-              <Liquid
-                percent={selectedCampaign?.percentWin ? selectedCampaign.percentWin : 0}
-                outline={{ border: 4, distance: 8 }}
-                wave={{ length: 128 }}
-                statistic={{
-                  title: {
-                    formatter: function formatter() {
-                      return 'Percent Win';
-                    },
-                    style: function style(_ref) {
-                      const { percent } = _ref;
-                      return { fill: percent > 0.65 ? 'white' : 'rgba(44,53,66,0.85)' };
-                    },
+                  formatter: function formatter() {
+                    return 'Percent Money Used';
                   },
-                }}
-              />
-            </Col>
-          </Row>
-        </Drawer>
+                },
+                // content: {
+                //   style: {
+                //     fontSize: '24px',
+                //     lineHeight: '44px',
+                //     color: '#4B535E',
+                //   },
+                //   formatter: function formatter() {
+                //     return 'Percent Money Used';
+                //   },
+                // },
+              }}
+            />
+            <Divider orientation="left"></Divider>
+            <Liquid
+              percent={selectedCampaign?.percentWin ? selectedCampaign.percentWin : 0}
+              outline={{ border: 4, distance: 8 }}
+              wave={{ length: 128 }}
+              statistic={{
+                title: {
+                  formatter: function formatter() {
+                    return 'Percent Win';
+                  },
+                  style: function style(_ref) {
+                    const { percent } = _ref;
+                    return { fill: percent > 0.65 ? 'white' : 'rgba(44,53,66,0.85)' };
+                  },
+                },
+              }}
+            />
+          </Col>
+        </Row>
+        {/* </Drawer> */}
       </>
     );
   }

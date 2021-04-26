@@ -34,6 +34,7 @@ export type DeviceType = {
   };
   location?: any;
   defaultScenarioId?: string;
+  defaultScenario?: any;
 };
 
 export type DeviceModelState = {

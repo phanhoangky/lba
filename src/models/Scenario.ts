@@ -48,6 +48,11 @@ export type ScenarioModelState = {
     isLoading: boolean;
     visible: boolean;
     currentStep: number;
+    listPlaylist: Playlist[];
+    totalItem: number;
+    urlPreview?: string;
+    mediaType?: string;
+    progress: number;
   };
 
   createScenarioParam?: PostScenarioParam;
@@ -164,13 +169,18 @@ const ScenarioStore: ScenarioStoreModel = {
     addNewScenarioModal: {
       isLoading: false,
       visible: false,
-      currentStep: 0
+      currentStep: 0,
+      listPlaylist: [],
+      totalItem: 0,
+      progress: 0
     },
 
     createScenarioParam: {
+      id: "",
       description: '',
       layoutId: '',
       title: '',
+      scenarioItems: []
     },
 
     editScenarioDrawer: {
@@ -224,7 +234,8 @@ const ScenarioStore: ScenarioStoreModel = {
             return {
               key: item.id,
               ...item,
-              isSelected: false
+              isSelected: false,
+              
             };
           }),
         });
@@ -239,10 +250,20 @@ const ScenarioStore: ScenarioStoreModel = {
       }
     },
 
-    *createScenario({ payload }, { call, put }) {
+    *createScenario({payload}, { call, put }) {
       try {
-
-        const data=  yield call(CreateNewScenario, payload);
+        console.log('====================================');
+        console.log("Param >>>>", payload);
+        console.log('====================================');
+        const data = yield call(CreateNewScenario, payload.payload, (percent: number) => {
+          // payload.getProgress(percent)
+          put({
+            type: "setAddNewScenarioModalReducer",
+            payload: {
+              progress: percent
+            }
+          })
+        });
         yield put({
           type: 'clearCreateScenarioParamReducer',
         });
@@ -257,21 +278,33 @@ const ScenarioStore: ScenarioStoreModel = {
     *getListPlaylist({ payload }, { call, put }) {
       const { data } = yield call(GetListPlaylist, payload);
 
+      const newList = data.result.data.map((item: any) => {
+        return {
+          ...item,
+          isSelected: false
+        }
+      }).filter(((s: any) => s.playlistItems.length > 0));
+
       yield put({
         type: "setPlaylistsDrawerReducer",
         payload: {
-          listPlaylists: data.result.data.map((item: any) => {
-            return {
-              ...item,
-              isSelected: false
-            }
-          })
+          listPlaylists: newList
         }
       });
 
       yield put({
+        type: "setAddNewScenarioModalReducer",
+        payload: {
+          totalItem: data.result.totalItem,
+          listPlaylist: newList
+        }
+      })
+
+      yield put({
         type: "setPlaylistsDrawerReducer",
-        payload: data.result.totalItem
+        payload: {
+          totalItem: data.result.totalItem
+        }
       });
 
       yield put({
@@ -366,6 +399,8 @@ const ScenarioStore: ScenarioStoreModel = {
           description: '',
           layoutId: '',
           title: '',
+          id: "",
+          scenarioItems: []
         },
       };
     },

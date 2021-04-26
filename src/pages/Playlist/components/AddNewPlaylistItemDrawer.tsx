@@ -130,18 +130,6 @@ class AddNewPlaylistItemModal extends Component<AddNewPlaylistItemProps> {
     });
   };
 
-  // setNewPlaylistItemParam = async (modal: any) => {
-  //   const { newPlaylistItemParam } = this.props.playlists;
-
-  //   await this.props.dispatch({
-  //     type: 'playlists/setNewPlaylistItemParamReducer',
-  //     payload: {
-  //       ...newPlaylistItemParam,
-  //       ...modal,
-  //     },
-  //   });
-  // };
-
   setCurrentNewItemDuration = async (duration: number) => {
     await this.props.dispatch({
       type: 'playlists/setCurrentDurationReducer',

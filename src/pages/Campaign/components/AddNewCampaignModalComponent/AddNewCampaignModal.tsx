@@ -259,14 +259,7 @@ export class AddNewCampaignModal extends React.Component<
     }).then(async () => {
       const campaignId = uuidv4();
       if (currentUser && addNewCampaignModal) {
-        const total = Math.round(addNewCampaignModal.fees.totalFee);
-        const remainFee = Math.round(addNewCampaignModal.fees.remainFee);
-        const cancel = Math.round(addNewCampaignModal.fees.cancelFee);
         const money = Number.parseFloat(values.budget.trim());
-        console.log('====================================');
-        console.log('Fee >>>', total, remainFee, cancel);
-        console.log('Budget >>>', money);
-        console.log('====================================');
         const hash = await currentUser.ether?.createCampaign(
           campaignId,
           Math.round(addNewCampaignModal.fees.totalFee),
@@ -676,12 +669,7 @@ export class AddNewCampaignModal extends React.Component<
                       showLocations={true}
                       onClick={async (data: any, e) => {
                         const createParam = this.props.campaign.createCampaignParam;
-
                         const { mapComponent } = this.props.location;
-                        console.log('====================================');
-                        console.log('mapComponent >>>', mapComponent);
-                        console.log(data, e, createParam);
-                        console.log('====================================');
                         if (mapComponent && createParam && createParam.radius > 0) {
                           if (mapComponent.map) {
                             if (!mapComponent.circle && createParam.radius !== 0) {

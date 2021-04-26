@@ -24,9 +24,9 @@ export type Layout = {
 };
 
 export type LayoutModelState = {
-  listLayouts: Layout[];
-  getListLayoutParam: BaseGetRequest;
-  selectedLayout: Layout;
+  listLayouts?: Layout[];
+  getListLayoutParam?: BaseGetRequest;
+  selectedLayout?: Layout;
 };
 
 export type LayoutModel = {

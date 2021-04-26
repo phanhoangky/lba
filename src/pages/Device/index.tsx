@@ -19,6 +19,7 @@ import {
 import { ViewScreenShotModal } from './components/ViewScreenShotModal';
 import { openNotification } from '@/utils/utils';
 import { ViewDeviceDetailComponent } from './components/ViewDeviceDetailComponent';
+import { UpdateDeviceDrawerFooter } from './components/UpdateDeviceFormDrawer/components/UpdateDeviceDrawerFooter';
 
 type DeviceProps = {
   dispatch: Dispatch;
@@ -196,6 +197,9 @@ class Device extends React.Component<DeviceProps> {
   };
 
   setSelectedDevice = async (record?: any) => {
+    console.log('====================================');
+    console.log(record);
+    console.log('====================================');
     await this.props.dispatch({
       type: 'deviceStore/setCurrentDevice',
       payload: {
@@ -254,8 +258,9 @@ class Device extends React.Component<DeviceProps> {
       },
     });
   };
-  updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
 
+  updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
+  updateDeviceFooterRef = React.createRef<UpdateDeviceDrawerFooter>();
   render() {
     const {
       listDevices,
@@ -264,10 +269,11 @@ class Device extends React.Component<DeviceProps> {
       viewScreenshotModal,
       devicesTableLoading,
       viewDeviceDetailModal,
+      isUpdateMultiple,
+      selectedDevice,
     } = this.props.deviceStore;
 
     const { selectedRowKeys } = this.state;
-    // console.log(selectedDevices);
 
     const rowSelection = {
       selectedRowKeys,
@@ -301,16 +307,17 @@ class Device extends React.Component<DeviceProps> {
             title={() => {
               return <DevicesTableHeaderComponent {...this.props} />;
             }}
-            onRow={(record) => {
-              return {
-                onClick: async () => {
-                  await this.props.dispatch({
-                    type: 'deviceStore/setCurrentDevice',
-                    payload: record,
-                  });
-                },
-              };
-            }}
+            // onRow={(record) => {
+            //   return {
+            //     onClick: () => {
+            //       // await this.props.dispatch({
+            //       //   type: 'deviceStore/setCurrentDevice',
+            //       //   payload: record,
+            //       // });
+            //       this.setSelectedDevice(record);
+            //     },
+            //   };
+            // }}
             rowSelection={rowSelection}
             pagination={{
               total: this.props.deviceStore.totalItem,
@@ -339,10 +346,11 @@ class Device extends React.Component<DeviceProps> {
               title="Location"
               // dataIndex={['location', 'name']}
               width="100"
+              ellipsis={true}
               render={(record) => {
                 return (
                   <>
-                    <Tooltip placement="topLeft" title={record.location.name}>
+                    <Tooltip placement="top" title={record.location.name}>
                       {record.location.name}
                     </Tooltip>
                   </>
@@ -357,19 +365,23 @@ class Device extends React.Component<DeviceProps> {
                   <Space>
                     <Button
                       className="lba-btn"
-                      onClick={() => {
-                        this.setSelectedDevice(record).then(() => {
-                          this.setViewDeviceDetailModal({
-                            visible: true,
+                      onClick={(e) => {
+                        this.setMultipleUpdateMode(false).then(() => {
+                          this.setSelectedDevice(record).then(() => {
+                            this.setViewDeviceDetailModal({
+                              visible: true,
+                            });
                           });
                         });
+
+                        e.stopPropagation();
                       }}
                     >
                       <EyeFilled className="lba-icon" />
                     </Button>
                     <Button
                       className="lba-btn"
-                      onClick={async () => {
+                      onClick={(e) => {
                         this.setMultipleUpdateMode(false).then(() => {
                           this.setSelectedDevice(record).then(() => {
                             this.setEditMultipleDevicesDrawer({
@@ -379,6 +391,7 @@ class Device extends React.Component<DeviceProps> {
                             });
                           });
                         });
+                        e.stopPropagation();
                         // this.setEditModalVisible(true);
                       }}
                     >
@@ -386,7 +399,7 @@ class Device extends React.Component<DeviceProps> {
                     </Button>
                     <Button
                       danger
-                      onClick={async (e) => {
+                      onClick={(e) => {
                         // this.setEditModalVisible(true);
                         this.confirmDeleteDevice(record);
                         e.stopPropagation();
@@ -407,7 +420,7 @@ class Device extends React.Component<DeviceProps> {
                   <Space>
                     <Button
                       className="lba-btn"
-                      onClick={async () => {
+                      onClick={() => {
                         this.setSelectedDevice(record).then(() => {
                           this.setViewScreenshotModal({
                             visible: true,
@@ -425,9 +438,9 @@ class Device extends React.Component<DeviceProps> {
         </PageContainer>
 
         {/* {editMultipleDevicesDrawer?.visible && ( */}
-        <>
+        {/* <>
           <UpdateDeviceFormDrawer ref={this.updateDeviceFormRef} {...this.props} />
-        </>
+        </> */}
         {/* )} */}
         {/* <UpdateDeviceFormDrawer {...this.props} /> */}
 
@@ -469,6 +482,48 @@ class Device extends React.Component<DeviceProps> {
           <ViewDeviceDetailComponent {...this.props} />
         </Drawer>
         {/* End View Device Detail Modal */}
+
+        {/* Edit Device Drawer */}
+        <Drawer
+          title={isUpdateMultiple ? 'Update Multiple Devices' : selectedDevice?.name}
+          key="updateMultipleDevies"
+          visible={this.props.deviceStore.editMultipleDevicesDrawer?.visible}
+          width={'40%'}
+          closable={false}
+          getContainer={false}
+          destroyOnClose={true}
+          onClose={() => {
+            // this.props.dispatch({
+            //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
+            //   payload: false,
+            // });
+            this.setEditMultipleDevicesDrawer({
+              visible: false,
+            });
+          }}
+          footer={
+            <>
+              <UpdateDeviceDrawerFooter
+                ref={this.updateDeviceFooterRef}
+                onUpdateDevice={async () => {
+                  // this.formRef.current?.validateFields().then((values) => {
+                  //   this.onUpdateDevice(values);
+                  // });
+                  this.updateDeviceFormRef.current?.onUpdateDevice();
+                }}
+                onUpdateMultipleDevices={async () => {
+                  // this.formRef.current?.validateFields().then((values) => {
+                  //   this.onUpdateMultipleDevices(values);
+                  // });
+                  this.updateDeviceFormRef.current?.onUpdateMultipleDevices();
+                }}
+                {...this.props}
+              />
+            </>
+          }
+        >
+          <UpdateDeviceFormDrawer ref={this.updateDeviceFormRef} {...this.props} />
+        </Drawer>
       </>
     );
   }

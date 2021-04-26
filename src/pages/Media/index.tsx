@@ -30,7 +30,6 @@ import {
   FormOutlined,
   HomeTwoTone,
   SettingFilled,
-  SettingTwoTone,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
 import type { EditMediaParam } from '@/services/MediaSourceService';
@@ -573,7 +572,7 @@ class Media extends React.Component<MediaSourceProps> {
                     >
                       {item.name === 'Home' ? (
                         <HomeTwoTone
-                          twoToneColor="#000000"
+                          twoToneColor="#fda502"
                           style={{
                             fontSize: '1.2em',
                           }}

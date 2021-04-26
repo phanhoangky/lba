@@ -14,7 +14,7 @@ import {
   EyeFilled,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Modal, Space, Switch, Table, Tag } from 'antd';
+import { Button, Drawer, Modal, Space, Switch, Table, Tag } from 'antd';
 import Column from 'antd/lib/table/Column';
 import { isObject } from 'lodash';
 import moment from 'moment';
@@ -49,9 +49,9 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
   componentDidMount = () => {
     this.setCampaignTableLoading(true)
       .then(async () => {
-        this.readJWT().catch((error) => {
-          openNotification('error', 'Error', error.message);
-        });
+        // this.readJWT().catch((error) => {
+        //   openNotification('error', 'Error', error.message);
+        // });
         Promise.all([
           this.callGetListCampaigns(),
           this.callGetListDeviceTypes(),
@@ -362,7 +362,10 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
       totalCampaigns,
       addNewCampaignModal,
       createCampaignParam,
+      editCampaignDrawer,
     } = this.props.campaign;
+
+    const { mapComponent } = this.props.location;
 
     const disabledOkButton = createCampaignParam?.scenarioId === '';
     return (
@@ -564,11 +567,48 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               this.addNewModalRef.current?.handleAfterClose();
             }}
           >
-            <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
+            {addNewCampaignModal?.visible && (
+              <AddNewCampaignModal {...this.props} ref={this.addNewModalRef} />
+            )}
           </Modal>
           {/* End Add New Campaign Modal */}
 
-          <ViewCampaignDetailDrawer ref={this.viewCampaignDetailRef} {...this.props} />
+          {/* View Campaign Detail */}
+          <Drawer
+            title={<>Campaign Detail</>}
+            width={'80%'}
+            closable={false}
+            afterVisibleChange={(e) => {
+              if (!e) {
+                if (mapComponent) {
+                  if (mapComponent.map) {
+                    if (mapComponent.marker) {
+                      mapComponent.marker.remove();
+                    }
+                    if (mapComponent.circle) {
+                      mapComponent.circle.remove();
+                    }
+                  }
+                  this.setMapComponent({
+                    marker: undefined,
+                    circle: undefined,
+                    map: undefined,
+                  });
+                }
+              }
+            }}
+            onClose={() => {
+              this.setEditCampaignDrawer({
+                visible: false,
+              });
+            }}
+            visible={editCampaignDrawer?.visible}
+            destroyOnClose={true}
+          >
+            {editCampaignDrawer?.visible && (
+              <ViewCampaignDetailDrawer ref={this.viewCampaignDetailRef} {...this.props} />
+            )}
+          </Drawer>
         </PageContainer>
       </>
     );

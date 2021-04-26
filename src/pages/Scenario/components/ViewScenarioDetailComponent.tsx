@@ -1,6 +1,6 @@
 import { openNotification, sortArea } from '@/utils/utils';
 import { UploadOutlined } from '@ant-design/icons';
-import { Col, Form, Input, Row, Image, Divider, Table, Modal, Skeleton, Empty } from 'antd';
+import { Col, Form, Row, Image, Divider, Table, Modal, Skeleton, Empty, Tag } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
@@ -9,6 +9,7 @@ import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
 import styles from '../index.less';
+import { TAG_COLOR } from '@/services/constantUrls';
 
 export type ViewScenarioDetailProps = {
   dispatch: Dispatch;
@@ -330,13 +331,21 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
           <Form name="view_scenario_detail" layout="vertical" ref={this.formRef}>
             <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
               <Form.Item name="title" label="Title">
-                <Input readOnly />
+                {/* <Input readOnly /> */}
+                <Tag color={TAG_COLOR}>{selectedSenario?.title}</Tag>
               </Form.Item>
             </Skeleton>
 
             <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
               <Form.Item name="description" label="Description">
-                <Input.TextArea readOnly rows={4} />
+                {/* <Input.TextArea readOnly rows={4} /> */}
+                <span
+                  style={{
+                    color: TAG_COLOR,
+                  }}
+                >
+                  {selectedSenario?.description}
+                </span>
               </Form.Item>
             </Skeleton>
           </Form>

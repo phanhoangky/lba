@@ -1,14 +1,31 @@
 import type { BaseGetRequest } from './../BaseRequest';
 import { CONSTANTS_LBA } from '../constantUrls';
 import ApiHelper from '@/apis/LBA_API';
+import type { Layout, Playlist } from 'umi';
+import qs from 'qs';
 
 export type GetListScenariosParam = BaseGetRequest;
 
 export type PostScenarioParam = {
+  id: string;
   layoutId: string;
   title: string;
   description: string;
+  layout?: Layout;
+  scenarioItems?: ScenarioItemPost[];
 };
+
+export type ScenarioItemPost = {
+  id: string;
+  displayOrder: number;
+  playlistId: string;
+  playlist: Playlist;
+  scenarioId: string;
+  areaId: string;
+  isActive: boolean;
+  audioArea: boolean;
+  isSelected?: boolean;
+}
 
 export type UpdateScenarioParam = {
   id: string;
@@ -30,14 +47,18 @@ export type UpdateScenarioItem = {
 
 export async function GetListScenarios(param: GetListScenariosParam) {
   const res = await ApiHelper.get(`${CONSTANTS_LBA.SCENARIO_URL}`, { params: { ...param } });
-  console.log('====================================');
-  console.log("Response >>>>", res);
-  console.log('====================================');
   return res;
 }
 
-export async function CreateNewScenario(param: PostScenarioParam) {
-  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param).catch((error) => {
+export async function CreateNewScenario(param: PostScenarioParam, getProgress?: (percent: number) => void) {
+  console.log('====================================');
+  console.log("Function >>>", getProgress);
+  console.log('====================================');
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param, {
+    paramsSerializer: params => {
+      return qs.stringify(params);
+    }
+  }).catch((error) => {
     return Promise.reject(new Error(error));
   });
   return data;

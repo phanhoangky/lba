@@ -77,10 +77,7 @@ const Login: React.FC<LoginProps> = (props) => {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
-        openNotification('error', 'Error');
+        openNotification('error', 'Error', error.message);
         setIsLoading(false);
       });
 
@@ -125,9 +122,6 @@ const Login: React.FC<LoginProps> = (props) => {
       .catch((err) => {
         setIsLoading(false);
         openNotification('error', 'Fail to login', err.message);
-        console.log('====================================');
-        console.error({ ...err });
-        console.log('====================================');
       });
   };
   return (
@@ -198,10 +192,7 @@ const Login: React.FC<LoginProps> = (props) => {
               setIsLoading(true);
               handleEmailSubmit(values.userName, values.password).catch((error) => {
                 setIsLoading(false);
-                console.log('====================================');
-                console.error(error);
-                console.log('====================================');
-                openNotification('error', 'fail to login with email', error.message);
+                openNotification('error', 'fail to login with email', error);
               });
               return Promise.resolve();
             }}

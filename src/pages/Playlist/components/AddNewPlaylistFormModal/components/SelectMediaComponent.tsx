@@ -1,10 +1,12 @@
+import { openNotification } from '@/utils/utils';
 import {
   FolderOpenTwoTone,
   HomeTwoTone,
   PlaySquareFilled,
   PlusSquareFilled,
 } from '@ant-design/icons';
-import { Breadcrumb, Button, Divider, List, Skeleton, Col, Row, Table, Space } from 'antd';
+import { Breadcrumb, Button, Col, Divider, List, Row, Skeleton, Space, Table } from 'antd';
+import Column from 'antd/lib/table/Column';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
 import type {
@@ -15,33 +17,41 @@ import type {
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-import styles from '../index.less';
-import { SelectMediaHeaderComponent } from './SelectMediaHeaderComponent';
 import { v4 as uuidv4 } from 'uuid';
-import { openNotification } from '@/utils/utils';
-import Column from 'antd/lib/table/Column';
+import { PLAYLIST_STORE } from '..';
+import { SelectMediaHeaderComponent } from '../../EditPlaylistFormDrawer/components/SelectMediaHeaderComponent';
+import styles from '../index.less';
 
-export type SelectMediaModalProps = {
+export type SelectMediaComponentProps = {
   dispatch: Dispatch;
   playlists: PlayListModelState;
   user: UserModelState;
   media: MediaSourceModelState;
 };
 
-export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
+export type SelectMediaComponentState = {};
+
+export class SelectMediaComponent extends React.Component<
+  SelectMediaComponentProps,
+  SelectMediaComponentState
+> {
+  constructor(props: SelectMediaComponentProps) {
+    super(props);
+    this.state = {};
+  }
+
   componentDidMount = () => {
     this.setListLoading(true)
       .then(() => {
-        this.getCurrentUser().then(async () => {
-          Promise.all([
-            this.callGetListFolders(),
-            this.callGetListMedia({
-              isSigned: 2,
-            }),
-            this.addBreadscrumbHome(),
-          ]).then(() => {
-            this.setListLoading(false);
-          });
+        // });
+        Promise.all([
+          this.callGetListFolders(),
+          this.callGetListMedia({
+            isSigned: 2,
+          }),
+          this.addBreadscrumbHome(),
+        ]).then(() => {
+          this.setListLoading(false);
         });
       })
       .catch(() => {
@@ -49,19 +59,22 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       });
   };
 
-  getCurrentUser = async () => {
-    const res = await this.props.dispatch({
-      type: 'user/getCurrentUser',
-    });
-    Promise.all([
-      this.setGetListFilesParam({
-        folder: res.rootFolderId,
-      }),
-      this.setGetListFolderParam({
-        parent_id: res.rootFolderId,
-      }),
-    ]);
-  };
+  // getCurrentUser = async () => {
+  //   const res = await this.props.dispatch({
+  //     type: 'user/getCurrentUser',
+  //   });
+  //   console.log('====================================');
+  //   console.log(res);
+  //   console.log('====================================');
+  //   await Promise.all([
+  //     this.setGetListFilesParam({
+  //       folder: res.rootFolderId,
+  //     }),
+  //     this.setGetListFolderParam({
+  //       parent_id: res.rootFolderId,
+  //     }),
+  //   ]);
+  // };
 
   setGetListFilesParam = async (param?: any) => {
     await this.props.dispatch({
@@ -278,69 +291,47 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
 
   addNewItemToSelectedItems = async (media?: any) => {
     const {
-      selectedPlaylist,
+      addNewPlaylistParam,
       // currentNewItemDuration,
     } = this.props.playlists;
 
-    if (selectedPlaylist) {
-      const newList = cloneDeep(selectedPlaylist.playlistItems);
+    if (addNewPlaylistParam) {
+      const newList = cloneDeep(addNewPlaylistParam.playlistItems);
 
       newList.push({
         id: uuidv4(),
-        index: selectedPlaylist.playlistItems.length,
-        displayOrder: selectedPlaylist.playlistItems.length,
+        index: addNewPlaylistParam.playlistItems.length,
+        displayOrder: addNewPlaylistParam.playlistItems.length,
         duration: 10,
         isActive: true,
         key: `${uuidv4()}`,
         mediaSrcId: media.id,
         mediaSrc: media,
-        playlistId: selectedPlaylist.id,
+        playlistId: uuidv4(),
         title: media.title,
         typeName: media.type.name,
         url: media.urlPreview,
       });
-      await this.setSelectedPlaylist({
+      await this.setAddNewPlaylistParam({
         playlistItems: newList,
       });
     }
-    // await this.props.dispatch({
-    //   type: 'playlists/setSelectedPlaylistItemsReducer',
-    //   payload: newList,
-    // });
   };
-
-  setListMedias = async (list?: any) => {
+  setAddNewPlaylistParam = async (param?: any) => {
     await this.props.dispatch({
-      type: 'media/setListMediaReducer',
-      payload: list,
-    });
-  };
-
-  setSelectedRecord = async (item: any) => {
-    const { listMedia } = this.props.media;
-    const newList = listMedia?.map((media) => {
-      if (item.id === media.id) {
-        return {
-          ...media,
-          isSelected: true,
-        };
-      }
-      return {
-        ...media,
-        isSelected: false,
-      };
-    });
-
-    await this.setListMedias(newList);
-  };
-
-  setEditPlaylistDrawer = async (drawer: any) => {
-    const { editPlaylistDrawer } = this.props.playlists;
-    await this.props.dispatch({
-      type: 'playlists/setEditPlaylistDrawerReducer',
+      type: `${PLAYLIST_STORE}/setAddNewPlaylistParamReducer`,
       payload: {
-        ...editPlaylistDrawer,
-        ...drawer,
+        ...this.props.playlists.addNewPlaylistParam,
+        ...param,
+      },
+    });
+  };
+  setAddNewPlaylistModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${PLAYLIST_STORE}/setAddNewPlaylistModalReducer`,
+      payload: {
+        ...this.props.playlists.addNewPlaylistModal,
+        ...param,
       },
     });
   };
@@ -356,7 +347,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       searchListMediaParam,
     } = this.props.media;
 
-    const { selectedPlaylist } = this.props.playlists;
+    const { addNewPlaylistParam } = this.props.playlists;
 
     // const maxD = maxDuration || 240;
     // const minD = minDuration || 10;
@@ -365,7 +356,9 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
     // const disalbedCondition = availableDuration < minD;
 
     const listMedias = listMedia
-      ?.filter((media) => selectedPlaylist?.playlistItems.every((p) => p.mediaSrcId !== media.id))
+      ?.filter((media) =>
+        addNewPlaylistParam?.playlistItems.every((p) => p.mediaSrcId !== media.id),
+      )
       .map((media) => {
         return {
           ...media,
@@ -516,19 +509,21 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                     <Space>
                       <Button
                         className="lba-btn"
-                        onClick={() => {
-                          this.setEditPlaylistDrawer({
+                        onClick={(e) => {
+                          this.setAddNewPlaylistModal({
                             playingUrl: record.urlPreview,
                             playlingMediaType: record.type.name,
                           });
+                          e.stopPropagation();
                         }}
                       >
                         <PlaySquareFilled className="lba-icon" />
                       </Button>
                       <Button
                         className="lba-btn"
-                        onClick={() => {
+                        onClick={(e) => {
                           this.addNewPlaylistItem(record);
+                          e.stopPropagation();
                         }}
                       >
                         <PlusSquareFilled className="lba-icon" />
@@ -545,4 +540,4 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
   }
 }
 
-export default connect((state: any) => ({ ...state }))(SelectMediaModal);
+export default connect((state: any) => ({ ...state }))(SelectMediaComponent);

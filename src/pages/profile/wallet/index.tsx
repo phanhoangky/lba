@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Avatar, Button, Col, Divider, Modal, Row, Space, Table } from 'antd';
+import { Avatar, Button, Col, Divider, Modal, Row, Space, Table, Tooltip } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -19,10 +19,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { TYPE_TRANSACTIONS } from '@/services/constantUrls';
 import type { TransactionType } from '@/models/transaction';
 import { CAMPAIGN } from '@/pages/Campaign';
-import { CheckCircleFilled, CloseCircleFilled, EditFilled, LockFilled } from '@ant-design/icons';
+import {
+  CaretDownOutlined,
+  CaretUpOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
+  EditFilled,
+  HighlightFilled,
+  LockFilled,
+} from '@ant-design/icons';
 import { UpdateProfileModal } from './components/UpdateProfileModal';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
-// import styles from './index.less';
+import styles from './index.less';
 import { openNotification } from '@/utils/utils';
 
 type WalletProps = {
@@ -177,6 +185,7 @@ class WalletScreen extends React.Component<WalletProps> {
     } = this.props.transaction;
 
     const { updateProfileModal } = this.props.profileWallet;
+
     return (
       <PageContainer
         title={false}
@@ -192,7 +201,7 @@ class WalletScreen extends React.Component<WalletProps> {
             <Row>
               <WalletHeaderComponent {...this.props} />
             </Row>
-            <Divider orientation="left" className="lba-text">
+            <Divider orientation="left" className="lba-label">
               View Transaction
             </Divider>
             <Row>
@@ -204,6 +213,13 @@ class WalletScreen extends React.Component<WalletProps> {
                       key: uuidv4(),
                     };
                   })}
+                  rowClassName={(record) => {
+                    // const { type } = record;
+                    const sender = record.senderNavigation?.email;
+                    // const receiver = record.receiverNavigation?.email;
+                    const isSender = sender ? sender === currentUser?.email : null;
+                    return isSender ? styles.sender : styles.receiver;
+                  }}
                   loading={transTableLoading}
                   scroll={{
                     x: 500,
@@ -242,12 +258,32 @@ class WalletScreen extends React.Component<WalletProps> {
                   <Column
                     key="sender"
                     title="Sender"
-                    dataIndex={['senderNavigation', 'email']}
+                    // dataIndex={['senderNavigation', 'email']}
+                    ellipsis={true}
+                    render={(record) => {
+                      return (
+                        <>
+                          <Tooltip placement="top" title={record.senderNavigation?.email}>
+                            {record.senderNavigation?.email}
+                          </Tooltip>
+                        </>
+                      );
+                    }}
                   ></Column>
                   <Column
                     key="receiver"
                     title="Receiver"
-                    dataIndex={['receiverNavigation', 'email']}
+                    ellipsis={true}
+                    // dataIndex={['receiverNavigation', 'email']}
+                    render={(record) => {
+                      return (
+                        <>
+                          <Tooltip placement="top" title={record.receiverNavigation?.email}>
+                            {record.receiverNavigation?.email}
+                          </Tooltip>
+                        </>
+                      );
+                    }}
                   ></Column>
                   <Column
                     key="type"
@@ -260,7 +296,32 @@ class WalletScreen extends React.Component<WalletProps> {
                     key="value"
                     title="Value"
                     render={(record) => {
-                      return <>{record.value} VND</>;
+                      const sender = record.senderNavigation?.email;
+                      // const receiver = record.receiverNavigation?.email;
+                      const type = TYPE_TRANSACTIONS[record.type];
+                      const isSender = sender ? sender === currentUser?.email : null;
+                      if (type === 'Sign Media') {
+                        return (
+                          <Space>
+                            <HighlightFilled className="sign-media-icon" />
+                            {record.value} VND
+                          </Space>
+                        );
+                      }
+                      if (isSender) {
+                        return (
+                          <Space>
+                            <CaretDownOutlined className="minus-trans-icon" />
+                            {record.value} VND
+                          </Space>
+                        );
+                      }
+                      return (
+                        <Space>
+                          <CaretUpOutlined className="plus-trans-icon" />
+                          {record.value} VND
+                        </Space>
+                      );
                     }}
                   ></Column>
                   {/* <Column key="time" title="Time" dataIndex="time"></Column> */}
@@ -348,27 +409,30 @@ class WalletScreen extends React.Component<WalletProps> {
                 <div className="lba-special-btn-text">
                   <Space>
                     <EditFilled className="lba-special-btn-icon" />
-                    Update Proflile
+                    Update Profile
                   </Space>
                 </div>
               </Button>
-              <Button
-                className="lba-special-btn"
-                block
-                size="large"
-                onClick={() => {
-                  this.setChangePasswordModal({
-                    visible: true,
-                  });
-                }}
-              >
-                <div className="lba-btn-overlap"></div>
-                <div className="lba-special-btn-text">
-                  <Space>
-                    <LockFilled className="lba-special-btn-icon" /> Change Password
-                  </Space>
-                </div>
-              </Button>
+              {currentUser?.firebase?.sign_in_provider === 'password' && (
+                <Button
+                  className="lba-special-btn"
+                  block
+                  size="large"
+                  onClick={() => {
+                    this.setChangePasswordModal({
+                      visible: true,
+                    });
+                  }}
+                >
+                  <div className="lba-btn-overlap"></div>
+                  <div className="lba-special-btn-text">
+                    <Space>
+                      <LockFilled className="lba-special-btn-icon" /> Change Password
+                    </Space>
+                  </div>
+                </Button>
+              )}
+
               {/* <div>
                 <Button
                   className={styles.lbaButtonStyle}
@@ -452,7 +516,7 @@ class WalletScreen extends React.Component<WalletProps> {
           closable={false}
           footer={false}
           centered
-          width={'40%'}
+          width={'50%'}
           onOk={() => {
             this.changePasswordModalRef.current?.handleChangePassword().then(() => {
               this.setChangePasswordModal({

@@ -1,5 +1,10 @@
-import { CheckOutlined, ClockCircleFilled, CloseOutlined } from '@ant-design/icons';
-import { Button, Col, DatePicker, Divider, Form, Input, Row, Select, Space, Switch } from 'antd';
+import {
+  CaretRightFilled,
+  CheckOutlined,
+  ClockCircleFilled,
+  CloseOutlined,
+} from '@ant-design/icons';
+import { Button, Divider, Form, Space, Switch, Tag } from 'antd';
 import moment from 'moment';
 import * as React from 'react';
 import type { Dispatch, DeviceModelState, ScenarioModelState } from 'umi';
@@ -15,12 +20,14 @@ export type ViewDeviceDetailComponentProps = {
 export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailComponentProps> {
   render() {
     const { selectedDevice } = this.props.deviceStore;
-    const { listScenario } = this.props.scenarios;
     const timeFilter = selectedDevice?.timeFilter;
+    console.log('====================================');
+    console.log('view Detail Device >>>', selectedDevice);
+    console.log('====================================');
     const displayTimeFilter = timeFilter?.map((time, index) => {
       return (
         time === '1' && (
-          <Button
+          <Tag
             icon={<ClockCircleFilled className="lba-icon" />}
             style={{
               fontWeight: 'bolder',
@@ -28,20 +35,31 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
             className="lba-btn"
           >
             {`${index} h - ${index + 1} h`}
-          </Button>
+          </Tag>
         )
       );
     });
 
     return (
       <>
-        <Form layout="vertical" name="Update_Device_Form">
+        <Form
+          layout="horizontal"
+          labelCol={{
+            span: 4,
+          }}
+          wrapperCol={{
+            span: 24,
+          }}
+          name="Update_Device_Form"
+        >
           <Form.Item label="Name">
-            <Input readOnly value={selectedDevice?.name} />
+            {/* <Input readOnly value={selectedDevice?.name} /> */}
+            <Tag color="orange">{selectedDevice?.name}</Tag>
           </Form.Item>
           <Form.Item label="Description">
             {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
-            <Input.TextArea rows={4} readOnly value={selectedDevice?.description} />
+            {/* <Input.TextArea rows={4} readOnly value={selectedDevice?.description} /> */}
+            <Tag color="orange">{selectedDevice?.description}</Tag>
             {/* </Skeleton> */}
           </Form.Item>
           <Form.Item label="Time Filter">
@@ -55,14 +73,29 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
 
           <Form.Item label="Start-End">
             {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
-            <DatePicker.RangePicker
+            {/* <DatePicker.RangePicker
               format={'YYYY/MM/DD'}
               disabled
               value={[
                 moment(moment(selectedDevice?.startDate).format('YYYY-MM-DD')),
                 moment(moment(selectedDevice?.endDate).format('YYYY-MM-DD')),
               ]}
-            />
+            /> */}
+            {/* <Tag>
+              {moment(moment(selectedDevice?.startDate).format('YYYY-MM-DD'))}-
+              {moment(moment(selectedDevice?.endDate).format('YYYY-MM-DD'))}
+            </Tag> */}
+            <Space>
+              <Tag color="orange">
+                {moment(selectedDevice?.startDate).format('YYYY/MM/DD')}
+                {/* {moment(selectedDevice?.endDate).format('YYYY/MM/DD')} */}
+              </Tag>
+              <CaretRightFilled className="lba-icon" />
+              <Tag color="orange">
+                {moment(selectedDevice?.endDate).format('YYYY/MM/DD')}
+                {/* {moment(selectedDevice?.endDate).format('YYYY/MM/DD')} */}
+              </Tag>
+            </Space>
             {/* </Skeleton> */}
           </Form.Item>
           <Divider></Divider>
@@ -74,20 +107,11 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
               unCheckedChildren={<CloseOutlined />}
             ></Switch>
           </Form.Item>
-          <Row gutter={20}>
-            <Col span={12}>
-              <Form.Item label="Slot">
-                <Input readOnly value={selectedDevice?.slot} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item label="Mininum Bid">
-                <Input readOnly value={selectedDevice?.minBid} />
-              </Form.Item>
-            </Col>
-          </Row>
+          <Form.Item label="Mininum Bid">
+            <Tag color="orange">{selectedDevice?.minBid}</Tag>
+          </Form.Item>
           <Form.Item label="Scenario">
-            <Select size="large" value={selectedDevice?.defaultScenarioId} disabled>
+            {/* <Select size="large" value={selectedDevice?.defaultScenarioId} disabled>
               {listScenario &&
                 listScenario.map((scenario) => {
                   return (
@@ -96,7 +120,8 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
                     </Select.Option>
                   );
                 })}
-            </Select>
+            </Select> */}
+            <Tag color="orange">{selectedDevice?.defaultScenario.title}</Tag>
           </Form.Item>
         </Form>
       </>

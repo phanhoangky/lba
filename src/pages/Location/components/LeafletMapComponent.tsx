@@ -18,8 +18,17 @@ export type LeafletMapComponentProps = {
 };
 
 export class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
-  componentDidMount = async () => {
-    const mymap = L.map('mapid').setView([10.8414846, 106.8100464], 13);
+  componentDidMount = () => {
+    // if (this.props.location.mapComponent?.map) {
+    //   this.props.location.mapComponent.map.eachLayer((l) => {
+    //     l.remove();
+    //   });
+    // }
+    const mymap = L.map('mapid');
+    console.log('====================================');
+    console.log('Map');
+    console.log('====================================');
+    mymap.setView([10.8414846, 106.8100464], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       // attribution:
       //   'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -32,12 +41,14 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
     // setTimeout(() => {
     //   mymap.invalidateSize(true);
     // }, 500);
-    if (this.props.showLocations) {
-      this.handleOnDragEvent(mymap);
+    if (mymap) {
+      if (this.props.showLocations) {
+        this.handleOnDragEvent(mymap);
+      }
+      this.setMapComponent({
+        map: mymap,
+      });
     }
-    await this.setMapComponent({
-      map: mymap,
-    });
     mymap.on('dragstart', () => {
       if (this.props.showLocations) {
         this.handleOnDragStartEvent(mymap);

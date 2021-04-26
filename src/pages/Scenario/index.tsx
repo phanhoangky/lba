@@ -1,5 +1,5 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import { Button, Col, Drawer, Row, Space, Table } from 'antd';
+import { Button, Col, Drawer, Modal, Row, Space, Table, Tooltip } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type {
@@ -13,15 +13,21 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
-import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
 import { cloneDeep } from 'lodash';
-import AddNewScenarioFormModal from './components/AddNewScenarioFormModal';
+import { AddNewScenarioFormModal } from './components/AddNewScenarioFormModal';
 import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
 import { ViewScenarioDetailComponent } from './components/ViewScenarioDetailComponent';
 import moment from 'moment';
 import { EditScenarioFormDrawer } from './components/EditScenarioFormDrawer';
-import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DeleteTwoTone,
+  EditFilled,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import { openNotification } from '@/utils/utils';
+import styles from './index.less';
 
 type ScenarioProps = {
   dispatch: Dispatch;
@@ -39,9 +45,9 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
     // });
     this.setTableLoading(true)
       .then(async () => {
-        this.readJWT().catch((error) => {
-          openNotification('error', 'Error', error.message);
-        });
+        // this.readJWT().catch((error) => {
+        //   openNotification('error', 'Error', error.message);
+        // });
         Promise.all([this.callGetListScenario(), this.callGetListLayout()]).then(() => {
           // const { listScenario } = this.props.scenarios;
           // const first = listScenario && listScenario.length > 0 ? listScenario[0] : null;
@@ -114,15 +120,6 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
       payload: {
         ...this.props.scenarios.addNewScenarioModal,
         ...modal,
-      },
-    });
-  };
-
-  createNewScenario = async () => {
-    await this.props.dispatch({
-      type: 'scenarios/createScenario',
-      payload: {
-        ...this.props.scenarios.createScenarioParam,
       },
     });
   };
@@ -202,48 +199,72 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
     });
   };
 
-  updateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
-    await this.setEditScenariosDrawer({
-      visible: false,
-    });
+  // updateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
+  //   await this.setEditScenariosDrawer({
+  //     visible: false,
+  //   });
 
-    await this.setTableLoading(true);
-    this.props
-      .dispatch({
-        type: 'scenarios/updateScenario',
-        payload: updateScenarioParam,
-      })
-      .then(() => {
-        this.callGetListScenario().then(() => {
-          this.setTableLoading(false);
-        });
-      })
-      .catch(() => {
-        this.setTableLoading(false);
-      });
-  };
+  //   await this.setTableLoading(true);
+  //   this.props
+  //     .dispatch({
+  //       type: 'scenarios/updateScenario',
+  //       payload: updateScenarioParam,
+  //     })
+  //     .then(() => {
+  //       this.callGetListScenario().then(() => {
+  //         this.setTableLoading(false);
+  //       });
+  //     })
+  //     .catch(() => {
+  //       this.setTableLoading(false);
+  //     });
+  // };
 
   removeScenario = async (id: string) => {
-    await this.setEditScenariosDrawer({
-      visible: false,
+    await this.props.dispatch({
+      type: 'scenarios/removeScenario',
+      payload: id,
     });
 
-    await this.setTableLoading(true);
-    this.props
-      .dispatch({
-        type: 'scenarios/removeScenario',
-        payload: id,
-      })
-      .then(() => {
-        this.callGetListScenario().then(() => {
-          this.setTableLoading(false);
-        });
-      })
-      .catch(() => {
-        this.setTableLoading(false);
-      });
+    // .then(() => {
+    //   this.callGetListScenario().then(() => {
+    //     this.setTableLoading(false);
+    //   });
+    // })
+    // .catch(() => {
+    //   this.setTableLoading(false);
+    // });
   };
-
+  handleRemoveScenario = async (record: any) => {
+    Modal.confirm({
+      centered: true,
+      closable: false,
+      icon: <ExclamationCircleOutlined />,
+      title: `Are you sure you want to remove playlist ${record.title}`,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
+      onOk: () => {
+        this.setTableLoading(true).then(() => {
+          this.removeScenario(record.id)
+            .then(() => {
+              this.callGetListScenario().then(() => {
+                openNotification('success', 'Remove Scenario Successful', record.title);
+                this.setTableLoading(false);
+              });
+            })
+            .catch((error) => {
+              openNotification('error', 'Fail to remove scenario', error.message);
+            });
+        });
+      },
+    });
+  };
   setSelectedPlaylistItems = async (modal: any) => {
     await this.props.dispatch({
       type: 'playlists/setSelectedPlaylistItemsReducer',
@@ -283,7 +304,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
   };
 
   viewScenarioDetailComponentRef = React.createRef<ViewScenarioDetailComponent>();
-
+  addNewScenarioFormRef = React.createRef<AddNewScenarioFormModal>();
   editScenarioModalRef = React.createRef<EditScenarioFormDrawer>();
   render() {
     const {
@@ -292,6 +313,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
       listScenario,
       tableLoading,
       viewScenarioDetailComponent,
+      addNewScenarioModal,
     } = this.props.scenarios;
 
     return (
@@ -368,6 +390,30 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                 }}
               ></Column>
               <Column
+                title="Modify Time"
+                key="modifyTime"
+                render={(record: Scenario) => {
+                  if (record.modifyTime) {
+                    return <>{moment(record.modifyTime).format('YYYY-MM-DD')}</>;
+                  }
+                  return <>Not modify yet</>;
+                }}
+              ></Column>
+              <Column
+                title="Layout"
+                key="layout"
+                ellipsis={true}
+                render={(record: Scenario) => {
+                  return (
+                    <>
+                      <Tooltip placement="top" title={record.layout.title}>
+                        {record.layout.title}
+                      </Tooltip>
+                    </>
+                  );
+                }}
+              ></Column>
+              <Column
                 title="Action"
                 key="action"
                 render={(record) => {
@@ -394,17 +440,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
                       <Button
                         danger
                         onClick={(e) => {
-                          this.setTableLoading(true)
-                            .then(() => {
-                              this.editScenarioModalRef.current
-                                ?.handleRemoveScenario(record)
-                                .then(() => {
-                                  this.setTableLoading(false);
-                                });
-                            })
-                            .catch(() => {
-                              this.setTableLoading(false);
-                            });
+                          this.handleRemoveScenario(record);
                           e.stopPropagation();
                         }}
                       >
@@ -416,23 +452,6 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
               ></Column>
             </Table>
           </Col>
-          {/* <Col span={14}>
-            {viewScenarioDetailComponent?.visible && (
-              <Typography.Title level={4} className="lba-text">
-                Scenario Detail
-              </Typography.Title>
-            )}
-            {viewScenarioDetailComponent?.visible && (
-              <ViewScenarioDetailComponent
-                ref={this.viewScenarioDetailComponentRef}
-                {...this.props}
-              />
-            )}
-
-            {!viewScenarioDetailComponent?.visible && (
-              <Empty description={<>Preview Scenario Detail</>} />
-            )}
-          </Col> */}
         </Row>
         <Drawer
           title="Scenario Detail"
@@ -449,7 +468,49 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
           <ViewScenarioDetailComponent ref={this.viewScenarioDetailComponentRef} {...this.props} />
         </Drawer>
         {/* Add New Scenario Modal */}
-        <AddNewScenarioFormModal {...this.props} />
+        <Modal
+          title="Create New Scenario Layout"
+          visible={addNewScenarioModal?.visible}
+          confirmLoading={addNewScenarioModal?.isLoading}
+          closable={false}
+          width={'50%'}
+          centered
+          className={styles.addNewScenarioModal}
+          destroyOnClose={true}
+          onCancel={() => {
+            this.setAddNewScenarioModal({
+              visible: false,
+              isLoading: false,
+              currentStep: 0,
+            }).then(() => {
+              this.addNewScenarioFormRef.current?.clearListScenarioLayouts();
+            });
+          }}
+          footer={false}
+          // okButtonProps={{
+          //   disabled: listLayouts?.every((layouts) => !layouts.isSelected),
+          //   className: 'lba-btn',
+          //   icon: <CheckCircleFilled className="lba-icon" />,
+          // }}
+          // cancelButtonProps={{
+          //   icon: <CloseCircleFilled className="lba-close-icon" />,
+          //   danger: true,
+          // }}
+          // onOk={async () => {
+          //   if (addNewScenarioModal?.currentStep === 0) {
+          //     this.formRef.current?.validateFields().then((values) => {
+          //       this.onCreateScenarios(values).catch((error) => {
+          //         openNotification('error', 'Fail to Create Scenario', error.message);
+          //       });
+          //       // this.setAddNewScenarioModal({
+          //       //   currentStep: 1,
+          //       // });
+          //     });
+          //   }
+          // }}
+        >
+          <AddNewScenarioFormModal ref={this.addNewScenarioFormRef} {...this.props} />
+        </Modal>
 
         {/* Edit Scenario Drawer */}
         <EditScenarioFormDrawer ref={this.editScenarioModalRef} {...this.props} />

@@ -2,6 +2,9 @@ import { ethers } from "ethers";
 
 export default class EtherService {
   constructor(abi, evn) {
+    console.log('====================================');
+    console.log("Constructor >>>", abi, evn);
+    console.log('====================================');
     this.abi = abi;
     this.evn = evn;
     this.provider = new ethers.providers.JsonRpcProvider(this.evn.RPC_ENDPOINT);
@@ -11,6 +14,11 @@ export default class EtherService {
   static async build() {
     const abiJson = await this.getJson("https://lbacontract.github.io/build/contracts/Support.json");
     const evn = await this.getJson("https://lbacontract.github.io/evn/testnet.json");
+    console.log('====================================');
+    console.log("Build >>>", abiJson, evn);
+    console.log('====================================');
+    localStorage.setItem("ABI", JSON.stringify(abiJson));
+    localStorage.setItem("EVN", JSON.stringify(evn));
     return new EtherService(abiJson.abi, evn);
   }
 
@@ -61,6 +69,9 @@ export default class EtherService {
 
   // init contract with provider and wallet
   async initContracts() {
+    console.log('====================================');
+    console.log("init contract support >>>>", this.abi, this.evn);
+    console.log('====================================');
     this.contract = new ethers.Contract(
       this.evn.SUPPORT_ADDRESS,
       this.abi,

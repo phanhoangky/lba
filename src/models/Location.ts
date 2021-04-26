@@ -24,6 +24,7 @@ export type Location = {
   typeName: string;
   address: string;
   isSelected: boolean;
+  totalDevices: number;
 };
 
 
@@ -361,7 +362,8 @@ const LocationStore: LocationStoreModel = {
           brandId: "",
           brandName: "",
           address: "",
-          isSelected: false
+          isSelected: false,
+          totalDevices: 0
         }
       }
     },

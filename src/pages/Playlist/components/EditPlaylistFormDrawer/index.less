@@ -8,45 +8,54 @@
 }
 
 :global {
-  // .row-dragging {
-  //   background: #fafafa;
-  //   border: 1px solid #ccc;
-  // }
+  .row-dragging {
+    transition: all 0.3s ease;
+    // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    background-image: @lba-background-image;
+    // color: aliceblue;
+    color: @lba-color-text;
+    position: relative;
+    z-index: 2000;
+  }
 
-  // .row-dragging td {
-  //   padding: 16px;
-  // }
+  .row-dragging td {
+    padding: 16px;
+    position: relative;
+    z-index: 2000;
+  }
 
-  // .row-dragging .drag-visible {
-  //   visibility: visible;
-  // }
+  .row-dragging .drag-visible {
+    visibility: visible;
+    position: relative;
+    z-index: 2000;
+  }
 }
 
-.customTable {
-  :global {
-    .ant-table-tbody>tr:hover {
-      transition: all 0.3s ease;
-      background-image: @lba-background-image;
-      color: @lba-color-text;
-      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
-      // color: aliceblue;
-    }
+// .customTable {
+//   :global {
+//     .ant-table-tbody>tr:hover {
+//       transition: all 0.3s ease;
+//       background-image: @lba-background-image;
+//       color: @lba-color-text;
+//       // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+//       // color: aliceblue;
+//     }
 
     
 
-    // .ant-table-row, .ant-table-row-level-0 {
-    //   background: unset;
-    // }
-  }
-  .ant-table-row:hover,
-  .ant-table-row-level-0:hover {
-    transition: all 0.3s ease;
-    background-image: @lba-background-image;
-    color: @lba-color-text;
-    // background-image: linear-gradient(135deg, #02aab0, #00cdac);
-    // color: aliceblue;
-  }
-}
+//     // .ant-table-row, .ant-table-row-level-0 {
+//     //   background: unset;
+//     // }
+//   }
+//   .ant-table-row:hover,
+//   .ant-table-row-level-0:hover {
+//     transition: all 0.3s ease;
+//     background-image: @lba-background-image;
+//     color: @lba-color-text;
+//     // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+//     // color: aliceblue;
+//   }
+// }
 
 // .addNewMediaBtn {
 //   :global {
@@ -104,7 +113,7 @@
   
 // }
 .editPlaylistModal {
-  :global {
+  // :global {
     * {
       box-sizing: border-box;
       transition: all 0.3s ease;
@@ -164,7 +173,7 @@
         // color: #0ae7e7;
       }
     }
-  }
+  // }
 }
 .addNewFileModal {
   :global {

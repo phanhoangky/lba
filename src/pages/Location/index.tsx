@@ -359,6 +359,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
               <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
               <Column key="name" dataIndex="name" title="Name"></Column>
               <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
+              <Column key="totalDevices" dataIndex="totalDevices" title="Total Devices"></Column>
               <Column
                 key="action"
                 title="Action"

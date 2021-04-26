@@ -12,15 +12,15 @@ export type PlaylistItem = {
   mediaSrcId: string;
   mediaSrc?: any;
   playlistId: string;
-  displayOrder: number,
-  duration: number,
+  displayOrder: number;
+  duration: number;
   modifyBy?: string;
   createBy?: string;
   createTime?: string;
-  modifyTime?: string,
-  isActive: true,
+  modifyTime?: string;
+  isActive: true;
   url: string;
-  title: string,
+  title: string;
   typeName: string;
   index: number;
   isSelected?: boolean;
@@ -29,36 +29,39 @@ export type PlaylistItem = {
 export type Playlist = {
   key: string;
   id: string;
-  title: string,
+  title: string;
   description: string;
   accountId: string;
   isSelected?: boolean;
-  playlistItems: PlaylistItem[],
+  playlistItems: PlaylistItem[];
   isLoading?: boolean;
 }
 
 export type PlayListModelState = {
-  listPlaylist?: Playlist[],
-  getPlaylistParam?: GetListPlaylistParam
-  selectedPlaylist?: Playlist,
-  selectedPlaylistItems?: PlaylistItem[],
+  listPlaylist?: Playlist[];
+  getPlaylistParam?: GetListPlaylistParam;
+  selectedPlaylist?: Playlist;
+  selectedPlaylistItems?: PlaylistItem[];
   addNewPlaylistModal?: {
-    isLoading: boolean,
-    visible: boolean,
+    isLoading: boolean;
+    visible: boolean;
+    playingUrl?: string;
+    playlingMediaType?: string;
+    currentStep: number;
   },
 
-  tableLoading?: boolean,
-  currentPage?: number,
-  totalItem?: number,
-  addNewPlaylistParam?: AddNewPlaylistParam,
+  tableLoading?: boolean;
+  currentPage?: number;
+  totalItem?: number;
+  addNewPlaylistParam?: AddNewPlaylistParam;
 
-  getItemsByPlaylistIdParam?: GetPlaylistItemByPlaylistIdParam
+  getItemsByPlaylistIdParam?: GetPlaylistItemByPlaylistIdParam;
 
   editPlaylistDrawer?: {
-    visible: boolean,
-    isLoading: boolean,
-    currentPage: number,
-    totalItem: number,
+    visible: boolean;
+    isLoading: boolean
+    currentPage: number;
+    totalItem: number;
     playingUrl?: string;
     playlingMediaType?: string;
   },
@@ -116,7 +119,6 @@ export type PlaylistModel = {
     setlistPlaylistReducer: Reducer<PlayListModelState>,
     setSelectedPlaylistReducer: Reducer<PlayListModelState>,
     clearSelectedPlaylistReducer: Reducer<PlayListModelState>,
-
     setGetPlaylistParamReducer: Reducer<PlayListModelState>,
     setAddNewPlaylistItemsDrawerReducer: Reducer<PlayListModelState>,
     setAddNewPlaylistModalReducer: Reducer<PlayListModelState>,
@@ -125,18 +127,14 @@ export type PlaylistModel = {
     clearAddNewPlaylistParamReducer: Reducer<PlayListModelState>,
     setTotalItemReducer: Reducer<PlayListModelState>,
     setEditPlaylistDrawerReducer: Reducer<PlayListModelState>,
-    setGetItemsByPlaylistIdParamReducer: Reducer<PlayListModelState>,
     setSelectedPlaylistItemsReducer: Reducer<PlayListModelState>,
     setListMediaNotBelongToPlaylistReducer: Reducer<PlayListModelState>,
     setGetListMediaParamReducer: Reducer<PlayListModelState>,
-    setNewPlaylistItemParamReducer: Reducer<PlayListModelState>,
     setSelectedMediaReducer: Reducer<PlayListModelState>,
     setTotalDurationReducer: Reducer<PlayListModelState>,
     clearAddNewPlaylistItemParamReducer: Reducer<PlayListModelState>,
     setCurrentDurationReducer: Reducer<PlayListModelState>;
-
     setViewPlaylistDetailComponentReducer: Reducer<PlayListModelState>;
-    
     selectMediaModalReducer: Reducer<PlayListModelState>;
   }
 }
@@ -179,13 +177,15 @@ const PlaylistStore: PlaylistModel = {
 
     addNewPlaylistModal: {
       visible: false,
-      isLoading: false
+      isLoading: false,
+      currentStep: 0,
     },
 
     addNewPlaylistParam: {
       accountId: "",
       description: "",
-      title: ""
+      title: "",
+      playlistItems: []
     },
 
     editPlaylistDrawer: {
@@ -333,10 +333,6 @@ const PlaylistStore: PlaylistModel = {
         }): []
       })
 
-      yield put({
-        type: "setGetItemsByPlaylistIdParamReducer",
-        payload
-      })
     },
 
     *getMediaNotBelongToPlaylist({ payload }, { call, put }) {
@@ -392,9 +388,6 @@ const PlaylistStore: PlaylistModel = {
 
   reducers: {
     setlistPlaylistReducer(state, { payload }) {
-      console.log('====================================');
-      console.log(payload);
-      console.log('====================================');
       return {
         ...state,
         listPlaylist: payload
@@ -449,7 +442,8 @@ const PlaylistStore: PlaylistModel = {
         addNewPlaylistParam: {
           accountId: "",
           description: "",
-          title: ""
+          title: "",
+          playlistItems: []
         }
       }
     },
@@ -467,15 +461,6 @@ const PlaylistStore: PlaylistModel = {
         editPlaylistDrawer: payload
       }
     },
-
-    setGetItemsByPlaylistIdParamReducer(state, { payload }) {
-      return {
-        ...state,
-        getItemsByPlaylistIdParam: payload
-      }
-    },
-    
-
 
     setAddNewPlaylistItemsDrawerReducer(state, { payload }) {
       return {
@@ -499,16 +484,6 @@ const PlaylistStore: PlaylistModel = {
         ...state,
         getListMediaParam: {
           ...state?.getListMediaParam,
-          ...payload
-        }
-      }
-    },
-
-    setNewPlaylistItemParamReducer(state, { payload }) {
-      return {
-        ...state,
-        newPlaylistItemParam: {
-          ...state?.newPlaylistItemParam,
           ...payload
         }
       }

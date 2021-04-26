@@ -6,7 +6,7 @@ import {
   DeleteTwoTone,
   MenuOutlined,
   MinusSquareTwoTone,
-  PlaySquareTwoTone,
+  PlaySquareFilled,
   SettingFilled,
 } from '@ant-design/icons';
 import {
@@ -52,7 +52,7 @@ export type EditPlaylistFormDrawerProps = {
 };
 
 const DragHandle = SortableHandle(() => (
-  <MenuOutlined style={{ cursor: 'pointer', color: '#999' }} />
+  <MenuOutlined style={{ cursor: 'pointer' }} className="lba-icon" />
 ));
 const SortableItemComponent = SortableElement((props: any) => <tr {...props} />);
 const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
@@ -527,7 +527,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                       visible: false,
                     });
                   }}
-                  icon={<CloseCircleFilled className="lba-icon" />}
+                  icon={<CloseCircleFilled className="lba-close-icon" />}
                 >
                   Cancel
                 </Button>
@@ -615,7 +615,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                     row: this.DraggableBodyRow,
                   },
                 }}
-                className={styles.customTable}
+                // className={styles.customTable}
                 dataSource={selectedPlaylist?.playlistItems}
                 pagination={false}
               >
@@ -667,6 +667,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                       <>
                         <Space>
                           <Button
+                            className="lba-btn"
                             onClick={() => {
                               this.setEditPlaylistDrawer({
                                 playingUrl: record.mediaSrc.urlPreview,
@@ -674,7 +675,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                               });
                             }}
                           >
-                            <PlaySquareTwoTone size={20} />
+                            <PlaySquareFilled className="lba-icon" size={20} />
                           </Button>
                           <Button
                             danger
@@ -709,7 +710,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
               </Button> */}
             </Col>
           </Row>
-          <Divider orientation="center" className="lba-text">
+          <Divider orientation="center" className="lba-label">
             Select Media Area
           </Divider>
           <Row>

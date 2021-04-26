@@ -1,5 +1,11 @@
 import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
-import { CheckCircleFilled, DeleteTwoTone, SettingFilled, UploadOutlined } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DeleteTwoTone,
+  SettingFilled,
+  UploadOutlined,
+} from '@ant-design/icons';
 import {
   Button,
   Drawer,
@@ -119,40 +125,40 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
       title: `Are you sure you want to delete ${record.title}`,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: async () => {
         this.setEditScenariosDrawer({
           isLoading: true,
-        })
-          .then(() => {
-            this.removeScenario(record.id)
-              .then(async () => {
-                this.callGetListScenario().then(() => {
-                  openNotification(
-                    'success',
-                    'Remove Scenario Successfully',
-                    `${record.title} was removed`,
-                  );
-                  this.setEditScenariosDrawer({
-                    isLoading: false,
-                    visible: false,
-                  });
-                });
-              })
-              .catch((error) => {
+        }).then(() => {
+          this.removeScenario(record.id)
+            .then(async () => {
+              this.callGetListScenario().then(() => {
+                openNotification(
+                  'success',
+                  'Remove Scenario Successfully',
+                  `${record.title} was removed`,
+                );
                 this.setEditScenariosDrawer({
                   isLoading: false,
                   visible: false,
                 });
-                openNotification('error', 'Fail to remove scenario ', error.message);
               });
-          })
-          .catch((error) => {
-            openNotification('error', 'Fail to remove scenario ', error.message);
-            this.setEditScenariosDrawer({
-              isLoading: false,
-              visible: false,
+            })
+            .catch((error) => {
+              this.setEditScenariosDrawer({
+                isLoading: false,
+                visible: false,
+              });
+              openNotification('error', 'Fail to remove scenario ', error.message);
             });
-          });
+        });
       },
     });
   };
@@ -502,6 +508,16 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
               <Space>
                 <Button
                   loading={editScenarioDrawer?.isLoading}
+                  onClick={() => {
+                    this.setEditScenariosDrawer({
+                      visible: false,
+                    });
+                  }}
+                >
+                  <CloseCircleFilled className="lba-close-icon" /> Close
+                </Button>
+                <Button
+                  loading={editScenarioDrawer?.isLoading}
                   danger
                   onClick={() => {
                     if (selectedSenario) {
@@ -664,6 +680,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                     );
                   })}
               </div>
+              <div>Check the square if you want the area to have an audio</div>
             </Skeleton>
           </Col>
           <Col span={12}>
@@ -701,7 +718,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                           dataIndex={['mediaSrc', 'title']}
                           title="Title"
                         ></Column>
-                        <Column key="duration" dataIndex="duration" title="Duration"></Column>
+                        <Column key="duration" dataIndex="duration" title="Duration (s)"></Column>
                       </Table>
                     </>
                   ) : (
