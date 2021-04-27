@@ -6,7 +6,10 @@ import {
   RemoveScenario,
   UpdateScenario,
 } from '@/services/ScenarioService/ScenarioService';
-import type { GetListScenariosParam, PostScenarioParam } from '@/services/ScenarioService/ScenarioService';
+import type {
+  GetListScenariosParam,
+  PostScenarioParam,
+} from '@/services/ScenarioService/ScenarioService';
 import type { Area, Effect, Layout, Playlist, PlaylistItem, Reducer } from 'umi';
 
 export type Scenario = {
@@ -28,7 +31,7 @@ export type Scenario = {
 
 export type ScenarioItem = {
   id: string;
-  displayOrder?: number
+  displayOrder?: number;
   audioArea?: boolean;
   isActive?: boolean;
   playlist?: Playlist;
@@ -36,7 +39,7 @@ export type ScenarioItem = {
   scenario?: Scenario;
   isHover?: boolean;
   isSelected?: boolean;
-}
+};
 
 export type ScenarioModelState = {
   listScenario?: Scenario[];
@@ -67,7 +70,7 @@ export type ScenarioModelState = {
     visible: boolean;
     isLoading: boolean;
     playlistLoading: boolean;
-  }
+  };
 
   selectedArea?: Area;
 
@@ -78,7 +81,7 @@ export type ScenarioModelState = {
     listPlaylists: Playlist[];
     urlPreview?: string;
     mediaType?: string;
-  },
+  };
 
   getListPlaylistParam?: GetListPlaylistParam;
 
@@ -134,9 +137,9 @@ const ScenarioStore: ScenarioStoreModel = {
     selectedArea: {
       height: 0,
       width: 0,
-      id: "",
+      id: '',
       x: 0,
-      y: 0
+      y: 0,
     },
     tableLoading: false,
     totalItem: 0,
@@ -155,7 +158,7 @@ const ScenarioStore: ScenarioStoreModel = {
         layoutUrl: '',
         title: '',
         isSelected: false,
-        areas: []
+        areas: [],
       },
       scenarioItems: [],
       layoutId: '',
@@ -163,7 +166,7 @@ const ScenarioStore: ScenarioStoreModel = {
       modifyTime: '',
       playlists: [],
       title: '',
-      isSelected: false
+      isSelected: false,
     },
 
     addNewScenarioModal: {
@@ -172,15 +175,15 @@ const ScenarioStore: ScenarioStoreModel = {
       currentStep: 0,
       listPlaylist: [],
       totalItem: 0,
-      progress: 0
+      progress: 0,
     },
 
     createScenarioParam: {
-      id: "",
+      id: '',
       description: '',
       layoutId: '',
       title: '',
-      scenarioItems: []
+      scenarioItems: [],
     },
 
     editScenarioDrawer: {
@@ -200,19 +203,19 @@ const ScenarioStore: ScenarioStoreModel = {
       isDescending: false,
       isPaging: true,
       isSort: false,
-      orderBy: "",
+      orderBy: '',
       pageLimitItem: 10,
-      pageNumber: 0
+      pageNumber: 0,
     },
 
     selectedPlaylist: {
-      id: "",
-      accountId: "",
-      description: "",
-      key: "",
+      id: '',
+      accountId: '',
+      description: '',
+      key: '',
       playlistItems: [],
-      title: "",
-      isSelected: false
+      title: '',
+      isSelected: false,
     },
 
     selectedPlaylistItems: [],
@@ -220,8 +223,8 @@ const ScenarioStore: ScenarioStoreModel = {
     viewScenarioDetailComponent: {
       visible: false,
       isLoading: false,
-      playlistLoading: false
-    }
+      playlistLoading: false,
+    },
   },
 
   effects: {
@@ -235,7 +238,6 @@ const ScenarioStore: ScenarioStoreModel = {
               key: item.id,
               ...item,
               isSelected: false,
-              
             };
           }),
         });
@@ -250,19 +252,19 @@ const ScenarioStore: ScenarioStoreModel = {
       }
     },
 
-    *createScenario({payload}, { call, put }) {
+    *createScenario({ payload }, { call, put }) {
       try {
         console.log('====================================');
-        console.log("Param >>>>", payload);
+        console.log('Param >>>>', payload);
         console.log('====================================');
         const data = yield call(CreateNewScenario, payload.payload, (percent: number) => {
           // payload.getProgress(percent)
           put({
-            type: "setAddNewScenarioModalReducer",
+            type: 'setAddNewScenarioModalReducer',
             payload: {
-              progress: percent
-            }
-          })
+              progress: percent,
+            },
+          });
         });
         yield put({
           type: 'clearCreateScenarioParamReducer',
@@ -271,46 +273,46 @@ const ScenarioStore: ScenarioStoreModel = {
       } catch (error) {
         return Promise.reject(error);
       }
-
-      
     },
 
     *getListPlaylist({ payload }, { call, put }) {
       const { data } = yield call(GetListPlaylist, payload);
 
-      const newList = data.result.data.map((item: any) => {
-        return {
-          ...item,
-          isSelected: false
-        }
-      }).filter(((s: any) => s.playlistItems.length > 0));
+      const newList = data.result.data
+        .map((item: any) => {
+          return {
+            ...item,
+            isSelected: false,
+          };
+        })
+        .filter((s: any) => s.playlistItems.length > 0);
 
       yield put({
-        type: "setPlaylistsDrawerReducer",
+        type: 'setPlaylistsDrawerReducer',
         payload: {
-          listPlaylists: newList
-        }
+          listPlaylists: newList,
+        },
       });
 
       yield put({
-        type: "setAddNewScenarioModalReducer",
+        type: 'setAddNewScenarioModalReducer',
         payload: {
           totalItem: data.result.totalItem,
-          listPlaylist: newList
-        }
-      })
-
-      yield put({
-        type: "setPlaylistsDrawerReducer",
-        payload: {
-          totalItem: data.result.totalItem
-        }
+          listPlaylist: newList,
+        },
       });
 
       yield put({
-        type: "setGetListPlaylistParamReducer",
-        payload
-      })
+        type: 'setPlaylistsDrawerReducer',
+        payload: {
+          totalItem: data.result.totalItem,
+        },
+      });
+
+      yield put({
+        type: 'setGetListPlaylistParamReducer',
+        payload,
+      });
     },
 
     *updateScenario({ payload }, { call }) {
@@ -323,11 +325,11 @@ const ScenarioStore: ScenarioStoreModel = {
 
     *removeScenario({ payload }, { call }) {
       try {
-        return yield call(RemoveScenario, payload); 
+        return yield call(RemoveScenario, payload);
       } catch (error) {
         return Promise.reject(error);
       }
-    }
+    },
   },
 
   reducers: {
@@ -353,7 +355,7 @@ const ScenarioStore: ScenarioStoreModel = {
         ...state,
         selectedSenario: {
           ...state?.selectedSenario,
-          ...payload
+          ...payload,
         },
       };
     },
@@ -399,8 +401,8 @@ const ScenarioStore: ScenarioStoreModel = {
           description: '',
           layoutId: '',
           title: '',
-          id: "",
-          scenarioItems: []
+          id: '',
+          scenarioItems: [],
         },
       };
     },
@@ -420,9 +422,9 @@ const ScenarioStore: ScenarioStoreModel = {
         ...state,
         playlistsDrawer: {
           ...state?.playlistsDrawer,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     setGetListPlaylistParamReducer(state, { payload }) {
@@ -430,19 +432,16 @@ const ScenarioStore: ScenarioStoreModel = {
         ...state,
         getListPlaylistParam: {
           ...state?.getListPlaylistParam,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     setSelectedAreaReducer(state, { payload }) {
       return {
         ...state,
-        selectedArea: {
-          ...state?.selectedArea,
-          ...payload
-        }
-      }
+        selectedArea: payload,
+      };
     },
 
     setSelectedPlaylistReducer(state, { payload }) {
@@ -450,24 +449,24 @@ const ScenarioStore: ScenarioStoreModel = {
         ...state,
         selectedPlaylist: {
           ...state?.selectedPlaylist,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     setSelectedPlaylistItemsReducer(state, { payload }) {
       return {
         ...state,
-        selectedPlaylistItems: payload
-      }
+        selectedPlaylistItems: payload,
+      };
     },
 
     setViewScenarioDetailComponentReducer(state, { payload }) {
       return {
         ...state,
-        viewScenarioDetailComponent: payload
-      }
-    }
+        viewScenarioDetailComponent: payload,
+      };
+    },
   },
 };
 

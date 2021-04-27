@@ -46,26 +46,23 @@ class Device extends React.Component<DeviceProps> {
     tableLoading: false,
   };
 
-  componentDidMount = async () => {
-    this.setDevicesTableLoading(true)
-      .then(async () => {
-        this.readJWT().catch((error) => {
-          openNotification('error', 'Error', error.message);
-        });
-        Promise.all([
-          this.callGetListScenarios({ isPaging: false }),
-          this.callGetListDevices(),
-        ]).then(() => {
+  componentDidMount = () => {
+    this.setDevicesTableLoading(true).then(async () => {
+      this.readJWT().catch((error) => {
+        openNotification('error', 'Error', error.message);
+      });
+      Promise.all([this.callGetListScenarios({ isPaging: false }), this.callGetListDevices()])
+        .then(() => {
           this.setGetDevicesParam({
             locationId: undefined,
           });
           this.setDevicesTableLoading(false);
+        })
+        .catch((error) => {
+          openNotification('error', 'Error occurred', error);
+          this.setDevicesTableLoading(false);
         });
-      })
-      .catch((error) => {
-        openNotification('error', 'Error occurred', error);
-        this.setDevicesTableLoading(false);
-      });
+    });
   };
 
   callGetListDevices = async (param?: any) => {
@@ -197,9 +194,6 @@ class Device extends React.Component<DeviceProps> {
   };
 
   setSelectedDevice = async (record?: any) => {
-    console.log('====================================');
-    console.log(record);
-    console.log('====================================');
     await this.props.dispatch({
       type: 'deviceStore/setCurrentDevice',
       payload: {
@@ -437,13 +431,6 @@ class Device extends React.Component<DeviceProps> {
           </Table>
         </PageContainer>
 
-        {/* {editMultipleDevicesDrawer?.visible && ( */}
-        {/* <>
-          <UpdateDeviceFormDrawer ref={this.updateDeviceFormRef} {...this.props} />
-        </> */}
-        {/* )} */}
-        {/* <UpdateDeviceFormDrawer {...this.props} /> */}
-
         {/** Screenshot Modal */}
         <Modal
           title="Screenshot"
@@ -493,10 +480,6 @@ class Device extends React.Component<DeviceProps> {
           getContainer={false}
           destroyOnClose={true}
           onClose={() => {
-            // this.props.dispatch({
-            //   type: 'deviceStore/setEditMultipleDevicesDrawerVisible',
-            //   payload: false,
-            // });
             this.setEditMultipleDevicesDrawer({
               visible: false,
             });
@@ -506,15 +489,9 @@ class Device extends React.Component<DeviceProps> {
               <UpdateDeviceDrawerFooter
                 ref={this.updateDeviceFooterRef}
                 onUpdateDevice={async () => {
-                  // this.formRef.current?.validateFields().then((values) => {
-                  //   this.onUpdateDevice(values);
-                  // });
                   this.updateDeviceFormRef.current?.onUpdateDevice();
                 }}
                 onUpdateMultipleDevices={async () => {
-                  // this.formRef.current?.validateFields().then((values) => {
-                  //   this.onUpdateMultipleDevices(values);
-                  // });
                   this.updateDeviceFormRef.current?.onUpdateMultipleDevices();
                 }}
                 {...this.props}

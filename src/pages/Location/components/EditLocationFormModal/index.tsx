@@ -19,7 +19,7 @@ export type EditLocationFormModalProps = {
 };
 
 export class EditLocationFormModal extends React.Component<EditLocationFormModalProps> {
-  componentDidMount = async () => {
+  componentDidMount = () => {
     if (this.formRef.current) {
       const { selectedLocation } = this.props.location;
       if (selectedLocation) {
@@ -31,7 +31,7 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
         });
       }
     }
-    await this.initialMap();
+    this.initialMap();
   };
 
   componentDidUpdate() {
@@ -121,7 +121,13 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
             mapComponent.map.setView([lat, lon]);
 
             if (mapComponent.marker) {
-              mapComponent.marker.setLatLng([lat, lon]);
+              mapComponent.marker.remove();
+              // mapComponent.marker.setLatLng([lat, lon]);
+              const marker = L.marker([lat, lon]).addTo(mapComponent.map);
+              // marker.setPopupContent('Marker');
+              this.setMapComponent({
+                marker,
+              });
             } else {
               const marker = L.marker([lat, lon]).addTo(mapComponent.map);
               // marker.setPopupContent('Marker');
@@ -312,12 +318,15 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
     const { selectedLocation, editLocationModal } = this.props.location;
     const { listDeviceTypes } = this.props.deviceStore;
     return (
-      <>
+      <div className="modal-content">
         <Form
           ref={this.formRef}
           layout="vertical"
           style={{
             boxSizing: 'border-box',
+          }}
+          initialValues={{
+            address: selectedLocation?.address,
           }}
         >
           <Row gutter={20}>
@@ -387,29 +396,43 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
               style={{
                 width: '100%',
               }}
-              // rules={[{ required: true, message: 'Please enter location address' }]}
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter location address',
+                },
+                // {
+                //   validator: (_: any, value: string) => {
+                //     if (value.trim() === '') {
+                //       return Promise.reject(new Error('Please enter location address'));
+                //     }
+                //     return Promise.resolve();
+                //   },
+                // },
+              ]}
             >
               <AutoCompleteComponent
                 ref={this.autoCompleteRef}
                 {...this.props}
-                inputValue={selectedLocation?.address}
-                address={selectedLocation?.address}
+                // value={selectedLocation?.address}
+                // inputValue={selectedLocation?.address}
+                // address={selectedLocation?.address}
                 // value={{
                 //   label: selectedLocation?.address,
                 //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
                 // }}
-                onInputChange={async (e) => {
+                onChange={async (e) => {
                   await this.setSelectedLocation({
                     address: e,
                   });
                 }}
-                onChange={async (address) => {
+                onSelect={async (address) => {
                   await this.onAutoCompleteSelect(address);
                 }}
               />
             </Form.Item>
           </Skeleton>
-          {selectedLocation?.address === '' && (
+          {/* {selectedLocation?.address === '' && (
             <p
               style={{
                 color: 'red',
@@ -418,7 +441,7 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
             >
               Please enter location address
             </p>
-          )}
+          )} */}
           <Divider></Divider>
         </Form>
         <LeafletMapComponent
@@ -427,11 +450,15 @@ export class EditLocationFormModal extends React.Component<EditLocationFormModal
               address: data.display_name,
               longitude: data.lon,
               latitude: data.lat,
+            }).then(() => {
+              this.formRef.current?.setFieldsValue({
+                address: data.display_name,
+              });
             });
           }}
           {...this.props}
         />
-      </>
+      </div>
     );
   }
 }

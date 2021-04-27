@@ -14,7 +14,7 @@ export default defineConfig({
   history: {
     type: 'browser',
   },
-  publicPath: "/",
+  publicPath: '/',
   runtimePublicPath: true,
   locale: {
     default: 'en-US',
@@ -28,7 +28,7 @@ export default defineConfig({
   targets: {
     ie: 11,
   },
-  base: "/",
+  base: '/',
 
   // umi routes: https://umijs.org/docs/routing
   routes,

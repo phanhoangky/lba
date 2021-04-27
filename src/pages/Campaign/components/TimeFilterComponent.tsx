@@ -96,6 +96,9 @@ class TimeFilterCamponent extends React.Component<TimeFilterComponentProps> {
                 <Input
                   value={`${startTime} h - ${endTime} h`}
                   readOnly
+                  style={{
+                    width: '150px',
+                  }}
                   key={uuidv4()}
                   prefix={<ClockCircleFilled className="lba-icon" />}
                   suffix={

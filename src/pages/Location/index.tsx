@@ -356,10 +356,10 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                 };
               }}
             >
-              <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
               <Column key="name" dataIndex="name" title="Name"></Column>
               <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
               <Column key="totalDevices" dataIndex="totalDevices" title="Total Devices"></Column>
+              <Column key="createTime" dataIndex="createTime" title="Create Time"></Column>
               <Column
                 key="action"
                 title="Action"
@@ -367,7 +367,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                   return (
                     <Space>
                       <Button
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           this.setViewLocationDetailComponent({
                             visible: false,
                           }).then(async () => {
@@ -383,6 +383,8 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                               this.resetMap().then(() => {
                                 this.setEditLocationModal({
                                   visible: true,
+                                }).then(() => {
+                                  this.editLocationFormRef.current?.componentDidMount();
                                 });
                               });
                             });

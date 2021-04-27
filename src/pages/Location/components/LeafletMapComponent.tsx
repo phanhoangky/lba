@@ -25,9 +25,6 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
     //   });
     // }
     const mymap = L.map('mapid');
-    console.log('====================================');
-    console.log('Map');
-    console.log('====================================');
     mymap.setView([10.8414846, 106.8100464], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       // attribution:
@@ -198,15 +195,16 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
     const nw = bound.getNorthWest();
     const se = bound.getSouthEast();
     this.callGetListLocationsInMapBound(nw, se).then((data) => {
-      console.log('====================================');
-      console.log(bound);
-      console.log('====================================');
       const locations = data.result.data;
-      locations.forEach((location: Location) => {
-        const lat = Number.parseFloat(location.latitude);
-        const lng = Number.parseFloat(location.longitude);
-        L.marker([lat, lng]).bindPopup(`<b>${location.name}!</b><br>`).addTo(map);
-      });
+      if (locations && locations.length > 0) {
+        locations.forEach((location: Location) => {
+          if (location && location.name) {
+            const lat = Number.parseFloat(location.latitude);
+            const lng = Number.parseFloat(location.longitude);
+            L.marker([lat, lng]).bindPopup(`<b>${location.name}!</b><br>`).addTo(map);
+          }
+        });
+      }
     });
   };
 

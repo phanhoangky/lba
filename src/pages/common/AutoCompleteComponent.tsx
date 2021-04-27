@@ -10,10 +10,11 @@ export type AutoCompleteComponentProps = {
   dispatch: Dispatch;
   location: LocationModelState;
   inputValue?: string;
-  // value?: { label: any; value: any };
+  value?: string;
   address?: string;
-  onInputChange: (value: string) => void | Promise<void>;
-  onChange: (address: string) => void | Promise<void>;
+  onInputChange?: (value: string) => void | Promise<void>;
+  onChange?: (address: string) => void | Promise<void>;
+  onSelect?: (address: string) => void | Promise<void>;
 };
 
 export class AutoCompleteComponent extends React.Component<AutoCompleteComponentProps> {
@@ -69,46 +70,36 @@ export class AutoCompleteComponent extends React.Component<AutoCompleteComponent
     );
   };
 
+  handleChange = (value: string) => {
+    if (this.props.onChange) {
+      this.props.onChange(value);
+    }
+  };
+
+  handleOnSelect = (value: string) => {
+    if (this.props.onSelect) {
+      this.props.onSelect(value);
+    }
+  };
   render() {
-    const { address } = this.props;
     return (
-      // <AsyncSelect
-      //   // inputValue={this.props.inputValue}
-
-      //   loadOptions={this.promiseOptions}
-      //   // isClearable={false}
-      //   value={this.props.value}
-      //   // blurInputOnSelect={true}
-      //   // escapeClearsValue={true}
-      //   styles={{ menu: (provided) => ({ ...provided, zIndex: 9999 }) }}
-      //   onChange={(e) => {
-      //     if (e) {
-      //       // this.props.onInputChange(e.label);
-      //       this.props.onChange(e.value, e.label);
-      //     }
-      //   }}
-      //   // onInputChange={(e) => {
-      //   //   if (this.props.onInputChange) {
-      //   //     this.props.onInputChange(e);
-      //   //   }
-      //   // }}
-      // />
-
       <AutoComplete
-        value={address}
+        value={this.props.value}
         // searchValue={this.props.inputValue}
         allowClear
         options={this.state.options}
         style={{ width: '100%' }}
-        onSelect={(e) => {
-          this.props.onChange(e);
-        }}
+        // onSelect={(e) => {
+        //   this.props.onChange(e);
+        // }}
+        onSelect={this.handleOnSelect}
         onSearch={(e) => {
           this.fetchData(e);
         }}
-        onChange={(e) => {
-          this.props.onInputChange(e);
-        }}
+        // onChange={(e) => {
+        //   this.props.onInputChange(e);
+        // }}
+        onChange={this.handleChange}
         placeholder="input address here"
       >
         <Input.TextArea></Input.TextArea>

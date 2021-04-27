@@ -459,14 +459,14 @@ export class AddNewCampaignModal extends React.Component<
   autoCompleteRef = React.createRef<AutoCompleteComponent>();
   mapRef = React.createRef<LeafletMapComponent>();
   render() {
-    const { addNewCampaignModal, createCampaignParam } = this.props.campaign;
+    const { addNewCampaignModal } = this.props.campaign;
 
     const { listDeviceTypes } = this.props.deviceStore;
     const { currentUser } = this.props.user;
     const maxBudget = currentUser?.balance ? Number.parseFloat(currentUser.balance.toString()) : 0;
     // const { listScenario, getListScenarioParam, totalItem } = this.props.scenarios;
     return (
-      <>
+      <div className="modal-content">
         {addNewCampaignModal?.visible && (
           <Form layout="vertical" name="create_brand_modal_form" ref={this.formRef}>
             <Row gutter={20}>
@@ -515,20 +515,6 @@ export class AddNewCampaignModal extends React.Component<
                     },
                   ]}
                 >
-                  {/* <InputNumber
-                    style={{ width: '100%' }}
-                    min={100000}
-                    max={maxBudget}
-                    onChange={(e) => {
-                      this.hanldeOnChangeBudget(e);
-                    }}
-                  /> */}
-                  {/* <InputNumber
-                    style={{ width: '100%' }}
-                    onChange={(e) => {
-                      this.hanldeOnChangeBudget(e);
-                    }}
-                  /> */}
                   <AutoComplete
                     options={this.state.budgetOptions}
                     // onSelect={(e) => {
@@ -636,24 +622,29 @@ export class AddNewCampaignModal extends React.Component<
                 <Form.Item
                   label="Address"
                   name="address"
-                  // rules={[{ required: true, message: 'Please enter address' }]}
+                  rules={[{ required: true, message: 'Please enter address' }]}
                 >
                   <AutoCompleteComponent
                     ref={this.autoCompleteRef}
                     {...this.props}
-                    inputValue={createCampaignParam?.address}
-                    address={createCampaignParam?.address}
-                    onInputChange={async (e) => {
+                    // value={selectedLocation?.address}
+                    // inputValue={selectedLocation?.address}
+                    // address={selectedLocation?.address}
+                    // value={{
+                    //   label: selectedLocation?.address,
+                    //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
+                    // }}
+                    onChange={async (e) => {
                       await this.setCreateNewCampaignParam({
                         address: e,
                       });
                     }}
-                    onChange={async (address) => {
+                    onSelect={async (address) => {
                       await this.onAutoCompleteSelect(address);
                     }}
                   />
                 </Form.Item>
-                {createCampaignParam?.address === '' && (
+                {/* {createCampaignParam?.address === '' && (
                   <p
                     style={{
                       color: 'red',
@@ -662,7 +653,7 @@ export class AddNewCampaignModal extends React.Component<
                   >
                     Please enter campaign address
                   </p>
-                )}
+                )} */}
                 <Row>
                   <Col span={24}>
                     <LeafletMapComponent
@@ -693,9 +684,13 @@ export class AddNewCampaignModal extends React.Component<
                             }
                           }
                         }
-                        await this.setCreateNewCampaignParam({
+                        this.setCreateNewCampaignParam({
                           location: `${data.lat}-${data.lon}`,
                           address: data.display_name,
+                        }).then(() => {
+                          this.formRef.current?.setFieldsValue({
+                            address: data.display_name,
+                          });
                         });
                       }}
                       ref={this.mapRef}
@@ -708,29 +703,10 @@ export class AddNewCampaignModal extends React.Component<
 
               {/* Start Column */}
               <Col span={12}>
-                {/* <Row>
-                  <Col span={10}>
-                    <Typography.Title level={4} className="lba-text">
-                      Time Filter
-                    </Typography.Title>
-                  </Col>
-                </Row> */}
                 <Form.Item label="Time Filter">
                   <TimeFilterComponent {...this.props} />
                 </Form.Item>
-                {/* <Row>
-                  <Col span={24}>
-                    <TimeFilterComponent {...this.props} />
-                  </Col>
-                </Row> */}
                 <Divider></Divider>
-                {/* <Row>
-                  <Col span={10}>
-                    <Typography.Title level={4} className="lba-text">
-                      Date Filter
-                    </Typography.Title>
-                  </Col>
-                </Row> */}
                 <Form.Item label="Date Filter">
                   <Space>
                     <FilterDate {...this.props} />
@@ -753,7 +729,7 @@ export class AddNewCampaignModal extends React.Component<
           </Form>
         )}
         {/* </Modal> */}
-      </>
+      </div>
     );
   }
 }
