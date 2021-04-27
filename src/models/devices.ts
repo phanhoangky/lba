@@ -41,6 +41,7 @@ export type DeviceType = {
   defaultScenarioId?: string;
   defaultScenario?: any;
   incomeInWeek?: number;
+  lastTimeOnline?: string;
 };
 
 export type DeviceModelState = {

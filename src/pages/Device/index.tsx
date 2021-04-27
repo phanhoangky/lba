@@ -378,7 +378,17 @@ class Device extends React.Component<DeviceProps> {
           >
             <Column key="Name" title="Name" dataIndex="name" width="100"></Column>
             <Column key="resolution" title="Resolution" dataIndex="resolution" width="100"></Column>
-            <Column key="macAddress" title="MacAddress" dataIndex="macaddress" width="100"></Column>
+            {/* <Column key="macAddress" title="MacAddress" dataIndex="macaddress" width="100"></Column> */}
+            <Column
+              key="lastTimeOnline"
+              title="Online"
+              render={(record: DeviceType) => {
+                if (record.lastTimeOnline) {
+                  return <>{record.lastTimeOnline}</>;
+                }
+                return <>N/A</>;
+              }}
+            ></Column>
             <Column
               key="income"
               title="Income (Week)"
