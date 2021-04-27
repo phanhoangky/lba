@@ -10,15 +10,30 @@ import type {
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-// import AddNewPlaylistItemDrawer from './components/AddNewPlaylistItemDrawer';
-// import AddNewPlaylistModal from './components/AddNewPlaylistModal';
-// import EditPlaylistDrawer from './components/EditPlaylistDrawer';
 import { EditPlaylistFormDrawer } from './components/EditPlaylistFormDrawer';
 import { PlaylistTableHeaderComponent } from './components/PlaylistTableHeaderComponent';
 import { ViewEditPlaylistComponent } from './components/ViewEditPlaylistComponent';
-import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  DeleteTwoTone,
+  EditFilled,
+  LeftCircleFilled,
+  RightCircleFilled,
+  SettingFilled,
+} from '@ant-design/icons';
 import { openNotification } from '@/utils/utils';
-import AddNewPlaylistFormModal from './components/AddNewPlaylistFormModal';
+// import {
+//   PLAYLIST_STORE,
+//   steps,
+//   AddNewPlaylistFormModal,
+// } from './components/AddNewPlaylistFormModal';
+import styles from './index.less';
+import {
+  AddNewPlaylistFormModal,
+  PLAYLIST_STORE,
+  steps,
+} from './components/AddNewPlaylistFormModal';
 
 type PlaylistProps = {
   dispatch: Dispatch;
@@ -30,27 +45,21 @@ type PlaylistProps = {
 class PlaylistScreen extends React.Component<PlaylistProps> {
   state = {};
 
-  componentDidMount = async () => {
-    // this.setViewPlaylistDetailComponent({
-    //   isLoading: true,
-    // });
+  componentDidMount = () => {
     this.setTableLoading(true)
-      .then(async () => {
-        this.readJWT().catch((error) => {
-          openNotification('error', 'Error occured', error.message);
-        });
-        Promise.all([this.callGetListPlaylist()]).then(async () => {
-          const { listPlaylist } = this.props.playlists;
-          const first = listPlaylist && listPlaylist.length > 0 ? listPlaylist[0] : null;
-          if (first) {
-            this.setSelectedPlaylist(first).then(() => {
-              // this.viewPlaylistComponentRef.current?.componentDidMount();
-            });
-          }
-          // this.setViewPlaylistDetailComponent({
-          //   isLoading: false,
-          // });
-          this.setTableLoading(false);
+      .then(() => {
+        // this.readJWT().catch((error) => {
+        //   openNotification('error', 'Error occured', error.message);
+        // });
+        this.getCurrentUser().then(() => {
+          Promise.all([this.callGetListPlaylist()]).then(async () => {
+            const { listPlaylist } = this.props.playlists;
+            const first = listPlaylist && listPlaylist.length > 0 ? listPlaylist[0] : null;
+            if (first) {
+              this.setSelectedPlaylist(first);
+            }
+            this.setTableLoading(false);
+          });
         });
       })
       .catch((error) => {
@@ -61,12 +70,43 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
         this.setTableLoading(false);
       });
   };
-
-  readJWT = async () => {
+  getCurrentUser = async () => {
+    const res = await this.props.dispatch({
+      type: 'user/getCurrentUser',
+    });
+    Promise.all([
+      this.setGetListFilesParam({
+        folder: res.rootFolderId,
+      }),
+      this.setGetListFolderParam({
+        parent_id: res.rootFolderId,
+      }),
+    ]);
+  };
+  setGetListFilesParam = async (param?: any) => {
     await this.props.dispatch({
-      type: 'user/readJWT',
+      type: 'media/setGetListFileParamReducer',
+      payload: {
+        ...this.props.media.getListFileParam,
+        ...param,
+      },
     });
   };
+
+  setGetListFolderParam = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'media/setGetListFolderParamReducer',
+      payload: {
+        ...this.props.media.getListFolderParam,
+        ...param,
+      },
+    });
+  };
+  // readJWT = async () => {
+  //   await this.props.dispatch({
+  //     type: 'user/readJWT',
+  //   });
+  // };
 
   callGetListPlaylist = async (param?: any) => {
     const { getPlaylistParam } = this.props.playlists;
@@ -120,64 +160,29 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
     });
   };
 
-  callGetItemsByPlaylistId = async (param?: any) => {
-    const { getItemsByPlaylistIdParam } = this.props.playlists;
+  // setTotalDuration = async (total: number) => {
+  //   await this.props.dispatch({
+  //     type: 'playlists/setTotalDurationReducer',
+  //     payload: total,
+  //   });
+  // };
 
-    await this.props.dispatch({
-      type: 'playlists/getItemsByPlaylist',
-      payload: {
-        ...getItemsByPlaylistIdParam,
-        ...param,
-      },
-    });
-  };
+  // calculateTotalDuration = async () => {
+  //   const { selectedPlaylist } = this.props.playlists;
 
-  setGetItemsByPlaylistIdParam = async (modal: any) => {
-    const { getItemsByPlaylistIdParam } = this.props.playlists;
-    this.props.dispatch({
-      type: 'playlists/setGetItemsByPlaylistIdParamReducer',
-      payload: {
-        ...getItemsByPlaylistIdParam,
-        ...modal,
-      },
-    });
-  };
+  //   let total: number = 0;
+  //   selectedPlaylist?.playlistItems?.forEach((item) => {
+  //     total += item.duration;
+  //   });
+  //   await this.setTotalDuration(total);
+  // };
 
-  setAddNewPlaylistItemsDrawer = async (modal: any) => {
-    const { addNewPlaylistItemsDrawer } = this.props.playlists;
-
-    await this.props.dispatch({
-      type: 'playlists/setAddNewPlaylistItemsDrawerReducer',
-      payload: {
-        ...addNewPlaylistItemsDrawer,
-        ...modal,
-      },
-    });
-  };
-
-  setTotalDuration = async (total: number) => {
-    await this.props.dispatch({
-      type: 'playlists/setTotalDurationReducer',
-      payload: total,
-    });
-  };
-
-  calculateTotalDuration = async () => {
-    const { selectedPlaylist } = this.props.playlists;
-
-    let total: number = 0;
-    selectedPlaylist?.playlistItems?.forEach((item) => {
-      total += item.duration;
-    });
-    await this.setTotalDuration(total);
-  };
-
-  clearDuration = async () => {
-    await this.props.dispatch({
-      type: 'playlists/setCurrentDurationReducer',
-      payload: 10,
-    });
-  };
+  // clearDuration = async () => {
+  //   await this.props.dispatch({
+  //     type: 'playlists/setCurrentDurationReducer',
+  //     payload: 10,
+  //   });
+  // };
 
   setViewPlaylistDetailComponent = async (param?: any) => {
     await this.props.dispatch({
@@ -202,6 +207,14 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
       title: `Are you sure you want to remove ${record?.title}`,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: async () => {
         this.setTableLoading(true)
           .then(() => {
@@ -228,8 +241,18 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
     });
   };
 
-  viewPlaylistComponentRef = React.createRef<ViewEditPlaylistComponent>();
+  setAddNewPlaylistModal = async (param?: any) => {
+    await this.props.dispatch({
+      type: `${PLAYLIST_STORE}/setAddNewPlaylistModalReducer`,
+      payload: {
+        ...this.props.playlists.addNewPlaylistModal,
+        ...param,
+      },
+    });
+  };
 
+  viewPlaylistComponentRef = React.createRef<ViewEditPlaylistComponent>();
+  addNewPlaylistModalRef = React.createRef<AddNewPlaylistFormModal>();
   editPlaylistModalRef = React.createRef<EditPlaylistFormDrawer>();
 
   render() {
@@ -239,8 +262,11 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
       totalItem,
       tableLoading,
       viewPlaylistDetailComponent,
+      addNewPlaylistModal,
+      editPlaylistDrawer,
     } = this.props.playlists;
 
+    const currentStep = addNewPlaylistModal?.currentStep ? addNewPlaylistModal.currentStep : 0;
     return (
       <PageContainer
         title={false}
@@ -280,18 +306,6 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                             isLoading: false,
                           });
                         });
-                        // this.setGetItemsByPlaylistIdParam({
-                        //   id: record.id,
-                        // });
-
-                        // this.callGetItemsByPlaylistId().then(() => {
-                        //   this.calculateTotalDuration().then(() => {
-                        //     this.viewPlaylistComponentRef.current?.componentDidMount();
-                        //     this.setViewPlaylistDetailComponent({
-                        //       isLoading: false,
-                        //     });
-                        //   });
-                        // });
                       })
                       .catch(() => {
                         this.setViewPlaylistDetailComponent({
@@ -335,31 +349,11 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                               this.editPlaylistModalRef.current?.componentDidMount();
                             });
                           });
-                          // this.setSelectedPlaylist(record).then(() => {
-                          //   this.setGetItemsByPlaylistIdParam({
-                          //     id: record.id,
-                          //   });
-                          //   .then(() => {
-                          //     this.callGetItemsByPlaylistId({
-                          //       id: record.id,
-                          //     });
-                          //   })
-
-                          //   this.setEditPlaylistDrawer({
-                          //     visible: true,
-                          //   }).then(() => {
-                          //     this.editPlaylistModalRef.current?.componentDidMount();
-                          //   });
-                          //   .then(() => {
-
-                          //   });
-                          // });
-
                           e.stopPropagation();
                         }}
-                        type="primary"
+                        className="lba-btn"
                       >
-                        <EditFilled />
+                        <EditFilled className="lba-icon" />
                       </Button>
                       <Button
                         onClick={(e) => {
@@ -384,20 +378,6 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
               ></Column>
             </Table>
           </Col>
-          {/* <Col span={14}>
-            {viewPlaylistDetailComponent?.visible && (
-              <Typography.Title level={4} className="lba-text">
-                Playlist Detail
-              </Typography.Title>
-            )}
-            {viewPlaylistDetailComponent?.visible && (
-              <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />
-            )}
-
-            {!viewPlaylistDetailComponent?.visible && (
-              <Empty description="Preview Playlist Detail" />
-            )}
-          </Col> */}
         </Row>
         <Drawer
           visible={viewPlaylistDetailComponent?.visible}
@@ -413,10 +393,142 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
         >
           <ViewEditPlaylistComponent ref={this.viewPlaylistComponentRef} {...this.props} />
         </Drawer>
-        {/* {addNewPlaylistModal.visible && <AddNewPlaylistFormModal {...this.props} />} */}
-        <AddNewPlaylistFormModal {...this.props} />
 
-        <EditPlaylistFormDrawer ref={this.editPlaylistModalRef} {...this.props} />
+        <Modal
+          title="Add New Playlist"
+          visible={addNewPlaylistModal?.visible}
+          destroyOnClose={true}
+          centered
+          closable={false}
+          maskClosable={false}
+          footer={
+            <Space>
+              <Button
+                style={{ margin: '0 8px' }}
+                onClick={() => {
+                  this.setAddNewPlaylistModal({
+                    visible: false,
+                    isLoading: false,
+                  });
+                }}
+              >
+                <CloseCircleFilled className="lba-close-icon" /> Close
+              </Button>
+              {currentStep > 0 && currentStep < steps.length - 1 && (
+                <Button
+                  className="lba-btn"
+                  style={{ margin: '0 8px' }}
+                  onClick={() => {
+                    this.addNewPlaylistModalRef.current?.onPrevious();
+                  }}
+                >
+                  <LeftCircleFilled className="lba-icon" /> Previous
+                </Button>
+              )}
+              {currentStep < steps.length - 2 && (
+                <Button
+                  className="lba-btn"
+                  onClick={() => {
+                    this.addNewPlaylistModalRef.current?.onNext();
+                    // .then(() => {})
+                    // .catch((error) => {
+                    //   openNotification('error', 'Error', error);
+                    // });
+                  }}
+                >
+                  Next <RightCircleFilled className="lba-icon" />
+                </Button>
+              )}
+              {currentStep === steps.length - 2 && (
+                <Button
+                  className="lba-btn"
+                  onClick={() => {
+                    this.addNewPlaylistModalRef.current?.onCreatePlaylist();
+                  }}
+                >
+                  Done <CheckCircleFilled className="lba-icon" />
+                </Button>
+              )}
+            </Space>
+          }
+          confirmLoading={addNewPlaylistModal?.isLoading}
+          className={styles.addNewPlaylistModal}
+          onCancel={async () => {
+            await this.setAddNewPlaylistModal({
+              visible: false,
+              playingUrl: undefined,
+              playlingMediaType: undefined,
+              currentStep: 0,
+            });
+          }}
+          width={'60%'}
+          afterClose={async () => {
+            await this.props.dispatch({
+              type: 'playlists/clearAddNewPlaylistParamReducer',
+            });
+          }}
+        >
+          <AddNewPlaylistFormModal ref={this.addNewPlaylistModalRef} {...this.props} />
+        </Modal>
+
+        {/* Edit Playlist Modal */}
+        <Modal
+          closable={false}
+          destroyOnClose={true}
+          centered
+          className={styles.editPlaylistModal}
+          visible={editPlaylistDrawer?.visible}
+          afterClose={() => {
+            this.editPlaylistModalRef.current?.setSelectedPlaylistItems([]);
+            this.editPlaylistModalRef.current?.clearSelectedPlaylist();
+          }}
+          title="Edit Playlist"
+          width={'55%'}
+          onCancel={() => {
+            this.setEditPlaylistDrawer({
+              visible: false,
+            });
+          }}
+          footer={
+            <>
+              <div style={{ textAlign: 'right' }}>
+                <Space>
+                  <Button
+                    onClick={async () => {
+                      await this.setEditPlaylistDrawer({
+                        visible: false,
+                      });
+                    }}
+                    icon={<CloseCircleFilled className="lba-close-icon" />}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    danger
+                    onClick={async () => {
+                      this.editPlaylistModalRef.current?.handleRemovePlaylist();
+                    }}
+                    icon={<DeleteTwoTone twoToneColor="#f93e3e" />}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      this.editPlaylistModalRef.current?.handleUpdatePlaylist();
+                    }}
+                    className="lba-btn"
+                    icon={<SettingFilled className="lba-icon" />}
+                  >
+                    Save Change
+                  </Button>
+                </Space>
+              </div>
+            </>
+          }
+        >
+          <EditPlaylistFormDrawer ref={this.editPlaylistModalRef} {...this.props} />
+        </Modal>
+        {/* End Edit Playlist Modal */}
       </PageContainer>
     );
   }

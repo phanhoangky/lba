@@ -33,7 +33,9 @@ class LocationScreen extends React.Component<LocationScreenProps> {
   componentDidMount = async () => {
     this.setLocationsTableLoading(true)
       .then(async () => {
-        this.readJWT();
+        this.readJWT().catch((error) => {
+          openNotification('error', 'error', error.message);
+        });
         Promise.all([this.callGetListLocations(), this.callGetListDeviceTypes()]).then(async () => {
           this.setLocationsTableLoading(false).then(async () => {
             this.resetMap();
@@ -157,42 +159,42 @@ class LocationScreen extends React.Component<LocationScreenProps> {
       icon: <ExclamationCircleOutlined />,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onCancel: () => {},
       onOk: async () => {
-        this.setLocationsTableLoading(true)
-          .then(() => {
-            this.setEditLocationModal({
-              isLoading: true,
-            });
-            this.deleteLocation(location.id)
-              .then(() => {
-                openNotification(
-                  'success',
-                  `Delete ${location.name} successfully`,
-                  `${location.name} was deleted`,
-                );
-                this.callGetListLocations().then(async () => {
-                  this.setLocationsTableLoading(false);
-                  this.setEditLocationModal({
-                    isLoading: false,
-                  });
-                });
-              })
-              .catch((error: any) => {
-                openNotification('error', `Delete ${location.name} error`, error.message);
+        this.setLocationsTableLoading(true).then(() => {
+          this.setEditLocationModal({
+            isLoading: true,
+          });
+          this.deleteLocation(location.id)
+            .then(() => {
+              openNotification(
+                'success',
+                `Delete ${location.name} successfully`,
+                `${location.name} was deleted`,
+              );
+              this.callGetListLocations().then(async () => {
                 this.setLocationsTableLoading(false);
                 this.setEditLocationModal({
                   isLoading: false,
                 });
               });
-          })
-          .catch((error: any) => {
-            openNotification('error', `Delete ${location.name} error`, error.message);
-            this.setLocationsTableLoading(false);
-            this.setEditLocationModal({
-              isLoading: false,
+            })
+            .catch((error: any) => {
+              openNotification('error', `Delete ${location.name} error`, error.message);
+              this.setLocationsTableLoading(false);
+              this.setEditLocationModal({
+                isLoading: false,
+              });
             });
-          });
+        });
       },
     });
   };
@@ -354,9 +356,10 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                 };
               }}
             >
-              <Column key="matchingCode" dataIndex="matchingCode" title="Matching Code"></Column>
               <Column key="name" dataIndex="name" title="Name"></Column>
               <Column key="typeName" dataIndex="typeName" title="Type Name"></Column>
+              <Column key="totalDevices" dataIndex="totalDevices" title="Total Devices"></Column>
+              <Column key="createTime" dataIndex="createTime" title="Create Time"></Column>
               <Column
                 key="action"
                 title="Action"
@@ -364,8 +367,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                   return (
                     <Space>
                       <Button
-                        type="primary"
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           this.setViewLocationDetailComponent({
                             visible: false,
                           }).then(async () => {
@@ -381,19 +383,23 @@ class LocationScreen extends React.Component<LocationScreenProps> {
                               this.resetMap().then(() => {
                                 this.setEditLocationModal({
                                   visible: true,
+                                }).then(() => {
+                                  this.editLocationFormRef.current?.componentDidMount();
                                 });
                               });
                             });
                           });
                           e.stopPropagation();
                         }}
+                        className="lba-btn"
                       >
-                        <EditFilled />
+                        <EditFilled className="lba-icon" />
                       </Button>
                       <Button
                         danger
-                        onClick={() => {
+                        onClick={(e) => {
                           this.deleteConfirm(record);
+                          e.stopPropagation();
                         }}
                       >
                         <DeleteTwoTone twoToneColor="#f93e3e" />

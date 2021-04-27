@@ -15,14 +15,21 @@ export type ChangePasswordModalProps = {
 const steps = [
   {
     title: 'Confirm Password',
-    icon: <SolutionOutlined />,
+    icon: <SolutionOutlined className="lba-icon" />,
   },
   {
     title: 'New Password',
-    icon: <LockOutlined />,
+    icon: <LockOutlined className="lba-icon" />,
   },
 ];
 export class ChangePasswordModal extends React.Component<ChangePasswordModalProps> {
+  componentDidMount = () => {
+    this.setChangePasswordModal({
+      currentStep: 0,
+      isLoading: false,
+    });
+  };
+
   setChangePasswordModal = async (param?: any) => {
     await this.props.dispatch({
       type: 'user/setChangePasswordModalReducer',
@@ -126,7 +133,14 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
           }}
         >
           {currentStep === 0 && (
-            <Form name="confirm_password" layout="horizontal" ref={this.confirmStepRef}>
+            <Form
+              name="confirm_password"
+              layout="vertical"
+              style={{
+                width: '100%',
+              }}
+              ref={this.confirmStepRef}
+            >
               <Form.Item
                 name="confirmPassword"
                 label="Confirm Password"
@@ -153,7 +167,7 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
         <div className={styles.stepsAction}>
           {currentStep < steps.length - 1 && (
             <Button
-              type="primary"
+              className="lba-btn"
               onClick={() => this.next()}
               loading={changePasswordModal?.isLoading}
             >
@@ -162,7 +176,7 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
           )}
           {currentStep === steps.length - 1 && (
             <Button
-              type="primary"
+              className="lba-btn"
               loading={changePasswordModal?.isLoading}
               onClick={() => {
                 this.handleChangePassword();
@@ -173,6 +187,7 @@ export class ChangePasswordModal extends React.Component<ChangePasswordModalProp
           )}
           {currentStep > 0 && (
             <Button
+              className="lba-btn"
               style={{ margin: '0 8px' }}
               onClick={() => this.prev()}
               loading={changePasswordModal?.isLoading}

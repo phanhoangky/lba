@@ -25,9 +25,6 @@ class SecurityLayout extends React.Component<SecurityLayoutProps, SecurityLayout
 
   componentDidMount = async () => {
     await this.readJWT().catch((error) => {
-      console.log('====================================');
-      console.log(error);
-      console.log('====================================');
       openNotification('error', 'Error when read JWT', error.message);
     });
 

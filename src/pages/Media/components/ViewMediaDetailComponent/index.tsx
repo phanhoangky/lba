@@ -1,4 +1,5 @@
-import { Alert, Divider, Form, Image, Input } from 'antd';
+import { TAG_COLOR } from '@/services/constantUrls';
+import { Alert, Divider, Form, Image, Tag } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState } from 'umi';
 import { connect } from 'umi';
@@ -37,10 +38,18 @@ export class ViewMediaDetailComponent extends React.Component<ViewMediaDetailCom
       <>
         <Form layout="vertical">
           <Form.Item label="Title">
-            <Input readOnly value={selectedFile?.title} />
+            {/* <Input readOnly value={selectedFile?.title} /> */}
+            <Tag color={TAG_COLOR}>{selectedFile?.title}</Tag>
           </Form.Item>
           <Form.Item label="Description">
-            <Input.TextArea readOnly value={selectedFile?.description} />
+            {/* <Input.TextArea readOnly value={selectedFile?.description} /> */}
+            <span
+              style={{
+                color: TAG_COLOR,
+              }}
+            >
+              {selectedFile?.description}
+            </span>
           </Form.Item>
           <Form.Item label="Status">
             <Alert
@@ -49,7 +58,8 @@ export class ViewMediaDetailComponent extends React.Component<ViewMediaDetailCom
             ></Alert>
           </Form.Item>
           <Form.Item label="Type">
-            <Input readOnly value={selectedFile?.type.name} />
+            {/* <Input readOnly value={selectedFile?.type.name} /> */}
+            <Tag color={TAG_COLOR}>{selectedFile?.type.name}</Tag>
           </Form.Item>
         </Form>
         <Divider></Divider>

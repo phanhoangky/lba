@@ -15,6 +15,7 @@ export type TransactionType = {
   campaignId: string;
   mediaSrcId: string;
   receiverNavigation: any;
+  senderNavigation: any;
   campaignCreateByNavigations: any;
   campaignModifyByNavigations: any;
 

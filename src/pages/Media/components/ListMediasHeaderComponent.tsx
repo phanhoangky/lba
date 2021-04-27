@@ -1,7 +1,7 @@
 import { openNotification } from '@/utils/utils';
 import {
   ControlTwoTone,
-  PlusSquareTwoTone,
+  PlusSquareFilled,
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
@@ -170,6 +170,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                     .then(() => {
                       this.callSearchListMedia({
                         isSigned: e === -1 ? undefined : e,
+                        pageNumber: 0,
                       }).then(() => {
                         this.setListLoading(false);
                       });
@@ -182,8 +183,8 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                 <Select.Option key={'all'} value={-1}>
                   All
                 </Select.Option>
-                <Select.Option key={'Not Sign'} value={0}>
-                  Not Sign
+                <Select.Option key={'Reject'} value={3}>
+                  Reject
                 </Select.Option>
                 <Select.Option key={'Waiting'} value={1}>
                   Waiting
@@ -252,7 +253,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                     });
                   }}
                 >
-                  <PlusSquareTwoTone twoToneColor="#00cdac" />
+                  <PlusSquareFilled className="lba-icon" />
                   Add New Folder
                 </Button>
                 <Button
@@ -263,7 +264,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                     });
                   }}
                 >
-                  <PlusSquareTwoTone twoToneColor="#00cdac" />
+                  <PlusSquareFilled className="lba-icon" />
                   Add New File
                 </Button>
 

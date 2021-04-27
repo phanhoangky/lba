@@ -76,7 +76,7 @@ export class ForgotPasswordPage extends React.Component<ForgotPasswordPageProps>
           </div>
           <Row justify="center">
             <Col>
-              <Typography.Title level={3} style={{ color: 'white' }}>
+              <Typography.Title level={3} style={{ color: 'black' }}>
                 Forgot your password ?
               </Typography.Title>
             </Col>

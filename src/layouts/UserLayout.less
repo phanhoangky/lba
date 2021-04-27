@@ -1,5 +1,7 @@
 @import '~antd/es/style/themes/default.less';
 
+@lba-form-label-text: linear-gradient(135deg, #995905, #ffbb00);
+
 .container {
   display: flex;
   flex-direction: column;
@@ -60,7 +62,8 @@
   color: @heading-color;
   font-size: 33px;
   font-family: Avenir, 'Helvetica Neue', Arial, Helvetica, sans-serif;
-   background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  //  background-image: linear-gradient(135deg, #02aab0, #00cdac);
+   background-image: @lba-form-label-text;
    background-clip: text;
    -webkit-background-clip: text;
    -webkit-text-fill-color: transparent;

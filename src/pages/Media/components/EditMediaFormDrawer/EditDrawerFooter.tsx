@@ -1,6 +1,6 @@
 import type { EditMediaParam } from '@/services/MediaSourceService';
 import { openNotification } from '@/utils/utils';
-import { DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { CheckCircleFilled, DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import { Button, Popconfirm, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
@@ -123,6 +123,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                           );
                           this.setEditFileDrawer({
                             isLoading: false,
+                            visible: false,
                           }).then(() => {
                             this.setState({
                               removeConfirmVisible: false,
@@ -151,7 +152,11 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                     });
                   });
               }}
-              okButtonProps={{ loading: this.props.media.editFileDrawer?.isLoading }}
+              okButtonProps={{
+                loading: this.props.media.editFileDrawer?.isLoading,
+                className: 'lba-btn',
+                icon: <CheckCircleFilled className="lba-icon" />,
+              }}
               onCancel={() => {
                 this.setState({
                   removeConfirmVisible: false,

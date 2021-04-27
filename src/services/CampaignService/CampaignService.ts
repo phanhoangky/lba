@@ -5,6 +5,7 @@ import { CONSTANTS_LBA } from "../constantUrls"
 export type CreateCampaignParam = {
   scenarioId: string;
   budget: number;
+  totalMoney: number;
   description: string;
   location: string;
   typeIds: string[];
@@ -30,6 +31,13 @@ export type DeleteCampaignParam = {
   id: string;
   hash: string;
   value: number;
+}
+
+export type GetAllLocationInBoundParam = {
+  northWestLatitude: number;
+  northWestLongitude: number;
+  southEastLatitude: number;
+  southEastLongitude: number;
 }
 
 export enum CAMPAIGN_STATUS {
@@ -67,5 +75,10 @@ export async function updateCampaign(param: UpdateCampaignParam) {
   const { data } = await ApiHelper.put(`${CONSTANTS_LBA.CAMPAIGN_URL}/${param.id}`, param).catch((error) => {
     return Promise.reject(new Error(error));
   });
+  return data;
+}
+
+export async function getAllLocationInBound(param: GetAllLocationInBoundParam) {
+  const { data } = await ApiHelper.get(`${CONSTANTS_LBA.CAMPAIGN_URL}/locations`, { params: { ...param } });
   return data;
 }

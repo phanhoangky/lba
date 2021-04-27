@@ -4,7 +4,7 @@ import * as React from 'react';
 import type { Dispatch, ProfileWalletModelState, TransactionModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import { openNotification } from '@/utils/utils';
-import { CreateTransactionParam } from '@/services/TransactionService';
+import type { CreateTransactionParam } from '@/services/TransactionService';
 
 export type SendModalProps = {
   dispatch: Dispatch;
@@ -32,46 +32,34 @@ export class SendModal extends React.Component<SendModalProps> {
   };
 
   handleSendMoney = async () => {
-    this.formRef.current
-      ?.validateFields()
-      .then(async (res) => {
-        const { currentUser } = this.props.user;
-        console.log('====================================');
-        console.log(res);
-        console.log('====================================');
-        if (currentUser && currentUser.ether) {
-          const hash = await currentUser.ether.transfer(res.destinationAddress, res.transferAmount);
-          if (hash.includes('Fail')) {
-            openNotification('error', 'Fail to send money', hash);
-          } else {
-            const createTransParam: CreateTransactionParam = {
-              receiverAddress: res.destinationAddress,
-              txHash: hash,
-              type: 0,
-              value: res.transferAmount,
-            };
-            this.createTransaction(createTransParam).then(() => {
-              openNotification('success', 'Money transfer successfully');
-              this.setSendModal({
-                visible: false,
-              });
+    this.formRef.current?.validateFields().then(async (res) => {
+      const { currentUser } = this.props.user;
+      if (currentUser && currentUser.ether) {
+        const hash = await currentUser.ether.transfer(res.destinationAddress, res.transferAmount);
+        if (hash.includes('Fail')) {
+          openNotification('error', 'Fail to send money', hash);
+        } else {
+          const createTransParam: CreateTransactionParam = {
+            receiverAddress: res.destinationAddress,
+            txHash: hash,
+            type: 0,
+            value: res.transferAmount,
+          };
+          this.createTransaction(createTransParam).then(() => {
+            openNotification('success', 'Money transfer successfully');
+            this.setSendModal({
+              visible: false,
             });
-            console.log('====================================');
-            console.log();
-            console.log('====================================');
-          }
+          });
         }
-      })
-      .catch((err) => {
-        this.setSendModal({
-          visible: false,
-        });
-      });
+      }
+    });
   };
 
   formRef = React.createRef<FormInstance>();
   render() {
     const { currentUser } = this.props.user;
+    const maxAmount = currentUser?.balance ? currentUser.balance : 0;
     return (
       <>
         <Form name="send_money_form" layout="vertical" ref={this.formRef}>
@@ -82,7 +70,29 @@ export class SendModal extends React.Component<SendModalProps> {
           <Form.Item name="destinationAddress" label="Wallet Address Destination">
             <Input />
           </Form.Item>
-          <Form.Item name="transferAmount" label="Trasnfer Amount">
+          <Form.Item
+            name="transferAmount"
+            label="Trasnfer Amount"
+            rules={[
+              { required: true, message: 'Please input amount of money' },
+              { type: 'number', min: 1000, message: 'Trasnfer amount must larger than 1000' },
+              {
+                type: 'number',
+                min: 1000,
+                validator: (rule, value) => {
+                  if (Number.isNaN(Number(value))) {
+                    return Promise.reject(new Error('Budget must be a number'));
+                  }
+
+                  if (value > maxAmount) {
+                    return Promise.reject(new Error('Budget is over your balance'));
+                  }
+
+                  return Promise.resolve();
+                },
+              },
+            ]}
+          >
             <InputNumber
               min={1000}
               style={{

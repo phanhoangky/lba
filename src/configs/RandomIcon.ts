@@ -20,7 +20,8 @@ export default class RandomIcon {
     repeat?: number
   } = {}) {
     this.canvas = document.createElement("canvas")
-    this.canvas.width = this.canvas.height = this.size
+    this.canvas.width = this.size
+    this.canvas.height = this.size
     this.context = this.canvas.getContext("2d")
   }
 
@@ -28,7 +29,7 @@ export default class RandomIcon {
     const {context, size} = this
     const rng = seedrandom(seed)
     context.clearRect(0, 0, size, size)
-    for (let i = 0; i < this.repeat; ++i) {
+    for (let i = 0; i < this.repeat; i+=1) {
       const x = rngRange(rng, -0.25, 1.25) * size
       const y = rngRange(rng, -0.25, 1.25) * size
       const radius = size / 2 * (1 + rng())

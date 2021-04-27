@@ -1,19 +1,25 @@
+@lba-color-text: rgb(0, 0, 0);
+@lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
+@lba-border-image: linear-gradient(135deg, #995905, #ffbb00);
 
 .listScenarios {
   :global {
     .ant-list-item-meta-content,
     .ant-list-item-meta-title,
     .ant-list-item-meta-description {
-      color: #00cdac;
+      // color: #00cdac;
+      color: @lba-background-image;
     }
 
     .selected-scenario {
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
+      // background-image: linear-gradient(135deg, #02aab0, #00cdac);
       transition: 0.5s ease;
       .ant-list-item-meta-content,
       .ant-list-item-meta-title,
       .ant-list-item-meta-description {
-        color: aliceblue;
+        // color: aliceblue;
+        color: @lba-color-text;
       }
     }
     .scenario-record {
@@ -37,9 +43,15 @@
       border-radius: 5px;
       border-image-slice: 1;
       border-width: 5px;
-      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      border-image-source: @lba-border-image;
       .area-item {
-        border: 5px solid #00cdac;
+        border-radius: 5px;
+        border-image-slice: 1;
+        border-width: 5px;
+        border-style: solid;
+        border-image-source: @lba-border-image;
+        // border: 5px solid #00cdac;
         border-radius: 5px;
       }
 

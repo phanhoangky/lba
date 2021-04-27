@@ -121,9 +121,6 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
 
         return playlist;
       });
-      console.log('====================================');
-      console.log(newList);
-      console.log('====================================');
       // const newList = clone.forEach((playlist) => {
       //   const selectedPlaylist = listPlaylists.filter((p) => p.isSelected)[0];
       //   if (selectedPlaylist.id === playlist.id) {
@@ -193,9 +190,6 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
     const selectedPlaylist = listPlaylists?.filter((playlist) => playlist.isSelected)?.[0];
 
     const items = selectedPlaylist?.playlistItems;
-    console.log('====================================');
-    console.log(selectedPlaylist);
-    console.log('====================================');
     return (
       <>
         <Row gutter={20}>
@@ -220,7 +214,9 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
           </Col>
           <Col span={12}>
             <Row wrap gutter={20}>
-              <Divider orientation="left" className="lba-text">Select Playlist</Divider>
+              <Divider orientation="left" className="lba-text">
+                Select Playlist
+              </Divider>
               <Table
                 scroll={{
                   y: 400,
@@ -274,7 +270,9 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
               </Table>
             </Row>
 
-            <Divider orientation="left" className="lba-text">Preview Media Detail</Divider>
+            <Divider orientation="left" className="lba-text">
+              Preview Media Detail
+            </Divider>
 
             <Row>
               <Skeleton active loading={playlistsDrawer?.isLoading}>
@@ -286,9 +284,6 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                   }}
                   dataSource={items}
                   rowClassName={(record) => {
-                    console.log('====================================');
-                    console.log(items, record);
-                    console.log('====================================');
                     return record.isSelected ? 'selected-media' : '';
                   }}
                   pagination={false}

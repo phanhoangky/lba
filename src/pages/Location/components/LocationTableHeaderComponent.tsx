@@ -1,9 +1,4 @@
-import { openNotification } from '@/utils/utils';
-import {
-  PlusSquareTwoTone,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-} from '@ant-design/icons';
+import { PlusSquareFilled, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
 import { Button, Col, Dropdown, Input, Menu, Row, Select, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, LocationModelState } from 'umi';
@@ -123,11 +118,8 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
                       .then(() => {
                         this.setLocationsTableLoading(false);
                       })
-                      .catch((error) => {
-                        console.log('====================================');
-                        console.log(error);
-                        console.log('====================================');
-                        openNotification('error', 'Fail to get list location');
+                      .catch(() => {
+                        this.setLocationsTableLoading(false);
                       });
                   })
                   .catch(() => {
@@ -206,7 +198,7 @@ export class LocationTableHeaderComponent extends React.Component<LocationTableH
                 });
               }}
               className="lba-btn"
-              icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
+              icon={<PlusSquareFilled className="lba-icon" />}
             >
               Add New Location
             </Button>

@@ -2,7 +2,7 @@ import { GoogleCircleFilled, LockTwoTone, MailFilled, UserOutlined } from '@ant-
 import { Button, Space, Divider, Row, Col, Carousel } from 'antd';
 import React, { useState } from 'react';
 import ProForm, { ProFormText } from '@ant-design/pro-form';
-import { connect, FormattedMessage, history } from 'umi';
+import { connect, history } from 'umi';
 // import { getFakeCaptcha } from '@/services/login';
 import type { Dispatch } from 'umi';
 import type { StateType } from '@/models/login';
@@ -77,10 +77,7 @@ const Login: React.FC<LoginProps> = (props) => {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
-        openNotification('error', 'Error');
+        openNotification('error', 'Error', error.message);
         setIsLoading(false);
       });
 
@@ -125,9 +122,6 @@ const Login: React.FC<LoginProps> = (props) => {
       .catch((err) => {
         setIsLoading(false);
         openNotification('error', 'Fail to login', err.message);
-        console.log('====================================');
-        console.error({ ...err });
-        console.log('====================================');
       });
   };
   return (
@@ -198,10 +192,7 @@ const Login: React.FC<LoginProps> = (props) => {
               setIsLoading(true);
               handleEmailSubmit(values.userName, values.password).catch((error) => {
                 setIsLoading(false);
-                console.log('====================================');
-                console.error(error);
-                console.log('====================================');
-                openNotification('error', 'fail to login with email', error.message);
+                openNotification('error', 'fail to login with email', error);
               });
               return Promise.resolve();
             }}
@@ -217,15 +208,11 @@ const Login: React.FC<LoginProps> = (props) => {
               //   id: 'pages.login.username.placeholder',
               //   defaultMessage: '用户名: admin or user',
               // })}
+              placeholder="Email"
               rules={[
                 {
                   required: true,
-                  message: (
-                    <FormattedMessage
-                      id="pages.login.username.required"
-                      defaultMessage="请输入用户名!"
-                    />
-                  ),
+                  message: 'Please enter your email',
                 },
               ]}
             />
@@ -235,6 +222,7 @@ const Login: React.FC<LoginProps> = (props) => {
                 size: 'large',
                 prefix: <LockTwoTone className={styles.prefixIcon} />,
               }}
+              placeholder="Password"
               // placeholder={intl.formatMessage({
               //   id: 'pages.login.password.placeholder',
               //   defaultMessage: '密码: ant.design',
@@ -242,12 +230,7 @@ const Login: React.FC<LoginProps> = (props) => {
               rules={[
                 {
                   required: true,
-                  message: (
-                    <FormattedMessage
-                      id="pages.login.password.required"
-                      defaultMessage="请输入密码！"
-                    />
-                  ),
+                  message: 'Please enter password',
                 },
               ]}
             />
@@ -261,10 +244,7 @@ const Login: React.FC<LoginProps> = (props) => {
                 history.replace('/account/forgot-password');
               }}
             >
-              <FormattedMessage
-                id="pages.login.forgotPassword"
-                defaultMessage="Forgot password ?"
-              />
+              Forgot password ?
             </a>
             <Divider></Divider>
             <div
@@ -286,7 +266,7 @@ const Login: React.FC<LoginProps> = (props) => {
                 history.replace('/account/register');
               }}
             >
-              <FormattedMessage id="pages.login.registerAccount" defaultMessage="Register" />
+              Register
             </a>
           </div>
         </div>

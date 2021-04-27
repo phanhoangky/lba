@@ -1,5 +1,6 @@
 import {
-  PlusSquareTwoTone,
+  PlusSquareFilled,
+  SearchOutlined,
   SortAscendingOutlined,
   SortDescendingOutlined,
 } from '@ant-design/icons';
@@ -16,19 +17,6 @@ export type CampaignTableHeaderComponentProps = {
 };
 
 export class CampaignTableHeaderComponent extends React.Component<CampaignTableHeaderComponentProps> {
-  setListScenarioWithAtLeastOneItems = async () => {
-    const { listScenario } = this.props.scenarios;
-    const newList = listScenario?.filter((s) => s.scenarioItems.length > 0);
-    await this.setListScenarios(newList);
-  };
-
-  setListScenarios = async (list: any) => {
-    await this.props.dispatch({
-      type: `scenarios/setListScenarioReducer`,
-      payload: list,
-    });
-  };
-
   setAddNewCampaignModal = async (modal: any) => {
     await this.props.dispatch({
       type: `${CAMPAIGN}/setAddNewCampaignModalReducer`,
@@ -61,7 +49,11 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
     return (
       <Space>
         <Input.Search
-          enterButton
+          enterButton={
+            <Button className="lba-btn">
+              <SearchOutlined className="lba-icon" />
+            </Button>
+          }
           onSearch={(e) => {
             this.setCampaignTableLoading(true)
               .then(() => {
@@ -134,15 +126,13 @@ export class CampaignTableHeaderComponent extends React.Component<CampaignTableH
           <Select.Option value="name">Name</Select.Option>
         </Select>
         <Button
-          onClick={async () => {
-            this.setListScenarioWithAtLeastOneItems().then(() => {
-              this.setAddNewCampaignModal({
-                visible: true,
-              });
+          onClick={() => {
+            this.setAddNewCampaignModal({
+              visible: true,
             });
           }}
           className="lba-btn"
-          icon={<PlusSquareTwoTone twoToneColor="#00cdac" />}
+          icon={<PlusSquareFilled className="lba-icon" />}
         >
           Add New Campaign
         </Button>

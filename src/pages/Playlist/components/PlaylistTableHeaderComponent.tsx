@@ -1,8 +1,4 @@
-import {
-  PlusSquareTwoTone,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-} from '@ant-design/icons';
+import { PlusSquareFilled, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, PlayListModelState } from 'umi';
@@ -129,7 +125,7 @@ export class PlaylistTableHeaderComponent extends React.Component<PlaylistTableH
           }}
           className="lba-btn"
         >
-          <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Playlist
+          <PlusSquareFilled className="lba-icon" /> Add New Playlist
         </Button>
       </Space>
     );

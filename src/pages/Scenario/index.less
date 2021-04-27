@@ -1,17 +1,46 @@
+@lba-color-text: rgb(0, 0, 0);
+@lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
+
+
+.addNewScenarioModal {
+  :global {
+    .steps-content {
+      padding: 20px;
+      margin-top: 16px;
+      max-height: 600px;
+      background-color: #fafafa;
+      border: 1px dashed #e9e9e9;
+      border-radius: 2px;
+      overflow-y: scroll;
+      overflow-x: visible;
+    }
+
+    .steps-action {
+      margin-top: 24px;
+      text-align: right;
+    }
+  }
+}
+
+
 .selectedLayout {
   transition: all 0.3s ease;
-  color: aliceblue;
-  background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  color: @lba-color-text;
+  // color: aliceblue;
+  // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+  background-image: @lba-background-image;
   transition: all 0.3s ease;
   border-radius: 5px;
   border-image-slice: 1;
   border-width: 5px;
-  border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+  // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+  border-image-source: @lba-background-image;
   
   :global {
     transition: all 0.3s ease;
     .ant-card-head-title {
-      color: aliceblue
+      // color: aliceblue
+      color: @lba-color-text;
     }
 
     .ant-card-bordered {
@@ -30,7 +59,8 @@
       border-radius: 5px;
       border-image-slice: 1;
       border-width: 1px;
-      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      border-image-source: @lba-background-image;
     }
     
     .ant-list-grid .ant-col>.ant-list-item {
@@ -54,11 +84,18 @@
       position: relative;
       z-index: 0;
       transition: all 0.3s ease;
-      border: 10px solid;
+      // border: 5px;
       border-radius: 5px;
+      border-style: solid;
       border-image-slice: 1;
+      -webkit-border-image-slice: 1;
       border-width: 5px;
-      border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      border-image-source: @lba-background-image;
+      //  -moz-border-image-source: -moz-linear-gradient(135deg, #02aab0, #00cdac);
+      //  -webkit-border-image-source: -webkit-linear-gradient(135deg, #02aab0, #00cdac);
+      // border-image-source: linear-gradient(135deg, #02aab0, #00cdac);
+      //  -moz-border-image-source: -moz-linear-gradient(135deg, #02aab0, #00cdac);
+      //  -webkit-border-image-source: -webkit-linear-gradient(135deg, #02aab0, #00cdac);
       // &:hover {
       //   transform: scale(1.05);
       //   z-index: 2;
@@ -74,10 +111,11 @@
       z-index: 1;
       transition: all 0.3s ease;
       // border: 2px solid #00cdac;
-      border: 5px solid #00cdac;
+      border: 5px solid @lba-color-text;
       border-radius: 5px;
       transform: scale(1.05);
-      color: aliceblue;
+      // color: aliceblue;
+      color: @lba-color-text;
       // &:hover {
       //   transform: scale(1.05);
       //   z-index: 2;
@@ -98,7 +136,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
       color: aliceblue;
       z-index: 1;
     }
@@ -175,23 +213,24 @@
     }
 
     .selected-playlist {
-      color: aliceblue;
+      // color: aliceblue;
+      color: @lba-color-text;
       background-color: rgba(84, 125, 187, 0.712);
       transition: all 0.3s ease;
 
-      &.ant-table-row &.ant-table-row-level-0 {
-        &:hover {
-          color: rgb(15, 15, 15);
-          background-image: linear-gradient(135deg, #02aab0, #00cdac);
-          transition: all 0.3s ease;
-        }
-      }
+      // &.ant-table-row &.ant-table-row-level-0 {
+      //   &:hover {
+      //     color: rgb(15, 15, 15);
+      //     background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      //     transition: all 0.3s ease;
+      //   }
+      // }
 
-      &:hover {
-        color: rgb(15, 15, 15);
-        background-image: linear-gradient(135deg, #02aab0, #00cdac);
-        transition: all 0.3s ease;
-      }
+      // &:hover {
+      //   color: rgb(15, 15, 15);
+      //   background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      //   transition: all 0.3s ease;
+      // }
     }
 
     .selected-media {
@@ -202,14 +241,14 @@
       &.ant-table-row &.ant-table-row-level-0 {
         &:hover {
           color: rgb(15, 15, 15);
-          background-image: linear-gradient(135deg, #02aab0, #00cdac);
+          background-image: @lba-background-image;
           transition: all 0.3s ease;
         }
       }
 
       &:hover {
         color: rgb(15, 15, 15);
-        background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        background-image: @lba-background-image;
         transition: all 0.3s ease;
       }
     }

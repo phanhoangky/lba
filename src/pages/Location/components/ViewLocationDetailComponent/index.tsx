@@ -1,4 +1,4 @@
-import { Col, Divider, Form, Input, Row, Select, Skeleton } from 'antd';
+import { Col, Divider, Form, Row, Skeleton, Tag } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -6,6 +6,7 @@ import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState
 import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
+import { TAG_COLOR } from '@/services/constantUrls';
 
 export type ViewLocationDetailComponentProps = {
   dispatch: Dispatch;
@@ -145,7 +146,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
 
   render() {
     const { selectedLocation, viewLocationDetailComponent } = this.props.location;
-    const { listDeviceTypes } = this.props.deviceStore;
+    // const { listDeviceTypes } = this.props.deviceStore;
 
     return (
       <>
@@ -162,14 +163,15 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 <Col span={12}>
                   <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                     <Form.Item label="Name">
-                      <Input value={selectedLocation.name} readOnly />
+                      {/* <Input value={selectedLocation.name} readOnly /> */}
+                      <Tag color={TAG_COLOR}>{selectedLocation.name}</Tag>
                     </Form.Item>
                   </Skeleton>
                 </Col>
                 <Col span={12}>
                   <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                     <Form.Item name="typeId" label="Type">
-                      <Select
+                      {/* <Select
                         disabled
                         style={{ width: '100%' }}
                         value={selectedLocation.typeId}
@@ -186,7 +188,8 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                             </Select.Option>
                           );
                         })}
-                      </Select>
+                      </Select> */}
+                      <Tag color={TAG_COLOR}>{selectedLocation.type?.typeName}</Tag>
                     </Form.Item>
                   </Skeleton>
                 </Col>
@@ -200,15 +203,19 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     width: '100%',
                   }}
                 >
-                  <Input.TextArea
-                    readOnly
-                    value={selectedLocation.description}
-                    rows={4}
-                    style={{
-                      width: '100%',
-                    }}
-                    placeholder="input placeholder"
-                  />
+                  <Tag color={TAG_COLOR}>{selectedLocation.description}</Tag>
+                </Form.Item>
+              </Skeleton>
+
+              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
+                <Form.Item
+                  name="matchingCode"
+                  label="Maching Code"
+                  style={{
+                    width: '100%',
+                  }}
+                >
+                  <Tag color={TAG_COLOR}>{selectedLocation.matchingCode}</Tag>
                 </Form.Item>
               </Skeleton>
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
@@ -218,12 +225,14 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     width: '100%',
                   }}
                 >
-                  <Input.TextArea readOnly value={selectedLocation.address} />
+                  {/* <Input.TextArea readOnly value={selectedLocation.address} /> */}
+                  {/* <Tag color={TAG_COLOR}>{selectedLocation.address}</Tag> */}
+                  {selectedLocation.address}
                 </Form.Item>
               </Skeleton>
               <Divider></Divider>
             </Form>
-            <LeafletMapComponent disabled={true} {...this.props} />
+            <LeafletMapComponent disabledClick={true} {...this.props} />
             <Divider></Divider>
             {/* <Row>
               <Col>

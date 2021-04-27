@@ -1,8 +1,8 @@
 import {
   FolderOpenTwoTone,
   HomeTwoTone,
-  PlaySquareTwoTone,
-  PlusSquareTwoTone,
+  PlaySquareFilled,
+  PlusSquareFilled,
 } from '@ant-design/icons';
 import { Breadcrumb, Button, Divider, List, Skeleton, Col, Row, Table, Space } from 'antd';
 import { cloneDeep } from 'lodash';
@@ -260,10 +260,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
         // this.setAddNewPlaylistItemsDrawer({
         //   visible: false,
         // });
-        console.log('====================================');
-        console.log(error);
-        console.log('====================================');
-        openNotification('error', 'Fail to  add new playlist items');
+        openNotification('error', 'Fail to  add new playlist items', error.message);
       });
   };
 
@@ -359,13 +356,13 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       searchListMediaParam,
     } = this.props.media;
 
-    const { totalDuration, maxDuration, minDuration, selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist } = this.props.playlists;
 
-    const maxD = maxDuration || 240;
-    const minD = minDuration || 10;
-    const totalD = totalDuration || 0;
-    const availableDuration = maxD - totalD;
-    const disalbedCondition = availableDuration < minD;
+    // const maxD = maxDuration || 240;
+    // const minD = minDuration || 10;
+    // const totalD = totalDuration || 0;
+    // const availableDuration = maxD - totalD;
+    // const disalbedCondition = availableDuration < minD;
 
     const listMedias = listMedia
       ?.filter((media) => selectedPlaylist?.playlistItems.every((p) => p.mediaSrcId !== media.id))
@@ -375,10 +372,6 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
           key: media.id,
         };
       });
-
-    console.log('====================================');
-    console.log(listMedia);
-    console.log('====================================');
     return (
       <>
         <Skeleton active loading={listLoading}>
@@ -393,7 +386,16 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                       this.breadScrumbNavigate(index);
                     }}
                   >
-                    {item.name === 'Home' ? <HomeTwoTone /> : item.name}
+                    {item.name === 'Home' ? (
+                      <HomeTwoTone
+                        twoToneColor="#fda502"
+                        style={{
+                          fontSize: '1.2em',
+                        }}
+                      />
+                    ) : (
+                      item.name
+                    )}
                   </Breadcrumb.Item>
                 );
               })}
@@ -416,6 +418,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
           }}
           dataSource={listFolder}
           loading={listLoading}
+          className={styles.listFolderStyle}
           renderItem={(item) => {
             return (
               <>
@@ -424,7 +427,8 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                     <List.Item style={{ height: 50 }}>
                       <Button
                         size="large"
-                        type={item.isSelected ? 'primary' : 'default'}
+                        // type={item.isSelected ? 'primary' : 'default'}
+                        className={item.isSelected ? 'selected-folder' : ''}
                         style={{
                           width: 200,
                           height: 50,
@@ -449,7 +453,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
           }}
         ></List>
 
-        <Divider orientation="left" className="lba-text">
+        <Divider orientation="left" className="lba-label">
           Medias
         </Divider>
         {/* ========================================================================================================================== */}
@@ -460,112 +464,12 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
 
         <Row gutter={20}>
           <Col span={24}>
-            {/* <List
-              grid={{
-                gutter: 20,
-                md: 2,
-                lg: 2,
-                xl: 3,
-                xxl: 3,
-              }}
-              className={styles.listMedias}
-              style={{ alignItems: 'center', alignContent: 'center' }}
-              dataSource={listMedia}
-              loading={listLoading}
-              pagination={{
-                current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
-                total: totalItem,
-                pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
-                onChange: async (e) => {
-                  if (searchListMediaParam?.title === '') {
-                    if (getListFileParam && getListFileParam.limit) {
-                      this.setListLoading(true)
-                        .then(() => {
-                          this.callGetListMedia({
-                            offset: getListFileParam.limit ? (e - 1) * getListFileParam.limit : 0,
-                            pageNumber: e - 1,
-                          }).then(() => {
-                            this.setListLoading(false);
-                          });
-                        })
-                        .catch(() => {
-                          this.setListLoading(false);
-                        });
-                    }
-                  } else {
-                    this.setListLoading(true)
-                      .then(() => {
-                        this.callSearchListMedia({
-                          pageNumber: e - 1,
-                        }).then(() => {
-                          this.setListLoading(false);
-                        });
-                      })
-                      .catch(() => {
-                        this.setListLoading(false);
-                      });
-                  }
-                },
-              }}
-              header={false}
-              renderItem={(item) => {
-                return (
-                  <>
-                    {listMedia && listMedia.length > 0 && (
-                      <Skeleton active avatar loading={listLoading}>
-                        <List.Item>
-                          <Card
-                            bordered
-                            hoverable
-                            className={
-                              item.isSelected ? 'selected-media media-record' : 'media-record'
-                            }
-                            onClick={async () => {
-                              this.setSelectedFile(item);
-                              this.setSelectedRecord(item);
-                            }}
-                            onDoubleClick={() => {
-                              if (disalbedCondition) {
-                                openNotification('error', 'One playlist have maximum 240s');
-                              } else {
-                                this.addNewPlaylistItem(item);
-                              }
-                            }}
-                            style={{ width: '100%', height: '100%' }}
-                            cover={
-                              (item.type.name.toLowerCase().includes('image') && (
-                                <Image
-                                  src={item.urlPreview}
-                                  alt="image"
-                                  height={200}
-                                  preview={false}
-                                />
-                              )) ||
-                              (item.type.name.toLowerCase().includes('video') && (
-                                <HoverVideoPlayer
-                                  style={{ height: '200px' }}
-                                  videoSrc={item.urlPreview}
-                                  restartOnPaused
-                                />
-                              ))
-                            }
-                            // title={item.title}
-                          >
-                            <Card.Meta title={item.title} />
-                          </Card>
-                        </List.Item>
-                      </Skeleton>
-                    )}
-                  </>
-                );
-              }}
-            ></List> */}
             <Table
               dataSource={listMedias}
               loading={listLoading}
               // className={styles.customTable}
               scroll={{
-                y: 400,
+                y: 300,
               }}
               pagination={{
                 current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
@@ -611,6 +515,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                   return (
                     <Space>
                       <Button
+                        className="lba-btn"
                         onClick={() => {
                           this.setEditPlaylistDrawer({
                             playingUrl: record.urlPreview,
@@ -618,14 +523,15 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                           });
                         }}
                       >
-                        <PlaySquareTwoTone />
+                        <PlaySquareFilled className="lba-icon" />
                       </Button>
                       <Button
+                        className="lba-btn"
                         onClick={() => {
                           this.addNewPlaylistItem(record);
                         }}
                       >
-                        <PlusSquareTwoTone />
+                        <PlusSquareFilled className="lba-icon" />
                       </Button>
                     </Space>
                   );

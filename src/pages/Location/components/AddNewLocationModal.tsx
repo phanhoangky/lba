@@ -280,12 +280,12 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
 
   viewLocationDetailComponentRef = React.createRef<ViewLocationDetailComponent>();
   render() {
-    const { createLocationParam } = this.props.location;
+    // const { createLocationParam } = this.props.location;
 
     const { listDeviceTypes } = this.props.deviceStore;
 
     return (
-      <>
+      <div className="modal-content">
         <Form ref={this.formRef} layout="vertical" name="add_location_modal_form">
           <Form.Item
             name="name"
@@ -331,28 +331,29 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
           <Form.Item
             label="Address"
             name="address"
-            // rules={[{ required: true, message: 'Please enter address' }]}
+            rules={[{ required: true, message: 'Please enter address' }]}
           >
             <AutoCompleteComponent
               ref={this.autoCompleteRef}
               {...this.props}
-              inputValue={createLocationParam?.address}
-              address={createLocationParam?.address}
+              // value={selectedLocation?.address}
+              // inputValue={selectedLocation?.address}
+              // address={createLocationParam?.address}
               // value={{
               //   label: selectedLocation?.address,
               //   value: `${selectedLocation?.latitude}-${selectedLocation?.longitude}`,
               // }}
-              onInputChange={async (e) => {
+              onChange={async (e) => {
                 await this.setCreateLocationParam({
                   address: e,
                 });
               }}
-              onChange={async (address) => {
+              onSelect={async (address) => {
                 await this.onAutoCompleteSelect(address);
               }}
             />
           </Form.Item>
-          {createLocationParam?.address === '' && (
+          {/* {createLocationParam?.address === '' && (
             <p
               style={{
                 color: 'red',
@@ -361,15 +362,28 @@ export class AddNewLocationModal extends React.Component<AddNewLocationModalProp
             >
               Please enter location address
             </p>
-          )}
+          )} */}
         </Form>
         <Row>
           <Col span={24}>
-            <LeafletMapComponent {...this.props} />
+            <LeafletMapComponent
+              onClick={(data: any) => {
+                this.setCreateLocationParam({
+                  address: data.display_name,
+                  longitude: data.lon,
+                  latitude: data.lat,
+                }).then(() => {
+                  this.formRef.current?.setFieldsValue({
+                    address: data.display_name,
+                  });
+                });
+              }}
+              {...this.props}
+            />
           </Col>
         </Row>
         {/* </Modal> */}
-      </>
+      </div>
     );
   }
 }

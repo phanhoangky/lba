@@ -1,6 +1,8 @@
 import { CONSTANTS_LBA } from '../constantUrls';
 import ApiHelper from "@/apis/LBA_API"
 import type { BaseGetRequest } from '../BaseRequest';
+import type { PlaylistItem } from 'umi';
+import qs from 'qs';
 
 export type GetListPlaylistParam = BaseGetRequest
 
@@ -8,6 +10,7 @@ export type AddNewPlaylistParam = {
   title: string,
   description: string;
   accountId: string;
+  playlistItems: PlaylistItem[];
 }
 
 
@@ -24,10 +27,11 @@ export async function GetListPlaylist(params: GetListPlaylistParam) {
 }
 
 export async function AddNewPlaylist(params: AddNewPlaylistParam) {
-  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.PLAYLIST_URL}`, params).catch((error) => {
-    console.log('====================================');
-    console.log(error);
-    console.log('====================================');
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.PLAYLIST_URL}`, params, {
+    paramsSerializer: (param) => {
+      return qs.stringify(param);
+    }
+  }).catch((error) => {
     return Promise.reject(new Error(error));
   });
   return data;

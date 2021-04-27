@@ -32,9 +32,6 @@ export class RenameFolderModal extends React.Component<RenameFolderModalProps> {
   handleUpdateFolder = async () => {
     const { listFolder } = this.props.media;
     const selectedFolder = listFolder?.filter((f) => f.isSelected)[0];
-    console.log('====================================');
-    console.log(selectedFolder);
-    console.log('====================================');
     this.formRef.current?.validateFields().then((values) => {
       this.setRenameFolderModal({
         isLoading: true,
@@ -50,9 +47,6 @@ export class RenameFolderModal extends React.Component<RenameFolderModalProps> {
             });
           })
           .catch((error) => {
-            console.log('====================================');
-            console.log(error);
-            console.log('====================================');
             openNotification('error', 'Fail to rename folder', error.message);
             this.setRenameFolderModal({
               isLoading: false,

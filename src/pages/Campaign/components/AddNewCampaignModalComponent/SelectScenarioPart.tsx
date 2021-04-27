@@ -19,11 +19,26 @@ class SelectScenarioPart extends React.Component<SelectScenarioPartProps> {
     this.setScenarioTableLoading(true).then(() => {
       this.callGetListScenario()
         .then(() => {
-          this.setScenarioTableLoading(false);
+          this.setListScenarioWithAtLeastOneItems().then(() => {
+            this.setScenarioTableLoading(false);
+          });
         })
         .catch(() => {
           this.setScenarioTableLoading(false);
         });
+    });
+  };
+
+  setListScenarioWithAtLeastOneItems = async () => {
+    const { listScenario } = this.props.scenarios;
+    const newList = listScenario?.filter((s) => s.scenarioItems.length > 0);
+    await this.setListScenarios(newList);
+  };
+
+  setListScenarios = async (list: any) => {
+    await this.props.dispatch({
+      type: `scenarios/setListScenarioReducer`,
+      payload: list,
     });
   };
 

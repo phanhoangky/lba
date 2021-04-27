@@ -1,5 +1,21 @@
 @import '~antd/es/style/themes/default.less';
 
+// Global LBA Styles
+@lba-color-text: rgb(0, 0, 0);
+@lba-background-image: linear-gradient(135deg, #cc7400, #ffbb00);
+@lba-background-image-hover: linear-gradient(135deg, #fecf00, #e2d742);
+
+@lba-table-hover-background: linear-gradient(135deg, #747474, #c5c5c5);
+@lba-border-background-image: linear-gradient(135deg, #995905, #ffbb00);
+@lba-icon-color: rgb(252, 206, 0);
+@lba-color-text-hover: linear-gradient(135deg, #030200, #ffbb00);
+@lba-icon-two-tone-color: #fda502;
+@lba-icon-color-hover: #fca402;
+@lba-form-label-text: linear-gradient(135deg, #995905, #ffbb00);
+// Switch Styles
+@lba-switch-background-image: linear-gradient(135deg, #a18b29, #ffee00);
+@lba-switch-border-color: linear-gradient(135deg, #a18b29, #ffee00);
+
 .main {
   width: 40%;
   margin: 0 auto;
@@ -49,7 +65,10 @@
       .submit-btn {
         width: 100%;
         height: 100%;
-        border: 2px solid rgb(16, 223, 144);
+        // border: 2px solid rgb(16, 223, 144);
+        border-style: solid;
+        border-width: 2px;
+        border-color: @lba-border-background-image;
         transition: all 0.3s ease;
         font-weight: bold;
         &:hover .register-btn-overlap {
@@ -57,18 +76,19 @@
         }
 
         &:hover .register-btn-text, .submit-btn {
-          background-image: linear-gradient(135deg, #f4f5f5, #f4f5f5);
+          // background-image: linear-gradient(135deg, #f4f5f5, #f4f5f5);
+          background-image: @lba-color-text-hover;
           background-clip: text;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          color: #f4f5f5;
+          // color: #f4f5f5;
         }
       }
 
       .register-btn-overlap {
         transition: all 0.3s ease;
-        // background-color: linear-gradient(#02aab0, #00cdac, #02aab0);
-        background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        background-image: @lba-background-image;
         position: absolute;
         top: 0;
         left: 0;
@@ -88,14 +108,15 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+        background-image: @lba-form-label-text;
 
         background-clip: text;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
 
         .google-icon {
-          color: #0ae7e7;
+          color: @lba-icon-color;
         }
       }
     }
@@ -105,7 +126,8 @@
     width: 100%;
   }
   :global {
-    background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    // background-image: linear-gradient(135deg, #02aab0, #00cdac);
+    background-image: @lba-background-image;
     padding: 2em;
     transition: all 0.3s ease;
     font-weight: bold;

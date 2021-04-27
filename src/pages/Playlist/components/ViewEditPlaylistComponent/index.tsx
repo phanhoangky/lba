@@ -1,5 +1,5 @@
-import { PlaySquareTwoTone } from '@ant-design/icons';
-import { Col, Form, Input, Row, Table, Image, Space, Button, Empty } from 'antd';
+import { PlaySquareFilled } from '@ant-design/icons';
+import { Col, Form, Row, Table, Image, Space, Button, Empty, Tag } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
@@ -13,11 +13,12 @@ import type {
   UserModelState,
 } from 'umi';
 import { connect } from 'umi';
-import styles from '../../index.less';
+// import styles from '../../index.less';
 import ReactPlayer from 'react-player';
 import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash';
 import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPageService/PlaylistItemService';
+import { TAG_COLOR } from '@/services/constantUrls';
 // import { openNotification } from '@/utils/utils';
 
 export type ViewEditPlaylistComponentProps = {
@@ -325,10 +326,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
         updatePlaylistItems: selectedPlaylist.playlistItems,
         ...param,
       };
-
-      console.log('====================================');
-      console.log(updateParam, param, selectedPlaylist);
-      console.log('====================================');
       await this.props.dispatch({
         type: 'playlists/updatePlaylist',
         payload: updateParam,
@@ -342,44 +339,6 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
       payload: this.props.playlists.selectedPlaylist?.id,
     });
   };
-
-  // handleRemovePlaylist = async () => {
-  //   const { selectedPlaylist } = this.props.playlists;
-  //   Modal.confirm({
-  //     title: `Are you sure you want to remove ${selectedPlaylist?.title}`,
-  //     centered: true,
-  //     closable: false,
-  //     onOk: () => {
-  //       this.setViewPlaylistDetailComponent({
-  //         isLoading: true,
-  //       })
-  //         .then(() => {
-  //           this.removePlaylist()
-  //             .then(() => {
-  //               openNotification(
-  //                 'success',
-  //                 'Remove playlist successfully',
-  //                 `Playlist ${selectedPlaylist?.title} was removed`,
-  //               );
-  //               this.callGetListPlaylist().then(() => {
-  //                 this.setViewPlaylistDetailComponent({
-  //                   isLoading: false,
-  //                 });
-  //               });
-  //             })
-  //             .catch((error) => {
-  //               Promise.reject(error);
-  //               openNotification('error', 'Fail to remove playlist', error);
-  //             });
-  //         })
-  //         .catch(() => {
-  //           this.setViewPlaylistDetailComponent({
-  //             isLoading: false,
-  //           });
-  //         });
-  //     },
-  //   });
-  // };
 
   setViewPlaylistDetailComponent = async (param?: any) => {
     await this.props.dispatch({
@@ -409,12 +368,20 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
       <>
         <Form name="view_playlists_form_drawer" layout="vertical" ref={this.formRef}>
           <Form.Item name="title" label="Title">
-            <Input readOnly />
+            {/* <Input readOnly /> */}
+            <Tag color={TAG_COLOR}>{selectedPlaylist?.title}</Tag>
           </Form.Item>
           <Form.Item name="description" label="Description">
-            <Input.TextArea readOnly rows={4} />
+            {/* <Input.TextArea readOnly rows={4} /> */}
+            <span
+              style={{
+                color: TAG_COLOR,
+              }}
+            >
+              {selectedPlaylist?.description}
+            </span>
           </Form.Item>
-          <Row>
+          <Row gutter={20}>
             <Col span={12}>{this.renderPreviewMedia()}</Col>
             <Col span={12}>
               {/* PlaylistItems Table */}
@@ -422,7 +389,7 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                 rowKey="index"
                 loading={viewPlaylistDetailComponent?.isLoading}
                 key={uuidv4()}
-                className={styles.customTable}
+                // className={styles.customTable}
                 dataSource={selectedPlaylist?.playlistItems}
                 pagination={false}
               >
@@ -459,18 +426,15 @@ export class ViewEditPlaylistComponent extends React.Component<ViewEditPlaylistC
                       <>
                         <Space>
                           <Button
+                            className="lba-btn"
                             onClick={() => {
-                              // this.selectPlaylistItem(record);
-                              console.log('====================================');
-                              console.log(record);
-                              console.log('====================================');
                               this.setViewPlaylistDetailComponent({
                                 playingUrl: record.mediaSrc.urlPreview,
                                 playlingMediaType: record.mediaSrc.type.name,
                               });
                             }}
                           >
-                            <PlaySquareTwoTone size={20} />
+                            <PlaySquareFilled className="lba-icon" size={20} />
                           </Button>
                         </Space>
                       </>

@@ -12,8 +12,6 @@ import {
   Alert,
   Dropdown,
   Menu,
-  Row,
-  Col,
 } from 'antd';
 import * as React from 'react';
 import type { Dispatch, FolderType, MediaSourceModelState, UserModelState } from 'umi';
@@ -31,7 +29,7 @@ import {
   FolderOpenTwoTone,
   FormOutlined,
   HomeTwoTone,
-  SettingTwoTone,
+  SettingFilled,
 } from '@ant-design/icons';
 import { Keccak } from 'sha3';
 import type { EditMediaParam } from '@/services/MediaSourceService';
@@ -71,6 +69,7 @@ class Media extends React.Component<MediaSourceProps> {
           ]).then(() => {
             this.setGetListFilesParam({
               id: undefined,
+              isSigned: undefined,
             });
             this.setListLoading(false);
           });
@@ -439,7 +438,7 @@ class Media extends React.Component<MediaSourceProps> {
       content: (
         <>
           If you remove this folder, every files inside will be removes aslo{'\n'}
-          <span>No undo option is possible</span>
+          <span style={{ color: 'red' }}>No undo option is possible</span>
         </>
       ),
       onOk: () => {
@@ -571,7 +570,16 @@ class Media extends React.Component<MediaSourceProps> {
                         this.breadScrumbNavigate(index);
                       }}
                     >
-                      {item.name === 'Home' ? <HomeTwoTone /> : item.name}
+                      {item.name === 'Home' ? (
+                        <HomeTwoTone
+                          twoToneColor="#fda502"
+                          style={{
+                            fontSize: '1.2em',
+                          }}
+                        />
+                      ) : (
+                        item.name
+                      )}
                     </Breadcrumb.Item>
                   );
                 })}
@@ -581,7 +589,9 @@ class Media extends React.Component<MediaSourceProps> {
           {/* ========================================================================================================================== */}
 
           <ListMediasHeaderComponent {...this.props} />
-          <Divider></Divider>
+          <Divider orientation="left" className="lba-text">
+            Folders
+          </Divider>
           {/* ========================================================================================================================== */}
 
           {/* ========================================================================================================================== */}
@@ -673,132 +683,130 @@ class Media extends React.Component<MediaSourceProps> {
             }}
           ></List>
 
-          <Divider></Divider>
+          <Divider orientation="left" className="lba-text">
+            Medias
+          </Divider>
           {/* ========================================================================================================================== */}
 
           {/* ========================================================================================================================== */}
 
           {/** List Media */}
 
-          <Row gutter={20}>
-            <Col span={24}>
-              <List
-                className={styles.listMediasStyles}
-                grid={{
-                  gutter: 20,
-                  md: 2,
-                  lg: 2,
-                  xl: 3,
-                  xxl: 3,
-                }}
-                style={{ alignItems: 'center', alignContent: 'center' }}
-                dataSource={listMedia}
-                loading={listLoading}
-                pagination={{
-                  current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
-                  total: totalItem,
-                  pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
-                  onChange: async (e) => {
-                    if (searchListMediaParam?.title === '') {
-                      if (getListFileParam && getListFileParam.limit) {
-                        this.setListLoading(true)
-                          .then(() => {
-                            this.callGetListMedia({
-                              offset: getListFileParam.limit ? (e - 1) * getListFileParam.limit : 0,
-                              pageNumber: e - 1,
-                            }).then(() => {
-                              this.setListLoading(false);
-                            });
-                          })
-                          .catch(() => {
-                            this.setListLoading(false);
-                          });
-                      }
-                    } else {
-                      this.setListLoading(true)
-                        .then(() => {
-                          this.callSearchListMedia({
-                            pageNumber: e - 1,
-                          }).then(() => {
-                            this.setListLoading(false);
-                          });
-                        })
-                        .catch(() => {
+          <List
+            className={styles.listMediasStyles}
+            grid={{
+              gutter: 20,
+              md: 2,
+              lg: 2,
+              xl: 3,
+              xxl: 3,
+            }}
+            style={{ alignItems: 'center', alignContent: 'center' }}
+            dataSource={listMedia}
+            loading={listLoading}
+            pagination={{
+              current: getListFileParam?.pageNumber ? getListFileParam.pageNumber + 1 : 1,
+              total: totalItem,
+              pageSize: getListFileParam?.limit ? getListFileParam?.limit : 9,
+              onChange: async (e) => {
+                if (searchListMediaParam?.title === '') {
+                  if (getListFileParam && getListFileParam.limit) {
+                    this.setListLoading(true)
+                      .then(() => {
+                        this.callGetListMedia({
+                          offset: getListFileParam.limit ? (e - 1) * getListFileParam.limit : 0,
+                          pageNumber: e - 1,
+                        }).then(() => {
                           this.setListLoading(false);
                         });
-                    }
-                  },
-                }}
-                header={false}
-                renderItem={(item) => {
-                  return (
-                    <>
-                      {listMedia && listMedia.length > 0 && (
-                        <Skeleton active avatar loading={listLoading}>
-                          <List.Item>
-                            <Card
-                              className={item.isSelected ? 'selected-media' : 'normal-media'}
-                              bordered
-                              hoverable
-                              onClick={() => {
+                      })
+                      .catch(() => {
+                        this.setListLoading(false);
+                      });
+                  }
+                } else {
+                  this.setListLoading(true)
+                    .then(() => {
+                      this.callSearchListMedia({
+                        pageNumber: e - 1,
+                      }).then(() => {
+                        this.setListLoading(false);
+                      });
+                    })
+                    .catch(() => {
+                      this.setListLoading(false);
+                    });
+                }
+              },
+            }}
+            header={false}
+            renderItem={(item) => {
+              return (
+                <>
+                  {listMedia && listMedia.length > 0 && (
+                    <Skeleton active avatar loading={listLoading}>
+                      <List.Item>
+                        <Card
+                          className={item.isSelected ? 'selected-media' : 'normal-media'}
+                          bordered
+                          hoverable
+                          onClick={() => {
+                            this.setSelectedFile(item).then(() => {
+                              this.setViewMediaDetailComponent({
+                                visible: true,
+                              });
+                            });
+                          }}
+                          style={{ width: '100%', height: '100%' }}
+                          cover={
+                            item.type.name.toLowerCase().includes('image') ? (
+                              <Image
+                                src={item.urlPreview}
+                                height={300}
+                                alt="image"
+                                preview={false}
+                              />
+                            ) : (
+                              <HoverVideoPlayer
+                                style={{ height: '300px', width: '100%' }}
+                                videoSrc={item.urlPreview}
+                                restartOnPaused
+                              />
+                            )
+                          }
+                          // title={item.title}
+                          actions={[
+                            <Alert
+                              style={{ height: '40px' }}
+                              type={signatureOfMedia(item.isSigned)}
+                              message={messageOfSignature(item.isSigned)}
+                              icon={<FormOutlined />}
+                              showIcon={true}
+                            ></Alert>,
+                            <SettingFilled
+                              className="lba-icon"
+                              style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
+                              onClick={(e) => {
                                 this.setSelectedFile(item).then(() => {
-                                  this.setViewMediaDetailComponent({
+                                  this.setEditFileDrawer({
                                     visible: true,
                                   });
                                 });
+                                e.stopPropagation();
                               }}
-                              style={{ width: '100%', height: '100%' }}
-                              cover={
-                                item.type.name.toLowerCase().includes('image') ? (
-                                  <Image
-                                    src={item.urlPreview}
-                                    alt="image"
-                                    height={200}
-                                    preview={false}
-                                  />
-                                ) : (
-                                  <HoverVideoPlayer
-                                    style={{ height: 200 }}
-                                    videoSrc={item.urlPreview}
-                                    restartOnPaused
-                                  />
-                                )
-                              }
-                              // title={item.title}
-                              actions={[
-                                <Alert
-                                  style={{ height: '40px' }}
-                                  type={signatureOfMedia(item.isSigned)}
-                                  message={messageOfSignature(item.isSigned)}
-                                  icon={<FormOutlined />}
-                                  showIcon={true}
-                                ></Alert>,
-                                <SettingTwoTone
-                                  className="lba-icon"
-                                  twoToneColor="#00cdac"
-                                  style={{ height: '40px', lineHeight: '40px', fontSize: '1.5em' }}
-                                  onClick={(e) => {
-                                    this.setSelectedFile(item).then(() => {
-                                      this.setEditFileDrawer({
-                                        visible: true,
-                                      });
-                                    });
-                                    e.stopPropagation();
-                                  }}
-                                />,
-                              ]}
-                            >
-                              <Card.Meta title={item.title} />
-                            </Card>
-                          </List.Item>
-                        </Skeleton>
-                      )}
-                    </>
-                  );
-                }}
-              ></List>
-            </Col>
-            {/* <Col span={8}>
+                            />,
+                          ]}
+                        >
+                          <Card.Meta title={item.title} />
+                        </Card>
+                      </List.Item>
+                    </Skeleton>
+                  )}
+                </>
+              );
+            }}
+          ></List>
+          {/* <Col span={8}>
               {viewMediaDetailComponent?.visible && (
                 <Typography.Title level={4} className="lba-text">
                   Media Detail
@@ -807,7 +815,6 @@ class Media extends React.Component<MediaSourceProps> {
               {viewMediaDetailComponent?.visible && <ViewMediaDetailComponent {...this.props} />}
               {!viewMediaDetailComponent?.visible && <Empty description={<>Preview Media</>} />}
             </Col> */}
-          </Row>
           {/* View Detail Media Drawer ========================================================================================================================== */}
           <Drawer
             visible={viewMediaDetailComponent?.visible}
@@ -885,6 +892,14 @@ class Media extends React.Component<MediaSourceProps> {
             }}
             onOk={() => {
               this.renameFolderModalRef.current?.handleUpdateFolder();
+            }}
+            okButtonProps={{
+              className: 'lba-btn',
+              icon: <CheckCircleFilled className="lba-icon" />,
+            }}
+            cancelButtonProps={{
+              icon: <CloseCircleFilled className="lba-close-icon" />,
+              danger: true,
             }}
           >
             {renameFolderModal?.visible && (

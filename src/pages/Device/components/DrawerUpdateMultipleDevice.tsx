@@ -52,6 +52,16 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
     );
   };
 
+  setSelectedDevice = async (record?: any) => {
+    await this.props.dispatch({
+      type: 'deviceStore/setCurrentDevice',
+      payload: {
+        ...this.props.deviceStore.selectedDevice,
+        ...record,
+      },
+    });
+  };
+
   handleRemoveDateFilter = (index: any) => {
     const { isUpdateMultiple, updateDevicesState, selectedDevice } = this.props.deviceStore;
     const listTimeFilter = isUpdateMultiple
@@ -72,18 +82,26 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
         },
       });
     } else {
-      this.props.dispatch({
-        type: 'deviceStore/setCurrentDevice',
-        payload: {
-          ...selectedDevice,
-          timeFilter: listTimeFilter?.map((time, i) => {
-            if (i.toString() === index) {
-              return 0;
-            }
-            return time;
-          }),
-        },
+      this.setSelectedDevice({
+        timeFilter: listTimeFilter?.map((time, i) => {
+          if (i.toString() === index) {
+            return 0;
+          }
+          return time;
+        }),
       });
+      // this.props.dispatch({
+      //   type: 'deviceStore/setCurrentDevice',
+      //   payload: {
+      //     ...selectedDevice,
+      //     timeFilter: listTimeFilter?.map((time, i) => {
+      //       if (i.toString() === index) {
+      //         return 0;
+      //       }
+      //       return time;
+      //     }),
+      //   },
+      // });
     }
   };
 
@@ -160,18 +178,26 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
                             },
                           });
                         } else {
-                          this.props.dispatch({
-                            type: 'deviceStore/setCurrentDevice',
-                            payload: {
-                              ...selectedDevice,
-                              timeFilter: timeFilter?.map((time, index) => {
-                                if (index >= startDate && index < endDate) {
-                                  return '1';
-                                }
-                                return time;
-                              }),
-                            },
+                          this.setSelectedDevice({
+                            timeFilter: timeFilter?.map((time, index) => {
+                              if (index >= startDate && index < endDate) {
+                                return '1';
+                              }
+                              return time;
+                            }),
                           });
+                          // this.props.dispatch({
+                          //   type: 'deviceStore/setCurrentDevice',
+                          //   payload: {
+                          //     ...selectedDevice,
+                          //     timeFilter: timeFilter?.map((time, index) => {
+                          //       if (index >= startDate && index < endDate) {
+                          //         return '1';
+                          //       }
+                          //       return time;
+                          //     }),
+                          //   },
+                          // });
                         }
                       }
                     }
@@ -202,18 +228,21 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
         <Divider></Divider>
         {!isUpdateMultiple && (
           <Row>
-            <Col flex={3}>Discription</Col>
+            <Col flex={3}>Description</Col>
             <Col flex={5}>
               <Input
                 value={selectedDevice?.description}
                 onChange={(e) => {
-                  this.props.dispatch({
-                    type: 'deviceStore/setCurrentDevice',
-                    payload: {
-                      ...selectedDevice,
-                      description: e.target.value,
-                    },
+                  this.setSelectedDevice({
+                    description: e.target.value,
                   });
+                  // this.props.dispatch({
+                  //   type: 'deviceStore/setCurrentDevice',
+                  //   payload: {
+                  //     ...selectedDevice,
+                  //     description: e.target.value,
+                  //   },
+                  // });
                 }}
               ></Input>
             </Col>

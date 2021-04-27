@@ -1,13 +1,30 @@
 import type { BaseGetRequest } from './../BaseRequest';
 import { CONSTANTS_LBA } from '../constantUrls';
 import ApiHelper from '@/apis/LBA_API';
+import type { Layout, Playlist } from 'umi';
+import qs from 'qs';
 
 export type GetListScenariosParam = BaseGetRequest;
 
 export type PostScenarioParam = {
+  id: string;
   layoutId: string;
   title: string;
   description: string;
+  layout?: Layout;
+  scenarioItems?: ScenarioItemPost[];
+};
+
+export type ScenarioItemPost = {
+  id: string;
+  displayOrder: number;
+  playlistId: string;
+  playlist: Playlist;
+  scenarioId: string;
+  areaId: string;
+  isActive: boolean;
+  audioArea: boolean;
+  isSelected?: boolean;
 };
 
 export type UpdateScenarioParam = {
@@ -16,7 +33,7 @@ export type UpdateScenarioParam = {
   title: string;
   description: string;
   scenarioItems: UpdateScenarioItem[];
-}
+};
 
 export type UpdateScenarioItem = {
   id?: string;
@@ -26,32 +43,30 @@ export type UpdateScenarioItem = {
   areaId?: string;
   isActive?: boolean;
   audioArea?: boolean;
-}
+};
 
 export async function GetListScenarios(param: GetListScenariosParam) {
   const res = await ApiHelper.get(`${CONSTANTS_LBA.SCENARIO_URL}`, { params: { ...param } });
-  console.log('====================================');
-  console.log("Response >>>>", res);
-  console.log('====================================');
   return res;
 }
 
 export async function CreateNewScenario(param: PostScenarioParam) {
-  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param).catch((error) => {
+  const { data } = await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param, {
+    paramsSerializer: (params) => {
+      return qs.stringify(params);
+    },
+  }).catch((error) => {
     return Promise.reject(new Error(error));
   });
   return data;
 }
 
-
 export async function UpdateScenario(param: UpdateScenarioParam) {
-
-  console.log('====================================');
-  console.log("Update Param >>>>", param);
-  console.log('====================================');
-  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.SCENARIO_URL}/${param.id}`, param).catch((error) => {
-    return Promise.reject(new Error(error));
-  });
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.SCENARIO_URL}/${param.id}`, param).catch(
+    (error) => {
+      return Promise.reject(new Error(error));
+    },
+  );
   return data;
 }
 

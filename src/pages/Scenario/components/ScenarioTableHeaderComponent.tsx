@@ -1,8 +1,4 @@
-import {
-  PlusSquareTwoTone,
-  SortAscendingOutlined,
-  SortDescendingOutlined,
-} from '@ant-design/icons';
+import { PlusSquareFilled, SortAscendingOutlined, SortDescendingOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Input, Menu, Select, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, ScenarioModelState } from 'umi';
@@ -56,10 +52,7 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
                   pageNumber: 0,
                 });
               })
-              .catch((error) => {
-                console.log('====================================');
-                console.log(error);
-                console.log('====================================');
+              .catch(() => {
                 this.setTableLoading(false);
               });
           }}
@@ -125,7 +118,7 @@ export class ScenarioTableHeaderComponent extends React.Component<ScenarioTableH
           }}
           className="lba-btn"
         >
-          <PlusSquareTwoTone twoToneColor="#00cdac" /> Add New Scenario
+          <PlusSquareFilled className="lba-icon" /> Add New Scenario
         </Button>
       </Space>
     );

@@ -61,18 +61,18 @@
                 path: '/campaign',
                 component: './Campaign',
               },
-              {
-                name: 'list.earned-screen',
-                icon: 'MoneyCollectOutlined',
-                path: '/earn',
-                component: './Earned',
-              },
-              {
-                name: 'list.transaction-screen',
-                icon: 'TransactionOutlined',
-                path: '/transaction',
-                component: './Transaction',
-              },
+              // {
+              //   name: 'list.earned-screen',
+              //   icon: 'MoneyCollectOutlined',
+              //   path: '/earn',
+              //   component: './Earned',
+              // },
+              // {
+              //   name: 'list.transaction-screen',
+              //   icon: 'TransactionOutlined',
+              //   path: '/transaction',
+              //   component: './Transaction',
+              // },
               {
                 name: 'list.scenario-list',
                 icon: 'ContainerOutlined',

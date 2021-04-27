@@ -1,12 +1,11 @@
 import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPageService/PlaylistItemService';
 import { openNotification } from '@/utils/utils';
 import {
-  CloseSquareTwoTone,
-  DeleteTwoTone,
+  CheckCircleFilled,
+  CloseCircleFilled,
   MenuOutlined,
   MinusSquareTwoTone,
-  PlaySquareTwoTone,
-  SettingTwoTone,
+  PlaySquareFilled,
 } from '@ant-design/icons';
 import {
   Button,
@@ -38,7 +37,7 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
-import styles from './index.less';
+// import styles from './index.less';
 // import { MediasTableComponent } from './components/MediasTableComponent';
 import { SelectMediaModal } from './components/SelectMediaModal';
 // import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
@@ -51,7 +50,7 @@ export type EditPlaylistFormDrawerProps = {
 };
 
 const DragHandle = SortableHandle(() => (
-  <MenuOutlined style={{ cursor: 'pointer', color: '#999' }} />
+  <MenuOutlined style={{ cursor: 'pointer' }} className="lba-icon" />
 ));
 const SortableItemComponent = SortableElement((props: any) => <tr {...props} />);
 const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
@@ -59,9 +58,6 @@ const SortableContainerComponent = SortableContainer((props: any) => <tbody {...
 export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDrawerProps> {
   componentDidMount = () => {
     const { selectedPlaylist } = this.props.playlists;
-    console.log('====================================');
-    console.log(selectedPlaylist, this.formRef, this.formRef.current);
-    console.log('====================================');
     if (this.formRef.current && selectedPlaylist) {
       this.formRef.current.setFieldsValue({
         title: selectedPlaylist.title,
@@ -160,15 +156,15 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
-  setViewPlaylistDetailComponent = async (param?: any) => {
-    await this.props.dispatch({
-      type: 'playlists/setViewPlaylistDetailComponentReducer',
-      payload: {
-        ...this.props.playlists.viewPlaylistDetailComponent,
-        ...param,
-      },
-    });
-  };
+  // setViewPlaylistDetailComponent = async (param?: any) => {
+  //   await this.props.dispatch({
+  //     type: 'playlists/setViewPlaylistDetailComponentReducer',
+  //     payload: {
+  //       ...this.props.playlists.viewPlaylistDetailComponent,
+  //       ...param,
+  //     },
+  //   });
+  // };
 
   handleRemovePlaylist = async () => {
     const { selectedPlaylist } = this.props.playlists;
@@ -176,47 +172,44 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       title: `Are you sure you want to remove ${selectedPlaylist?.title}`,
       centered: true,
       closable: false,
+      okButtonProps: {
+        className: 'lba-btn',
+        icon: <CheckCircleFilled className="lba-icon" />,
+      },
+      cancelButtonProps: {
+        icon: <CloseCircleFilled className="lba-close-icon" />,
+        danger: true,
+      },
       onOk: () => {
         this.setEditPlaylistDrawer({
           isLoading: true,
-        })
-          .then(() => {
-            this.removePlaylist()
-              .then(() => {
-                this.callGetListPlaylist().then(() => {
-                  openNotification(
-                    'success',
-                    'Remove playlist successfully',
-                    `Playlist ${selectedPlaylist?.title} was removed`,
-                  );
-                  this.setEditPlaylistDrawer({
-                    isLoading: false,
-                    visible: false,
-                  });
-                });
-              })
-              .catch((error) => {
-                openNotification('error', 'Fail to remove playlist', error.message);
+        }).then(() => {
+          this.removePlaylist()
+            .then(() => {
+              this.callGetListPlaylist().then(() => {
+                openNotification(
+                  'success',
+                  'Remove playlist successfully',
+                  `Playlist ${selectedPlaylist?.title} was removed`,
+                );
                 this.setEditPlaylistDrawer({
                   isLoading: false,
                   visible: false,
                 });
               });
-          })
-          .catch(() => {
-            this.setEditPlaylistDrawer({
-              isLoading: false,
-              visible: false,
+            })
+            .catch((error) => {
+              openNotification('error', 'Fail to remove playlist', error.message);
+              this.setEditPlaylistDrawer({
+                isLoading: false,
+                visible: false,
+              });
             });
-          });
+        });
       },
       onCancel: () => {
         this.setEditPlaylistDrawer({
           visible: false,
-        }).then(() => {
-          // this.setViewPlaylistDetailComponent({
-          //   visible: true,
-          // });
         });
       },
     });
@@ -482,6 +475,38 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
+  handleUpdatePlaylist = async () => {
+    const { selectedPlaylist } = this.props.playlists;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        this.setEditPlaylistDrawer({
+          isLoading: true,
+        });
+        this.updatePlaylist(values)
+          .then(() => {
+            this.callGetListPlaylist().then(() => {
+              openNotification(
+                'success',
+                'update playlist successfully',
+                `Playlist ${selectedPlaylist?.title} was updated`,
+              );
+              this.setEditPlaylistDrawer({
+                isLoading: false,
+                visible: false,
+              });
+            });
+          })
+          .catch((error) => {
+            openNotification('error', 'Fail tp update playlist', error.message);
+            this.setEditPlaylistDrawer({
+              isLoading: false,
+              visible: false,
+            });
+          });
+      });
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -497,92 +522,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     const totalD = totalDuration || 0;
     const availableDuration = maxD - totalD;
     return (
-      <Modal
-        closable={false}
-        destroyOnClose={true}
-        className={styles.editPlaylistModal}
-        visible={editPlaylistDrawer?.visible}
-        afterClose={() => {
-          this.setSelectedPlaylistItems([]);
-          this.clearSelectedPlaylist();
-        }}
-        zIndex={2}
-        title="Edit Playlist"
-        width={'55%'}
-        onCancel={async () => {
-          this.setEditPlaylistDrawer({
-            visible: false,
-          }).then(() => {
-            // this.setViewPlaylistDetailComponent({
-            //   visible: true,
-            // });
-          });
-        }}
-        footer={
-          <>
-            <div style={{ textAlign: 'right' }}>
-              <Space>
-                <Button
-                  onClick={async () => {
-                    await this.setEditPlaylistDrawer({
-                      visible: false,
-                    });
-                  }}
-                  icon={<CloseSquareTwoTone />}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  danger
-                  onClick={async () => {
-                    this.handleRemovePlaylist();
-                  }}
-                  icon={<DeleteTwoTone twoToneColor="#f93e3e" />}
-                >
-                  Delete
-                </Button>
-                <Button
-                  onClick={async () => {
-                    if (this.formRef.current) {
-                      this.formRef.current.validateFields().then((values) => {
-                        this.setEditPlaylistDrawer({
-                          isLoading: true,
-                        });
-                        this.updatePlaylist(values)
-                          .then(() => {
-                            this.callGetListPlaylist().then(() => {
-                              openNotification(
-                                'success',
-                                'update playlist successfully',
-                                `Playlist ${selectedPlaylist?.title} was updated`,
-                              );
-                              this.setEditPlaylistDrawer({
-                                isLoading: false,
-                                visible: false,
-                              });
-                            });
-                          })
-                          .catch((error) => {
-                            openNotification('error', 'Fail tp update playlist', error.message);
-                            this.setEditPlaylistDrawer({
-                              isLoading: false,
-                              visible: false,
-                            });
-                          });
-                      });
-                    }
-                  }}
-                  className="lba-btn"
-                  icon={<SettingTwoTone twoToneColor="#00cdac" />}
-                >
-                  Save Change
-                </Button>
-              </Space>
-            </div>
-          </>
-        }
-      >
-        {/* <EditPlaylistDrawer {...this.props}></EditPlaylistDrawer> */}
+      <div className="modal-content">
         <Form name="edit_playlists_form_drawer" layout="vertical" ref={this.formRef}>
           <Form.Item
             name="title"
@@ -616,7 +556,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                     row: this.DraggableBodyRow,
                   },
                 }}
-                className={styles.customTable}
+                // className={styles.customTable}
                 dataSource={selectedPlaylist?.playlistItems}
                 pagination={false}
               >
@@ -668,6 +608,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                       <>
                         <Space>
                           <Button
+                            className="lba-btn"
                             onClick={() => {
                               this.setEditPlaylistDrawer({
                                 playingUrl: record.mediaSrc.urlPreview,
@@ -675,7 +616,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                               });
                             }}
                           >
-                            <PlaySquareTwoTone size={20} />
+                            <PlaySquareFilled className="lba-icon" size={20} />
                           </Button>
                           <Button
                             danger
@@ -695,43 +636,16 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                   }}
                 ></Column>
               </Table>
-              {/* <Button
-                className="add-new-media-btn"
-                block
-                size="large"
-                onClick={() => {
-                  this.setSelectMediaModal({
-                    visible: true,
-                  });
-                }}
-              >
-                <div className="add-media-overlap"></div>
-                <div className="add-media-text">Add New Media</div>
-              </Button> */}
             </Col>
           </Row>
-          <Divider orientation="center" className="lba-text">
+          <Divider orientation="center" className="lba-label">
             Select Media Area
           </Divider>
           <Row>
             <SelectMediaModal {...this.props} />
           </Row>
         </Form>
-        {/* <Drawer
-          closable={false}
-          destroyOnClose={true}
-          visible={selectMediaModal?.visible}
-          title="Select Media"
-          width={'50%'}
-          onClose={() => {
-            this.setSelectMediaModal({
-              visible: false,
-            });
-          }}
-        >
-          {selectMediaModal?.visible && <SelectMediaModal {...this.props} />}
-        </Drawer> */}
-      </Modal>
+      </div>
     );
   }
 }
