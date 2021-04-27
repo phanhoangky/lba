@@ -91,3 +91,8 @@ export async function DeleteDevice(id: string) {
   });
   return data;
 }
+
+export async function WithdrawDevice(id: string) {
+  const { data } = await ApiHelper.get(`${CONSTANTS_LBA.DEVICES_URL}/${id}/withdraw`);
+  return data;
+}

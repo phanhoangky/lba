@@ -2,7 +2,13 @@ import { PageContainer } from '@ant-design/pro-layout';
 // import firebase from '@/services/firebase';
 import React from 'react';
 import { Button, Drawer, Modal, Space, Table, Tooltip } from 'antd';
-import type { DeviceModelState, Dispatch, ScenarioModelState, UserModelState } from 'umi';
+import type {
+  DeviceModelState,
+  DeviceType,
+  Dispatch,
+  ScenarioModelState,
+  UserModelState,
+} from 'umi';
 import { connect } from 'umi';
 import Column from 'antd/lib/table/Column';
 // import DrawerUpdateMultipleDevice from './components/DrawerUpdateMultipleDevice';
@@ -12,6 +18,7 @@ import {
   CheckCircleFilled,
   CloseCircleFilled,
   DeleteTwoTone,
+  DollarOutlined,
   EditFilled,
   ExclamationCircleOutlined,
   EyeFilled,
@@ -48,9 +55,9 @@ class Device extends React.Component<DeviceProps> {
 
   componentDidMount = () => {
     this.setDevicesTableLoading(true).then(async () => {
-      this.readJWT().catch((error) => {
-        openNotification('error', 'Error', error.message);
-      });
+      // this.readJWT().catch((error) => {
+      //   openNotification('error', 'Error', error.message);
+      // });
       Promise.all([this.callGetListScenarios({ isPaging: false }), this.callGetListDevices()])
         .then(() => {
           this.setGetDevicesParam({
@@ -253,6 +260,43 @@ class Device extends React.Component<DeviceProps> {
     });
   };
 
+  withdrawDeviceMoney = async (device: DeviceType) => {
+    await this.props.dispatch({
+      type: `deviceStore/withdrawDevice`,
+      payload: device.id,
+    });
+  };
+
+  setCurrentUser = async (param?: any) => {
+    await this.props.dispatch({
+      type: 'user/saveCurrentUser',
+      payload: {
+        ...this.props.user.currentUser,
+        ...param,
+      },
+    });
+  };
+
+  handleWithdrawDeviceMoney = async (device: DeviceType) => {
+    this.setDevicesTableLoading(true).then(() => {
+      this.withdrawDeviceMoney(device)
+        .then(() => {
+          this.callGetListDevices().then(() => {
+            this.props.user.currentUser?.ether?.getBalance().then((res) => {
+              this.setCurrentUser({
+                balance: res.toString(),
+              }).then(() => {
+                this.setDevicesTableLoading(false);
+              });
+            });
+          });
+        })
+        .catch(() => {
+          this.setDevicesTableLoading(false);
+        });
+    });
+  };
+
   updateDeviceFormRef = React.createRef<UpdateDeviceFormDrawer>();
   updateDeviceFooterRef = React.createRef<UpdateDeviceDrawerFooter>();
   render() {
@@ -296,7 +340,7 @@ class Device extends React.Component<DeviceProps> {
           <Table
             dataSource={listDevices}
             style={{}}
-            scroll={{ y: 400, x: 500 }}
+            scroll={{ y: 400 }}
             loading={devicesTableLoading}
             title={() => {
               return <DevicesTableHeaderComponent {...this.props} />;
@@ -336,6 +380,15 @@ class Device extends React.Component<DeviceProps> {
             <Column key="resolution" title="Resolution" dataIndex="resolution" width="100"></Column>
             <Column key="macAddress" title="MacAddress" dataIndex="macaddress" width="100"></Column>
             <Column
+              key="income"
+              title="Income (Week)"
+              render={(record: DeviceType) => {
+                return (
+                  <>{record.incomeInWeek?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} VND</>
+                );
+              }}
+            ></Column>
+            <Column
               key="location"
               title="Location"
               // dataIndex={['location', 'name']}
@@ -352,8 +405,31 @@ class Device extends React.Component<DeviceProps> {
               }}
             ></Column>
             <Column
+              key="screenShot"
+              title="ScreenShot"
+              render={(record) => {
+                return (
+                  <Space>
+                    <Button
+                      className="lba-btn"
+                      onClick={() => {
+                        this.setSelectedDevice(record).then(() => {
+                          this.setViewScreenshotModal({
+                            visible: true,
+                          });
+                        });
+                      }}
+                    >
+                      Sreenshot
+                    </Button>
+                  </Space>
+                );
+              }}
+            ></Column>
+            <Column
               key="action"
               title="Action"
+              fixed
               render={(record) => {
                 return (
                   <Space>
@@ -392,6 +468,14 @@ class Device extends React.Component<DeviceProps> {
                       <EditFilled className="lba-icon" />
                     </Button>
                     <Button
+                      className="lba-btn"
+                      onClick={() => {
+                        this.handleWithdrawDeviceMoney(record);
+                      }}
+                    >
+                      <DollarOutlined className="lba-icon" />
+                    </Button>
+                    <Button
                       danger
                       onClick={(e) => {
                         // this.setEditModalVisible(true);
@@ -404,29 +488,7 @@ class Device extends React.Component<DeviceProps> {
                   </Space>
                 );
               }}
-              width="100"
-            ></Column>
-            <Column
-              key="screenShot"
-              title="ScreenShot"
-              render={(record) => {
-                return (
-                  <Space>
-                    <Button
-                      className="lba-btn"
-                      onClick={() => {
-                        this.setSelectedDevice(record).then(() => {
-                          this.setViewScreenshotModal({
-                            visible: true,
-                          });
-                        });
-                      }}
-                    >
-                      Sreenshot
-                    </Button>
-                  </Space>
-                );
-              }}
+              width={250}
             ></Column>
           </Table>
         </PageContainer>

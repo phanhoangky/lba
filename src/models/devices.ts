@@ -4,6 +4,7 @@ import {
   GetListTypes,
   UpdateDevice,
   UpdateListDevices,
+  WithdrawDevice,
 } from '@/services/DeviceService';
 import type {
   GetDeviceParams,
@@ -39,6 +40,7 @@ export type DeviceType = {
   location?: any;
   defaultScenarioId?: string;
   defaultScenario?: any;
+  incomeInWeek?: number;
 };
 
 export type DeviceModelState = {
@@ -96,6 +98,8 @@ export type DeviceModelType = {
     setGetDevicesParam: Effect;
 
     fetchDevicesScreenShot: Effect;
+
+    withdrawDevice: Effect;
   };
 
   // 4. Reducers
@@ -380,6 +384,10 @@ const DeviceModel: DeviceModelType = {
         type: 'setListDevicesScreenShotReducer',
         payload: data,
       });
+    },
+
+    *withdrawDevice({ payload }, { call }) {
+      yield call(WithdrawDevice, payload);
     },
   },
 
