@@ -440,7 +440,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             ></Column>
             <Column
               key="budget"
-              title="Budget"
+              title="Budget (VND)"
               render={(record: Campaign) => {
                 return <>{record.budget.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}</>;
               }}

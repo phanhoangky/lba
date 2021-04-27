@@ -51,6 +51,7 @@ export class FilterDate extends React.Component<FilterTimeProps> {
   render() {
     const { isUpdateMultiple, selectedDevice, updateDevicesState } = this.props.deviceStore;
     const data = isUpdateMultiple ? updateDevicesState?.dateFilter : selectedDevice?.dateFilter;
+    const { disabled } = this.props;
     return (
       <>
         <Space wrap={true}>
@@ -61,7 +62,7 @@ export class FilterDate extends React.Component<FilterTimeProps> {
                   this.handleChooseDate(index);
                 }}
                 // type={d === '1' ? 'primary' : 'default'}
-                className={d === '1' ? 'lba-btn' : ''}
+                className={d === '1' ? (disabled ? 'lba-normal-btn' : 'lba-btn') : ''}
                 key={`${Math.random() + 100}`}
               >
                 {index === 0 && 'Monday'}

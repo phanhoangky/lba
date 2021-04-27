@@ -4,7 +4,7 @@ import {
   ClockCircleFilled,
   CloseOutlined,
 } from '@ant-design/icons';
-import { Button, Divider, Form, Space, Switch, Tag } from 'antd';
+import { Divider, Form, Space, Switch, Tag } from 'antd';
 import moment from 'moment';
 import * as React from 'react';
 import type { Dispatch, DeviceModelState, ScenarioModelState } from 'umi';
@@ -21,9 +21,6 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
   render() {
     const { selectedDevice } = this.props.deviceStore;
     const timeFilter = selectedDevice?.timeFilter;
-    console.log('====================================');
-    console.log('view Detail Device >>>', selectedDevice);
-    console.log('====================================');
     const displayTimeFilter = timeFilter?.map((time, index) => {
       return (
         time === '1' && (
@@ -32,7 +29,7 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
             style={{
               fontWeight: 'bolder',
             }}
-            className="lba-btn"
+            className="lba-nornal-btn"
           >
             {`${index} h - ${index + 1} h`}
           </Tag>
@@ -98,7 +95,6 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
             </Space>
             {/* </Skeleton> */}
           </Form.Item>
-          <Divider></Divider>
 
           <Form.Item label="Publish">
             <Switch

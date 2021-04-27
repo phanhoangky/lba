@@ -1,6 +1,15 @@
-import { CreateLocation, DeleteLocation, GetLocations, UpdateLocation } from "@/services/LocationService/LocationService";
-import type { CreateLocationParam, GetLocationParam } from '@/services/LocationService/LocationService';
-import { Effect, Reducer } from "umi";
+import {
+  CreateLocation,
+  DeleteLocation,
+  GetLocations,
+  UpdateLocation,
+} from '@/services/LocationService/LocationService';
+import type {
+  CreateLocationParam,
+  GetLocationParam,
+} from '@/services/LocationService/LocationService';
+import { Effect, Reducer } from 'umi';
+import moment from 'moment';
 
 export type Location = {
   key: string;
@@ -15,19 +24,17 @@ export type Location = {
   createBy?: string;
   createTime?: string;
   matchingCode: string;
-  isActive: boolean,
+  isActive: boolean;
   type?: {
     id: string;
     typeName: string;
-  },
+  };
   typeId: string;
   typeName: string;
   address: string;
   isSelected: boolean;
   totalDevices: number;
 };
-
-
 
 export type LocationModelState = {
   listLocations?: Location[];
@@ -49,12 +56,12 @@ export type LocationModelState = {
   editLocationModal?: {
     visible: boolean;
     isLoading: boolean;
-  },
+  };
 
   viewLocationDetailComponent?: {
     visible: boolean;
     isLoading: boolean;
-  }
+  };
   addressSuggestList?: any[];
 
   mapComponent?: {
@@ -62,9 +69,8 @@ export type LocationModelState = {
     marker?: L.Marker;
     circle?: L.Circle;
     layer?: L.TileLayer;
-  }
+  };
 };
-
 
 export type LocationStoreModel = {
   namespace: string;
@@ -81,7 +87,7 @@ export type LocationStoreModel = {
   reducers: {
     setListLocationsReducer: Reducer<LocationModelState>;
     setGetListLocationParamReducer: Reducer<LocationModelState>;
-    
+
     setTotalItemReducer: Reducer<LocationModelState>;
     setLocationTableLoadingReducer: Reducer<LocationModelState>;
     setSelectedLocationReducer: Reducer<LocationModelState>;
@@ -99,12 +105,11 @@ export type LocationStoreModel = {
     setMapComponentReducer: Reducer<LocationModelState>;
 
     setViewLocationDetailComponentReducer: Reducer<LocationModelState>;
-  }
-}
-
+  };
+};
 
 const LocationStore: LocationStoreModel = {
-  namespace: "location",
+  namespace: 'location',
 
   state: {
     listLocations: [],
@@ -129,14 +134,14 @@ const LocationStore: LocationStoreModel = {
     //   address: "",
     //   isSelected: false
     // },
-    
+
     createLocationParam: {
-      description: "",
-      latitude: "",
-      longitude: "",
-      name: "",
-      typeId: "",
-      address: ""
+      description: '',
+      latitude: '',
+      longitude: '',
+      name: '',
+      typeId: '',
+      address: '',
     },
 
     getListLocationParam: {
@@ -144,13 +149,13 @@ const LocationStore: LocationStoreModel = {
       isPaging: true,
       isSort: false,
       pageLimitItem: 10,
-      pageNumber: 0
+      pageNumber: 0,
     },
 
     addNewLocationModal: {
       isLoading: false,
       visible: false,
-      addressSearchBoxLoading: false
+      addressSearchBoxLoading: false,
     },
 
     editLocationModal: {
@@ -169,8 +174,8 @@ const LocationStore: LocationStoreModel = {
 
     viewLocationDetailComponent: {
       isLoading: false,
-      visible: false
-    }
+      visible: false,
+    },
   },
 
   effects: {
@@ -178,33 +183,33 @@ const LocationStore: LocationStoreModel = {
       const { data } = yield call(GetLocations, payload);
 
       yield put({
-        type: "setListLocationsReducer",
+        type: 'setListLocationsReducer',
         payload: data.result.data.map((item: any) => {
           return {
             key: item.id,
             ...item,
             typeId: item.type.id,
             typeName: item.type.typeName,
-            isSelected: false
-          }
-        })
+            isSelected: false,
+            createTime: moment(data.createTime).format('YYYY-MM-DD'),
+          };
+        }),
       });
 
       yield put({
-        type: "setTotalItemReducer",
-        payload: data.result.totalItem
+        type: 'setTotalItemReducer',
+        payload: data.result.totalItem,
       });
 
       yield put({
-        type: "setGetListLocationParamReducer",
-        payload
-      })
+        type: 'setGetListLocationParamReducer',
+        payload,
+      });
     },
 
     *createLocation({ payload }, { call }) {
       try {
         return yield call(CreateLocation, payload);
-
       } catch (error) {
         // console.log('====================================');
         // console.log(error, error.message);
@@ -224,19 +229,18 @@ const LocationStore: LocationStoreModel = {
     *deleteLocation({ payload }, { call }) {
       try {
         return yield call(DeleteLocation, payload);
-        
       } catch (error) {
         return Promise.reject(error);
       }
-    }
+    },
   },
 
   reducers: {
     setListLocationsReducer(state, { payload }) {
       return {
         ...state,
-        listLocations: payload
-      }
+        listLocations: payload,
+      };
     },
 
     setGetListLocationParamReducer(state, { payload }) {
@@ -244,23 +248,23 @@ const LocationStore: LocationStoreModel = {
         ...state,
         getListLocationParam: {
           ...state?.getListLocationParam,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     setTotalItemReducer(state, { payload }) {
       return {
         ...state,
-        totalItem: payload
-      }
+        totalItem: payload,
+      };
     },
 
     setLocationTableLoadingReducer(state, { payload }) {
       return {
         ...state,
-        locationTableLoading: payload
-      }
+        locationTableLoading: payload,
+      };
     },
 
     setSelectedLocationReducer(state, { payload }) {
@@ -268,18 +272,18 @@ const LocationStore: LocationStoreModel = {
         ...state,
         selectedLocation: {
           ...state?.selectedLocation,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
     setCreateLocationParamReducer(state, { payload }) {
       return {
         ...state,
         createLocationParam: {
           ...state?.createLocationParam,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     setAddNewLocationModalReducer(state, { payload }) {
@@ -287,24 +291,24 @@ const LocationStore: LocationStoreModel = {
         ...state,
         addNewLocationModal: {
           ...state?.addNewLocationModal,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     clearCreateLocationParamReducer(state) {
       return {
         ...state,
         createLocationParam: {
-          brandId: "",
-          description: "",
-          latitude: "",
-          longitude: "",
-          name: "",
-          typeId: "",
-          address: ""
-        }
-      }
+          brandId: '',
+          description: '',
+          latitude: '',
+          longitude: '',
+          name: '',
+          typeId: '',
+          address: '',
+        },
+      };
     },
 
     setEditLocationModalReduder(state, { payload }) {
@@ -312,16 +316,16 @@ const LocationStore: LocationStoreModel = {
         ...state,
         editLocationModal: {
           ...state?.editLocationModal,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     setAddressSearchListReducer(state, { payload }) {
       return {
         ...state,
-        addressSuggestList: payload
-      }
+        addressSuggestList: payload,
+      };
     },
 
     setMapComponentReducer(state, { payload }) {
@@ -329,53 +333,52 @@ const LocationStore: LocationStoreModel = {
         ...state,
         mapComponent: {
           ...state?.mapComponent,
-          ...payload
-        }
-      }
+          ...payload,
+        },
+      };
     },
 
     clearSelectedLocationReducer(state) {
       return {
         ...state,
         selectedLocation: {
-          key: "",
-          id: "",
-          description: "",
+          key: '',
+          id: '',
+          description: '',
           isActive: true,
           isApprove: false,
-          latitude: "",
-          longitude: "",
-          matchingCode: "",
-          name: "",
+          latitude: '',
+          longitude: '',
+          matchingCode: '',
+          name: '',
           type: {
-            id: "",
-            typeName: ""
+            id: '',
+            typeName: '',
           },
-          typeName: "",
-          typeId: "",
+          typeName: '',
+          typeId: '',
 
           brand: {
-            id: "",
-            name: ""
+            id: '',
+            name: '',
           },
 
-          brandId: "",
-          brandName: "",
-          address: "",
+          brandId: '',
+          brandName: '',
+          address: '',
           isSelected: false,
-          totalDevices: 0
-        }
-      }
+          totalDevices: 0,
+        },
+      };
     },
 
     setViewLocationDetailComponentReducer(state, { payload }) {
       return {
         ...state,
-        viewLocationDetailComponent: payload
-      }
-    }
-  }
-}
-
+        viewLocationDetailComponent: payload,
+      };
+    },
+  },
+};
 
 export default LocationStore;

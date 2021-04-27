@@ -173,6 +173,10 @@ class WalletScreen extends React.Component<WalletProps> {
     });
   };
 
+  openInNewTab = (url: string) => {
+    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+    if (newWindow) newWindow.opener = null;
+  };
   updateProfileModalRef = React.createRef<UpdateProfileModal>();
   changePasswordModalRef = React.createRef<ChangePasswordModal>();
   render() {
@@ -251,6 +255,12 @@ class WalletScreen extends React.Component<WalletProps> {
                     return {
                       onDoubleClick: () => {
                         this.redirectByTypeTransaction(record);
+                      },
+
+                      onClick: () => {
+                        this.openInNewTab(
+                          `https://scan.testnet.tomochain.com/txs/${record.txHash}`,
+                        );
                       },
                     };
                   }}

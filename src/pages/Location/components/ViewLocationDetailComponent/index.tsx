@@ -203,16 +203,19 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     width: '100%',
                   }}
                 >
-                  {/* <Input.TextArea
-                    readOnly
-                    value={selectedLocation.description}
-                    rows={4}
-                    style={{
-                      width: '100%',
-                    }}
-                    placeholder="input placeholder"
-                  /> */}
                   <Tag color={TAG_COLOR}>{selectedLocation.description}</Tag>
+                </Form.Item>
+              </Skeleton>
+
+              <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
+                <Form.Item
+                  name="matchingCode"
+                  label="Maching Code"
+                  style={{
+                    width: '100%',
+                  }}
+                >
+                  <Tag color={TAG_COLOR}>{selectedLocation.matchingCode}</Tag>
                 </Form.Item>
               </Skeleton>
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>

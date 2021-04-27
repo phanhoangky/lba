@@ -109,7 +109,7 @@ export class DevicesTableHeaderComponent extends React.Component<DevicesTableHea
             {!getDevicesParam?.isDescending && <SortAscendingOutlined />}
           </Button>
         </Dropdown>
-        <FilterTwoTone style={{ fontSize: `2em` }} />
+        <FilterTwoTone twoToneColor="#fecf00" style={{ fontSize: `2em` }} />
         <Select
           style={{ width: 120 }}
           defaultValue="CreateTime"

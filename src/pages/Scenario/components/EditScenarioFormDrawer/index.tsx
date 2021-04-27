@@ -174,36 +174,29 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
     this.setEditScenariosDrawer({
       isLoading: true,
     });
-    this.setTableLoading(true)
-      .then(() => {
-        this.updateScenario(updateScenarioParam)
-          .then(() => {
-            this.callGetListScenario().then(async () => {
-              openNotification(
-                'success',
-                'Update Scenario Successfully',
-                `Update Scenario ${updateScenarioParam.title} successfully`,
-              );
-              this.setEditScenariosDrawer({
-                isLoading: false,
-              });
-              this.setTableLoading(false);
-            });
-          })
-          .catch((error) => {
+    this.setTableLoading(true).then(() => {
+      this.updateScenario(updateScenarioParam)
+        .then(() => {
+          this.callGetListScenario().then(async () => {
+            openNotification(
+              'success',
+              'Update Scenario Successfully',
+              `Update Scenario ${updateScenarioParam.title} successfully`,
+            );
             this.setEditScenariosDrawer({
               isLoading: false,
             });
             this.setTableLoading(false);
-            openNotification('error', 'Fail to edit scenario', error.message);
           });
-      })
-      .catch(() => {
-        this.setEditScenariosDrawer({
-          isLoading: false,
+        })
+        .catch((error) => {
+          this.setEditScenariosDrawer({
+            isLoading: false,
+          });
+          this.setTableLoading(false);
+          openNotification('error', 'Fail to edit scenario', error.message);
         });
-        this.setTableLoading(false);
-      });
+    });
   };
 
   setPlaylistDrawer = async (payload: any) => {
@@ -284,10 +277,12 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
   setSelectedArea = async (payload: any) => {
     await this.props.dispatch({
       type: 'scenarios/setSelectedAreaReducer',
-      payload: {
-        ...this.props.scenarios.selectedArea,
-        ...payload,
-      },
+      payload: payload
+        ? {
+            ...this.props.scenarios.selectedArea,
+            ...payload,
+          }
+        : undefined,
     });
   };
 
@@ -468,6 +463,20 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
     });
   };
 
+  clearSelectedScenarioItem = async () => {
+    const { selectedSenario } = this.props.scenarios;
+    const newScenarioItems = selectedSenario?.scenarioItems.map((scenario) => {
+      return {
+        ...scenario,
+        isSelected: false,
+      };
+    });
+
+    await this.setSelectedScenario({
+      scenarioItems: newScenarioItems,
+    });
+  };
+
   setViewScenarioDetailComponent = async (param?: any) => {
     await this.props.dispatch({
       type: `${SCENARIO_STORE}/setViewScenarioDetailComponentReducer`,
@@ -500,6 +509,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
         title="Edit Scenario"
         afterClose={() => {
           this.clearSelectedPlaylistItems();
+          this.clearSelectedScenarioItem();
         }}
         closable={false}
         footer={
@@ -545,6 +555,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           this.setEditScenariosDrawer({
             visible: false,
           }).then(() => {
+            this.setSelectedArea(undefined);
             // this.setViewScenarioDetailComponent({
             //   visible: true,
             // });

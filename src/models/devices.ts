@@ -4,8 +4,12 @@ import {
   GetListTypes,
   UpdateDevice,
   UpdateListDevices,
-} from '@/services/DevicePageService';
-import type {GetDeviceParams, UpdateDeviceParams, UpdateListDevicesParam} from '@/services/DevicePageService';
+} from '@/services/DeviceService';
+import type {
+  GetDeviceParams,
+  UpdateDeviceParams,
+  UpdateListDevicesParam,
+} from '@/services/DeviceService';
 import moment from 'moment';
 import type { Effect, Reducer } from 'umi';
 import { fetchScreenShot } from '@/services/FirebaseService';
@@ -47,7 +51,7 @@ export type DeviceModelState = {
   editMultipleDevicesDrawer?: {
     visible: boolean;
     isLoading: boolean;
-  }
+  };
   // Update Drawer Model State
   isUpdateMultiple?: boolean;
   updateDevicesState?: UpdateListDevicesParam;
@@ -61,18 +65,18 @@ export type DeviceModelState = {
     visible: boolean;
     isLoading: boolean;
     metadata?: ScreenShotMetadata;
-  }
+  };
 
   viewDeviceDetailModal?: {
     visible: boolean;
     isLoading: boolean;
-  }
+  };
 };
 
 export type ScreenShotMetadata = {
   url: string;
   createDate: string;
-}
+};
 export type DeviceModelType = {
   // 1. Namespace
   namespace: string;
@@ -212,7 +216,7 @@ const DeviceModel: DeviceModelType = {
       //   url: "",
       //   createDate: ""
       // }
-    }
+    },
   },
 
   //
@@ -238,7 +242,7 @@ const DeviceModel: DeviceModelType = {
       if (payload) {
         param = {
           ...param,
-          ...payload
+          ...payload,
         };
       }
 
@@ -290,7 +294,7 @@ const DeviceModel: DeviceModelType = {
         startDate: payload.startDate,
         timeFilter: payload.timeFilter.toString().replaceAll(',', ''),
         name: payload.name,
-        defaultScenarioId: payload.scenarioId
+        defaultScenarioId: payload.scenarioId,
       };
       console.log('====================================');
       console.log(param);
@@ -307,7 +311,7 @@ const DeviceModel: DeviceModelType = {
         idList: payload.listId,
         minBid: payload.updateDevicesState.minBid,
         isPublished: payload.updateDevicesState.isPublished,
-        defaultScenarioId: payload.updateDevicesState.scenarioId
+        defaultScenarioId: payload.updateDevicesState.scenarioId,
       };
       yield call(UpdateListDevices, param);
     },
@@ -361,8 +365,8 @@ const DeviceModel: DeviceModelType = {
         payload: data.result.data.map((item: any) => {
           return {
             key: item.id,
-            ...item
-          }
+            ...item,
+          };
         }),
       });
     },
@@ -373,10 +377,10 @@ const DeviceModel: DeviceModelType = {
       console.log(data);
       console.log('====================================');
       yield put({
-        type: "setListDevicesScreenShotReducer",
-        payload: data
-      })
-    }
+        type: 'setListDevicesScreenShotReducer',
+        payload: data,
+      });
+    },
   },
 
   //
@@ -512,8 +516,8 @@ const DeviceModel: DeviceModelType = {
           pageLimitItem: 10,
           pageNumber: 1,
           searchValue: '',
-          name: "",
-          typeId: ""
+          name: '',
+          typeId: '',
         },
       };
     },
@@ -528,37 +532,37 @@ const DeviceModel: DeviceModelType = {
     setDevicesTableLoadingReducer(state, { payload }) {
       return {
         ...state,
-        devicesTableLoading: payload
-      }
+        devicesTableLoading: payload,
+      };
     },
 
     setViewScreenshotModalReducer(state, { payload }) {
       return {
         ...state,
-        viewScreenshotModal: payload
-      }
+        viewScreenshotModal: payload,
+      };
     },
 
     setListDevicesScreenShotReducer(state, { payload }) {
       return {
         ...state,
-        listDevicesScreenShot: payload
-      }
+        listDevicesScreenShot: payload,
+      };
     },
 
     setEditMultipleDevicesDrawerReducer(state, { payload }) {
       return {
         ...state,
-        editMultipleDevicesDrawer: payload
-      }
+        editMultipleDevicesDrawer: payload,
+      };
     },
 
     setViewDeviceDetailModalReducer(state, { payload }) {
       return {
         ...state,
-        viewDeviceDetailModal: payload
-      }
-    }
+        viewDeviceDetailModal: payload,
+      };
+    },
   },
 };
 

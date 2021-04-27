@@ -189,7 +189,7 @@ export class AddNewPlaylistFormModal extends React.Component<
       //     danger: true,
       //   }}
       // >
-      <>
+      <div className="modal-content">
         {/* <AddNewPlaylistModal {...this.props} /> */}
         {/* <Form ref={this.formRef} layout="vertical" name={'add_new_playlist_form'}>
           <Form.Item
@@ -274,7 +274,7 @@ export class AddNewPlaylistFormModal extends React.Component<
             )}
           </Space>
         </div>
-      </>
+      </div>
       // </Modal>
     );
   }
