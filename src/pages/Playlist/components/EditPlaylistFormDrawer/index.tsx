@@ -3,11 +3,9 @@ import { openNotification } from '@/utils/utils';
 import {
   CheckCircleFilled,
   CloseCircleFilled,
-  DeleteTwoTone,
   MenuOutlined,
   MinusSquareTwoTone,
   PlaySquareFilled,
-  SettingFilled,
 } from '@ant-design/icons';
 import {
   Button,
@@ -39,7 +37,7 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
-import styles from './index.less';
+// import styles from './index.less';
 // import { MediasTableComponent } from './components/MediasTableComponent';
 import { SelectMediaModal } from './components/SelectMediaModal';
 // import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
@@ -158,15 +156,15 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
-  setViewPlaylistDetailComponent = async (param?: any) => {
-    await this.props.dispatch({
-      type: 'playlists/setViewPlaylistDetailComponentReducer',
-      payload: {
-        ...this.props.playlists.viewPlaylistDetailComponent,
-        ...param,
-      },
-    });
-  };
+  // setViewPlaylistDetailComponent = async (param?: any) => {
+  //   await this.props.dispatch({
+  //     type: 'playlists/setViewPlaylistDetailComponentReducer',
+  //     payload: {
+  //       ...this.props.playlists.viewPlaylistDetailComponent,
+  //       ...param,
+  //     },
+  //   });
+  // };
 
   handleRemovePlaylist = async () => {
     const { selectedPlaylist } = this.props.playlists;
@@ -212,10 +210,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       onCancel: () => {
         this.setEditPlaylistDrawer({
           visible: false,
-        }).then(() => {
-          // this.setViewPlaylistDetailComponent({
-          //   visible: true,
-          // });
         });
       },
     });
@@ -481,6 +475,38 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     });
   };
 
+  handleUpdatePlaylist = async () => {
+    const { selectedPlaylist } = this.props.playlists;
+    if (this.formRef.current) {
+      this.formRef.current.validateFields().then((values) => {
+        this.setEditPlaylistDrawer({
+          isLoading: true,
+        });
+        this.updatePlaylist(values)
+          .then(() => {
+            this.callGetListPlaylist().then(() => {
+              openNotification(
+                'success',
+                'update playlist successfully',
+                `Playlist ${selectedPlaylist?.title} was updated`,
+              );
+              this.setEditPlaylistDrawer({
+                isLoading: false,
+                visible: false,
+              });
+            });
+          })
+          .catch((error) => {
+            openNotification('error', 'Fail tp update playlist', error.message);
+            this.setEditPlaylistDrawer({
+              isLoading: false,
+              visible: false,
+            });
+          });
+      });
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
 
   render() {
@@ -496,245 +522,130 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     const totalD = totalDuration || 0;
     const availableDuration = maxD - totalD;
     return (
-      <Modal
-        closable={false}
-        destroyOnClose={true}
-        centered
-        className={styles.editPlaylistModal}
-        visible={editPlaylistDrawer?.visible}
-        afterClose={() => {
-          this.setSelectedPlaylistItems([]);
-          this.clearSelectedPlaylist();
-        }}
-        zIndex={2}
-        title="Edit Playlist"
-        width={'55%'}
-        onCancel={async () => {
-          this.setEditPlaylistDrawer({
-            visible: false,
-          }).then(() => {
-            // this.setViewPlaylistDetailComponent({
-            //   visible: true,
-            // });
-          });
-        }}
-        footer={
-          <>
-            <div style={{ textAlign: 'right' }}>
-              <Space>
-                <Button
-                  onClick={async () => {
-                    await this.setEditPlaylistDrawer({
-                      visible: false,
-                    });
-                  }}
-                  icon={<CloseCircleFilled className="lba-close-icon" />}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  danger
-                  onClick={async () => {
-                    this.handleRemovePlaylist();
-                  }}
-                  icon={<DeleteTwoTone twoToneColor="#f93e3e" />}
-                >
-                  Delete
-                </Button>
-                <Button
-                  onClick={async () => {
-                    if (this.formRef.current) {
-                      this.formRef.current.validateFields().then((values) => {
-                        this.setEditPlaylistDrawer({
-                          isLoading: true,
-                        });
-                        this.updatePlaylist(values)
-                          .then(() => {
-                            this.callGetListPlaylist().then(() => {
-                              openNotification(
-                                'success',
-                                'update playlist successfully',
-                                `Playlist ${selectedPlaylist?.title} was updated`,
-                              );
-                              this.setEditPlaylistDrawer({
-                                isLoading: false,
-                                visible: false,
-                              });
-                            });
-                          })
-                          .catch((error) => {
-                            openNotification('error', 'Fail tp update playlist', error.message);
-                            this.setEditPlaylistDrawer({
-                              isLoading: false,
-                              visible: false,
-                            });
-                          });
-                      });
-                    }
-                  }}
-                  className="lba-btn"
-                  icon={<SettingFilled className="lba-icon" />}
-                >
-                  Save Change
-                </Button>
-              </Space>
-            </div>
-          </>
-        }
-      >
-        {/* <EditPlaylistDrawer {...this.props}></EditPlaylistDrawer> */}
-        <div className="modal-content">
-          <Form name="edit_playlists_form_drawer" layout="vertical" ref={this.formRef}>
-            <Form.Item
-              name="title"
-              label="Title"
-              rules={[
-                { required: true, message: 'Please input title' },
-                { max: 50, message: 'Title cannot exceed 50 characters' },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="description"
-              label="Description"
-              rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
-            >
-              <Input.TextArea rows={4} />
-            </Form.Item>
+      <div className="modal-content">
+        <Form name="edit_playlists_form_drawer" layout="vertical" ref={this.formRef}>
+          <Form.Item
+            name="title"
+            label="Title"
+            rules={[
+              { required: true, message: 'Please input title' },
+              { max: 50, message: 'Title cannot exceed 50 characters' },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="description"
+            label="Description"
+            rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+          >
+            <Input.TextArea rows={4} />
+          </Form.Item>
 
-            <Row gutter={20}>
-              <Col span={12}>{this.renderPreviewMedia()}</Col>
-              <Col span={12}>
-                {/* PlaylistItems Table */}
-                <Table
-                  rowKey="index"
-                  loading={editPlaylistDrawer?.isLoading}
-                  key={uuidv4()}
-                  components={{
-                    body: {
-                      wrapper: this.DraggableContainer,
-                      row: this.DraggableBodyRow,
-                    },
-                  }}
-                  // className={styles.customTable}
-                  dataSource={selectedPlaylist?.playlistItems}
-                  pagination={false}
-                >
-                  <Column
-                    key="drag"
-                    dataIndex="sort"
-                    width={30}
-                    className="drag-visible"
-                    render={() => <DragHandle />}
-                  ></Column>
-                  <Column key="index" title="No" dataIndex="index"></Column>
-                  <Column
-                    key="title"
-                    title="Title"
-                    dataIndex={['mediaSrc', 'title']}
-                    className="drag-visible"
-                  ></Column>
-
-                  <Column
-                    key="Duration"
-                    title="Duration"
-                    className="drag-visible"
-                    render={(record) => {
-                      return (
-                        <>
-                          <Slider
-                            min={minDuration}
-                            max={maxDuration}
-                            disabled={availableDuration < minD}
-                            value={record.duration}
-                            onChange={(e: any) => {
-                              if (totalDuration + e < maxD) {
-                                this.setSelectedPlaylistItemsDuration(record, e);
-                                this.calculateTotalDuration();
-                              }
-                            }}
-                          ></Slider>
-                        </>
-                      );
-                    }}
-                  ></Column>
-
-                  <Column
-                    key="action"
-                    title="Action"
-                    className="drag-visible"
-                    render={(record: any) => {
-                      return (
-                        <>
-                          <Space>
-                            <Button
-                              className="lba-btn"
-                              onClick={() => {
-                                this.setEditPlaylistDrawer({
-                                  playingUrl: record.mediaSrc.urlPreview,
-                                  playlingMediaType: record.mediaSrc.type.name,
-                                });
-                              }}
-                            >
-                              <PlaySquareFilled className="lba-icon" size={20} />
-                            </Button>
-                            <Button
-                              danger
-                              onClick={async () => {
-                                this.removeItem(record).then(() => {
-                                  this.calculateTotalDuration().then(() => {
-                                    this.clearDuration();
-                                  });
-                                });
-                              }}
-                            >
-                              <MinusSquareTwoTone size={20} twoToneColor="#f93e3e" />
-                            </Button>
-                          </Space>
-                        </>
-                      );
-                    }}
-                  ></Column>
-                </Table>
-                {/* <Button
-                className="add-new-media-btn"
-                block
-                size="large"
-                onClick={() => {
-                  this.setSelectMediaModal({
-                    visible: true,
-                  });
+          <Row gutter={20}>
+            <Col span={12}>{this.renderPreviewMedia()}</Col>
+            <Col span={12}>
+              {/* PlaylistItems Table */}
+              <Table
+                rowKey="index"
+                loading={editPlaylistDrawer?.isLoading}
+                key={uuidv4()}
+                components={{
+                  body: {
+                    wrapper: this.DraggableContainer,
+                    row: this.DraggableBodyRow,
+                  },
                 }}
+                // className={styles.customTable}
+                dataSource={selectedPlaylist?.playlistItems}
+                pagination={false}
               >
-                <div className="add-media-overlap"></div>
-                <div className="add-media-text">Add New Media</div>
-              </Button> */}
-              </Col>
-            </Row>
-            <Divider orientation="center" className="lba-label">
-              Select Media Area
-            </Divider>
-            <Row>
-              <SelectMediaModal {...this.props} />
-            </Row>
-          </Form>
-        </div>
-        {/* <Drawer
-          closable={false}
-          destroyOnClose={true}
-          visible={selectMediaModal?.visible}
-          title="Select Media"
-          width={'50%'}
-          onClose={() => {
-            this.setSelectMediaModal({
-              visible: false,
-            });
-          }}
-        >
-          {selectMediaModal?.visible && <SelectMediaModal {...this.props} />}
-        </Drawer> */}
-      </Modal>
+                <Column
+                  key="drag"
+                  dataIndex="sort"
+                  width={30}
+                  className="drag-visible"
+                  render={() => <DragHandle />}
+                ></Column>
+                <Column key="index" title="No" dataIndex="index"></Column>
+                <Column
+                  key="title"
+                  title="Title"
+                  dataIndex={['mediaSrc', 'title']}
+                  className="drag-visible"
+                ></Column>
+
+                <Column
+                  key="Duration"
+                  title="Duration"
+                  className="drag-visible"
+                  render={(record) => {
+                    return (
+                      <>
+                        <Slider
+                          min={minDuration}
+                          max={maxDuration}
+                          disabled={availableDuration < minD}
+                          value={record.duration}
+                          onChange={(e: any) => {
+                            if (totalDuration + e < maxD) {
+                              this.setSelectedPlaylistItemsDuration(record, e);
+                              this.calculateTotalDuration();
+                            }
+                          }}
+                        ></Slider>
+                      </>
+                    );
+                  }}
+                ></Column>
+
+                <Column
+                  key="action"
+                  title="Action"
+                  className="drag-visible"
+                  render={(record: any) => {
+                    return (
+                      <>
+                        <Space>
+                          <Button
+                            className="lba-btn"
+                            onClick={() => {
+                              this.setEditPlaylistDrawer({
+                                playingUrl: record.mediaSrc.urlPreview,
+                                playlingMediaType: record.mediaSrc.type.name,
+                              });
+                            }}
+                          >
+                            <PlaySquareFilled className="lba-icon" size={20} />
+                          </Button>
+                          <Button
+                            danger
+                            onClick={async () => {
+                              this.removeItem(record).then(() => {
+                                this.calculateTotalDuration().then(() => {
+                                  this.clearDuration();
+                                });
+                              });
+                            }}
+                          >
+                            <MinusSquareTwoTone size={20} twoToneColor="#f93e3e" />
+                          </Button>
+                        </Space>
+                      </>
+                    );
+                  }}
+                ></Column>
+              </Table>
+            </Col>
+          </Row>
+          <Divider orientation="center" className="lba-label">
+            Select Media Area
+          </Divider>
+          <Row>
+            <SelectMediaModal {...this.props} />
+          </Row>
+        </Form>
+      </div>
     );
   }
 }

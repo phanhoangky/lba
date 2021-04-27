@@ -511,6 +511,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           this.clearSelectedPlaylistItems();
           this.clearSelectedScenarioItem();
         }}
+        maskClosable={false}
         closable={false}
         footer={
           <>
@@ -521,6 +522,8 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
                   onClick={() => {
                     this.setEditScenariosDrawer({
                       visible: false,
+                    }).then(() => {
+                      this.setSelectedArea(undefined);
                     });
                   }}
                 >

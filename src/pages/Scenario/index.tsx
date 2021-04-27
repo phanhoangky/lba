@@ -14,7 +14,7 @@ import type {
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep } from 'lodash';
-import { AddNewScenarioFormModal } from './components/AddNewScenarioFormModal';
+import { AddNewScenarioFormModal, steps } from './components/AddNewScenarioFormModal';
 import { ScenarioTableHeaderComponent } from './components/ScenarioTableHeaderComponent';
 import { ViewScenarioDetailComponent } from './components/ViewScenarioDetailComponent';
 import moment from 'moment';
@@ -25,6 +25,8 @@ import {
   DeleteTwoTone,
   EditFilled,
   ExclamationCircleOutlined,
+  LeftCircleFilled,
+  RightCircleFilled,
 } from '@ant-design/icons';
 import { openNotification } from '@/utils/utils';
 import styles from './index.less';
@@ -316,6 +318,7 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
       addNewScenarioModal,
     } = this.props.scenarios;
 
+    const currentStep = addNewScenarioModal?.currentStep ? addNewScenarioModal.currentStep : 0;
     return (
       <PageContainer
         title={false}
@@ -473,20 +476,69 @@ class ScenarioScreen extends React.Component<ScenarioProps> {
           visible={addNewScenarioModal?.visible}
           confirmLoading={addNewScenarioModal?.isLoading}
           closable={false}
+          maskClosable={false}
           width={'50%'}
           centered
           className={styles.addNewScenarioModal}
           destroyOnClose={true}
-          onCancel={() => {
-            this.setAddNewScenarioModal({
-              visible: false,
-              isLoading: false,
-              currentStep: 0,
-            }).then(() => {
-              this.addNewScenarioFormRef.current?.clearListScenarioLayouts();
-            });
-          }}
-          footer={false}
+          footer={
+            <Space>
+              <Button
+                loading={addNewScenarioModal?.isLoading}
+                style={{ margin: '0 8px' }}
+                onClick={() => {
+                  this.setAddNewScenarioModal({
+                    visible: false,
+                    isLoading: false,
+                    currentStep: 0,
+                  }).then(() => {
+                    this.addNewScenarioFormRef.current?.clearListScenarioLayouts();
+                  });
+                }}
+              >
+                <CloseCircleFilled className="lba-close-icon" /> Close
+              </Button>
+              {currentStep > 0 && currentStep < steps.length - 1 && (
+                <Button
+                  className="lba-btn"
+                  loading={addNewScenarioModal?.isLoading}
+                  style={{ margin: '0 8px' }}
+                  onClick={() => {
+                    this.addNewScenarioFormRef.current?.handleOnPrevious();
+                  }}
+                >
+                  <LeftCircleFilled className="lba-icon" /> Previous
+                </Button>
+              )}
+              {currentStep < steps.length - 2 && (
+                <Button
+                  className="lba-btn"
+                  loading={addNewScenarioModal?.isLoading}
+                  onClick={() => {
+                    if (addNewScenarioModal) {
+                      // this.setAddNewScenarioModal({
+                      //   currentStep: addNewScenarioModal.currentStep + 1,
+                      // });
+                      this.addNewScenarioFormRef.current?.handleOnNext();
+                    }
+                  }}
+                >
+                  Next <RightCircleFilled className="lba-icon" />
+                </Button>
+              )}
+              {currentStep === steps.length - 2 && (
+                <Button
+                  loading={addNewScenarioModal?.isLoading}
+                  className="lba-btn"
+                  onClick={() => {
+                    this.addNewScenarioFormRef.current?.onCreateScenarios();
+                  }}
+                >
+                  Done <CheckCircleFilled className="lba-icon" />
+                </Button>
+              )}
+            </Space>
+          }
           // okButtonProps={{
           //   disabled: listLayouts?.every((layouts) => !layouts.isSelected),
           //   className: 'lba-btn',

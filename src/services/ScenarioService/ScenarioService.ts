@@ -25,7 +25,7 @@ export type ScenarioItemPost = {
   isActive: boolean;
   audioArea: boolean;
   isSelected?: boolean;
-}
+};
 
 export type UpdateScenarioParam = {
   id: string;
@@ -33,7 +33,7 @@ export type UpdateScenarioParam = {
   title: string;
   description: string;
   scenarioItems: UpdateScenarioItem[];
-}
+};
 
 export type UpdateScenarioItem = {
   id?: string;
@@ -43,36 +43,30 @@ export type UpdateScenarioItem = {
   areaId?: string;
   isActive?: boolean;
   audioArea?: boolean;
-}
+};
 
 export async function GetListScenarios(param: GetListScenariosParam) {
   const res = await ApiHelper.get(`${CONSTANTS_LBA.SCENARIO_URL}`, { params: { ...param } });
   return res;
 }
 
-export async function CreateNewScenario(param: PostScenarioParam, getProgress?: (percent: number) => void) {
-  console.log('====================================');
-  console.log("Function >>>", getProgress);
-  console.log('====================================');
+export async function CreateNewScenario(param: PostScenarioParam) {
   const { data } = await ApiHelper.post(`${CONSTANTS_LBA.SCENARIO_URL}`, param, {
-    paramsSerializer: params => {
+    paramsSerializer: (params) => {
       return qs.stringify(params);
-    }
+    },
   }).catch((error) => {
     return Promise.reject(new Error(error));
   });
   return data;
 }
 
-
 export async function UpdateScenario(param: UpdateScenarioParam) {
-
-  console.log('====================================');
-  console.log("Update Param >>>>", param);
-  console.log('====================================');
-  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.SCENARIO_URL}/${param.id}`, param).catch((error) => {
-    return Promise.reject(new Error(error));
-  });
+  const { data } = await ApiHelper.put(`${CONSTANTS_LBA.SCENARIO_URL}/${param.id}`, param).catch(
+    (error) => {
+      return Promise.reject(new Error(error));
+    },
+  );
   return data;
 }
 

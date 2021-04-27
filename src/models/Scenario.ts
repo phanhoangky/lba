@@ -254,18 +254,7 @@ const ScenarioStore: ScenarioStoreModel = {
 
     *createScenario({ payload }, { call, put }) {
       try {
-        console.log('====================================');
-        console.log('Param >>>>', payload);
-        console.log('====================================');
-        const data = yield call(CreateNewScenario, payload.payload, (percent: number) => {
-          // payload.getProgress(percent)
-          put({
-            type: 'setAddNewScenarioModalReducer',
-            payload: {
-              progress: percent,
-            },
-          });
-        });
+        const data = yield call(CreateNewScenario, payload);
         yield put({
           type: 'clearCreateScenarioParamReducer',
         });

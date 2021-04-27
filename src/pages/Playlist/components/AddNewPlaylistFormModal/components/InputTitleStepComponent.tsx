@@ -4,7 +4,6 @@ import * as React from 'react';
 import type { Dispatch, PlayListModelState } from 'umi';
 import { connect } from 'umi';
 import { PLAYLIST_STORE } from '..';
-import { openNotification } from '@/utils/utils';
 
 export type InputTitleStepComponentProps = {
   dispatch: Dispatch;
@@ -43,26 +42,24 @@ export class InputTitleStepComponent extends React.Component<
     });
   };
 
-  handleOnNext = async () => {
-    this.formRef.current
-      ?.validateFields()
-      .then((values) => {
-        const { addNewPlaylistModal } = this.props.playlists;
-        this.setAddNewPlaylistParam({
-          ...values,
-        });
-        if (addNewPlaylistModal) {
-          this.setAddNewPlaylistModal({
-            currentStep: addNewPlaylistModal.currentStep + 1,
-          });
-        }
-        return values;
-      })
-      .catch((error) => {
-        const e = error.errorFields.map((s: any) => s.errors[0]).toString();
-
-        openNotification('error', 'Error', e);
+  handleOnNext = () => {
+    this.formRef.current?.validateFields().then((values) => {
+      const { addNewPlaylistModal } = this.props.playlists;
+      this.setAddNewPlaylistParam({
+        ...values,
       });
+      if (addNewPlaylistModal) {
+        this.setAddNewPlaylistModal({
+          currentStep: addNewPlaylistModal.currentStep + 1,
+        });
+      }
+      return values;
+    });
+    // .catch((error) => {
+    //   const e = error.errorFields.map((s: any) => s.errors[0]).toString();
+
+    //   openNotification('error', 'Error', e);
+    // });
   };
 
   formRef = React.createRef<FormInstance>();

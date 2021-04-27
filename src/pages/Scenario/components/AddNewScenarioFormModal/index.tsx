@@ -1,4 +1,4 @@
-import { Steps, Button, Space } from 'antd';
+import { Steps } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
 import type {
@@ -18,6 +18,7 @@ import { SCENARIO_STORE } from '../..';
 import { v4 as uuidv4 } from 'uuid';
 import { FormOutlined, LayoutFilled, SmileFilled, SolutionOutlined } from '@ant-design/icons';
 import { CreateDoneComponent } from '@/pages/common/CreateDoneComponent';
+import { Animated } from 'react-animated-css';
 
 export type AddNewScenarioFormModalProps = {
   dispatch: Dispatch;
@@ -26,6 +27,29 @@ export type AddNewScenarioFormModalProps = {
   playlists: PlayListModelState;
   layouts: LayoutModelState;
 };
+
+export const steps = [
+  {
+    title: 'Title and Description',
+    // content: <InputTitleStepComponent {...this.props} />,
+    icon: <FormOutlined className="lba-icon" />,
+  },
+  {
+    title: 'Layout',
+    // content: <ChooseLayoutStepComponent {...this.props} />,
+    icon: <LayoutFilled className="lba-icon" />,
+  },
+  {
+    title: 'Playlist',
+    // content: <SetupScenarioItemsStepComponent {...this.props} />,
+    icon: <SolutionOutlined className="lba-icon" />,
+  },
+  {
+    title: 'Done',
+    // content: <SetupScenarioItemsStepComponent {...this.props} />,
+    icon: <SmileFilled className="lba-icon" />,
+  },
+];
 
 export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormModalProps> {
   componentDidMount = () => {
@@ -55,15 +79,8 @@ export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormM
     await this.props.dispatch({
       type: `${SCENARIO_STORE}/createScenario`,
       payload: {
-        payload: {
-          ...this.props.scenarios.createScenarioParam,
-          ...values,
-        },
-        getProgess: (progress: number) => {
-          console.log('====================================');
-          console.log('ASD', progress);
-          console.log('====================================');
-        },
+        ...this.props.scenarios.createScenarioParam,
+        ...values,
       },
     });
   };
@@ -168,7 +185,7 @@ export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormM
     });
   };
 
-  handleOnNext = async () => {
+  handleOnNext = () => {
     const { addNewScenarioModal } = this.props.scenarios;
     if (addNewScenarioModal) {
       const { currentStep } = addNewScenarioModal;
@@ -181,32 +198,20 @@ export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormM
       }
     }
   };
+
+  handleOnPrevious = () => {
+    const { addNewScenarioModal } = this.props.scenarios;
+    if (addNewScenarioModal) {
+      this.setAddNewScenarioModal({
+        currentStep: addNewScenarioModal.currentStep - 1,
+      });
+    }
+  };
+
   formRef = React.createRef<FormInstance<any>>();
   inputTitleStepRef = React.createRef<InputTitleStepComponent>();
   chooseLayoutStepRef = React.createRef<ChooseLayoutStepComponent>();
   setupScenarioRef = React.createRef<SetupScenarioItemsStepComponent>();
-  steps = [
-    {
-      title: 'Title and Description',
-      content: <InputTitleStepComponent {...this.props} />,
-      icon: <FormOutlined className="lba-icon" />,
-    },
-    {
-      title: 'Layout',
-      content: <ChooseLayoutStepComponent {...this.props} />,
-      icon: <LayoutFilled className="lba-icon" />,
-    },
-    {
-      title: 'Playlist',
-      content: <SetupScenarioItemsStepComponent {...this.props} />,
-      icon: <SolutionOutlined className="lba-icon" />,
-    },
-    {
-      title: 'Done',
-      // content: <SetupScenarioItemsStepComponent {...this.props} />,
-      icon: <SmileFilled className="lba-icon" />,
-    },
-  ];
 
   render() {
     const { addNewScenarioModal } = this.props.scenarios;
@@ -216,37 +221,61 @@ export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormM
     return (
       <>
         <Steps current={addNewScenarioModal?.currentStep}>
-          {this.steps.map((item) => (
+          {steps.map((item) => (
             <Steps.Step key={item.title} title={item.title} icon={item.icon} />
           ))}
         </Steps>
         <div className="steps-content">
-          {currentStep === 0 && (
-            <InputTitleStepComponent ref={this.inputTitleStepRef} {...this.props} />
-          )}
-          {currentStep === 1 && (
-            <ChooseLayoutStepComponent ref={this.chooseLayoutStepRef} {...this.props} />
-          )}
-          {currentStep === 2 && (
-            <SetupScenarioItemsStepComponent ref={this.setupScenarioRef} {...this.props} />
-          )}
-          {currentStep === this.steps.length - 1 && (
-            <CreateDoneComponent
-              finish={() => {
-                this.setAddNewScenarioModal({
-                  visible: false,
-                  isLoading: false,
-                  currentStep: 0,
-                });
-              }}
-              title="Successfully create scenario"
-              {...this.props}
-            />
-          )}
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === 0}
+          >
+            {currentStep === 0 && (
+              <InputTitleStepComponent ref={this.inputTitleStepRef} {...this.props} />
+            )}
+          </Animated>
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === 1}
+          >
+            {currentStep === 1 && (
+              <ChooseLayoutStepComponent ref={this.chooseLayoutStepRef} {...this.props} />
+            )}
+          </Animated>
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === 2}
+          >
+            {currentStep === 2 && (
+              <SetupScenarioItemsStepComponent ref={this.setupScenarioRef} {...this.props} />
+            )}
+          </Animated>
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === steps.length - 1}
+          >
+            {currentStep === steps.length - 1 && (
+              <CreateDoneComponent
+                finish={() => {
+                  this.setAddNewScenarioModal({
+                    visible: false,
+                    isLoading: false,
+                    currentStep: 0,
+                  });
+                }}
+                title="Successfully create scenario"
+                {...this.props}
+              />
+            )}
+          </Animated>
         </div>
-        <div className="steps-action">
+        {/* <div className="steps-action">
           <Space>
-            {currentStep > 0 && currentStep < this.steps.length - 1 && (
+            {currentStep > 0 && currentStep < steps.length - 1 && (
               <Button
                 className="lba-btn"
                 style={{ margin: '0 8px' }}
@@ -261,7 +290,7 @@ export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormM
                 Previous
               </Button>
             )}
-            {currentStep < this.steps.length - 2 && (
+            {currentStep < steps.length - 2 && (
               <Button
                 className="lba-btn"
                 onClick={() => {
@@ -276,18 +305,18 @@ export class AddNewScenarioFormModal extends React.Component<AddNewScenarioFormM
                 Next
               </Button>
             )}
-            {currentStep === this.steps.length - 2 && (
+            {currentStep === steps.length - 2 && (
               <Button
                 className="lba-btn"
                 onClick={() => {
-                  this.onCreateScenarios().then(() => {});
+                  this.onCreateScenarios();
                 }}
               >
                 Done
               </Button>
             )}
           </Space>
-        </div>
+        </div> */}
         {/* <Modal
           title="Create New Scenario Layout"
           visible={addNewScenarioModal?.visible}

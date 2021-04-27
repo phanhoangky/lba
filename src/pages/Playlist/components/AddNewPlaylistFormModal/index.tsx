@@ -1,9 +1,10 @@
 import { CreateDoneComponent } from '@/pages/common/CreateDoneComponent';
 import { openNotification } from '@/utils/utils';
 import { FormOutlined, PlaySquareOutlined, SmileFilled } from '@ant-design/icons';
-import { Steps, Button, Space } from 'antd';
+import { Steps } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import * as React from 'react';
+import { Animated } from 'react-animated-css';
 import type { Dispatch, MediaSourceModelState, PlayListModelState, UserModelState } from 'umi';
 import { connect } from 'umi';
 import { InputTitleStepComponent } from './components/InputTitleStepComponent';
@@ -21,6 +22,24 @@ export type AddNewPlaylistFormModalStates = {
 };
 
 export const PLAYLIST_STORE = 'playlists';
+export const steps = [
+  {
+    title: 'Title and Description',
+    // content: <InputTitleStepComponent {...this.props} />,
+    icon: <FormOutlined className="lba-icon" />,
+  },
+  {
+    title: 'Select Media',
+    // content: <SelectMediaStepComponent {...this.props} />,
+    icon: <PlaySquareOutlined className="lba-icon" />,
+  },
+  {
+    title: 'Done',
+    // content: <SelectMediaStepComponent {...this.props} />,
+    icon: <SmileFilled className="lba-icon" />,
+  },
+];
+
 export class AddNewPlaylistFormModal extends React.Component<
   AddNewPlaylistFormModalProps,
   AddNewPlaylistFormModalStates
@@ -86,62 +105,52 @@ export class AddNewPlaylistFormModal extends React.Component<
     // const {  } = this.props.playlists;
     this.setAddNewPlaylistModal({
       isLoading: true,
-    })
-      .then(() => {
-        this.createPlaylist(values)
-          .then(() => {
-            this.callGetListPlaylist().then(() => {
-              const { addNewPlaylistModal, addNewPlaylistParam } = this.props.playlists;
-              openNotification(
-                'success',
-                'Create playlist successfully',
-                `${addNewPlaylistParam?.title} was created`,
-              );
-              if (addNewPlaylistModal) {
-                this.setAddNewPlaylistModal({
-                  visible: false,
-                  isLoading: false,
-                  playingUrl: undefined,
-                  playlingMediaType: undefined,
-                  currentStep: 0,
-                });
-              }
-            });
-          })
-          .catch((error) => {
-            openNotification('error', 'Fail to create Playlist', error.message);
-            this.setAddNewPlaylistModal({
-              visible: false,
-              isLoading: false,
-            });
+    }).then(() => {
+      this.createPlaylist(values)
+        .then(() => {
+          this.callGetListPlaylist().then(() => {
+            const { addNewPlaylistModal, addNewPlaylistParam } = this.props.playlists;
+            openNotification(
+              'success',
+              'Create playlist successfully',
+              `${addNewPlaylistParam?.title} was created`,
+            );
+            if (addNewPlaylistModal) {
+              this.setAddNewPlaylistModal({
+                visible: false,
+                isLoading: false,
+                playingUrl: undefined,
+                playlingMediaType: undefined,
+                currentStep: 0,
+              });
+            }
           });
-      })
-      .catch(() => {
-        this.setAddNewPlaylistModal({
-          isLoading: false,
-          visible: false,
+        })
+        .catch((error) => {
+          openNotification('error', 'Fail to create Playlist', error.message);
+          this.setAddNewPlaylistModal({
+            visible: false,
+            isLoading: false,
+          });
         });
+    });
+  };
+
+  onPrevious = () => {
+    const { addNewPlaylistModal } = this.props.playlists;
+    if (addNewPlaylistModal) {
+      this.setAddNewPlaylistModal({
+        currentStep: addNewPlaylistModal.currentStep - 1,
       });
+    }
+  };
+
+  onNext = () => {
+    this.inputTitleStepRef.current?.handleOnNext();
   };
   formRef = React.createRef<FormInstance>();
   inputTitleStepRef = React.createRef<InputTitleStepComponent>();
-  steps = [
-    {
-      title: 'Title and Description',
-      content: <InputTitleStepComponent {...this.props} />,
-      icon: <FormOutlined className="lba-icon" />,
-    },
-    {
-      title: 'Select Media',
-      content: <SelectMediaStepComponent {...this.props} />,
-      icon: <PlaySquareOutlined className="lba-icon" />,
-    },
-    {
-      title: 'Done',
-      // content: <SelectMediaStepComponent {...this.props} />,
-      icon: <SmileFilled className="lba-icon" />,
-    },
-  ];
+
   render() {
     const { addNewPlaylistModal } = this.props.playlists;
 
@@ -211,12 +220,54 @@ export class AddNewPlaylistFormModal extends React.Component<
           </Form.Item>
         </Form> */}
         <Steps current={addNewPlaylistModal?.currentStep}>
-          {this.steps.map((item) => (
+          {steps.map((item) => (
             <Steps.Step key={item.title} title={item.title} icon={item.icon} />
           ))}
         </Steps>
         <div className="steps-content">
-          {currentStep === 0 && (
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === 0}
+          >
+            {currentStep === 0 && (
+              <InputTitleStepComponent ref={this.inputTitleStepRef} {...this.props} />
+            )}
+            {/* <InputTitleStepComponent ref={this.inputTitleStepRef} {...this.props} /> */}
+          </Animated>
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === 1}
+          >
+            {currentStep === 1 && <SelectMediaStepComponent {...this.props} />}
+            {/* <SelectMediaStepComponent {...this.props} /> */}
+          </Animated>
+          <Animated
+            animationIn="fadeInLeft"
+            animationOut="fadeOutRight"
+            isVisible={currentStep === steps.length - 1}
+          >
+            {currentStep === steps.length - 1 && (
+              <CreateDoneComponent
+                title="Successfully create playlist"
+                finish={() => {
+                  this.setAddNewPlaylistModal({
+                    visible: false,
+                  });
+                }}
+              />
+            )}
+            {/* <CreateDoneComponent
+              title="Successfully create playlist"
+              finish={() => {
+                this.setAddNewPlaylistModal({
+                  visible: false,
+                });
+              }}
+            /> */}
+          </Animated>
+          {/* {currentStep === 0 && (
             <InputTitleStepComponent ref={this.inputTitleStepRef} {...this.props} />
           )}
           {currentStep === 1 && <SelectMediaStepComponent {...this.props} />}
@@ -229,11 +280,11 @@ export class AddNewPlaylistFormModal extends React.Component<
                 });
               }}
             />
-          )}
+          )} */}
         </div>
-        <div className="steps-action">
+        {/* <div className="steps-action">
           <Space>
-            {currentStep > 0 && currentStep < this.steps.length - 1 && (
+            {currentStep > 0 && currentStep < steps.length - 1 && (
               <Button
                 className="lba-btn"
                 style={{ margin: '0 8px' }}
@@ -248,7 +299,7 @@ export class AddNewPlaylistFormModal extends React.Component<
                 Previous
               </Button>
             )}
-            {currentStep < this.steps.length - 2 && (
+            {currentStep < steps.length - 2 && (
               <Button
                 className="lba-btn"
                 onClick={() => {
@@ -262,18 +313,18 @@ export class AddNewPlaylistFormModal extends React.Component<
                 Next
               </Button>
             )}
-            {currentStep === this.steps.length - 2 && (
+            {currentStep === steps.length - 2 && (
               <Button
                 className="lba-btn"
                 onClick={() => {
-                  this.onCreatePlaylist().then(() => {});
+                  this.onCreatePlaylist();
                 }}
               >
                 Done
               </Button>
             )}
           </Space>
-        </div>
+        </div> */}
       </div>
       // </Modal>
     );
