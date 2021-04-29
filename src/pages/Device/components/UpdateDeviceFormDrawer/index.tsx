@@ -78,13 +78,14 @@ export class UpdateDeviceFormDrawer extends React.Component<
   }
 
   updateMultitpleDevices = async (values: any) => {
+    const { updateDevicesState } = this.props.deviceStore;
     await this.props.dispatch({
       type: 'deviceStore/updateListDevice',
       payload: {
         updateDevicesState: {
           ...this.props.deviceStore.updateDevicesState,
-          startDate: values.startEnd[0],
-          endDate: values.startEnd[1],
+          startDate: values.isPublished ? values.startEnd[0] : updateDevicesState?.startDate,
+          endDate: values.isPublished ? values.startEnd[0] : updateDevicesState?.endDate,
           ...values,
         },
         listId: this.props.deviceStore.selectedDevices?.map((device) => {
@@ -95,27 +96,43 @@ export class UpdateDeviceFormDrawer extends React.Component<
   };
 
   onUpdateMultipleDevices = async () => {
-    this.formRef.current?.validateFields().then((values) => {
-      this.setEditMultipleDevicesDrawer({
-        isLoading: true,
-      }).then(() => {
-        this.updateMultitpleDevices(values)
-          .then(() => {
-            this.callGetListDevices().then(() => {
+    this.formRef.current
+      ?.validateFields()
+      .then((values) => {
+        this.setEditMultipleDevicesDrawer({
+          isLoading: true,
+        }).then(() => {
+          this.updateMultitpleDevices(values)
+            .then(() => {
+              this.callGetListDevices().then(() => {
+                const { selectedDevices } = this.props.deviceStore;
+                openNotification(
+                  'success',
+                  'Devices updated successfully',
+                  selectedDevices &&
+                    selectedDevices.map((d) => `${d.name} was update sucessfully \n`).join(''),
+                );
+                this.setEditMultipleDevicesDrawer({
+                  isLoading: false,
+                  // visible: false,
+                });
+                // openNotification('success', 'Update Multiple Devices Success');
+              });
+            })
+            .catch((err) => {
               this.setEditMultipleDevicesDrawer({
                 isLoading: false,
               });
-              openNotification('success', 'Update Multiple Devices Success');
+              openNotification('error', 'Fail to update devices', err.message);
             });
-          })
-          .catch((err) => {
-            this.setEditMultipleDevicesDrawer({
-              isLoading: false,
-            });
-            openNotification('error', 'Fail to update devices', err.message);
-          });
+        });
+      })
+      .catch(() => {
+        this.setEditMultipleDevicesDrawer({
+          isLoading: false,
+        });
+        // openNotification('error', 'Fail to update devices', err.message);
       });
-    });
   };
 
   callGetListDevices = async (param?: any) => {
@@ -129,38 +146,56 @@ export class UpdateDeviceFormDrawer extends React.Component<
   };
 
   updateDevice = async (values: any) => {
+    const { selectedDevice } = this.props.deviceStore;
+    const param = {
+      ...this.props.deviceStore.selectedDevice,
+      ...values,
+      startDate: values.isPublished ? values.startEnd[0] : selectedDevice?.startDate,
+      endDate: values.isPublished ? values.startEnd[0] : selectedDevice?.endDate,
+    };
+
+    console.log('====================================');
+    console.log(param, values);
+    console.log('====================================');
     await this.props.dispatch({
       type: 'deviceStore/updateDevice',
-      payload: {
-        ...this.props.deviceStore.selectedDevice,
-        ...values,
-        startDate: values.startEnd[0],
-        endDate: values.startEnd[1],
-      },
+      payload: param,
     });
   };
 
   onUpdateDevice = async () => {
-    this.formRef.current?.validateFields().then((values) => {
-      this.setEditMultipleDevicesDrawer({
-        isLoading: true,
-      }).then(() => {
-        this.updateDevice(values)
-          .then(() => {
-            this.callGetListDevices().then(() => {
+    this.formRef.current
+      ?.validateFields()
+      .then((values) => {
+        this.setEditMultipleDevicesDrawer({
+          isLoading: true,
+        }).then(() => {
+          console.log('====================================');
+          console.log(values);
+          console.log('====================================');
+          this.updateDevice(values)
+            .then(() => {
+              openNotification('success', 'Update device successfully');
+              this.callGetListDevices().then(() => {
+                this.setEditMultipleDevicesDrawer({
+                  isLoading: false,
+                });
+              });
+            })
+            .catch((error) => {
               this.setEditMultipleDevicesDrawer({
                 isLoading: false,
               });
+              openNotification('error', 'Fail to update device', error.message);
             });
-          })
-          .catch((error) => {
-            this.setEditMultipleDevicesDrawer({
-              isLoading: false,
-            });
-            openNotification('error', 'Fail to update device', error.message);
-          });
+        });
+      })
+      .catch(() => {
+        this.setEditMultipleDevicesDrawer({
+          isLoading: false,
+        });
+        // openNotification('error', 'Fail to update device', error.message);
       });
-    });
   };
 
   handleRemoveDateFilter = (index: any) => {
@@ -328,15 +363,17 @@ export class UpdateDeviceFormDrawer extends React.Component<
     });
     return (
       <Form ref={this.formRef} layout="vertical" name="Update_Device_Form">
-        <Form.Item name="isPublished" label="Publish" valuePropName="checked">
-          <Switch
-            checkedChildren={<CheckOutlined />}
-            unCheckedChildren={<CloseOutlined />}
-            onChange={(value) => {
-              this.setState({ isPublished: value });
-            }}
-          ></Switch>
-        </Form.Item>
+        <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}>
+          <Form.Item name="isPublished" label="Publish" valuePropName="checked">
+            <Switch
+              checkedChildren={<CheckOutlined />}
+              unCheckedChildren={<CloseOutlined />}
+              onChange={(value) => {
+                this.setState({ isPublished: value });
+              }}
+            ></Switch>
+          </Form.Item>
+        </Skeleton>
         <Animated
           animationIn="fadeInDownBig"
           animationOut="fadeOutUpBig"
@@ -344,152 +381,156 @@ export class UpdateDeviceFormDrawer extends React.Component<
         >
           {this.state.isPublished && (
             <>
-              <Form.Item label="Times in day">
-                <Space wrap={true}>{displayTimeFilter}</Space>
-              </Form.Item>
+              <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}>
+                <Form.Item label="Times in day">
+                  <Space wrap={true}>{displayTimeFilter}</Space>
+                </Form.Item>
+              </Skeleton>
               {/* <Row>
               <Col></Col>
             </Row> */}
               <Divider></Divider>
               <Row>
-                {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
-                <Col>
-                  <Space>
-                    {inputVisible && (
-                      <TimePicker.RangePicker
-                        onChange={(e) => {
-                          if (e) {
-                            if (e[0] && e[1]) {
-                              const start = e[0].hour();
-                              const end = e[1]?.hour();
-                              this.setTimeFilter(start, end);
+                <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}>
+                  <Col>
+                    <Space>
+                      {inputVisible && (
+                        <TimePicker.RangePicker
+                          onChange={(e) => {
+                            if (e) {
+                              if (e[0] && e[1]) {
+                                const start = e[0].hour();
+                                const end = e[1]?.hour();
+                                this.setTimeFilter(start, end);
+                              }
                             }
-                          }
 
-                          this.onTimeFilterBlur();
-                        }}
-                        format="HH"
-                        // onOk={(date) => {
-                        //   console.log(date?.[0]?.hour);
-                        // }}
-                        onBlur={this.onTimeFilterBlur}
-                      />
-                    )}
-                    {!inputVisible && (
+                            this.onTimeFilterBlur();
+                          }}
+                          format="HH"
+                          // onOk={(date) => {
+                          //   console.log(date?.[0]?.hour);
+                          // }}
+                          onBlur={this.onTimeFilterBlur}
+                        />
+                      )}
+                      {!inputVisible && (
+                        <Button
+                          className="lba-btn"
+                          onClick={() => {
+                            this.setState({ inputVisible: true });
+                          }}
+                        >
+                          <PlusSquareFilled className="lba-icon" /> New Time
+                        </Button>
+                      )}
                       <Button
                         className="lba-btn"
+                        icon={<PlusSquareFilled className="lba-icon" />}
                         onClick={() => {
-                          this.setState({ inputVisible: true });
+                          if (isUpdateMultiple) {
+                            this.setUpdateMultipleDevicesState({
+                              timeFilter: '111111000000000000000000'.split(''),
+                            });
+                          } else {
+                            this.setSelectedDevice({
+                              timeFilter: '111111000000000000000000'.split(''),
+                            });
+                          }
                         }}
                       >
-                        <PlusSquareFilled className="lba-icon" /> New Time
+                        0h - 6h
                       </Button>
-                    )}
-                    <Button
-                      className="lba-btn"
-                      icon={<PlusSquareFilled className="lba-icon" />}
-                      onClick={() => {
-                        if (isUpdateMultiple) {
-                          this.setUpdateMultipleDevicesState({
-                            timeFilter: '111111000000000000000000'.split(''),
-                          });
-                        } else {
-                          this.setSelectedDevice({
-                            timeFilter: '111111000000000000000000'.split(''),
-                          });
-                        }
-                      }}
-                    >
-                      0h - 6h
-                    </Button>
-                    <Button
-                      className="lba-btn"
-                      icon={<PlusSquareFilled className="lba-icon" />}
-                      onClick={() => {
-                        if (isUpdateMultiple) {
-                          this.setUpdateMultipleDevicesState({
-                            timeFilter: '000000111111000000000000'.split(''),
-                          });
-                        } else {
-                          this.setSelectedDevice({
-                            timeFilter: '000000111111000000000000'.split(''),
-                          });
-                        }
-                      }}
-                    >
-                      6h - 12h
-                    </Button>
-                    <Button
-                      className="lba-btn"
-                      icon={<PlusSquareFilled className="lba-icon" />}
-                      onClick={() => {
-                        if (isUpdateMultiple) {
-                          this.setUpdateMultipleDevicesState({
-                            timeFilter: '000000000000111111000000'.split(''),
-                          });
-                        } else {
-                          this.setSelectedDevice({
-                            timeFilter: '000000000000111111000000'.split(''),
-                          });
-                        }
-                      }}
-                    >
-                      12h - 18h
-                    </Button>
-                    <Button
-                      className="lba-btn"
-                      icon={<PlusSquareFilled className="lba-icon" />}
-                      onClick={() => {
-                        if (isUpdateMultiple) {
-                          this.setUpdateMultipleDevicesState({
-                            timeFilter: '000000000000000000111111'.split(''),
-                          });
-                        } else {
-                          this.setSelectedDevice({
-                            timeFilter: '000000000000000000111111'.split(''),
-                          });
-                        }
-                      }}
-                    >
-                      18h - 0h
-                    </Button>
-                  </Space>
-                </Col>
-                {/* </Skeleton> */}
+                      <Button
+                        className="lba-btn"
+                        icon={<PlusSquareFilled className="lba-icon" />}
+                        onClick={() => {
+                          if (isUpdateMultiple) {
+                            this.setUpdateMultipleDevicesState({
+                              timeFilter: '000000111111000000000000'.split(''),
+                            });
+                          } else {
+                            this.setSelectedDevice({
+                              timeFilter: '000000111111000000000000'.split(''),
+                            });
+                          }
+                        }}
+                      >
+                        6h - 12h
+                      </Button>
+                      <Button
+                        className="lba-btn"
+                        icon={<PlusSquareFilled className="lba-icon" />}
+                        onClick={() => {
+                          if (isUpdateMultiple) {
+                            this.setUpdateMultipleDevicesState({
+                              timeFilter: '000000000000111111000000'.split(''),
+                            });
+                          } else {
+                            this.setSelectedDevice({
+                              timeFilter: '000000000000111111000000'.split(''),
+                            });
+                          }
+                        }}
+                      >
+                        12h - 18h
+                      </Button>
+                      <Button
+                        className="lba-btn"
+                        icon={<PlusSquareFilled className="lba-icon" />}
+                        onClick={() => {
+                          if (isUpdateMultiple) {
+                            this.setUpdateMultipleDevicesState({
+                              timeFilter: '000000000000000000111111'.split(''),
+                            });
+                          } else {
+                            this.setSelectedDevice({
+                              timeFilter: '000000000000000000111111'.split(''),
+                            });
+                          }
+                        }}
+                      >
+                        18h - 0h
+                      </Button>
+                    </Space>
+                  </Col>
+                </Skeleton>
               </Row>
               <Divider></Divider>
               {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
-              <Form.Item label="Days in week">
-                <FilterDate {...this.props}></FilterDate>
-              </Form.Item>
+              <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}>
+                <Form.Item label="Days in week">
+                  <FilterDate {...this.props}></FilterDate>
+                </Form.Item>
+              </Skeleton>
               {/* </Skeleton> */}
               <Divider></Divider>
 
               {!isUpdateMultiple && (
-                <Form.Item
-                  name="description"
-                  label="Description"
-                  rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
-                >
-                  {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
-                  <Input.TextArea rows={4} />
-                  {/* </Skeleton> */}
-                </Form.Item>
+                <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}>
+                  <Form.Item
+                    name="description"
+                    label="Description"
+                    rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
+                  >
+                    <Input.TextArea rows={4} />
+                  </Form.Item>
+                </Skeleton>
               )}
+              {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
               <Form.Item
                 name="startEnd"
                 label="Start-End"
                 rules={[{ required: true, message: 'Please enter start date and end date' }]}
               >
-                {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
                 <DatePicker.RangePicker
                   format={'YYYY/MM/DD'}
                   disabledDate={(current) => {
                     return current < moment().endOf('day');
                   }}
                 />
-                {/* </Skeleton> */}
               </Form.Item>
+              {/* </Skeleton> */}
               <Divider></Divider>
               <Row gutter={20}>
                 {/* <Col span={12}>
@@ -510,6 +551,7 @@ export class UpdateDeviceFormDrawer extends React.Component<
               </Form.Item>
             </Col> */}
                 <Col span={12}>
+                  {/* <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}> */}
                   <Form.Item
                     name="minBid"
                     label="Mininum Bid"
@@ -524,6 +566,7 @@ export class UpdateDeviceFormDrawer extends React.Component<
                   >
                     <InputNumber style={{ width: '100%' }} />
                   </Form.Item>
+                  {/* </Skeleton> */}
                 </Col>
               </Row>
             </>
@@ -565,18 +608,20 @@ export class UpdateDeviceFormDrawer extends React.Component<
             
           )} */}
 
-        <Form.Item name="scenarioId" label="Scenario">
-          <Select size="large">
-            {listScenario &&
-              listScenario.map((scenario) => {
-                return (
-                  <Select.Option key={scenario.id} value={scenario.id}>
-                    {scenario.title}
-                  </Select.Option>
-                );
-              })}
-          </Select>
-        </Form.Item>
+        <Skeleton active loading={editMultipleDevicesDrawer?.isLoading}>
+          <Form.Item name="scenarioId" label="Scenario">
+            <Select size="large">
+              {listScenario &&
+                listScenario.map((scenario) => {
+                  return (
+                    <Select.Option key={scenario.id} value={scenario.id}>
+                      {scenario.title}
+                    </Select.Option>
+                  );
+                })}
+            </Select>
+          </Form.Item>
+        </Skeleton>
       </Form>
       // </Drawer>
     );
