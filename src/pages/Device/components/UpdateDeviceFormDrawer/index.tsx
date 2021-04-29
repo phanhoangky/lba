@@ -298,6 +298,8 @@ export class UpdateDeviceFormDrawer extends React.Component<
       ? updateDevicesState?.timeFilter
       : selectedDevice?.timeFilter;
     const displayTimeFilter = timeFilter?.map((time, index) => {
+      const start = index;
+      const end = index + 1 === 24 ? 0 : index + 1;
       return (
         time === '1' && (
           <Skeleton key={Math.random() + 100} active loading={editMultipleDevicesDrawer?.isLoading}>
@@ -318,7 +320,7 @@ export class UpdateDeviceFormDrawer extends React.Component<
                   <CloseCircleFilled className="lba-close-icon" />
                 </Button>
               }
-              value={`${index} h - ${index + 1} h`}
+              value={`${start} h - ${end} h`}
             />
           </Skeleton>
         )
@@ -389,11 +391,11 @@ export class UpdateDeviceFormDrawer extends React.Component<
                       onClick={() => {
                         if (isUpdateMultiple) {
                           this.setUpdateMultipleDevicesState({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '111111000000000000000000'.split(''),
                           });
                         } else {
                           this.setSelectedDevice({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '111111000000000000000000'.split(''),
                           });
                         }
                       }}
@@ -406,11 +408,11 @@ export class UpdateDeviceFormDrawer extends React.Component<
                       onClick={() => {
                         if (isUpdateMultiple) {
                           this.setUpdateMultipleDevicesState({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '000000111111000000000000'.split(''),
                           });
                         } else {
                           this.setSelectedDevice({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '000000111111000000000000'.split(''),
                           });
                         }
                       }}
@@ -423,11 +425,11 @@ export class UpdateDeviceFormDrawer extends React.Component<
                       onClick={() => {
                         if (isUpdateMultiple) {
                           this.setUpdateMultipleDevicesState({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '000000000000111111000000'.split(''),
                           });
                         } else {
                           this.setSelectedDevice({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '000000000000111111000000'.split(''),
                           });
                         }
                       }}
@@ -440,11 +442,11 @@ export class UpdateDeviceFormDrawer extends React.Component<
                       onClick={() => {
                         if (isUpdateMultiple) {
                           this.setUpdateMultipleDevicesState({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '000000000000000000111111'.split(''),
                           });
                         } else {
                           this.setSelectedDevice({
-                            timeFilter: '11111100000000000000000'.split(''),
+                            timeFilter: '000000000000000000111111'.split(''),
                           });
                         }
                       }}

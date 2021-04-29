@@ -4,7 +4,7 @@ import {
   ClockCircleFilled,
   CloseOutlined,
 } from '@ant-design/icons';
-import { Divider, Form, Space, Switch, Tag } from 'antd';
+import { Form, Space, Switch, Tag } from 'antd';
 import moment from 'moment';
 import * as React from 'react';
 import type { Dispatch, DeviceModelState, ScenarioModelState } from 'umi';
