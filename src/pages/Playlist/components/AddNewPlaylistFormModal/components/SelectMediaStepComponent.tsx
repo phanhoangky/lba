@@ -1,5 +1,25 @@
-import { MenuOutlined, MinusSquareTwoTone, PlaySquareFilled } from '@ant-design/icons';
-import { Col, Row, Slider, Table, Image, Empty, Space, Button, Divider } from 'antd';
+import {
+  CheckCircleFilled,
+  ClockCircleFilled,
+  CloseCircleFilled,
+  MenuOutlined,
+  MinusSquareTwoTone,
+  PlaySquareFilled,
+} from '@ant-design/icons';
+import {
+  Col,
+  Row,
+  Slider,
+  Table,
+  Image,
+  Empty,
+  Space,
+  Button,
+  Divider,
+  Form,
+  Popconfirm,
+} from 'antd';
+import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import arrayMove from 'array-move';
 import { cloneDeep } from 'lodash';
@@ -25,7 +45,9 @@ export type SelectMediaStepComponentProps = {
   media: MediaSourceModelState;
 };
 
-export type SelectMediaStepComponentState = {};
+export type SelectMediaStepComponentState = {
+  selectedPlaylistItem: PlaylistItem | undefined;
+};
 
 const DragHandle = SortableHandle(() => (
   <MenuOutlined style={{ cursor: 'pointer' }} className="lba-icon" />
@@ -39,7 +61,9 @@ export class SelectMediaStepComponent extends React.Component<
 > {
   constructor(props: SelectMediaStepComponentProps) {
     super(props);
-    this.state = {};
+    this.state = {
+      selectedPlaylistItem: undefined,
+    };
   }
 
   componentDidMount = () => {
@@ -158,7 +182,7 @@ export class SelectMediaStepComponent extends React.Component<
         }
         return item;
       });
-      this.setAddNewPlaylistParam({
+      await this.setAddNewPlaylistParam({
         playlistItems: newItems,
       });
     }
@@ -195,6 +219,9 @@ export class SelectMediaStepComponent extends React.Component<
     }
     return <Empty description={<>Preview Media</>} />;
   };
+
+  durationFormRef = React.createRef<FormInstance<any>>();
+
   render() {
     const {
       addNewPlaylistModal,
@@ -205,7 +232,7 @@ export class SelectMediaStepComponent extends React.Component<
     } = this.props.playlists;
 
     const maxD = maxDuration || 240;
-    const minD = minDuration || 10;
+    // const minD = minDuration || 10;
     const totalD = totalDuration || 0;
     const availableDuration = maxD - totalD;
     return (
@@ -247,21 +274,93 @@ export class SelectMediaStepComponent extends React.Component<
                 key="Duration"
                 title="Duration"
                 className="drag-visible"
-                render={(record) => {
+                render={(record: PlaylistItem) => {
                   return (
                     <>
-                      <Slider
-                        min={minDuration}
-                        max={maxDuration}
-                        disabled={availableDuration < minD}
-                        value={record.duration}
-                        onChange={(e: any) => {
-                          if (totalDuration + e < maxD) {
-                            this.setSelectedPlaylistItemsDuration(record, e);
-                            this.calculateTotalDuration();
-                          }
+                      <Popconfirm
+                        icon={<ClockCircleFilled className="lba-icon" />}
+                        title={
+                          <>
+                            <Form ref={this.durationFormRef} name="slider_duration_form">
+                              <Form.Item label="Total Duration">{totalD}</Form.Item>
+                              <Form.Item label="Remain Duration">{availableDuration}</Form.Item>
+                              <Form.Item
+                                label="Duration"
+                                name="duration"
+                                style={{
+                                  width: '200px',
+                                }}
+                                rules={[
+                                  {
+                                    validator: (rule, value) => {
+                                      const currentDuration = totalD - record.duration;
+                                      if (currentDuration + value > maxD) {
+                                        return Promise.reject(new Error('Over maximum duration'));
+                                      }
+                                      return Promise.resolve();
+                                    },
+                                  },
+                                ]}
+                              >
+                                <Slider
+                                  style={{}}
+                                  min={minDuration}
+                                  max={maxDuration}
+                                  disabled={totalD > maxD}
+                                />
+                              </Form.Item>
+                            </Form>
+                          </>
+                        }
+                        visible={record.id === this.state.selectedPlaylistItem?.id}
+                        onConfirm={() => {
+                          this.durationFormRef.current?.validateFields().then((values) => {
+                            this.setSelectedPlaylistItemsDuration(record, values.duration).then(
+                              () => {
+                                this.calculateTotalDuration();
+                                this.setState({
+                                  selectedPlaylistItem: undefined,
+                                });
+                              },
+                            );
+                          });
                         }}
-                      ></Slider>
+                        okButtonProps={{
+                          loading: addNewPlaylistModal?.isLoading,
+                          className: 'lba-btn',
+                          icon: <CheckCircleFilled className="lba-icon" />,
+                        }}
+                        cancelButtonProps={{
+                          loading: addNewPlaylistModal?.isLoading,
+                          icon: <CloseCircleFilled className="lba-close-icon" />,
+                        }}
+                        onCancel={() => {
+                          this.setState({
+                            selectedPlaylistItem: undefined,
+                          });
+                        }}
+                        destroyTooltipOnHide
+                        popupVisible
+                        afterVisibleChange={() => {
+                          // if (e) {
+                          this.durationFormRef.current?.setFieldsValue({
+                            duration: record.duration,
+                          });
+                          // }
+                        }}
+                      >
+                        <Button
+                          className="lba-btn"
+                          icon={<ClockCircleFilled className="lba-icon" />}
+                          onClick={() => {
+                            this.setState({
+                              selectedPlaylistItem: record,
+                            });
+                          }}
+                        >
+                          {record.duration} s
+                        </Button>
+                      </Popconfirm>
                     </>
                   );
                 }}
@@ -288,7 +387,7 @@ export class SelectMediaStepComponent extends React.Component<
                         </Button>
                         <Button
                           danger
-                          onClick={async () => {
+                          onClick={() => {
                             this.removeItem(record).then(() => {
                               this.calculateTotalDuration().then(() => {
                                 // this.clearDuration();

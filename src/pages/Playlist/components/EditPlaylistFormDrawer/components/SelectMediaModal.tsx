@@ -356,13 +356,13 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
       searchListMediaParam,
     } = this.props.media;
 
-    const { selectedPlaylist } = this.props.playlists;
+    const { selectedPlaylist, maxDuration, minDuration, totalDuration } = this.props.playlists;
 
-    // const maxD = maxDuration || 240;
-    // const minD = minDuration || 10;
-    // const totalD = totalDuration || 0;
-    // const availableDuration = maxD - totalD;
-    // const disalbedCondition = availableDuration < minD;
+    const maxD = maxDuration || 240;
+    const minD = minDuration || 10;
+    const totalD = totalDuration || 0;
+    const availableDuration = maxD - totalD;
+    const disalbedCondition = availableDuration < minD;
 
     const listMedias = listMedia
       ?.filter((media) => selectedPlaylist?.playlistItems.every((p) => p.mediaSrcId !== media.id))
@@ -526,6 +526,7 @@ export class SelectMediaModal extends React.Component<SelectMediaModalProps> {
                         <PlaySquareFilled className="lba-icon" />
                       </Button>
                       <Button
+                        disabled={disalbedCondition}
                         className="lba-btn"
                         onClick={() => {
                           this.addNewPlaylistItem(record);

@@ -341,14 +341,20 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                     <Space>
                       <Button
                         onClick={(e) => {
-                          this.setEditPlaylistDrawer({
-                            visible: true,
-                            isLoading: true,
-                          }).then(() => {
-                            this.setSelectedPlaylist(record).then(() => {
-                              this.editPlaylistModalRef.current?.componentDidMount();
+                          this.setSelectedPlaylist(record).then(() => {
+                            this.setEditPlaylistDrawer({
+                              visible: true,
                             });
                           });
+                          // this.setEditPlaylistDrawer({
+                          //   visible: true,
+                          //   isLoading: true,
+                          // }).then(() => {
+                          //   this.setSelectedPlaylist(record);
+                          //   //   .then(() => {
+                          //   //   this.editPlaylistModalRef.current?.componentDidMount();
+                          //   // });
+                          // });
                           e.stopPropagation();
                         }}
                         className="lba-btn"
@@ -474,12 +480,13 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
         {/* Edit Playlist Modal */}
         <Modal
           closable={false}
+          maskClosable={false}
           destroyOnClose={true}
           centered
           className={styles.editPlaylistModal}
           visible={editPlaylistDrawer?.visible}
           afterClose={() => {
-            this.editPlaylistModalRef.current?.setSelectedPlaylistItems([]);
+            // this.editPlaylistModalRef.current?.setSelectedPlaylistItems([]);
             this.editPlaylistModalRef.current?.clearSelectedPlaylist();
           }}
           title="Edit Playlist"
@@ -526,7 +533,9 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
             </>
           }
         >
-          <EditPlaylistFormDrawer ref={this.editPlaylistModalRef} {...this.props} />
+          {editPlaylistDrawer?.visible && (
+            <EditPlaylistFormDrawer ref={this.editPlaylistModalRef} {...this.props} />
+          )}
         </Modal>
         {/* End Edit Playlist Modal */}
       </PageContainer>

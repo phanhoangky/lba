@@ -213,6 +213,7 @@ export class SelectMediaComponent extends React.Component<
         this.callGetListMedia({
           ...getListFileParam,
           folder: item.id,
+          offset: 0,
         }),
       ])
         .then(() => {
@@ -247,10 +248,10 @@ export class SelectMediaComponent extends React.Component<
   };
 
   calculateTotalDuration = async () => {
-    const { selectedPlaylist } = this.props.playlists;
+    const { addNewPlaylistParam } = this.props.playlists;
 
     let total: number = 0;
-    selectedPlaylist?.playlistItems.forEach((item) => {
+    addNewPlaylistParam?.playlistItems.forEach((item) => {
       total += item.duration;
     });
 
@@ -347,13 +348,13 @@ export class SelectMediaComponent extends React.Component<
       searchListMediaParam,
     } = this.props.media;
 
-    const { addNewPlaylistParam } = this.props.playlists;
+    const { addNewPlaylistParam, minDuration, maxDuration, totalDuration } = this.props.playlists;
 
-    // const maxD = maxDuration || 240;
-    // const minD = minDuration || 10;
-    // const totalD = totalDuration || 0;
-    // const availableDuration = maxD - totalD;
-    // const disalbedCondition = availableDuration < minD;
+    const maxD = maxDuration || 240;
+    const minD = minDuration || 10;
+    const totalD = totalDuration || 0;
+    const availableDuration = maxD - totalD;
+    const disalbedCondition = availableDuration < minD;
 
     const listMedias = listMedia
       ?.filter((media) =>
@@ -520,6 +521,7 @@ export class SelectMediaComponent extends React.Component<
                         <PlaySquareFilled className="lba-icon" />
                       </Button>
                       <Button
+                        disabled={disalbedCondition}
                         className="lba-btn"
                         onClick={(e) => {
                           this.addNewPlaylistItem(record);
