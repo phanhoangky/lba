@@ -8,7 +8,7 @@ import type {
   BasicLayoutProps as ProLayoutProps,
   Settings,
 } from '@ant-design/pro-layout';
-import ProLayout, { SettingDrawer } from '@ant-design/pro-layout';
+import ProLayout from '@ant-design/pro-layout';
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { Dispatch, MomoModelState } from 'umi';
 import { Link, useIntl, connect, history } from 'umi';
@@ -130,6 +130,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         className={styles.customSider}
         menu={{
           type: 'group',
+          defaultOpenAll: true,
         }}
         {...settings}
         onCollapse={handleMenuCollapse}
@@ -182,7 +183,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
           {children}
         </Authorized>
       </ProLayout>
-      <SettingDrawer
+      {/* <SettingDrawer
         settings={settings}
         onSettingChange={(config) =>
           dispatch({
@@ -190,7 +191,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
             payload: config,
           })
         }
-      />
+      /> */}
     </>
   );
 };

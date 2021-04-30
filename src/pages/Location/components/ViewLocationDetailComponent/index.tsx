@@ -1,4 +1,4 @@
-import { Col, Divider, Form, Row, Skeleton, Tag } from 'antd';
+import { Divider, Form, Skeleton } from 'antd';
 import type { FormInstance } from 'antd';
 import L from 'leaflet';
 import * as React from 'react';
@@ -6,7 +6,7 @@ import type { CampaignModelState, DeviceModelState, Dispatch, LocationModelState
 import { connect } from 'umi';
 import { LOCATION_DISPATCHER } from '../..';
 import { LeafletMapComponent } from '../LeafletMapComponent';
-import { TAG_COLOR } from '@/services/constantUrls';
+// import { TAG_COLOR } from '@/services/constantUrls';
 
 export type ViewLocationDetailComponentProps = {
   dispatch: Dispatch;
@@ -154,24 +154,24 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
           <>
             <Form
               ref={this.formRef}
-              layout="vertical"
+              layout="horizontal"
               style={{
                 boxSizing: 'border-box',
               }}
+              labelCol={{
+                span: 4,
+              }}
+              wrapperCol={{
+                span: 24,
+              }}
             >
-              <Row gutter={20}>
-                <Col span={12}>
-                  <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                    <Form.Item label="Name">
-                      {/* <Input value={selectedLocation.name} readOnly /> */}
-                      <Tag color={TAG_COLOR}>{selectedLocation.name}</Tag>
-                    </Form.Item>
-                  </Skeleton>
-                </Col>
-                <Col span={12}>
-                  <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
-                    <Form.Item name="typeId" label="Type">
-                      {/* <Select
+              <Form.Item label="Name">
+                {/* <Input value={selectedLocation.name} readOnly /> */}
+                {/* <Tag color={TAG_COLOR}>{selectedLocation.name}</Tag> */}
+                {selectedLocation.name}
+              </Form.Item>
+              <Form.Item name="typeId" label="Type">
+                {/* <Select
                         disabled
                         style={{ width: '100%' }}
                         value={selectedLocation.typeId}
@@ -189,11 +189,17 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                           );
                         })}
                       </Select> */}
-                      <Tag color={TAG_COLOR}>{selectedLocation.type?.typeName}</Tag>
-                    </Form.Item>
-                  </Skeleton>
+                {/* <Tag color={TAG_COLOR}>{selectedLocation.type?.typeName}</Tag> */}
+                {selectedLocation.type?.typeName}
+              </Form.Item>
+              {/* <Row gutter={20}>
+                <Col span={12}>
+                  <Skeleton active loading={viewLocationDetailComponent?.isLoading}></Skeleton>
                 </Col>
-              </Row>
+                <Col span={12}>
+                  <Skeleton active loading={viewLocationDetailComponent?.isLoading}></Skeleton>
+                </Col>
+              </Row> */}
 
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>
                 <Form.Item
@@ -203,7 +209,8 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     width: '100%',
                   }}
                 >
-                  <Tag color={TAG_COLOR}>{selectedLocation.description}</Tag>
+                  {/* <Tag color={TAG_COLOR}>{selectedLocation.description}</Tag> */}
+                  {selectedLocation.description}
                 </Form.Item>
               </Skeleton>
 
@@ -215,7 +222,8 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                     width: '100%',
                   }}
                 >
-                  <Tag color={TAG_COLOR}>{selectedLocation.matchingCode}</Tag>
+                  {/* <Tag color={TAG_COLOR}>{selectedLocation.matchingCode}</Tag> */}
+                  {selectedLocation.matchingCode}
                 </Form.Item>
               </Skeleton>
               <Skeleton active loading={viewLocationDetailComponent?.isLoading}>

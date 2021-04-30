@@ -227,6 +227,7 @@ class Media extends React.Component<MediaSourceProps> {
         this.callGetListMedia({
           ...getListFileParam,
           folder: item.id,
+          offset: 0,
         }),
       ])
         .then(() => {
@@ -589,7 +590,7 @@ class Media extends React.Component<MediaSourceProps> {
           {/* ========================================================================================================================== */}
 
           <ListMediasHeaderComponent {...this.props} />
-          <Divider orientation="left" className="lba-text">
+          <Divider orientation="left" className="lba-label">
             Folders
           </Divider>
           {/* ========================================================================================================================== */}
@@ -683,7 +684,7 @@ class Media extends React.Component<MediaSourceProps> {
             }}
           ></List>
 
-          <Divider orientation="left" className="lba-text">
+          <Divider orientation="left" className="lba-label">
             Medias
           </Divider>
           {/* ========================================================================================================================== */}

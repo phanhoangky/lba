@@ -1,5 +1,5 @@
 import type { MenuDataItem } from '@ant-design/pro-layout';
-import { DefaultFooter, getMenuData, getPageTitle } from '@ant-design/pro-layout';
+import { getMenuData, getPageTitle } from '@ant-design/pro-layout';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import type { ConnectProps } from 'umi';
 import { Link, useIntl, connect } from 'umi';
@@ -54,7 +54,7 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
           </div>
           {children}
         </div>
-        <DefaultFooter />
+        {/* <DefaultFooter /> */}
       </div>
     </HelmetProvider>
   );

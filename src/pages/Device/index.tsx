@@ -549,6 +549,7 @@ class Device extends React.Component<DeviceProps> {
           visible={this.props.deviceStore.editMultipleDevicesDrawer?.visible}
           width={'40%'}
           closable={false}
+          maskClosable={false}
           getContainer={false}
           destroyOnClose={true}
           onClose={() => {

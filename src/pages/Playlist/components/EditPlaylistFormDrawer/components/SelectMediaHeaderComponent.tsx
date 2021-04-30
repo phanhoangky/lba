@@ -125,10 +125,7 @@ export class SelectMediaHeaderComponent extends React.Component<SelectMediaHeade
                                 this.setListLoading(false);
                                 openNotification('success', 'List Medias are loaded');
                               })
-                              .catch((error) => {
-                                console.log('====================================');
-                                console.log(error);
-                                console.log('====================================');
+                              .catch(() => {
                                 openNotification('error', 'Fail to load list medias');
                               });
                           }
@@ -171,10 +168,7 @@ export class SelectMediaHeaderComponent extends React.Component<SelectMediaHeade
                         .then(() => {
                           this.setListLoading(false);
                         })
-                        .catch((error) => {
-                          console.log('====================================');
-                          console.log(error);
-                          console.log('====================================');
+                        .catch(() => {
                           this.setListLoading(false);
                         });
                     } else {
@@ -184,10 +178,7 @@ export class SelectMediaHeaderComponent extends React.Component<SelectMediaHeade
                         .then(() => {
                           this.setListLoading(false);
                         })
-                        .catch((error) => {
-                          console.log('====================================');
-                          console.log(error);
-                          console.log('====================================');
+                        .catch(() => {
                           this.setListLoading(false);
                         });
                     }

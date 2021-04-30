@@ -2,6 +2,7 @@ import type { UpdatePlaylistItemsByPlaylistIdParam } from '@/services/PlaylistPa
 import { openNotification } from '@/utils/utils';
 import {
   CheckCircleFilled,
+  ClockCircleFilled,
   CloseCircleFilled,
   MenuOutlined,
   MinusSquareTwoTone,
@@ -16,10 +17,11 @@ import {
   Row,
   Col,
   Image,
-  Slider,
   Modal,
   Empty,
   Divider,
+  Slider,
+  Popconfirm,
 } from 'antd';
 import type { FormInstance } from 'antd/lib/form';
 import Column from 'antd/lib/table/Column';
@@ -37,10 +39,7 @@ import type {
 } from 'umi';
 import { connect } from 'umi';
 import { v4 as uuidv4 } from 'uuid';
-// import styles from './index.less';
-// import { MediasTableComponent } from './components/MediasTableComponent';
 import { SelectMediaModal } from './components/SelectMediaModal';
-// import AddNewPlaylistItemDrawer from '../AddNewPlaylistItemDrawer';
 
 export type EditPlaylistFormDrawerProps = {
   dispatch: Dispatch;
@@ -49,13 +48,27 @@ export type EditPlaylistFormDrawerProps = {
   media: MediaSourceModelState;
 };
 
+type EditPlaylistFormDrawerState = {
+  selectedPlaylistItem: PlaylistItem | undefined;
+};
+
 const DragHandle = SortableHandle(() => (
   <MenuOutlined style={{ cursor: 'pointer' }} className="lba-icon" />
 ));
 const SortableItemComponent = SortableElement((props: any) => <tr {...props} />);
 const SortableContainerComponent = SortableContainer((props: any) => <tbody {...props} />);
 
-export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDrawerProps> {
+export class EditPlaylistFormDrawer extends React.Component<
+  EditPlaylistFormDrawerProps,
+  EditPlaylistFormDrawerState
+> {
+  constructor(props: EditPlaylistFormDrawerProps) {
+    super(props);
+    this.state = {
+      selectedPlaylistItem: undefined,
+    };
+  }
+
   componentDidMount = () => {
     const { selectedPlaylist } = this.props.playlists;
     if (this.formRef.current && selectedPlaylist) {
@@ -64,73 +77,40 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         description: selectedPlaylist.description,
       });
     }
-    this.setEditPlaylistDrawer({
-      isLoading: true,
-    })
-      .then(() => {
-        // this.getMediaNotBelongToPlaylist({ isPaging: false, isSigned: 2 }).then(() => {
-        //   this.calculateTotalDuration().then(() => {
-        //     // this.setListMediaNotBelongToPlaylist(
-        //     //   listMediaNotBelongToPlaylist.filter((media) =>
-        //     //     selectedPlaylistItems.every((p) => p.mediaSrcId !== media.id),
-        //     //   ),
-        //     // )
-        //     this.setEditPlaylistDrawer({
-        //       isLoading: false,
-        //     });
-        //   });
-        // });
-        this.setEditPlaylistDrawer({
-          isLoading: false,
-        });
-      })
-      .catch(() => {
-        this.setEditPlaylistDrawer({
-          isLoading: false,
-        });
-      });
+    this.calculateTotalDuration();
   };
 
-  // getMediaNotBelongToPlaylist = async (param?: any) => {
-  //   const { getListMediaParam } = this.props.playlists;
+  callGetListPlaylist = async (param?: any) => {
+    const { getPlaylistParam } = this.props.playlists;
+    // this.setTableLoading(true);
+    await this.props.dispatch({
+      type: 'playlists/getListPlaylist',
+      payload: {
+        ...getPlaylistParam,
+        ...param,
+      },
+    });
+    // .then(() => {
+    //   this.setTableLoading(false);
+    // })
+    // .catch(() => {
+    //   this.setTableLoading(false);
+    // });
+  };
+
+  // setTableLoading = async (loading: boolean) => {
   //   await this.props.dispatch({
-  //     type: 'playlists/getMediaNotBelongToPlaylist',
-  //     payload: {
-  //       ...getListMediaParam,
-  //       ...param,
-  //     },
+  //     type: 'playlists/setTableLoadingReducer',
+  //     payload: loading,
   //   });
   // };
 
-  callGetListPlaylist = async () => {
-    const { getPlaylistParam } = this.props.playlists;
-    this.setTableLoading(true);
-    await this.props
-      .dispatch({
-        type: 'playlists/getListPlaylist',
-        payload: getPlaylistParam,
-      })
-      .then(() => {
-        this.setTableLoading(false);
-      })
-      .catch(() => {
-        this.setTableLoading(false);
-      });
-  };
-
-  setTableLoading = async (loading: boolean) => {
-    await this.props.dispatch({
-      type: 'playlists/setTableLoadingReducer',
-      payload: loading,
-    });
-  };
-
-  setSelectedPlaylistItems = async (payload: any) => {
-    await this.props.dispatch({
-      type: `playlists/setSelectedPlaylistItemsReducer`,
-      payload,
-    });
-  };
+  // setSelectedPlaylistItems = async (payload: any) => {
+  //   await this.props.dispatch({
+  //     type: `playlists/setSelectedPlaylistItemsReducer`,
+  //     payload,
+  //   });
+  // };
 
   clearSelectedPlaylist = async () => {
     await this.props.dispatch({
@@ -256,7 +236,9 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         typeName: media.type.name,
         url: media.urlPreview,
       });
-      await this.setSelectedPlaylistItems(newList);
+      await this.setSelectedPlaylist({
+        playlistItems: newList,
+      });
     }
     // await this.props.dispatch({
     //   type: 'playlists/setSelectedPlaylistItemsReducer',
@@ -300,18 +282,6 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
     const { listMediaNotBelongToPlaylist } = this.props.playlists;
     const newList = listMediaNotBelongToPlaylist?.filter((media: any) => media.id !== param.id);
     await this.setListMediaNotBelongToPlaylist(newList);
-  };
-
-  setAddNewPlaylistItemsDrawer = async (modal: any) => {
-    const { addNewPlaylistItemsDrawer } = this.props.playlists;
-
-    await this.props.dispatch({
-      type: 'playlists/setAddNewPlaylistItemsDrawerReducer',
-      payload: {
-        ...addNewPlaylistItemsDrawer,
-        ...modal,
-      },
-    });
   };
 
   onSortEnd = ({ oldIndex, newIndex }: any) => {
@@ -427,10 +397,10 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
         }
         return item;
       });
-      this.setSelectedPlaylist({
+      await this.setSelectedPlaylist({
         playlistItems: newItems,
       });
-      this.setSelectedPlaylistItems(newItems);
+      // this.setSelectedPlaylistItems(newItems);
     }
   };
 
@@ -508,7 +478,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
   };
 
   formRef = React.createRef<FormInstance<any>>();
-
+  durationFormRef = React.createRef<FormInstance<any>>();
   render() {
     const {
       editPlaylistDrawer,
@@ -518,12 +488,22 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
       selectedPlaylist,
     } = this.props.playlists;
     const maxD = maxDuration || 240;
-    const minD = minDuration || 10;
+    // const minD = minDuration || 10;
     const totalD = totalDuration || 0;
     const availableDuration = maxD - totalD;
     return (
       <div className="modal-content">
-        <Form name="edit_playlists_form_drawer" layout="vertical" ref={this.formRef}>
+        <Form
+          name="edit_playlists_form_drawer"
+          labelCol={{
+            span: 4,
+          }}
+          wrapperCol={{
+            span: 24,
+          }}
+          layout="vertical"
+          ref={this.formRef}
+        >
           <Form.Item
             name="title"
             label="Title"
@@ -579,21 +559,90 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                   key="Duration"
                   title="Duration"
                   className="drag-visible"
-                  render={(record) => {
+                  render={(record: PlaylistItem) => {
                     return (
                       <>
-                        <Slider
-                          min={minDuration}
-                          max={maxDuration}
-                          disabled={availableDuration < minD}
-                          value={record.duration}
-                          onChange={(e: any) => {
-                            if (totalDuration + e < maxD) {
-                              this.setSelectedPlaylistItemsDuration(record, e);
-                              this.calculateTotalDuration();
-                            }
+                        <Popconfirm
+                          icon={<ClockCircleFilled className="lba-icon" />}
+                          title={
+                            <>
+                              <Form ref={this.durationFormRef} name="slider_duration_form">
+                                <Form.Item label="Total Duration">{totalD}</Form.Item>
+                                <Form.Item label="Remain Duration">{availableDuration}</Form.Item>
+                                <Form.Item
+                                  label="Duration"
+                                  name="duration"
+                                  style={{
+                                    width: '200px',
+                                  }}
+                                  rules={[
+                                    {
+                                      validator: (rule, value) => {
+                                        const currentDuration = totalD - record.duration;
+                                        if (currentDuration + value > maxD) {
+                                          return Promise.reject(new Error('Over maximum duration'));
+                                        }
+                                        return Promise.resolve();
+                                      },
+                                    },
+                                  ]}
+                                >
+                                  <Slider
+                                    min={minDuration}
+                                    max={maxDuration}
+                                    disabled={totalD > maxD}
+                                  />
+                                </Form.Item>
+                              </Form>
+                            </>
+                          }
+                          visible={record.id === this.state.selectedPlaylistItem?.id}
+                          onConfirm={() => {
+                            this.durationFormRef.current?.validateFields().then((values) => {
+                              this.setSelectedPlaylistItemsDuration(record, values.duration).then(
+                                () => {
+                                  this.calculateTotalDuration();
+                                  this.setState({
+                                    selectedPlaylistItem: undefined,
+                                  });
+                                },
+                              );
+                            });
                           }}
-                        ></Slider>
+                          okButtonProps={{
+                            loading: editPlaylistDrawer?.isLoading,
+                            className: 'lba-btn',
+                            icon: <CheckCircleFilled className="lba-icon" />,
+                          }}
+                          onCancel={() => {
+                            this.setState({
+                              selectedPlaylistItem: undefined,
+                            });
+                          }}
+                          cancelButtonProps={{
+                            loading: editPlaylistDrawer?.isLoading,
+                            icon: <CloseCircleFilled className="lba-close-icon" />,
+                          }}
+                          destroyTooltipOnHide
+                          popupVisible
+                          afterVisibleChange={() => {
+                            this.durationFormRef.current?.setFieldsValue({
+                              duration: record.duration,
+                            });
+                          }}
+                        >
+                          <Button
+                            className="lba-btn"
+                            icon={<ClockCircleFilled className="lba-icon" />}
+                            onClick={() => {
+                              this.setState({
+                                selectedPlaylistItem: record,
+                              });
+                            }}
+                          >
+                            {record.duration} s
+                          </Button>
+                        </Popconfirm>
                       </>
                     );
                   }}
@@ -602,6 +651,7 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                 <Column
                   key="action"
                   title="Action"
+                  fixed="right"
                   className="drag-visible"
                   render={(record: any) => {
                     return (
@@ -620,11 +670,9 @@ export class EditPlaylistFormDrawer extends React.Component<EditPlaylistFormDraw
                           </Button>
                           <Button
                             danger
-                            onClick={async () => {
+                            onClick={() => {
                               this.removeItem(record).then(() => {
-                                this.calculateTotalDuration().then(() => {
-                                  this.clearDuration();
-                                });
+                                this.calculateTotalDuration();
                               });
                             }}
                           >

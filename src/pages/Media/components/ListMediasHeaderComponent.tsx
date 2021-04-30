@@ -109,7 +109,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                   }
                 }}
               />
-              <ControlTwoTone style={{ fontSize: `2em` }} />
+              <ControlTwoTone twoToneColor="#ffbb00" style={{ fontSize: `2em` }} />
               <Dropdown
                 overlay={
                   <Menu
@@ -132,10 +132,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                                 this.setListLoading(false);
                                 openNotification('success', 'List Medias are loaded');
                               })
-                              .catch((error) => {
-                                console.log('====================================');
-                                console.log(error);
-                                console.log('====================================');
+                              .catch(() => {
                                 openNotification('error', 'Fail to load list medias');
                               });
                           }
@@ -210,10 +207,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                         .then(() => {
                           this.setListLoading(false);
                         })
-                        .catch((error) => {
-                          console.log('====================================');
-                          console.log(error);
-                          console.log('====================================');
+                        .catch(() => {
                           this.setListLoading(false);
                         });
                     } else {
@@ -223,10 +217,7 @@ export class ListMediasHeaderComponent extends React.Component<ListMediasHeaderC
                         .then(() => {
                           this.setListLoading(false);
                         })
-                        .catch((error) => {
-                          console.log('====================================');
-                          console.log(error);
-                          console.log('====================================');
+                        .catch(() => {
                           this.setListLoading(false);
                         });
                     }

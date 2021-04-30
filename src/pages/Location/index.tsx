@@ -465,6 +465,7 @@ class LocationScreen extends React.Component<LocationScreenProps> {
             });
           }}
           destroyOnClose={true}
+          maskClosable={false}
           closable={false}
           onOk={() => {
             this.addNewLocationModalRef.current?.handleCreateNewLocation();
@@ -497,30 +498,17 @@ class LocationScreen extends React.Component<LocationScreenProps> {
           title={'Edit Location'}
           visible={editLocationModal?.visible}
           closable={false}
+          maskClosable={false}
           destroyOnClose={true}
           centered
           onCancel={() => {
             this.setEditLocationModal({
               visible: false,
             });
-            this.resetMap().then(async () => {
-              // const { selectedLocation } = this.props.location;
-              // const old = listLocations?.filter((l) => l.id === selectedLocation?.id)[0];
-              // if (old) {
-              //   const { data } = await this.reverseGeocoding(old.latitude, old.longitude);
-              //   this.setSelectedLocation({ ...old, address: data.display_name }).then(() => {
-              //     this.setViewLocationDetailComponent({
-              //       visible: true,
-              //     }).then(() => {
-              //       this.viewLocationRef.current?.componentDidMount();
-              //     });
-              //   });
-              // }
-            });
+            this.resetMap();
           }}
           width={'50%'}
           confirmLoading={editLocationModal?.isLoading}
-          afterClose={async () => {}}
           footer={
             <>
               <EditLocationModalFooter

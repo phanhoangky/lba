@@ -95,6 +95,7 @@ export class UpdateDeviceDrawerFooter extends React.Component<
       >
         <Space>
           <Button
+            loading={editMultipleDevicesDrawer?.isLoading}
             icon={<CloseCircleFilled className="lba-close-icon" />}
             onClick={async () => {
               // await this.props.dispatch({
@@ -166,6 +167,7 @@ export class UpdateDeviceDrawerFooter extends React.Component<
             >
               <Button
                 danger
+                loading={editMultipleDevicesDrawer?.isLoading}
                 icon={<DeleteFilled className="lba-close-icon" />}
                 onClick={() => {
                   this.setState({
@@ -179,66 +181,61 @@ export class UpdateDeviceDrawerFooter extends React.Component<
           )}
           <Button
             className="lba-btn"
+            loading={editMultipleDevicesDrawer?.isLoading}
             icon={<EditFilled className="lba-icon" />}
-            onClick={async () => {
-              this.setEditMultipleDevicesDrawer({
-                isLoading: true,
-              }).then(() => {
-                if (isUpdateMultiple) {
-                  this.props
-                    .onUpdateMultipleDevices()
-                    .then(() => {
-                      const { selectedDevices } = this.props.deviceStore;
-                      openNotification(
-                        'success',
-                        'Devices updated successfully',
-                        selectedDevices &&
-                          selectedDevices
-                            .map((d) => `${d.name} was update sucessfully \n`)
-                            .join(''),
-                      );
-                      this.setEditMultipleDevicesDrawer({
-                        isLoading: false,
-                        // visible: false,
-                      });
-                    })
+            onClick={() => {
+              if (isUpdateMultiple) {
+                this.props.onUpdateMultipleDevices();
+                // .then(() => {
+                //   const { selectedDevices } = this.props.deviceStore;
+                //   openNotification(
+                //     'success',
+                //     'Devices updated successfully',
+                //     selectedDevices &&
+                //       selectedDevices
+                //         .map((d) => `${d.name} was update sucessfully \n`)
+                //         .join(''),
+                //   );
+                //   this.setEditMultipleDevicesDrawer({
+                //     isLoading: false,
+                //     // visible: false,
+                //   });
+                // })
 
-                    .catch(() => {
-                      const { selectedDevices } = this.props.deviceStore;
-                      openNotification(
-                        'error',
-                        'Devices updated fail',
-                        selectedDevices?.map((d) => `${d.name} was fail to updated  \n`).toString(),
-                      );
-                      this.setEditMultipleDevicesDrawer({
-                        isLoading: false,
-                        // visible: false,
-                      });
-                    });
-                } else {
-                  this.props
-                    .onUpdateDevice()
-                    .then(async () => {
-                      openNotification(
-                        'success',
-                        'Devices updated successfully',
-                        `${selectedDevice?.name} was updated`,
-                      );
-                      this.setEditMultipleDevicesDrawer({
-                        isLoading: false,
-                      });
-                    })
+                // .catch(() => {
+                //   const { selectedDevices } = this.props.deviceStore;
+                //   openNotification(
+                //     'error',
+                //     'Devices updated fail',
+                //     selectedDevices?.map((d) => `${d.name} was fail to updated  \n`).toString(),
+                //   );
+                //   this.setEditMultipleDevicesDrawer({
+                //     isLoading: false,
+                //     // visible: false,
+                //   });
+                // });
+              } else {
+                this.props.onUpdateDevice();
+                // .then(async () => {
+                //   openNotification(
+                //     'success',
+                //     'Devices updated successfully',
+                //     `${selectedDevice?.name} was updated`,
+                //   );
+                //   this.setEditMultipleDevicesDrawer({
+                //     isLoading: false,
+                //   });
+                // })
 
-                    .catch((error) => {
-                      // Promise.reject(error);
-                      openNotification('error', 'Devices updated fail', error.message);
-                      this.setEditMultipleDevicesDrawer({
-                        isLoading: false,
-                        // visible: false,
-                      });
-                    });
-                }
-              });
+                // .catch((error) => {
+                //   // Promise.reject(error);
+                //   openNotification('error', 'Devices updated fail', error.message);
+                //   this.setEditMultipleDevicesDrawer({
+                //     isLoading: false,
+                //     // visible: false,
+                //   });
+                // });
+              }
             }}
           >
             {isUpdateMultiple ? 'Update Multiple Devices' : 'Update Device'}

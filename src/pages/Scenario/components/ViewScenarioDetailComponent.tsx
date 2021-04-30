@@ -1,15 +1,13 @@
-import { openNotification, sortArea } from '@/utils/utils';
+import { sortArea } from '@/utils/utils';
 import { UploadOutlined } from '@ant-design/icons';
-import { Col, Form, Row, Image, Divider, Table, Modal, Skeleton, Empty, Tag } from 'antd';
+import { Col, Form, Row, Image, Divider, Table, Skeleton, Empty } from 'antd';
 import type { FormInstance } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
 import type { Area, Dispatch, PlayListModelState, ScenarioItem, ScenarioModelState } from 'umi';
 import { connect } from 'umi';
-import { v4 as uuidv4 } from 'uuid';
-import type { UpdateScenarioParam } from '@/services/ScenarioService/ScenarioService';
 import styles from '../index.less';
-import { TAG_COLOR } from '@/services/constantUrls';
+// import { TAG_COLOR } from '@/services/constantUrls';
 
 export type ViewScenarioDetailProps = {
   dispatch: Dispatch;
@@ -67,16 +65,6 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
     return undefined;
   };
 
-  setPlaylistDrawer = async (payload: any) => {
-    await this.props.dispatch({
-      type: 'scenarios/setPlaylistsDrawerReducer',
-      payload: {
-        ...this.props.scenarios.playlistsDrawer,
-        ...payload,
-      },
-    });
-  };
-
   setSelectedScenario = async (item: any) => {
     await this.props.dispatch({
       type: 'scenarios/setSelectedScenarioReducer',
@@ -104,35 +92,6 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
 
     await this.setSelectedScenario({
       scenarioItems: newScenarioItems,
-    });
-  };
-
-  setAudioArea = async (id: string, checked: boolean) => {
-    const { selectedSenario } = this.props.scenarios;
-    await this.setSelectedScenario({
-      scenarioItems: selectedSenario?.scenarioItems.map((scenarioItem) => {
-        if (checked) {
-          if (scenarioItem.id === id) {
-            return {
-              ...scenarioItem,
-              audioArea: true,
-            };
-          }
-
-          return {
-            ...scenarioItem,
-            audioArea: false,
-          };
-        }
-
-        if (scenarioItem.id === id) {
-          return {
-            ...scenarioItem,
-            audioArea: false,
-          };
-        }
-        return scenarioItem;
-      }),
     });
   };
 
@@ -167,62 +126,6 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
     });
   };
 
-  setSelectedPlaylistItems = async (modal: any) => {
-    await this.props.dispatch({
-      type: 'playlists/setSelectedPlaylistItemsReducer',
-      payload: modal,
-    });
-  };
-
-  clearSelectedPlaylistItems = async () => {
-    await this.setSelectedPlaylistItems([]);
-  };
-
-  choosePlaylist = () => {
-    const { selectedSenario, selectedArea, playlistsDrawer } = this.props.scenarios;
-
-    const selectedPlaylist = playlistsDrawer?.listPlaylists.filter((item) => item.isSelected)[0];
-
-    const selectedScenarioItem = selectedSenario?.scenarioItems.filter(
-      (item) => item?.area?.id === selectedArea?.id,
-    );
-    if (selectedScenarioItem) {
-      if (selectedScenarioItem.length > 0) {
-        this.setSelectedScenario({
-          scenarioItems: selectedSenario?.scenarioItems.map((item) => {
-            if (selectedScenarioItem[0].id === item.id) {
-              return {
-                ...item,
-                playlist: selectedPlaylist,
-                scenario: selectedSenario,
-              };
-            }
-
-            return item;
-          }),
-        });
-      } else {
-        const newScenarioItem: ScenarioItem = {
-          area: selectedArea,
-          audioArea: false,
-          displayOrder: 0,
-          id: uuidv4(),
-          isActive: true,
-          playlist: selectedPlaylist,
-          scenario: selectedSenario,
-        };
-
-        selectedSenario?.scenarioItems.push(newScenarioItem);
-        this.setSelectedScenario({
-          scenarioItems: selectedSenario?.scenarioItems,
-        });
-      }
-    }
-    this.setPlaylistDrawer({
-      visible: false,
-    });
-  };
-
   setEditScenariosDrawer = async (modal: any) => {
     await this.props.dispatch({
       type: 'scenarios/setEditScenarioDrawerReducer',
@@ -230,90 +133,6 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
         ...this.props.scenarios.editScenarioDrawer,
         ...modal,
       },
-    });
-  };
-
-  saveChange = async (values: any) => {
-    const { selectedSenario } = this.props.scenarios;
-    const updateParam: UpdateScenarioParam = {
-      description: selectedSenario?.description,
-      id: selectedSenario?.id,
-      layoutId: selectedSenario?.layoutId,
-      scenarioItems: selectedSenario?.scenarioItems.map((item) => {
-        return {
-          id: item.id,
-          areaId: item?.area?.id,
-          audioArea: item.audioArea,
-          displayOrder: item.displayOrder,
-          isActive: item.isActive,
-          playlistId: item?.playlist?.id,
-          scenarioId: selectedSenario.id,
-        };
-      }),
-      title: selectedSenario?.title,
-      ...values,
-    };
-    await this.updateScenario(updateParam);
-  };
-
-  updateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
-    await this.props.dispatch({
-      type: 'scenarios/updateScenario',
-      payload: updateScenarioParam,
-    });
-  };
-
-  removeScenario = async (id: string) => {
-    await this.props.dispatch({
-      type: 'scenarios/removeScenario',
-      payload: id,
-    });
-  };
-
-  handleRemoveScenario = async (record: any) => {
-    Modal.confirm({
-      title: `Are you sure you want to delete ${record.title}`,
-      centered: true,
-      closable: false,
-      onOk: async () => {
-        this.setEditScenariosDrawer({
-          isLoading: true,
-        })
-          .then(() => {
-            this.removeScenario(record.id)
-              .then(async () => {
-                openNotification(
-                  'success',
-                  'Remove Scenario Successfully',
-                  `${record.title} was removed`,
-                );
-                this.callGetListScenario().then(() => {
-                  this.setEditScenariosDrawer({
-                    isLoading: false,
-                  });
-                });
-              })
-              .catch((error) => {
-                Promise.reject(error);
-                openNotification('error', 'Fail to remove scenario ', error);
-              });
-          })
-          .catch((error) => {
-            Promise.reject(error);
-            openNotification('error', 'Fail to remove scenario ', error);
-            this.setEditScenariosDrawer({
-              isLoading: false,
-            });
-          });
-      },
-    });
-  };
-
-  removeScenarioItems = async (item: any) => {
-    const { selectedSenario } = this.props.scenarios;
-    const newScenarioItem = selectedSenario?.scenarioItems.filter((s) => s.id !== item.id);
-    await this.setSelectedScenario({
-      scenarioItems: newScenarioItem,
     });
   };
 
@@ -328,24 +147,36 @@ export class ViewScenarioDetailComponent extends React.Component<ViewScenarioDet
         {/* {viewScenarioDetailComponent?.isLoading && <Spin size="large" />} */}
 
         <>
-          <Form name="view_scenario_detail" layout="vertical" ref={this.formRef}>
+          <Form
+            name="view_scenario_detail"
+            layout="horizontal"
+            labelCol={{
+              span: 4,
+            }}
+            wrapperCol={{
+              span: 24,
+            }}
+            ref={this.formRef}
+          >
             <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
-              <Form.Item name="title" label="Title">
+              <Form.Item label="Title">
                 {/* <Input readOnly /> */}
-                <Tag color={TAG_COLOR}>{selectedSenario?.title}</Tag>
+                {/* <Tag color={TAG_COLOR}>{selectedSenario?.title}</Tag> */}
+                {selectedSenario?.title}
               </Form.Item>
             </Skeleton>
 
             <Skeleton active loading={viewScenarioDetailComponent?.isLoading}>
-              <Form.Item name="description" label="Description">
+              <Form.Item label="Description">
                 {/* <Input.TextArea readOnly rows={4} /> */}
-                <span
+                {/* <span
                   style={{
                     color: TAG_COLOR,
                   }}
                 >
                   {selectedSenario?.description}
-                </span>
+                </span> */}
+                {selectedSenario?.description}
               </Form.Item>
             </Skeleton>
           </Form>

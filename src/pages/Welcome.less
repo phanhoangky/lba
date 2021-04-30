@@ -1,5 +1,19 @@
 @import '~antd/lib/style/themes/default.less';
 
+// Global LBA Styles
+@lba-color-text: rgb(0, 0, 0);
+@lba-background-image: linear-gradient(135deg, #ffd000, #f8ab06);
+@lba-table-hover-background: linear-gradient(135deg, #747474, #c5c5c5);
+@lba-icon-color: rgb(252, 206, 0);
+@lba-color-text-hover: rgb(252, 252, 252);
+@lba-icon-two-tone-color: #fda502;
+@lba-form-label-text: linear-gradient(135deg, #131313, #5e5e5e);
+
+@lba-normal-btn-background-image: linear-gradient(135deg, #ffd900, #ffbb00);
+// Switch Styles
+@lba-switch-background-image: linear-gradient(135deg, #a18b29, #ffee00);
+@lba-switch-border-color: linear-gradient(135deg, #a18b29, #ffee00);
+
 .pre {
   margin: 12px 0;
   padding: 12px 20px;
@@ -77,13 +91,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .text-color-main {
-      background-image: linear-gradient(135deg, #02aab0, #00cdac);
+      background-image: @lba-background-image;
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
