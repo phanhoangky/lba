@@ -442,7 +442,13 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               key="budget"
               title="Budget (VND)"
               render={(record: Campaign) => {
-                return <>{record.budget.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}</>;
+                return (
+                  <>
+                    {Math.floor(record.budget)
+                      .toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')}
+                  </>
+                );
               }}
             ></Column>
             <Column
@@ -456,7 +462,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
                 return (
                   <>
                     {diffStart > 0 && diffEnd < 0 && (
-                      <Tag color={'cyan'} key={'running'}>
+                      <Tag color={'green'} key={'running'}>
                         RUNNING
                       </Tag>
                     )}
@@ -544,6 +550,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
             destroyOnClose={true}
             confirmLoading={addNewCampaignModal?.isLoading}
             closable={false}
+            maskClosable={false}
             afterClose={() => {
               this.addNewModalRef.current?.handleAfterClose();
             }}
@@ -551,9 +558,11 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
               disabled: disabledOkButton,
               className: 'lba-btn',
               icon: <CheckCircleFilled className="lba-icon" />,
+              loading: addNewCampaignModal?.isLoading,
             }}
             cancelButtonProps={{
               icon: <CloseCircleFilled className="lba-close-icon" />,
+              loading: addNewCampaignModal?.isLoading,
               danger: true,
             }}
             onOk={() => {
@@ -576,7 +585,7 @@ export class CampaignScreen extends React.Component<CampaignScreenProps> {
           {/* View Campaign Detail */}
           <Drawer
             title={<>Campaign Detail</>}
-            width={'80%'}
+            width={'65%'}
             closable={false}
             afterVisibleChange={(e) => {
               if (!e) {

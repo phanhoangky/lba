@@ -2,6 +2,7 @@
 
 // Global LBA Styles
 @lba-color-text: rgb(0, 0, 0);
+@lba-color-menu-icon-color: rgb(0, 0, 0);
 @lba-background-image: linear-gradient(135deg, #fecf00, #e2d742);
 @lba-table-hover-background: linear-gradient(135deg, #747474, #c5c5c5);
 @lba-icon-color: rgb(252, 206, 0);
@@ -267,6 +268,12 @@ body,
   .ant-switch-checked {
     background-image: @lba-background-image;
   }
+
+  .ant-menu-dark .ant-menu-item-selected .ant-menu-item-icon, .ant-menu-dark .ant-menu-item-selected .anticon {
+    color: @lba-color-menu-icon-color;
+  }
+
+  
   .ant-table-content {
     overflow-x: scroll;
   }

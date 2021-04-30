@@ -122,123 +122,6 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
   render() {
     const { selectedFile } = this.props.media;
     return (
-      // <Drawer
-      //   closable={false}
-      //   destroyOnClose={true}
-      //   visible={editFileDrawer.visible}
-      //   width={700}
-      //   onClose={async () => {
-      //     await this.setEditFileDrawer({
-      //       visible: false,
-      //     });
-      //   }}
-      //   title={
-      //     <>
-      //       <div>{selectedFile.title}</div>
-      //     </>
-      //   }
-      //   footer={
-      //     <>
-      //       <div style={{ textAlign: 'right' }}>
-      //         <Space>
-      //           <Popconfirm
-      //             title={`Remove ${selectedFile.title}`}
-      //             visible={this.state.removeConfirmVisible}
-      //             onConfirm={async () => {
-      //               this.setListLoading(true)
-      //                 .then(() => {
-      //                   this.setEditFileDrawer({
-      //                     visible: false,
-      //                   }).then(() => {
-      //                     this.removeMedia(selectedFile)
-      //                       .then(() => {
-      //                         openNotification(
-      //                           'success',
-      //                           'remove media sucessfully',
-      //                           `${selectedFile.title} is removed`,
-      //                         );
-      //                         this.callGetListMedia().then(() => {
-      //                           this.setListLoading(false).then(() => {
-      //                             this.setState({
-      //                               removeConfirmVisible: false,
-      //                             });
-      //                           });
-      //                         });
-      //                       })
-      //                       .catch((error) => {
-      //                         Promise.reject(error);
-      //                         openNotification('error', 'fail to remove media', error);
-      //                       });
-      //                   });
-      //                 })
-      //                 .catch(() => {
-      //                   this.setListLoading(false).then(() => {
-      //                     this.setState({
-      //                       removeConfirmVisible: false,
-      //                     });
-      //                   });
-      //                 });
-      //             }}
-      //             okButtonProps={{ loading: this.props.media.listLoading }}
-      //             onCancel={() => {
-      //               this.setState({
-      //                 removeConfirmVisible: false,
-      //               });
-      //             }}
-      //           >
-      //             <Button
-      //               danger
-      //               onClick={() => {
-      //                 this.setState({
-      //                   removeConfirmVisible: true,
-      //                 });
-      //               }}
-      //             >
-      //               <DeleteTwoTone twoToneColor={'#f64842'} /> Remove
-      //             </Button>
-      //           </Popconfirm>
-      //           <Button
-      //             type="primary"
-      //             onClick={async () => {
-      //               await this.setEditFileDrawer({
-      //                 visible: false,
-      //               });
-      //               this.setListLoading(true)
-      //                 .then(() => {
-      //                   this.handleUpdateFile()
-      //                     .then(() => {
-      //                       openNotification(
-      //                         'success',
-      //                         'update media sucessfully',
-      //                         `${selectedFile.title} is updated`,
-      //                       );
-      //                       this.callGetListMedia().then(() => {
-      //                         this.setListLoading(false);
-      //                       });
-      //                     })
-      //                     .catch((error) => {
-      //                       Promise.reject(error);
-      //                       openNotification(
-      //                         'error',
-      //                         'Fail to update media ',
-      //                         `${selectedFile.title} is fail to update`,
-      //                       );
-      //                       this.setListLoading(false);
-      //                     });
-      //                 })
-      //                 .catch(() => {
-      //                   this.setListLoading(false);
-      //                 });
-      //             }}
-      //           >
-      //             <EditOutlined /> Update Media
-      //           </Button>
-      //         </Space>
-      //       </div>
-      //       <EditDrawerFooter {...this.props} />
-      //     </>
-      //   }
-      // >
       <Form ref={this.formRef} name="edit_file_drawer" layout="vertical">
         <Form.Item
           label="Title"
@@ -256,7 +139,7 @@ export class EditMediaFormDrawer extends React.Component<EditMediaFormDrawerProp
           name="description"
           rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
         >
-          <Input />
+          <Input.TextArea />
         </Form.Item>
         <Row>
           <Col span={24}>

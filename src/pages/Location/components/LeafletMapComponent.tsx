@@ -19,11 +19,6 @@ export type LeafletMapComponentProps = {
 
 export class LeafletMapComponent extends React.Component<LeafletMapComponentProps> {
   componentDidMount = () => {
-    // if (this.props.location.mapComponent?.map) {
-    //   this.props.location.mapComponent.map.eachLayer((l) => {
-    //     l.remove();
-    //   });
-    // }
     const mymap = L.map('mapid');
     mymap.setView([10.8414846, 106.8100464], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -34,14 +29,15 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
       tileSize: 512,
       zoomOffset: -1,
     }).addTo(mymap);
+    mymap.invalidateSize({
+      animate: true,
+      duration: 10,
+    });
+    if (this.props.showLocations) {
+      this.handleOnDragEvent(mymap);
+    }
 
-    // setTimeout(() => {
-    //   mymap.invalidateSize(true);
-    // }, 500);
     if (mymap) {
-      if (this.props.showLocations) {
-        this.handleOnDragEvent(mymap);
-      }
       this.setMapComponent({
         map: mymap,
       });
@@ -70,31 +66,15 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
     });
 
     mymap.on('click', async (e: any) => {
-      // console.log('====================================');
-      // console.log('Map Click >>>>', e);
-      // console.log('====================================');
       if (this.props.disabledClick !== true) {
         const { mapComponent } = this.props.location;
-        // const { addNewCampaignModal } = this.props.campaign;
-
         mymap.setView([e.latlng.lat, e.latlng.lng]);
 
         if (mapComponent && mapComponent.map) {
           if (mapComponent.marker !== undefined) {
-            // mapComponent.marker.setLatLng(e.latlng);
-            // mapComponent.marker.remove();
-            // mapComponent.marker.removeFrom(mymap);
-            // const marker = L.marker(e.latlng);
             mapComponent.marker.setLatLng(e.latlng);
-            // marker.addTo(mymap);
-            // this.setMapComponent({
-            //   marker,
-            // });
           } else {
             const marker = L.marker(e.latlng);
-            // const icon = L.icon({
-            //   iconUrl: ,
-            // });
             marker.addTo(mymap);
             this.setMapComponent({
               marker,
@@ -105,57 +85,6 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
           if (this.props.onClick) {
             this.props.onClick(data, e.latlng);
           }
-
-          // if (addNewLocationModal?.visible) {
-          //   await this.setCreateLocationParam({
-          //     address: data.display_name,
-          //     longitude: data.lon,
-          //     latitude: data.lat,
-          //   });
-          // }
-
-          // if (editLocationModal?.visible) {
-          //   await this.setSelectedLocation({
-          //     address: data.display_name,
-          //     longitude: data.lon,
-          //     latitude: data.lat,
-          //   });
-          // }
-
-          // if (addNewCampaignModal?.visible) {
-          // const { createCampaignParam } = this.props.campaign;
-
-          // if (createCampaignParam && createCampaignParam.radius > 0) {
-          //   if (mapComponent.map) {
-          //     if (!mapComponent.circle && createCampaignParam.radius !== 0) {
-          //       const circle = L.circle(e.latlng, {
-          //         radius: createCampaignParam.radius,
-          //       });
-          //       circle.addTo(mapComponent.map);
-          //       await this.setMapComponent({
-          //         circle,
-          //       });
-          //     } else if (mapComponent.circle) {
-          //       mapComponent.circle.setLatLng(e.latlng).setRadius(createCampaignParam.radius);
-          //       // mapComponent.circle?.remove();
-          //       // const circle = L.circle(e.latlng, {
-          //       //   radius: createCampaignParam.radius,
-          //       // });
-          //       // circle.addTo(mapComponent.map);
-          //       // await this.setMapComponent({
-          //       //   circle,
-          //       // });
-          //     }
-          //   }
-          // }
-          //   await this.setCreateNewCampaignParam({
-          //     location: `${data.lat}-${data.lon}`,
-          //     address: data.display_name,
-          //   });
-          // }
-          // await this.setAddNewCampaignModal({
-          //   address: data.display_name,
-          // });
         }
       }
     });
@@ -175,6 +104,7 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
   };
 
   handleOnDragStartEvent = (map: L.Map) => {
+    map.invalidateSize(true);
     const { mapComponent } = this.props.location;
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker) {
@@ -182,7 +112,6 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
       }
     });
     if (mapComponent?.marker) {
-      // mapComponent?.marker.removeFrom(mymap);
       const marker = L.marker(mapComponent.marker.getLatLng()).addTo(map);
       this.setMapComponent({
         marker,
@@ -191,9 +120,10 @@ export class LeafletMapComponent extends React.Component<LeafletMapComponentProp
   };
 
   handleOnDragEvent = (map: L.Map) => {
+    map.invalidateSize();
     const bound = map.getBounds();
-    const nw = bound.getNorthWest();
-    const se = bound.getSouthEast();
+    const nw = bound.getNorthWest().wrap();
+    const se = bound.getSouthEast().wrap();
     this.callGetListLocationsInMapBound(nw, se).then((data) => {
       const locations = data.result.data;
       if (locations && locations.length > 0) {

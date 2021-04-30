@@ -30,7 +30,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
       if (selectedCampaign && selectedCampaign.location.split('-').length === 2) {
         const lat = Number.parseFloat(selectedCampaign.location.split('-')[0]);
         const lng = Number.parseFloat(selectedCampaign.location.split('-')[1]);
-        mapComponent.map.setView([lat, lng]);
+        mapComponent.map.setView([lat, lng]).invalidateSize();
         if (!mapComponent.marker) {
           if (lat && lng) {
             const marker = L.marker([lat, lng]);
@@ -56,6 +56,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
         }
       }
       mapComponent.map.invalidateSize(true);
+      this.mapRef.current?.handleOnDragEvent(mapComponent.map);
     }
   }
 
@@ -86,6 +87,8 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
       },
     });
   };
+
+  mapRef = React.createRef<LeafletMapComponent>();
   render() {
     const { selectedCampaign, fees } = this.props.campaign;
     // const { mapComponent } = this.props.location;
@@ -99,157 +102,22 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
     });
     return (
       <>
-        {/* <Drawer
-          title={<>Campaign Detail</>}
-          width={'80%'}
-          closable={false}
-          afterVisibleChange={(e) => {
-            if (!e) {
-              if (mapComponent) {
-                if (mapComponent.map) {
-                  if (mapComponent.marker) {
-                    mapComponent.marker.remove();
-                  }
-                  if (mapComponent.circle) {
-                    mapComponent.circle.remove();
-                  }
-                }
-                this.setMapComponent({
-                  marker: undefined,
-                  circle: undefined,
-                  map: undefined,
-                });
-              }
-            }
-          }}
-          onClose={() => {
-            this.setEditCampaignDrawer({
-              visible: false,
-            });
-          }}
-          visible={editCampaignDrawer?.visible}
-          destroyOnClose={true}
-          forceRender={true}
-        > */}
         <Row gutter={24}>
           <Col span={12}>
-            {/* <Row>
-                <Col span={4}>Name</Col>
-                <Col span={20}>
-                  <Input readOnly value={selectedCampaign?.name} />
-                </Col>
-              </Row>
-              <Divider></Divider>
-              <Row>
-                <Col span={4}>Budget</Col>
-                <Col span={20}>
-                  <Input
-                    readOnly
-                    value={selectedCampaign?.budget
-                      .toString()
-                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-                      .concat(' VND')}
-                  />
-                </Col>
-              </Row>
-              <Row>
-                <Col span={4}>Calculate Fees</Col>
-                <Col span={20}>
-                  <Row>
-                    <Col span={4}>Total Fee</Col>
-                    <Col span={20}>
-                      {fees && campaignBudget && campaignBudget * fees.Advertiser + campaignBudget}{' '}
-                      VND
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={4}>Remain Fee</Col>
-                    <Col span={20}>
-                      {fees && campaignBudget && campaignBudget - campaignBudget * fees.Supplier}{' '}
-                      VND
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col span={4}>Cancel Fee</Col>
-                    <Col span={20}>
-                      {fees && campaignBudget && campaignBudget * fees.CancelCampagin} VND
-                    </Col>
-                  </Row>
-                </Col>
-              </Row>
-              <Divider></Divider>
-              <Row>
-                <Col span={4}>Types</Col>
-                <Col span={20}>
-                  <Space wrap>{listType}</Space>
-                </Col>
-              </Row>
-              <Divider></Divider>
-              <Row>
-                <Col span={4}>From - To</Col>
-                <Col span={20}>
-                  <DatePicker.RangePicker
-                    disabled={true}
-                    value={[
-                      moment(moment(selectedCampaign?.startDate).format('YYYY-MM-DD')),
-                      moment(moment(selectedCampaign?.endDate).format('YYYY-MM-DD')),
-                    ]}
-                    inputReadOnly={true}
-                  />
-                </Col>
-              </Row>
-              <Divider></Divider>
-              <Row>
-                <Col span={4}>Time Filter</Col>
-                <Col span={20}>
-                  <Space wrap={true}>
-                    {selectedCampaign?.timeFilter.split('').map((time, index) => {
-                      const start = index;
-                      const end = index + 1 === 24 ? 0 : index + 1;
-                      if (time === '1') {
-                        return (
-                          <Button
-                            key={uuidv4()}
-                            style={{ textAlign: 'center' }}
-                            icon={<ClockCircleFilled className="lba-icon" />}
-                          >{`${start}h - ${end}h`}</Button>
-                        );
-                      }
-                      return '';
-                    })}
-                  </Space>
-                </Col>
-              </Row>
-              <Divider></Divider>
-              <Row>
-                <Col span={4}>Date Filter</Col>
-                <Col span={20}>
-                  <Space wrap={true}>
-                    {selectedCampaign?.dateFilter.split('').map((date, index) => {
-                      return (
-                        <Button key={uuidv4()} type={date === '1' ? 'primary' : 'default'}>
-                          {index === 0 && 'Monday'}
-                          {index === 1 && 'Tuesday'}
-                          {index === 2 && 'Wednesday'}
-                          {index === 3 && 'Thursday'}
-                          {index === 4 && 'Friday'}
-                          {index === 5 && 'Saturday'}
-                          {index === 6 && 'Sunday'}
-                        </Button>
-                      );
-                    })}
-                  </Space>
-                </Col>
-              </Row>
-              <Divider></Divider>
-              <Row>
-                <Col span={4}>Address</Col>
-                <Col span={20}>{selectedCampaign?.address}</Col>
-              </Row> */}
-            <Form name="view_campaign_detail_form" layout="vertical">
+            <Form
+              name="view_campaign_detail_form"
+              layout="horizontal"
+              labelCol={{
+                span: 5,
+              }}
+              wrapperCol={{
+                span: 24,
+              }}
+            >
               <Form.Item label="Name">
                 {/* <Input readOnly value={selectedCampaign?.name} /> */}
-                <Tag color={TAG_COLOR}>{selectedCampaign?.name}</Tag>
+                {/* <Tag color={TAG_COLOR}>{selectedCampaign?.name}</Tag> */}
+                {selectedCampaign?.name}
               </Form.Item>
               <Form.Item label="Budget">
                 {/* <Input
@@ -259,18 +127,29 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                       .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                       .concat(' VND')}
                   /> */}
-                <Tag color={TAG_COLOR}>
+                {/* <Tag color={TAG_COLOR}>
                   {selectedCampaign?.budget
                     .toString()
                     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                     .concat(' VND')}
-                </Tag>
+                </Tag> */}
+                {Math.floor(selectedCampaign?.budget || 0)
+                  .toString()
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                  .concat(' VND')}
               </Form.Item>
-              <Form.Item label="Calculate Fees">
-                <Row gutter={20}>
-                  <Col>
-                    <Form.Item label="Total Fee">
-                      {/* <Input
+              <Form.Item>
+                <Form
+                  layout="horizontal"
+                  labelCol={{
+                    span: 5,
+                  }}
+                  wrapperCol={{
+                    span: 24,
+                  }}
+                >
+                  <Form.Item label="Total Fee">
+                    {/* <Input
                           value={(
                             fees &&
                             campaignBudget &&
@@ -280,7 +159,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                             .concat(' VND')}
                         /> */}
-                      <Tag color={TAG_COLOR}>
+                    {/* <Tag color={TAG_COLOR}>
                         {(
                           fees &&
                           campaignBudget &&
@@ -289,46 +168,46 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                           ?.toString()
                           .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                           .concat(' VND')}
-                      </Tag>
-                    </Form.Item>
-                  </Col>
-                  <Col>
-                    <Form.Item label="Remain Fee">
-                      {/* <Input
-                          value={(
-                            fees &&
-                            campaignBudget &&
-                            campaignBudget - campaignBudget * fees.Supplier
-                          )
-                            ?.toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-                            .concat(' VND')}
-                        /> */}
-                      <Tag color={TAG_COLOR}>
-                        {(fees && campaignBudget && campaignBudget - campaignBudget * fees.Supplier)
-                          ?.toString()
-                          .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-                          .concat(' VND')}
-                      </Tag>
-                    </Form.Item>
-                  </Col>
-                  <Col>
-                    <Form.Item label="Cancel Fee">
-                      {/* <Input
+                      </Tag> */}
+                    {(
+                      fees &&
+                      campaignBudget &&
+                      Math.floor(campaignBudget * fees.Advertiser + campaignBudget)
+                    )
+                      ?.toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                      .concat(' VND')}
+                  </Form.Item>
+                  {/* <Form.Item label="Remain Fee">
+                    
+                    {(
+                      fees &&
+                      campaignBudget &&
+                      Math.floor(campaignBudget - campaignBudget * fees.Supplier)
+                    )
+                      ?.toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                      .concat(' VND')}
+                  </Form.Item> */}
+                  <Form.Item label="Cancel Fee">
+                    {/* <Input
                           value={(fees && campaignBudget && campaignBudget * fees.CancelCampagin)
                             ?.toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                             .concat(' VND')}
                         /> */}
-                      <Tag color={TAG_COLOR}>
+                    {/* <Tag color={TAG_COLOR}>
                         {(fees && campaignBudget && campaignBudget * fees.CancelCampagin)
                           ?.toString()
                           .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
                           .concat(' VND')}
-                      </Tag>
-                    </Form.Item>
-                  </Col>
-                </Row>
+                      </Tag> */}
+                    {(fees && campaignBudget && Math.floor(campaignBudget * fees.CancelCampagin))
+                      ?.toString()
+                      .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+                      .concat(' VND')}
+                  </Form.Item>
+                </Form>
               </Form.Item>
               <Form.Item label="Types">
                 <Space wrap>{listType}</Space>
@@ -360,6 +239,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                     if (time === '1') {
                       return (
                         <Button
+                          className="lba-normal-btn"
                           key={uuidv4()}
                           style={{ textAlign: 'center' }}
                           icon={<ClockCircleFilled className="lba-icon" />}
@@ -374,7 +254,10 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                 <Space wrap={true}>
                   {selectedCampaign?.dateFilter.split('').map((date, index) => {
                     return (
-                      <Button key={uuidv4()} className={date === '1' ? 'lba-btn' : ''}>
+                      <Button
+                        key={uuidv4()}
+                        className={date === '1' ? 'className="lba-normal-btn"' : ''}
+                      >
                         {index === 0 && 'Monday'}
                         {index === 1 && 'Tuesday'}
                         {index === 2 && 'Wednesday'}
@@ -391,7 +274,12 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
             <Divider></Divider>
             <Row>
               <Col span={24}>
-                <LeafletMapComponent disabledClick={true} showLocations={true} {...this.props} />
+                <LeafletMapComponent
+                  ref={this.mapRef}
+                  disabledClick={true}
+                  showLocations={true}
+                  {...this.props}
+                />
               </Col>
             </Row>
           </Col>
@@ -413,16 +301,6 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                     return 'Percent Money Used';
                   },
                 },
-                // content: {
-                //   style: {
-                //     fontSize: '24px',
-                //     lineHeight: '44px',
-                //     color: '#4B535E',
-                //   },
-                //   formatter: function formatter() {
-                //     return 'Percent Money Used';
-                //   },
-                // },
               }}
             />
             <Divider orientation="left"></Divider>
