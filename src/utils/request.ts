@@ -45,8 +45,8 @@ const errorHandler = (error: { response: Response }): Response => {
 const request = extend({
   errorHandler, // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
-  // prefix: "https://location-base-advertising.herokuapp.com/api/v1/",
-  prefix: "https://localhost:44333/api/v1/",
+  prefix: "https://location-base-advertising.herokuapp.com/api/v1/",
+  // prefix: "https://localhost:44333/api/v1/",
   headers: {
     "Accept": "application/json",
     'Access-Control-Allow-Origin':  '*',

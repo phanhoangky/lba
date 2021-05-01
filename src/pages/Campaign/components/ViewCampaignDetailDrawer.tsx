@@ -227,7 +227,7 @@ export class ViewCampaignDetailDrawer extends React.Component<ViewCampaignDetail
                   </Tag>
                   <CaretRightFilled className="lba-icon" />
                   <Tag color={TAG_COLOR}>
-                    {moment(selectedCampaign?.startDate).format('YYYY-MM-DD')}
+                    {moment(selectedCampaign?.endDate).format('YYYY-MM-DD')}
                   </Tag>
                 </Space>
               </Form.Item>

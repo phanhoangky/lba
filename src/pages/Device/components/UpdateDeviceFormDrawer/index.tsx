@@ -150,12 +150,12 @@ export class UpdateDeviceFormDrawer extends React.Component<
     const param = {
       ...this.props.deviceStore.selectedDevice,
       ...values,
-      startDate: values.isPublished ? values.startEnd[0] : selectedDevice?.startDate,
-      endDate: values.isPublished ? values.startEnd[0] : selectedDevice?.endDate,
+      startDate: values.isPublished ? values.startEnd[0].format('YYYY-MM-DD') : selectedDevice?.startDate,
+      endDate: values.isPublished ? values.startEnd[1].format('YYYY-MM-DD') : selectedDevice?.endDate,
     };
 
     console.log('====================================');
-    console.log(param, values);
+    console.log("updateDevice",param, values);
     console.log('====================================');
     await this.props.dispatch({
       type: 'deviceStore/updateDevice',
@@ -171,7 +171,7 @@ export class UpdateDeviceFormDrawer extends React.Component<
           isLoading: true,
         }).then(() => {
           console.log('====================================');
-          console.log(values);
+          console.log("onUpdateDevice",values);
           console.log('====================================');
           this.updateDevice(values)
             .then(() => {
