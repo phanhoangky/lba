@@ -849,6 +849,7 @@ class Media extends React.Component<MediaSourceProps> {
           <Drawer
             closable={false}
             destroyOnClose={true}
+            maskClosable={false}
             visible={editFileDrawer?.visible}
             width={700}
             onClose={async () => {
@@ -883,6 +884,7 @@ class Media extends React.Component<MediaSourceProps> {
             visible={renameFolderModal?.visible}
             confirmLoading={renameFolderModal?.isLoading}
             destroyOnClose={true}
+            maskClosable={false}
             closable={false}
             centered
             onCancel={() => {

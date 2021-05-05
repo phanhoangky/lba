@@ -417,11 +417,13 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                     isLoading: false,
                   });
                 }}
+                loading={addNewPlaylistModal?.isLoading}
               >
                 <CloseCircleFilled className="lba-close-icon" /> Close
               </Button>
               {currentStep > 0 && currentStep < steps.length - 1 && (
                 <Button
+                  loading={addNewPlaylistModal?.isLoading}
                   className="lba-btn"
                   style={{ margin: '0 8px' }}
                   onClick={() => {
@@ -433,6 +435,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
               )}
               {currentStep < steps.length - 2 && (
                 <Button
+                  loading={addNewPlaylistModal?.isLoading}
                   className="lba-btn"
                   onClick={() => {
                     this.addNewPlaylistModalRef.current?.onNext();
@@ -447,6 +450,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
               )}
               {currentStep === steps.length - 2 && (
                 <Button
+                  loading={addNewPlaylistModal?.isLoading}
                   className="lba-btn"
                   onClick={() => {
                     this.addNewPlaylistModalRef.current?.onCreatePlaylist();
@@ -501,6 +505,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
               <div style={{ textAlign: 'right' }}>
                 <Space>
                   <Button
+                    loading={editPlaylistDrawer?.isLoading}
                     onClick={async () => {
                       await this.setEditPlaylistDrawer({
                         visible: false,
@@ -511,6 +516,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                     Cancel
                   </Button>
                   <Button
+                    loading={editPlaylistDrawer?.isLoading}
                     danger
                     onClick={async () => {
                       this.editPlaylistModalRef.current?.handleRemovePlaylist();
@@ -520,6 +526,7 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                     Delete
                   </Button>
                   <Button
+                    loading={editPlaylistDrawer?.isLoading}
                     onClick={() => {
                       this.editPlaylistModalRef.current?.handleUpdatePlaylist();
                     }}

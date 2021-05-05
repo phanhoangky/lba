@@ -1,7 +1,7 @@
 import { SCENARIO_STORE } from '@/pages/Scenario';
 import type { ScenarioItemPost } from '@/services/ScenarioService/ScenarioService';
 import { openNotification } from '@/utils/utils';
-import { PlaySquareFilled, PlusSquareFilled } from '@ant-design/icons';
+import { PlusSquareFilled } from '@ant-design/icons';
 import { Button, Space, Table } from 'antd';
 import Column from 'antd/lib/table/Column';
 import * as React from 'react';
@@ -94,6 +94,29 @@ export class ChoosePlaylistComponent extends React.Component<ChoosePlaylistCompo
     // });
   };
 
+  setUrlAreasOfScenario = async (item: any, urlPreview: string, typeName: string) => {
+    const { createScenarioParam } = this.props.scenarios;
+    if (createScenarioParam && createScenarioParam.layout) {
+      const newAreas = createScenarioParam?.layout.areas.map((area) => {
+        if (area.id === item.id) {
+          return {
+            ...area,
+            urlPreview,
+            typeMediaName: typeName,
+          };
+        }
+
+        return area;
+      });
+      await this.setCreateScenarioParam({
+        layout: {
+          ...createScenarioParam?.layout,
+          areas: newAreas,
+        },
+      });
+    }
+  };
+
   render() {
     const { addNewScenarioModal, getListPlaylistParam } = this.props.scenarios;
     return (
@@ -131,9 +154,15 @@ export class ChoosePlaylistComponent extends React.Component<ChoosePlaylistCompo
             key="action"
             render={(record: Playlist) => (
               <Space>
-                <Button className="lba-btn" onClick={() => {}}>
+                {/* <Button className="lba-btn" onClick={() => {
+                  this.setUrlAreasOfScenario(
+                    selectedArea,
+                    record.mediaSrc.urlPreview,
+                    record.mediaSrc.type.name,
+                  );
+                }}>
                   <PlaySquareFilled className="lba-icon" />
-                </Button>
+                </Button> */}
                 <Button
                   className="lba-btn"
                   onClick={() => {

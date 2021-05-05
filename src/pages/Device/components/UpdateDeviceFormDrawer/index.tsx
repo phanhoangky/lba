@@ -85,7 +85,7 @@ export class UpdateDeviceFormDrawer extends React.Component<
         updateDevicesState: {
           ...this.props.deviceStore.updateDevicesState,
           startDate: values.isPublished ? values.startEnd[0] : updateDevicesState?.startDate,
-          endDate: values.isPublished ? values.startEnd[0] : updateDevicesState?.endDate,
+          endDate: values.isPublished ? values.startEnd[1] : updateDevicesState?.endDate,
           ...values,
         },
         listId: this.props.deviceStore.selectedDevices?.map((device) => {
@@ -151,7 +151,7 @@ export class UpdateDeviceFormDrawer extends React.Component<
       ...this.props.deviceStore.selectedDevice,
       ...values,
       startDate: values.isPublished ? values.startEnd[0] : selectedDevice?.startDate,
-      endDate: values.isPublished ? values.startEnd[0] : selectedDevice?.endDate,
+      endDate: values.isPublished ? values.startEnd[1] : selectedDevice?.endDate,
     };
 
     console.log('====================================');

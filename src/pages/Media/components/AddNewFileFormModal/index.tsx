@@ -100,7 +100,8 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         isSigned: 1,
         mediaSrcId: uuidv4(),
       };
-      this.createFile(param).then(() => {
+
+      await this.createFile(param).then(() => {
         openNotification('success', 'Create File Successfully', `Create ${values.title}`);
         Promise.all([this.callGetListMedia(), this.clearCreateFileParam(), this.clearFilelist()]);
       });
@@ -158,16 +159,19 @@ export class AddNewFileFormModal extends React.Component<AddNewFileFormModalProp
         title={<>Add New File</>}
         visible={addNewFileModal?.visible}
         closable={false}
+        maskClosable={false}
         onOk={() => {
           this.showConfirmCreateNewFile();
         }}
         destroyOnClose={true}
         okButtonProps={{
           className: 'lba-btn',
+          loading: addNewFileModal?.isLoading,
           icon: <CheckCircleFilled className="lba-icon" />,
         }}
         cancelButtonProps={{
           icon: <CloseCircleFilled className="lba-close-icon" />,
+          loading: addNewFileModal?.isLoading,
           danger: true,
         }}
         confirmLoading={addNewFileModal?.isLoading}

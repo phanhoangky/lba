@@ -309,10 +309,10 @@ class Device extends React.Component<DeviceProps> {
       viewDeviceDetailModal,
       isUpdateMultiple,
       selectedDevice,
+      selectedDevices,
     } = this.props.deviceStore;
 
     const { selectedRowKeys } = this.state;
-
     const rowSelection = {
       selectedRowKeys,
       onChange: async (selectedRowsKeys: React.Key[], selectedRows: any[]) => {
@@ -544,7 +544,9 @@ class Device extends React.Component<DeviceProps> {
 
         {/* Edit Device Drawer */}
         <Drawer
-          title={isUpdateMultiple ? 'Update Multiple Devices' : selectedDevice?.name}
+          title={
+            isUpdateMultiple ? selectedDevices?.map((d) => `${d.name}, `) : selectedDevice?.name
+          }
           key="updateMultipleDevies"
           visible={this.props.deviceStore.editMultipleDevicesDrawer?.visible}
           width={'40%'}
