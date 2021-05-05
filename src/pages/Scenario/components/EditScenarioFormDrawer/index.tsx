@@ -173,8 +173,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
   handleUpdateScenario = async (updateScenarioParam: UpdateScenarioParam) => {
     this.setEditScenariosDrawer({
       isLoading: true,
-    });
-    this.setTableLoading(true).then(() => {
+    }).then(() => {
       this.updateScenario(updateScenarioParam)
         .then(() => {
           this.callGetListScenario().then(async () => {
@@ -186,7 +185,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
             this.setEditScenariosDrawer({
               isLoading: false,
             });
-            this.setTableLoading(false);
+            // this.setTableLoading(false);
           });
         })
         .catch((error) => {
