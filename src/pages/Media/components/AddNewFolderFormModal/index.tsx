@@ -116,6 +116,7 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
         visible={addNewFolderModal?.visible}
         confirmLoading={addNewFolderModal?.isLoading}
         closable={false}
+        maskClosable={false}
         destroyOnClose={true}
         onOk={() => {
           this.handleCreateFolder();
@@ -141,7 +142,21 @@ export class AddNewFolderFormModal extends React.Component<AddNewFolderFormModal
               name="name"
               rules={[
                 { required: true, message: 'Please input name' },
-                { max: 50, message: 'Name cannot exceed 50 characters' },
+                {
+                  max: 50,
+                  message: 'Name cannot exceed 50 characters',
+                },
+                {
+                  validator: (rule, value: string) => {
+                    console.log('====================================');
+                    console.log(value);
+                    console.log('====================================');
+                    if (value.includes(' ')) {
+                      return Promise.reject(new Error('Folder name cannot have whitespace'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
               ]}
             >
               <Input

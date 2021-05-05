@@ -257,44 +257,44 @@ class DrawerUpdateMultipleDevice extends React.Component<DrawerUpdateMultipleDev
               disabledDate={(current) => {
                 return current < moment().endOf('day');
               }}
-              onChange={(e) => {
-                if (e) {
-                  if (e[0] && e[1]) {
-                    const startDate = e[0].format('YYYY-MM-DD');
-                    const endDate = e[1].format('YYYY-MM-DD');
-                    if (isUpdateMultiple) {
-                      this.props.dispatch({
-                        type: 'deviceStore/setUpdateDevicesState',
-                        payload: {
-                          ...updateDevicesState,
-                          startDate,
-                          endDate,
-                        },
-                      });
-                    } else {
-                      this.props.dispatch({
-                        type: 'deviceStore/setCurrentDevice',
-                        payload: {
-                          ...selectedDevice,
-                          startDate,
-                          endDate,
-                        },
-                      });
-                    }
-                  }
-                }
-              }}
-              value={
-                isUpdateMultiple
-                  ? [
-                      moment(moment(updateDevicesState?.startDate).format('YYYY/MM/DD')),
-                      moment(moment(updateDevicesState?.endDate).format('YYYY/MM/DD')),
-                    ]
-                  : [
-                      moment(moment(selectedDevice?.startDate).format('YYYY/MM/DD')),
-                      moment(moment(selectedDevice?.endDate).format('YYYY/MM/DD')),
-                    ]
-              }
+              // onChange={(e) => {
+              //   if (e) {
+              //     if (e[0] && e[1]) {
+              //       const startDate = e[0].format('YYYY-MM-DD');
+              //       const endDate = e[1].format('YYYY-MM-DD');
+              //       if (isUpdateMultiple) {
+              //         this.props.dispatch({
+              //           type: 'deviceStore/setUpdateDevicesState',
+              //           payload: {
+              //             ...updateDevicesState,
+              //             startDate,
+              //             endDate,
+              //           },
+              //         });
+              //       } else {
+              //         this.props.dispatch({
+              //           type: 'deviceStore/setCurrentDevice',
+              //           payload: {
+              //             ...selectedDevice,
+              //             startDate,
+              //             endDate,
+              //           },
+              //         });
+              //       }
+              //     }
+              //   }
+              // }}
+              // value={
+              //   isUpdateMultiple
+              //     ? [
+              //         moment(moment(updateDevicesState?.startDate).format('YYYY/MM/DD')),
+              //         moment(moment(updateDevicesState?.endDate).format('YYYY/MM/DD')),
+              //       ]
+              //     : [
+              //         moment(moment(selectedDevice?.startDate).format('YYYY/MM/DD')),
+              //         moment(moment(selectedDevice?.endDate).format('YYYY/MM/DD')),
+              //       ]
+              // }
             />
           </Col>
         </Row>

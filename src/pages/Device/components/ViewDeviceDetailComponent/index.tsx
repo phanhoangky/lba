@@ -117,7 +117,7 @@ export class ViewDeviceDetailComponent extends React.Component<ViewDeviceDetailC
                   );
                 })}
             </Select> */}
-            <Tag color="orange">{selectedDevice?.defaultScenario.title}</Tag>
+            <Tag color="orange">{selectedDevice?.defaultScenario?.title}</Tag>
           </Form.Item>
         </Form>
       </>

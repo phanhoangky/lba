@@ -334,20 +334,25 @@ const UserModel: UserModelType = {
       if (payload && user) {
         yield user.sendEmailVerification();
         const res = yield call(CreateFolder, { name: user.uid });
-        const ether = yield EtherService.build();
-        const tokenFirebase = yield user.getIdToken(true);
-        yield ether.createAccount();
-        const walletKeyStore: any = yield ether.createKeyStoreJson(user.uid);
-        const param: AuthenticationRequest = {
-          firebaseToken: tokenFirebase,
-          uid: user.uid,
-          walletKeyStore,
-          walletAddress: ether.wallet.address,
-          rootFolderId: res.id,
-        };
-        // console.log(param);
+        yield EtherService.build();
+        const abi = yield localStorage.getItem('ABI');
+        const evn = yield localStorage.getItem('EVN');
+        if (abi && !isObject(abi) && evn && !isObject(evn)) {
+          const tokenFirebase = yield user.getIdToken(true);
+          const ether = new EtherService(JSON.parse(abi), JSON.parse(evn));
+          yield ether.createAccount();
+          const walletKeyStore: any = yield ether.createKeyStoreJson(user.uid);
+          const param: AuthenticationRequest = {
+            firebaseToken: tokenFirebase,
+            uid: user.uid,
+            walletKeyStore,
+            walletAddress: ether.wallet.address,
+            rootFolderId: res.id,
+          };
+          // console.log(param);
 
-        yield call(PostAuthentication, param);
+          yield call(PostAuthentication, param);
+        }
       }
       history.push('/account/register-result');
     },
