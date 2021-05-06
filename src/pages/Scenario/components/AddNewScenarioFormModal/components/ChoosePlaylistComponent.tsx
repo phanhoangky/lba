@@ -122,7 +122,7 @@ export class ChoosePlaylistComponent extends React.Component<ChoosePlaylistCompo
     return (
       <>
         <Table
-          dataSource={addNewScenarioModal?.listPlaylist}
+          dataSource={addNewScenarioModal?.listPlaylist.filter((s) => s.playlistItems.length > 0)}
           loading={addNewScenarioModal?.isLoading}
           scroll={{
             y: 250,

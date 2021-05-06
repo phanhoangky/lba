@@ -414,6 +414,9 @@ class PlaylistScreen extends React.Component<PlaylistProps> {
                 onClick={() => {
                   this.setAddNewPlaylistModal({
                     visible: false,
+                    playingUrl: undefined,
+                    playlingMediaType: undefined,
+                    currentStep: 0,
                     isLoading: false,
                   });
                 }}

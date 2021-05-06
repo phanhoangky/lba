@@ -129,7 +129,7 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
         {...props}
         className={styles.customSider}
         menu={{
-          type: 'group',
+          type: 'sub',
           defaultOpenAll: true,
         }}
         {...settings}

@@ -2,7 +2,7 @@ import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Row } from 'antd';
 import styles from './Welcome.less';
-import illustrations from '@/assets/welcome-illustration.svg';
+import illustrations from '@/assets/welcome-orange.svg';
 
 // const CodePreview: React.FC = ({ children }) => (
 //   <pre className={styles.pre}>

@@ -223,7 +223,9 @@ class SelectPlaylistDrawer extends React.Component<SelectPlaylistDrawerProps> {
                 }}
                 style={{ width: '100%' }}
                 className={styles.selectPlaylistTable}
-                dataSource={playlistsDrawer?.listPlaylists}
+                dataSource={playlistsDrawer?.listPlaylists.filter(
+                  (s) => s.playlistItems.length > 0,
+                )}
                 pagination={false}
                 rowClassName={(record) => {
                   return record.isSelected ? 'selected-playlist' : '';

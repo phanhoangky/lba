@@ -47,6 +47,7 @@ export type SelectMediaStepComponentProps = {
 
 export type SelectMediaStepComponentState = {
   selectedPlaylistItem: PlaylistItem | undefined;
+  currentDuration: number;
 };
 
 const DragHandle = SortableHandle(() => (
@@ -63,6 +64,7 @@ export class SelectMediaStepComponent extends React.Component<
     super(props);
     this.state = {
       selectedPlaylistItem: undefined,
+      currentDuration: 10,
     };
   }
 
@@ -275,6 +277,7 @@ export class SelectMediaStepComponent extends React.Component<
                 title="Duration"
                 className="drag-visible"
                 render={(record: PlaylistItem) => {
+                  const available = maxD - (totalD - record.duration);
                   return (
                     <>
                       <Popconfirm
@@ -282,8 +285,8 @@ export class SelectMediaStepComponent extends React.Component<
                         title={
                           <>
                             <Form ref={this.durationFormRef} name="slider_duration_form">
-                              <Form.Item label="Total Duration">{totalD}</Form.Item>
-                              <Form.Item label="Remain Duration">{availableDuration}</Form.Item>
+                              <Form.Item label="Total Duration">{totalD} s</Form.Item>
+                              <Form.Item label="Remain Duration">{available} s</Form.Item>
                               <Form.Item
                                 label="Duration"
                                 name="duration"
@@ -303,7 +306,6 @@ export class SelectMediaStepComponent extends React.Component<
                                 ]}
                               >
                                 <Slider
-                                  style={{}}
                                   min={minDuration}
                                   max={maxDuration}
                                   disabled={totalD > maxD}
@@ -342,7 +344,6 @@ export class SelectMediaStepComponent extends React.Component<
                         destroyTooltipOnHide
                         popupVisible
                         afterVisibleChange={() => {
-                          // if (e) {
                           this.durationFormRef.current?.setFieldsValue({
                             duration: record.duration,
                           });

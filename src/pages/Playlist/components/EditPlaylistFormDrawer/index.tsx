@@ -560,6 +560,7 @@ export class EditPlaylistFormDrawer extends React.Component<
                   title="Duration"
                   className="drag-visible"
                   render={(record: PlaylistItem) => {
+                    const available = maxD - (totalD - record.duration);
                     return (
                       <>
                         <Popconfirm
@@ -568,7 +569,7 @@ export class EditPlaylistFormDrawer extends React.Component<
                             <>
                               <Form ref={this.durationFormRef} name="slider_duration_form">
                                 <Form.Item label="Total Duration">{totalD}</Form.Item>
-                                <Form.Item label="Remain Duration">{availableDuration}</Form.Item>
+                                <Form.Item label="Remain Duration">{available}</Form.Item>
                                 <Form.Item
                                   label="Duration"
                                   name="duration"
