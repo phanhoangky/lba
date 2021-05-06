@@ -754,6 +754,7 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           width={`50%`}
           closable={false}
           destroyOnClose={true}
+          maskClosable={false}
           afterVisibleChange={() => {
             this.clearSelectedPlaylistItems();
           }}
@@ -768,14 +769,30 @@ export class EditScenarioFormDrawer extends React.Component<EditScenarioFormDraw
           footer={
             <>
               <div style={{ textAlign: 'right' }}>
-                <Button
-                  disabled={disableChoosePlaylists}
-                  onClick={() => this.choosePlaylist()}
-                  className="lba-btn"
-                  icon={<CheckCircleFilled className="lba-icon" />}
-                >
-                  Choose Playlist
-                </Button>
+                <Space>
+                  <Button
+                    onClick={() => {
+                      this.setPlaylistDrawer({
+                        visible: false,
+                        urlPreview: undefined,
+                        mediaType: undefined,
+                      });
+                    }}
+                    loading={playlistsDrawer?.isLoading}
+                    icon={<CheckCircleFilled className="lba-close-icon" />}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    loading={playlistsDrawer?.isLoading}
+                    disabled={disableChoosePlaylists}
+                    onClick={() => this.choosePlaylist()}
+                    className="lba-btn"
+                    icon={<CheckCircleFilled className="lba-icon" />}
+                  >
+                    Choose Playlist
+                  </Button>
+                </Space>
               </div>
             </>
           }

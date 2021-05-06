@@ -41,8 +41,9 @@ ApiHelper.interceptors.response.use(
   },
   (error) => {
     console.log('====================================');
-    console.error(error.response);
+    console.error(error.response.data.message);
     console.log('====================================');
+    openNotification('error', error.response.status, error.response.data.message);
     if (error.response) {
       const { status, data } = error.response;
       const { errors } = data;

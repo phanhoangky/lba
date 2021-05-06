@@ -156,69 +156,7 @@ export class AddNewPlaylistFormModal extends React.Component<
 
     const currentStep = addNewPlaylistModal ? addNewPlaylistModal.currentStep : 0;
     return (
-      // <Modal
-      //   title="Add New Playlist"
-      //   visible={addNewPlaylistModal?.visible}
-      //   destroyOnClose={true}
-      //   centered
-      //   confirmLoading={addNewPlaylistModal?.isLoading}
-      //   className={styles.addNewPlaylistModal}
-      //   onCancel={async () => {
-      //     await this.setAddNewPlaylistModal({
-      //       visible: false,
-      //       playingUrl: undefined,
-      //       playlingMediaType: undefined,
-      //     });
-      //   }}
-      //   width={'60%'}
-      //   afterClose={async () => {
-      //     await this.props.dispatch({
-      //       type: 'playlists/clearAddNewPlaylistParamReducer',
-      //     });
-
-      //     await this.setAddNewPlaylistModal({
-      //       currentStep: 0,
-      //       playingUrl: undefined,
-      //       playlingMediaType: undefined,
-      //     });
-      //   }}
-      //   onOk={async () => {
-      //     if (this.formRef.current) {
-      //       this.formRef.current.validateFields().then((values) => {
-      //         this.onCreatePlaylist(values);
-      //       });
-      //     }
-      //   }}
-      //   okButtonProps={{
-      //     className: 'lba-btn',
-      //     icon: <CheckCircleFilled className="lba-icon" />,
-      //   }}
-      //   cancelButtonProps={{
-      //     icon: <CloseCircleFilled className="lba-close-icon" />,
-      //     danger: true,
-      //   }}
-      // >
       <div className="modal-content">
-        {/* <AddNewPlaylistModal {...this.props} /> */}
-        {/* <Form ref={this.formRef} layout="vertical" name={'add_new_playlist_form'}>
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[
-              { required: true, message: 'Please input title' },
-              { max: 50, message: 'Title cannot exceed 50 characters' },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Description"
-            name="description"
-            rules={[{ max: 250, message: 'Description cannot exceed 250 characters' }]}
-          >
-            <Input />
-          </Form.Item>
-        </Form> */}
         <Steps current={addNewPlaylistModal?.currentStep}>
           {steps.map((item) => (
             <Steps.Step key={item.title} title={item.title} icon={item.icon} />
@@ -258,75 +196,9 @@ export class AddNewPlaylistFormModal extends React.Component<
                 }}
               />
             )}
-            {/* <CreateDoneComponent
-              title="Successfully create playlist"
-              finish={() => {
-                this.setAddNewPlaylistModal({
-                  visible: false,
-                });
-              }}
-            /> */}
           </Animated>
-          {/* {currentStep === 0 && (
-            <InputTitleStepComponent ref={this.inputTitleStepRef} {...this.props} />
-          )}
-          {currentStep === 1 && <SelectMediaStepComponent {...this.props} />}
-          {currentStep === this.steps.length - 1 && (
-            <CreateDoneComponent
-              title="Successfully create playlist"
-              finish={() => {
-                this.setAddNewPlaylistModal({
-                  visible: false,
-                });
-              }}
-            />
-          )} */}
         </div>
-        {/* <div className="steps-action">
-          <Space>
-            {currentStep > 0 && currentStep < steps.length - 1 && (
-              <Button
-                className="lba-btn"
-                style={{ margin: '0 8px' }}
-                onClick={() => {
-                  if (addNewPlaylistModal) {
-                    this.setAddNewPlaylistModal({
-                      currentStep: addNewPlaylistModal.currentStep - 1,
-                    });
-                  }
-                }}
-              >
-                Previous
-              </Button>
-            )}
-            {currentStep < steps.length - 2 && (
-              <Button
-                className="lba-btn"
-                onClick={() => {
-                  this.inputTitleStepRef.current?.handleOnNext();
-                  // .then(() => {})
-                  // .catch((error) => {
-                  //   openNotification('error', 'Error', error);
-                  // });
-                }}
-              >
-                Next
-              </Button>
-            )}
-            {currentStep === steps.length - 2 && (
-              <Button
-                className="lba-btn"
-                onClick={() => {
-                  this.onCreatePlaylist();
-                }}
-              >
-                Done
-              </Button>
-            )}
-          </Space>
-        </div> */}
       </div>
-      // </Modal>
     );
   }
 }
