@@ -1,6 +1,6 @@
 import type { EditMediaParam } from '@/services/MediaSourceService';
 import { openNotification } from '@/utils/utils';
-import { CheckCircleFilled, DeleteTwoTone, EditFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled, DeleteTwoTone, EditFilled } from '@ant-design/icons';
 import { Button, Popconfirm, Space } from 'antd';
 import * as React from 'react';
 import type { Dispatch, MediaSourceModelState, UserModelState } from 'umi';
@@ -93,12 +93,26 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
   };
 
   render() {
-    const { selectedFile } = this.props.media;
+    const { selectedFile, editFileDrawer } = this.props.media;
     // const { currentUser } = this.props.user;
     return (
       <>
         <div style={{ textAlign: 'right' }}>
           <Space>
+            <Button
+              onClick={() => {
+                // this.setState({
+                //   removeConfirmVisible: true,
+                // });
+                this.setEditFileDrawer({
+                  visible: false,
+                  isLoading: false,
+                });
+              }}
+              loading={editFileDrawer?.isLoading}
+            >
+              <CloseCircleFilled className="lba-close-icon" /> Close
+            </Button>
             <Popconfirm
               title={`Remove ${selectedFile?.title}`}
               visible={this.state.removeConfirmVisible}
@@ -153,9 +167,13 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
                   });
               }}
               okButtonProps={{
-                loading: this.props.media.editFileDrawer?.isLoading,
+                loading: editFileDrawer?.isLoading,
                 className: 'lba-btn',
                 icon: <CheckCircleFilled className="lba-icon" />,
+              }}
+              cancelButtonProps={{
+                loading: editFileDrawer?.isLoading,
+                icon: <CloseCircleFilled className="lba-close-icon" />,
               }}
               onCancel={() => {
                 this.setState({
@@ -165,6 +183,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
             >
               <Button
                 danger
+                loading={editFileDrawer?.isLoading}
                 onClick={() => {
                   this.setState({
                     removeConfirmVisible: true,
@@ -176,6 +195,7 @@ export class EditDrawerFooter extends React.Component<EditDrawerFooterProps> {
             </Popconfirm>
             <Button
               className="lba-btn"
+              loading={editFileDrawer?.isLoading}
               onClick={async () => {
                 // await this.setEditFileDrawer({
                 //   visible: false,
