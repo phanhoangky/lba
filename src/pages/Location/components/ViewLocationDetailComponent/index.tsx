@@ -159,7 +159,7 @@ export class ViewLocationDetailComponent extends React.Component<ViewLocationDet
                 boxSizing: 'border-box',
               }}
               labelCol={{
-                span: 4,
+                span: 5,
               }}
               wrapperCol={{
                 span: 24,
